@@ -1088,6 +1088,59 @@
 </div>
 
 <script>
+/* ---------- DRAGON CURSOR (runs FIRST so it can't be blocked by errors elsewhere) ---------- */
+(function initDragonCursor() {
+  function setup() {
+    try {
+      const dragon = document.getElementById('dragonCursor');
+      if (!dragon) return; // nothing to do if the element isn't there yet
+
+      // Touch devices: hide custom cursor, restore normal OS cursor
+      const isTouch = window.matchMedia('(pointer: coarse)').matches;
+      if (isTouch) {
+        document.body.classList.add('touch-device');
+        return;
+      }
+
+      let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+      let dx = mx, dy = my;
+      const startX = window.innerWidth / 2;
+      const startY = window.innerHeight / 2;
+
+      document.addEventListener('mousemove',  e => { mx = e.clientX; my = e.clientY; });
+      document.addEventListener('mousedown',  () => dragon.classList.add('clicking'));
+      document.addEventListener('mouseup',    () => dragon.classList.remove('clicking'));
+      document.addEventListener('mouseleave', () => { dragon.style.opacity = '0'; });
+      document.addEventListener('mouseenter', () => { dragon.style.opacity = '1'; });
+
+      (function animateDragon() {
+        dx += (mx - dx) * 0.18;
+        dy += (my - dy) * 0.18;
+        dragon.style.transform = `translate(${dx - startX}px, ${dy - startY}px)`;
+        requestAnimationFrame(animateDragon);
+      })();
+
+      // image fallback — swap to a glowing orb if the embedded webp ever fails
+      const dragonImg = dragon.querySelector('img');
+      if (dragonImg) {
+        dragonImg.addEventListener('error', () => {
+          dragonImg.style.background = 'radial-gradient(circle, #e85ee8, #5e7fff)';
+          dragonImg.removeAttribute('src');
+        });
+      }
+    } catch (err) {
+      console.error('[dragon cursor] init failed:', err);
+    }
+  }
+
+  // If the DOM is already parsed, run now. Otherwise wait for it.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+})();
+
 /* =========================================================
    ============== CONFIGURATION YOU EDIT ===================
    =========================================================
@@ -1239,46 +1292,6 @@ form.addEventListener('submit', async (e) => {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Send to Chunley';
   }
-});
-
-
-/* ---------- DRAGON CURSOR ---------- */
-const dragon = document.getElementById('dragonCursor');
-/* (pointer: coarse) is more accurate than (hover: none) — hybrid laptops
-   with touchscreens shouldn't lose the dragon. */
-const isTouch = window.matchMedia('(pointer: coarse)').matches;
-
-if (isTouch) {
-  document.body.classList.add('touch-device');
-} else {
-  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
-  let dx = mx, dy = my;
-
-  /* CSS already centers the dragon via top/left + margin. Our JS transform
-     therefore measures movement *from* center — so subtract the starting
-     center to get a delta offset, not the absolute coords. */
-  const startX = window.innerWidth / 2;
-  const startY = window.innerHeight / 2;
-
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  document.addEventListener('mousedown', () => dragon.classList.add('clicking'));
-  document.addEventListener('mouseup',   () => dragon.classList.remove('clicking'));
-  document.addEventListener('mouseleave',() => dragon.style.opacity = '0');
-  document.addEventListener('mouseenter',() => dragon.style.opacity = '1');
-
-  (function animateDragon() {
-    dx += (mx - dx) * 0.18;
-    dy += (my - dy) * 0.18;
-    dragon.style.transform = `translate(${dx - startX}px, ${dy - startY}px)`;
-    requestAnimationFrame(animateDragon);
-  })();
-}
-
-/* keep the dragon working even if the .webp fails to load — swap to a glowing orb */
-const dragonImg = dragon.querySelector('img');
-dragonImg.addEventListener('error', () => {
-  dragonImg.style.background = 'radial-gradient(circle, #e85ee8, #5e7fff)';
-  dragonImg.removeAttribute('src');
 });
 
 
