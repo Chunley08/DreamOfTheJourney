@@ -1108,7 +1108,7 @@ const CHARACTERS = [
   {
     name: "Scorch",
     desc: "frontman of The Snake Skins",
-    portrait: "blob:chrome-untrusted://media-app/efc146d9-f116-40f6-9d50-8c505637e2c4",
+    portrait: "<img src="assets/scorch-g03.jpg" alt="Scorch — hooded with snake" loading="lazy" />",
     pageId: "scorch",
   },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
@@ -1590,13 +1590,16 @@ function hideCharacterPage(pageId) {
   document.body.style.overflow = '';
 }
 
-// Scorch close handlers
-const _scorchClose = document.getElementById('scorchClose');
-if (_scorchClose) _scorchClose.addEventListener('click', () => hideCharacterPage('scorch'));
-const _scorchBack = document.getElementById('scorchBack');
-if (_scorchBack) _scorchBack.addEventListener('click', (e) => {
-  e.preventDefault();
-  hideCharacterPage('scorch');
+// Scorch close handlers — defer until DOM is parsed, since the
+// Scorch page markup appears AFTER this <script> block in the document.
+document.addEventListener('DOMContentLoaded', () => {
+  const _scorchClose = document.getElementById('scorchClose');
+  if (_scorchClose) _scorchClose.addEventListener('click', () => hideCharacterPage('scorch'));
+  const _scorchBack = document.getElementById('scorchBack');
+  if (_scorchBack) _scorchBack.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideCharacterPage('scorch');
+  });
 });
 
 // ESC closes any open character page
@@ -1623,15 +1626,17 @@ function openLightbox(src, alt) {
   lb.addEventListener('click', () => lb.remove());
   document.body.appendChild(lb);
 }
-// wire up Scorch gallery
-const _scorchGallery = document.getElementById('scorchGallery');
-if (_scorchGallery) {
-  _scorchGallery.addEventListener('click', (e) => {
-    const img = e.target.closest('img');
-    if (!img) return;
-    openLightbox(img.src, img.alt);
-  });
-}
+// wire up Scorch gallery — same deferral reason as above
+document.addEventListener('DOMContentLoaded', () => {
+  const _scorchGallery = document.getElementById('scorchGallery');
+  if (_scorchGallery) {
+    _scorchGallery.addEventListener('click', (e) => {
+      const img = e.target.closest('img');
+      if (!img) return;
+      openLightbox(img.src, img.alt);
+    });
+  }
+});
 
 </script>
 
