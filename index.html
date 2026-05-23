@@ -178,32 +178,128 @@
     font-size: 0.8em;
   }
 
-  /* ---------- HEADER NAV ---------- */
-  .main-nav {
-    margin-top: 1.8rem;
-    animation: fadeUp 1.4s 0.5s ease both;
+  /* ---------- CLICKABLE SECTION TITLE ---------- */
+  .section-title-link {
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, rgba(157, 92, 255, 0.08), rgba(94, 220, 255, 0.04));
+    border: 1px solid rgba(157, 92, 255, 0.25);
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.4s ease,
+                box-shadow 0.4s ease,
+                background 0.4s ease;
+    animation: meetPulse 3.2s ease-in-out infinite;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
-  .nav-link {
+  /* Soft pulsing glow to draw the eye */
+  @keyframes meetPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(232, 94, 232, 0.0),
+                  0 0 28px rgba(157, 92, 255, 0.18);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(232, 94, 232, 0.0),
+                  0 0 50px rgba(232, 94, 232, 0.35),
+                  0 0 80px rgba(94, 220, 255, 0.2);
+    }
+  }
+  /* Animated sheen sweep across the button */
+  .section-title-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.08) 45%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.08) 55%,
+      transparent 65%,
+      transparent 100%
+    );
+    animation: sheenSweep 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes sheenSweep {
+    0%, 60% { left: -100%; }
+    100% { left: 200%; }
+  }
+  .section-title-link .section-title {
+    margin: 0 0 0.8rem 0;
+    transition: text-shadow 0.3s ease, letter-spacing 0.4s ease;
+    position: relative;
+    z-index: 1;
+  }
+  /* The wiggling arrow indicator after the title */
+  .section-title-link .section-title::after {
+    content: '✦';
     display: inline-block;
-    font-family: 'Cinzel', serif;
-    font-size: 0.95rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    text-decoration: none;
-    color: var(--text-primary);
-    padding: 0.7rem 1.6rem;
-    border: 1px solid rgba(157, 92, 255, 0.5);
-    border-radius: 999px;
-    background: rgba(26, 10, 64, 0.4);
-    backdrop-filter: blur(6px);
-    transition: all 0.3s ease;
-    text-shadow: 0 0 8px var(--glow-cyan);
+    margin-left: 0.5em;
+    font-size: 0.7em;
+    color: var(--accent-magenta);
+    text-shadow: 0 0 12px var(--glow-magenta);
+    animation: arrowWiggle 1.8s ease-in-out infinite;
+    -webkit-text-fill-color: var(--accent-magenta);
   }
-  .nav-link:hover {
+  @keyframes arrowWiggle {
+    0%, 100% { transform: translateX(0) rotate(0deg); opacity: 0.7; }
+    50%      { transform: translateX(6px) rotate(12deg); opacity: 1; }
+  }
+  /* "click here" hint that drifts in under the button */
+  .section-title-link::after {
+    content: '↓ click to open ↓';
+    display: block;
+    margin-top: 0.6rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    opacity: 0.55;
+    transition: opacity 0.3s ease, transform 0.3s ease, letter-spacing 0.4s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .section-title-link:hover {
+    transform: translateY(-6px) scale(1.015);
     border-color: var(--accent-magenta);
-    background: rgba(157, 92, 255, 0.18);
-    transform: translateY(-2px);
-    box-shadow: 0 0 18px var(--glow-purple), 0 0 32px var(--glow-magenta);
+    background: linear-gradient(135deg, rgba(232, 94, 232, 0.15), rgba(94, 220, 255, 0.08));
+    animation-play-state: paused;
+    box-shadow:
+      0 0 60px rgba(232, 94, 232, 0.55),
+      0 0 100px rgba(157, 92, 255, 0.35),
+      0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  .section-title-link:hover .section-title {
+    letter-spacing: 0.04em;
+    text-shadow:
+      0 0 28px rgba(255, 200, 255, 0.8),
+      0 0 56px rgba(180, 220, 255, 0.6);
+  }
+  .section-title-link:hover::after {
+    opacity: 1;
+    transform: translateY(2px);
+    letter-spacing: 0.55em;
+    color: var(--accent-magenta);
+  }
+  .section-title-link:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+  .section-title-link:focus-visible {
+    outline: 2px solid var(--accent-magenta);
+    outline-offset: 6px;
   }
 
   /* ---------- SEARCH ---------- */
@@ -291,6 +387,104 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1.6rem;
+  }
+
+  /* ---------- "SEE MORE CHARACTERS" CALL-TO-ACTION ---------- */
+  .see-more-wrap {
+    margin-top: 3rem;
+    text-align: center;
+    animation: fadeUp 1s ease both;
+  }
+  .see-more-btn {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: clamp(1rem, 2.4vw, 1.4rem);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(90deg,
+      rgba(157, 92, 255, 0.35),
+      rgba(232, 94, 232, 0.45),
+      rgba(94, 220, 255, 0.35));
+    background-size: 200% 100%;
+    border: 2px solid rgba(232, 94, 232, 0.7);
+    border-radius: 999px;
+    padding: 1.1rem 2.4rem;
+    cursor: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    text-shadow: 0 0 14px var(--glow-cyan), 0 0 28px var(--glow-magenta);
+    box-shadow:
+      0 0 24px var(--glow-purple),
+      0 0 48px rgba(232, 94, 232, 0.35),
+      inset 0 0 18px rgba(255, 255, 255, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-position 0.8s ease;
+    animation: seeMorePulse 2.4s ease-in-out infinite, rainbowFlow 8s linear infinite;
+  }
+  .see-more-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow:
+      0 0 36px var(--glow-magenta),
+      0 0 64px var(--glow-purple),
+      inset 0 0 22px rgba(255, 255, 255, 0.12);
+  }
+  .see-more-arrow {
+    display: inline-block;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 12px var(--accent-cyan);
+    animation: seeMoreArrow 1.6s ease-in-out infinite;
+  }
+  .see-more-arrow:last-child { animation-delay: 0.8s; }
+  @keyframes seeMorePulse {
+    0%, 100% { box-shadow: 0 0 24px var(--glow-purple), 0 0 48px rgba(232, 94, 232, 0.35), inset 0 0 18px rgba(255, 255, 255, 0.08); }
+    50%      { box-shadow: 0 0 36px var(--glow-magenta), 0 0 72px var(--glow-purple), inset 0 0 22px rgba(255, 255, 255, 0.12); }
+  }
+  @keyframes seeMoreArrow {
+    0%, 100% { transform: translateX(0); opacity: 0.7; }
+    50%      { transform: translateX(4px); opacity: 1; }
+  }
+
+  /* ---------- ALL CHARACTERS OVERLAY ---------- */
+  /* This overlay should feel like an extension of the homepage, not a separate
+     metal-themed page. Transparent background lets the body's background image,
+     vignette (body::before), and stars canvas show through. */
+  .all-characters-page {
+    background: transparent;
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+  }
+  /* Suppress the film-grain and scanlines that the base .character-page adds
+     (those are for Scorch's heavy-metal aesthetic, not this one). */
+  .all-characters-page::before,
+  .all-characters-page::after {
+    content: none;
+    display: none;
+  }
+  .all-characters-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem 4rem;
+  }
+  .all-characters-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    text-align: center;
+    background: var(--rainbow-gradient);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowFlow 14s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+  .all-characters-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 3rem;
+    letter-spacing: 0.08em;
   }
   .character-card {
     position: relative;
@@ -1248,9 +1442,6 @@
     <h1 class="brand">DreamjourneyAI</h1>
     <div class="tagline">characters born of starlight</div>
     <div class="creator">made by the insanity of Chunley's Brain</div>
-    <nav class="main-nav">
-      <a href="#characters" class="nav-link">Meet the Characters →</a>
-    </nav>
   </header>
 
   <section class="search-section">
@@ -1264,10 +1455,12 @@
   </section>
 
   <section class="section" id="characters">
-    <h2 class="section-title"><span class="section-title-accent">Meet the Characters</span></h2>
-    <div class="divider"></div>
-    <p class="section-sub">click a portrait to begin a conversation</p>
-    <div class="character-grid" id="characterGrid"></div>
+    <button type="button" class="section-title-link" id="meetCharactersLink" aria-label="Open characters page">
+      <h2 class="section-title">
+        <span class="section-title-accent">Click Here to Meet the Characters</span>
+      </h2>
+      <div class="divider"></div>
+    </button>
   </section>
 
   <section class="section" id="request">
@@ -1401,6 +1594,7 @@ const CHARACTERS = [
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
+  { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
 
   /* ---------- EXAMPLE of a real character once you're ready ----------
   {
@@ -1415,8 +1609,9 @@ const CHARACTERS = [
 
 
 /* ---------- BUILD CHARACTER GRID ---------- */
-const characterGrid = document.getElementById('characterGrid');
-CHARACTERS.forEach(b => {
+const HOME_PREVIEW_COUNT = 4;
+
+function buildCharacterCard(b) {
   const card = document.createElement('div');
   card.className = 'character-card' + (b.placeholder ? ' placeholder' : '');
 
@@ -1448,20 +1643,61 @@ CHARACTERS.forEach(b => {
   } else if (b.url && !b.placeholder) {
     card.addEventListener('click', () => window.open(b.url, '_blank'));
   }
-  characterGrid.appendChild(card);
-});
+  return card;
+}
+
+// The grid containers and the meet-characters button live in HTML that comes
+// AFTER this <script> block, so we have to defer until the DOM is parsed.
+// (Without this, getElementById returned null and the grid stayed empty.)
+function buildAllGrids() {
+  // Home grid removed — portraits live in the All Characters overlay only.
+  // Keep this guarded in case the element comes back later.
+  const characterGrid = document.getElementById('characterGrid');
+  if (characterGrid && characterGrid.childElementCount === 0) {
+    CHARACTERS.slice(0, HOME_PREVIEW_COUNT).forEach(b => {
+      characterGrid.appendChild(buildCharacterCard(b));
+    });
+  }
+
+  // Full grid inside the "All Characters" overlay: every character.
+  const allCharactersGrid = document.getElementById('allCharactersGrid');
+  if (allCharactersGrid && allCharactersGrid.childElementCount === 0) {
+    CHARACTERS.forEach(b => {
+      allCharactersGrid.appendChild(buildCharacterCard(b));
+    });
+  }
+
+  // Clickable rainbow heading + legacy "See more" button — both open the overlay.
+  ['meetCharactersLink', 'seeMoreCharacters'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.dataset.wired) {
+      el.dataset.wired = '1';
+      el.addEventListener('click', () => showCharacterPage('characters'));
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', buildAllGrids);
+} else {
+  buildAllGrids();
+}
 
 /* ---------- SEARCH FILTER ---------- */
 const searchInput = document.getElementById('searchInput');
-searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  document.querySelectorAll('.character-card').forEach(card => {
-    const name = card.querySelector('.character-name').textContent.toLowerCase();
-    const desc = card.querySelector('.character-desc').textContent.toLowerCase();
-    const match = !q || name.includes(q) || desc.includes(q);
-    card.style.display = match ? '' : 'none';
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    // Filter whichever grid is currently in the DOM (home grid removed,
+    // so this now affects the overlay grid when it's been built).
+    document.querySelectorAll('#characterGrid .character-card, #allCharactersGrid .character-card').forEach(card => {
+      const name = card.querySelector('.character-name').textContent.toLowerCase();
+      const desc = card.querySelector('.character-desc').textContent.toLowerCase();
+      const match = !q || name.includes(q) || desc.includes(q);
+      card.style.display = match ? '' : 'none';
+    });
   });
-});
+}
 
 /* ---------- DISCORD WEBHOOK FORM ---------- */
 const form = document.getElementById('requestForm');
@@ -1845,6 +2081,10 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     hideCharacterPage('scorch');
   });
+
+  // All-characters overlay close
+  const _charactersClose = document.getElementById('charactersClose');
+  if (_charactersClose) _charactersClose.addEventListener('click', () => hideCharacterPage('characters'));
 });
 
 // ESC closes any open character page
@@ -1928,6 +2168,18 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 </script>
+
+
+<!-- ====================== ALL CHARACTERS OVERLAY ====================== -->
+<div class="character-page all-characters-page" id="charactersPage" aria-hidden="true">
+  <button class="char-close" id="charactersClose" aria-label="Close" type="button">✕</button>
+  <section class="all-characters-section">
+    <h1 class="all-characters-title">All Characters</h1>
+    <p class="all-characters-sub">every dream Chunley's brain has dragged into the light</p>
+    <div class="character-grid" id="allCharactersGrid"></div>
+  </section>
+</div>
+<!-- ================== END ALL CHARACTERS OVERLAY ===================== -->
 
 
 <!-- ====================== SCORCH CHARACTER PAGE ====================== -->
