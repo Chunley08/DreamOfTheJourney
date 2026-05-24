@@ -1863,8 +1863,8 @@
       document.addEventListener('mouseenter', () => { dragon.style.opacity = '1'; });
 
       (function animateDragon() {
-        dx += (mx - dx) * 0.18;
-        dy += (my - dy) * 0.18;
+        dx += (mx - dx) * 0.4;
+        dy += (my - dy) * 0.4;
         dragon.style.transform = `translate(${dx - startX}px, ${dy - startY}px)`;
         requestAnimationFrame(animateDragon);
       })();
