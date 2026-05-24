@@ -1437,6 +1437,338 @@
     .quote-card::before { width: 50px; }
   }
 
+  /* ============================================================
+     SETLIST / MUSIC PLAYER — The Snake Skins live stage console
+     ============================================================ */
+  .setlist-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 1.8rem;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 90, 30, 0.18) 0%, transparent 60%),
+      linear-gradient(165deg, rgba(30, 8, 4, 0.94), rgba(10, 2, 0, 0.98));
+    border: 1px solid rgba(255, 130, 50, 0.3);
+    border-top: 3px solid #ff5a1f;
+    border-bottom: 3px solid #5a0500;
+    padding: clamp(1.2rem, 2.4vw, 2rem);
+    position: relative;
+    box-shadow:
+      inset 0 0 60px rgba(255, 60, 0, 0.08),
+      0 18px 50px rgba(0, 0, 0, 0.75),
+      0 0 80px rgba(255, 60, 0, 0.18);
+  }
+  /* rivets in top corners */
+  .setlist-stage::before,
+  .setlist-stage::after {
+    content: '';
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffaa66, #4a1500 70%, #1a0500);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+  }
+  .setlist-stage::before { top: 10px; left: 10px; }
+  .setlist-stage::after  { top: 10px; right: 10px; }
+
+  @media (max-width: 760px) {
+    .setlist-stage { grid-template-columns: 1fr; gap: 1.4rem; }
+  }
+
+  /* === LEFT: NOW PLAYING CONSOLE === */
+  .np-console {
+    display: flex; flex-direction: column;
+    min-width: 0;
+  }
+  .np-display {
+    position: relative;
+    background: linear-gradient(180deg, #1a0a04 0%, #0a0200 100%);
+    border: 1px solid rgba(255, 130, 50, 0.35);
+    padding: 1rem 1.1rem 0.9rem;
+    overflow: hidden;
+    box-shadow: inset 0 0 24px rgba(255, 60, 0, 0.12);
+  }
+  /* scanline overlay on the LCD-style display */
+  .np-display::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 2px,
+      rgba(255, 90, 30, 0.05) 2px, rgba(255, 90, 30, 0.05) 3px);
+    pointer-events: none;
+  }
+  .np-eyebrow {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #ff8833;
+    text-shadow: 0 0 8px rgba(255, 90, 30, 0.6);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .np-eyebrow .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #ff2a00;
+    box-shadow: 0 0 8px #ff5a1f, 0 0 14px rgba(255, 90, 30, 0.6);
+    animation: liveBlink 1.4s ease-in-out infinite;
+  }
+  @keyframes liveBlink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.35; transform: scale(0.85); }
+  }
+  .np-title {
+    font-family: 'Metal Mania', cursive;
+    font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+    color: #ffd070;
+    line-height: 1;
+    margin: 0.55rem 0 0.25rem;
+    letter-spacing: 0.02em;
+    text-shadow:
+      0 0 18px rgba(255, 90, 30, 0.6),
+      0 2px 0 #4a0500;
+    word-break: break-word;
+  }
+  .np-sub {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.9rem;
+    color: #d0a866;
+    letter-spacing: 0.08em;
+  }
+
+  /* === LIVE AUDIO VISUALIZER === */
+  .np-viz {
+    height: 70px;
+    margin: 0.9rem 0 0.3rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 2px;
+    position: relative;
+    z-index: 1;
+  }
+  .np-viz-bar {
+    flex: 1 1 0;
+    min-width: 3px;
+    height: 12%;
+    background: linear-gradient(180deg, #ffe066 0%, #ffaa00 30%, #ff5a00 65%, #aa1500 100%);
+    border-radius: 1px 1px 0 0;
+    transform-origin: bottom;
+    transition: height 90ms ease-out, opacity 200ms ease;
+    opacity: 0.55;
+    box-shadow: 0 0 4px rgba(255, 90, 30, 0.4);
+  }
+  .np-console.is-playing .np-viz-bar { opacity: 1; }
+
+  /* === PROGRESS BAR — looks like a heated filament === */
+  .np-progress {
+    margin-top: 0.6rem;
+    position: relative;
+    height: 8px;
+    background: rgba(255, 90, 30, 0.12);
+    border: 1px solid rgba(255, 130, 50, 0.3);
+  }
+  .np-progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: linear-gradient(90deg, #ffe066, #ff5a1f);
+    box-shadow: 0 0 12px rgba(255, 90, 30, 0.7);
+    transition: width 0.1s linear;
+  }
+  .np-progress-head {
+    position: absolute;
+    top: 50%; left: 0%;
+    width: 14px; height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff5cc, #ff8833 60%, #aa1500);
+    box-shadow: 0 0 10px #ff5a1f, 0 0 18px rgba(255, 90, 30, 0.7);
+    pointer-events: none;
+    transition: left 0.1s linear;
+  }
+  .np-times {
+    display: flex; justify-content: space-between;
+    font-family: 'Special Elite', cursive;
+    font-size: 0.8rem;
+    color: #ffaa66;
+    margin-top: 0.45rem;
+    letter-spacing: 0.06em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === TRANSPORT CONTROLS === */
+  .np-transport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    margin-top: 1.1rem;
+  }
+  .np-btn {
+    background: rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(255, 130, 50, 0.55);
+    color: #ffaa66;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s, color 0.18s, border-color 0.18s;
+    font-family: 'Oswald', sans-serif;
+    padding: 0;
+  }
+  .np-btn:hover {
+    transform: translateY(-2px);
+    border-color: #ffaa00;
+    color: #ffd070;
+    box-shadow: 0 0 18px rgba(255, 90, 30, 0.45);
+  }
+  .np-btn:active { transform: translateY(0) scale(0.95); }
+  .np-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  .np-btn.np-play {
+    width: 72px; height: 72px;
+    border-width: 3px;
+    border-color: #ff5a1f;
+    color: #ffe066;
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.45),
+      0 0 22px rgba(255, 90, 30, 0.55),
+      inset 0 0 18px rgba(255, 90, 30, 0.2);
+  }
+  .np-btn.np-play svg { width: 26px; height: 26px; }
+  .np-btn.np-play:hover {
+    background: rgba(255, 90, 30, 0.15);
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.45),
+      0 0 35px rgba(255, 90, 30, 0.75),
+      inset 0 0 22px rgba(255, 90, 30, 0.3);
+  }
+  .np-console.is-playing .np-btn.np-play {
+    animation: playPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes playPulse {
+    0%, 100% {
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.45),
+        0 0 22px rgba(255, 90, 30, 0.55),
+        inset 0 0 18px rgba(255, 90, 30, 0.2);
+    }
+    50% {
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.45),
+        0 0 40px rgba(255, 90, 30, 0.9),
+        0 0 60px rgba(255, 130, 50, 0.4),
+        inset 0 0 28px rgba(255, 90, 30, 0.4);
+    }
+  }
+
+  /* === RIGHT: HANDWRITTEN SETLIST PAPER === */
+  .np-setlist {
+    position: relative;
+    background:
+      repeating-linear-gradient(180deg,
+        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 32px,
+        rgba(255, 90, 30, 0.06) 32px, rgba(255, 90, 30, 0.06) 33px),
+      linear-gradient(180deg, #f4e6c8 0%, #e8d0a0 100%);
+    color: #1a0500;
+    padding: 1.4rem 1.4rem 1.2rem;
+    font-family: 'Special Elite', cursive;
+    box-shadow:
+      inset 0 0 20px rgba(120, 60, 0, 0.25),
+      0 12px 28px rgba(0, 0, 0, 0.6);
+    transform: rotate(0.6deg);
+  }
+  /* tape strips on the top corners */
+  .np-setlist::before,
+  .np-setlist::after {
+    content: '';
+    position: absolute; top: -10px;
+    width: 70px; height: 18px;
+    background: rgba(255, 230, 180, 0.55);
+    border-left: 1px dashed rgba(0,0,0,0.15);
+    border-right: 1px dashed rgba(0,0,0,0.15);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  }
+  .np-setlist::before { left: 10%; transform: rotate(-4deg); }
+  .np-setlist::after  { right: 10%; transform: rotate(5deg); }
+
+  .np-setlist-head {
+    font-family: 'Metal Mania', cursive;
+    font-size: 1.6rem;
+    color: #aa2200;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+    text-shadow: 0 1px 0 rgba(255, 200, 120, 0.6);
+  }
+  .np-setlist-sub {
+    font-size: 0.78rem;
+    color: #6a3010;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+    opacity: 0.85;
+  }
+  .np-track {
+    display: grid;
+    grid-template-columns: 2.2em 1fr auto;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.55rem 0.4rem;
+    border: none;
+    border-bottom: 1px dashed rgba(80, 30, 0, 0.35);
+    text-align: left;
+    width: 100%;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: background 0.18s, transform 0.18s, color 0.18s;
+  }
+  .np-track:last-child { border-bottom: none; }
+  .np-track:hover {
+    background: rgba(255, 90, 30, 0.12);
+    transform: translateX(2px);
+  }
+  .np-track-num {
+    font-weight: 700;
+    color: #aa2200;
+    text-align: left;
+  }
+  .np-track-name {
+    font-size: 1.05rem;
+    line-height: 1.15;
+    color: #1a0500;
+  }
+  .np-track-len {
+    color: #5a2000;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+  .np-track.is-active { background: rgba(255, 90, 30, 0.18); }
+  .np-track.is-active .np-track-name {
+    color: #aa2200;
+    font-weight: 700;
+  }
+  .np-track.is-active .np-track-num {
+    color: #ff2a00;
+    text-shadow: 0 0 6px rgba(255, 60, 0, 0.5);
+  }
+
+  .np-scribble {
+    margin-top: 0.9rem;
+    font-size: 0.8rem;
+    color: #6a3010;
+    text-align: right;
+    transform: rotate(-1.5deg);
+    letter-spacing: 0.04em;
+  }
+  .np-scribble strong { color: #aa2200; }
+
+  @media (max-width: 480px) {
+    .np-transport { gap: 1rem; }
+    .np-btn { width: 44px; height: 44px; }
+    .np-btn.np-play { width: 64px; height: 64px; }
+  }
+
 </style>
 </head>
 <body>
@@ -2171,6 +2503,230 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 });
 
+/* ============================================================
+   SNAKE SKINS PLAYER — audio + Web Audio visualizer + setlist
+   ============================================================ */
+(function() {
+  function initSnakeSkinsPlayer() {
+    var root = document.getElementById('snakeSkinsPlayer');
+    if (!root) return;
+    var dataEl = document.getElementById('snakeSkinsTracksData');
+    if (!dataEl) return;
+    var tracks;
+    try { tracks = JSON.parse(dataEl.textContent); } catch(e) { return; }
+    if (!tracks || !tracks.length) return;
+
+    var audio      = document.getElementById('npAudio');
+    var consoleEl  = document.getElementById('npConsole');
+    var titleEl    = document.getElementById('npTitle');
+    var subEl      = document.getElementById('npSub');
+    var vizEl      = document.getElementById('npViz');
+    var progressEl = document.getElementById('npProgress');
+    var fillEl     = document.getElementById('npFill');
+    var headEl     = document.getElementById('npHead');
+    var currentEl  = document.getElementById('npTimeCurrent');
+    var totalEl    = document.getElementById('npTimeTotal');
+    var playBtn    = document.getElementById('npPlay');
+    var playIcon   = document.getElementById('npPlayIcon');
+    var prevBtn    = document.getElementById('npPrev');
+    var nextBtn    = document.getElementById('npNext');
+    var listEl     = document.getElementById('npTrackList');
+
+    // Build the visualizer bars
+    var BAR_COUNT = 48;
+    var bars = [];
+    for (var i = 0; i < BAR_COUNT; i++) {
+      var b = document.createElement('div');
+      b.className = 'np-viz-bar';
+      vizEl.appendChild(b);
+      bars.push(b);
+    }
+
+    // Build the setlist UI
+    listEl.innerHTML = '';
+    tracks.forEach(function(t, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'np-track';
+      btn.dataset.index = i;
+      var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+      btn.innerHTML =
+        '<span class="np-track-num">' + num + '</span>' +
+        '<span class="np-track-name">' + t.title + '</span>' +
+        '<span class="np-track-len">—:—</span>';
+      btn.addEventListener('click', function() { playIndex(i); });
+      listEl.appendChild(btn);
+    });
+    var trackEls = listEl.querySelectorAll('.np-track');
+
+    var currentIndex = -1;
+    var audioCtx, analyser, sourceNode, freqData;
+    var rafId = null;
+
+    var PLAY_SVG  = '<path d="M8 5v14l11-7z"/>';
+    var PAUSE_SVG = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+
+    function fmt(sec) {
+      if (!isFinite(sec) || sec < 0) return '0:00';
+      var m = Math.floor(sec / 60);
+      var s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    // Build Web Audio graph on first interaction (browser autoplay rule)
+    function setupAudioGraph() {
+      if (audioCtx) return;
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.78;
+        sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+      } catch (e) {
+        audioCtx = null; analyser = null;
+      }
+    }
+
+    // Idle pulse when nothing's playing, real frequency data when it is
+    function startVizLoop() {
+      if (rafId) return;
+      var idleBeat = 0;
+      function tick() {
+        if (analyser && !audio.paused) {
+          analyser.getByteFrequencyData(freqData);
+          for (var i = 0; i < BAR_COUNT; i++) {
+            var srcIdx = Math.floor(i * freqData.length / BAR_COUNT);
+            var v = freqData[srcIdx] / 255;
+            bars[i].style.height = Math.max(6, v * 100) + '%';
+          }
+        } else {
+          idleBeat += 0.04;
+          for (var j = 0; j < BAR_COUNT; j++) {
+            var n = Math.sin(idleBeat + j * 0.35) * 0.5 + 0.5;
+            bars[j].style.height = (8 + n * 14) + '%';
+          }
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    startVizLoop();
+
+    function updateActive() {
+      trackEls.forEach(function(el, i) {
+        el.classList.toggle('is-active', i === currentIndex);
+        var numEl = el.querySelector('.np-track-num');
+        if (numEl) {
+          var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+          numEl.textContent = (i === currentIndex) ? '▶' : num;
+        }
+      });
+    }
+
+    function loadIndex(i) {
+      if (i < 0) i = tracks.length - 1;
+      if (i >= tracks.length) i = 0;
+      currentIndex = i;
+      var t = tracks[i];
+      audio.src = t.src;
+      titleEl.textContent = t.title;
+      subEl.textContent = 'The Snake Skins  •  Bite Back Tour';
+      currentEl.textContent = '0:00';
+      totalEl.textContent = '0:00';
+      fillEl.style.width = '0%';
+      headEl.style.left = '0%';
+      updateActive();
+    }
+
+    function playIndex(i) {
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (i !== currentIndex) loadIndex(i);
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){ /* missing file or blocked — handled by error event */ });
+    }
+
+    playBtn.addEventListener('click', function() {
+      if (currentIndex < 0) { playIndex(0); return; }
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (audio.paused) {
+        var p = audio.play();
+        if (p && p.catch) p.catch(function(){});
+      } else {
+        audio.pause();
+      }
+    });
+    prevBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex <= 0 ? tracks.length - 1 : currentIndex - 1;
+      playIndex(nextIdx);
+    });
+    nextBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+
+    audio.addEventListener('play', function() {
+      consoleEl.classList.add('is-playing');
+      playIcon.innerHTML = PAUSE_SVG;
+    });
+    audio.addEventListener('pause', function() {
+      consoleEl.classList.remove('is-playing');
+      playIcon.innerHTML = PLAY_SVG;
+    });
+    audio.addEventListener('ended', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+    audio.addEventListener('loadedmetadata', function() {
+      totalEl.textContent = fmt(audio.duration);
+      if (currentIndex >= 0 && trackEls[currentIndex]) {
+        var lenEl = trackEls[currentIndex].querySelector('.np-track-len');
+        if (lenEl) lenEl.textContent = fmt(audio.duration);
+      }
+    });
+    audio.addEventListener('timeupdate', function() {
+      var pct = (audio.currentTime / (audio.duration || 1)) * 100;
+      fillEl.style.width = pct + '%';
+      headEl.style.left = pct + '%';
+      currentEl.textContent = fmt(audio.currentTime);
+    });
+    audio.addEventListener('error', function() {
+      if (currentIndex >= 0 && tracks[currentIndex]) {
+        titleEl.textContent = tracks[currentIndex].title;
+      }
+      subEl.textContent = 'file not found — drop MP3 into /assets/';
+    });
+
+    // Click-to-seek on progress bar
+    function seekFromEvent(e) {
+      if (!isFinite(audio.duration)) return;
+      var rect = progressEl.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var x = clientX - rect.left;
+      var pct = Math.max(0, Math.min(1, x / rect.width));
+      audio.currentTime = pct * audio.duration;
+    }
+    progressEl.addEventListener('click', seekFromEvent);
+    progressEl.addEventListener('keydown', function(e) {
+      if (!isFinite(audio.duration)) return;
+      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); e.preventDefault(); }
+      if (e.key === 'ArrowLeft')  { audio.currentTime = Math.max(0, audio.currentTime - 5); e.preventDefault(); }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSnakeSkinsPlayer);
+  } else {
+    initSnakeSkinsPlayer();
+  }
+})();
+
 </script>
 
 
@@ -2270,6 +2826,54 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="member-desc">Permanently fed up. Permanently angry. Scorch gives him heart palpitations on a near-daily basis. He's still here though. Has to count for something.</div>
       </div>
     </div>
+  </section>
+
+  <!-- BITE BACK SETLIST / MUSIC PLAYER -->
+  <section class="char-section">
+    <h2 class="char-h2">Bite Back — Live</h2>
+    <div class="setlist-stage" id="snakeSkinsPlayer">
+      <!-- LEFT: NOW PLAYING CONSOLE -->
+      <div class="np-console" id="npConsole">
+        <div class="np-display">
+          <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+          <div class="np-title" id="npTitle">— select a track —</div>
+          <div class="np-sub" id="npSub">The Snake Skins  •  Bite Back Tour</div>
+          <div class="np-viz" id="npViz" aria-hidden="true"></div>
+          <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
+            <div class="np-progress-fill" id="npFill"></div>
+            <div class="np-progress-head" id="npHead"></div>
+          </div>
+          <div class="np-times">
+            <span id="npTimeCurrent">0:00</span>
+            <span id="npTimeTotal">0:00</span>
+          </div>
+        </div>
+        <div class="np-transport">
+          <button class="np-btn np-prev" id="npPrev" type="button" aria-label="Previous track">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+          </button>
+          <button class="np-btn np-play" id="npPlay" type="button" aria-label="Play / pause">
+            <svg id="npPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="np-btn np-next" id="npNext" type="button" aria-label="Next track">
+            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- RIGHT: SETLIST -->
+      <div class="np-setlist">
+        <div class="np-setlist-head">// The Setlist</div>
+        <div class="np-setlist-sub">Bite Back Tour — Track List</div>
+        <div id="npTrackList"></div>
+        <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
+      </div>
+    </div>
+    <audio id="npAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="snakeSkinsTracksData" type="application/json">[
+      {"title": "Bite Back",        "src": "assets/snakeskins-track-01.mp3"},
+      {"title": "Dumpster Fire",    "src": "assets/snakeskins-track-02.mp3"},
+      {"title": "Conner's Lullaby", "src": "assets/snakeskins-track-03.mp3"}
+    ]</script>
   </section>
 
   <!-- BABY MOMMA DRAMA -->
