@@ -410,7 +410,6 @@
     border: 2px solid rgba(232, 94, 232, 0.7);
     border-radius: 999px;
     padding: 1.1rem 2.4rem;
-    cursor: none;
     display: inline-flex;
     align-items: center;
     gap: 1rem;
@@ -961,7 +960,6 @@
     transition: transform 0.15s, box-shadow 0.15s;
     text-transform: uppercase;
     text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-    cursor: none;
   }
   .char-chat-btn:hover {
     transform: translateY(-3px);
@@ -1159,7 +1157,6 @@
   }
   .spoiler-details summary {
     list-style: none;
-    cursor: none;
     padding: 2.2rem 1.5rem;
     text-align: center;
     background: repeating-linear-gradient(45deg,
@@ -1393,7 +1390,6 @@
     text-transform: uppercase;
     font-size: 0.85rem;
     text-decoration: none;
-    cursor: none;
   }
   .char-back-link:hover { color: #ffaa66; }
 
@@ -1406,7 +1402,6 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    cursor: none;
     animation: lbFadeIn 0.2s ease;
   }
   @keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -1869,27 +1864,29 @@
         requestAnimationFrame(animateDragon);
       })();
 
-      // image fallback — swap to a glowing orb if the webp ever fails.
-      // Either way, signal "dragon-ready" on the body so cursor: none kicks in
-      // and the user sees the custom cursor (image or orb), not nothing.
+      // Show the dragon cursor immediately so the page is always usable.
+      // Image handling is decoupled: if the dragon.webp loads, great — the
+      // user sees the dragon. If it fails (now or later), the error handler
+      // swaps in a glowing pink/blue orb fallback. Either way, the custom
+      // cursor is visible from the first frame.
       const dragonImg = dragon.querySelector('img');
       const enableDragon = () => document.body.classList.add('dragon-ready');
+      const swapToOrb = () => {
+        if (!dragonImg) return;
+        dragonImg.style.background = 'radial-gradient(circle, #e85ee8, #5e7fff)';
+        dragonImg.removeAttribute('src');
+      };
 
       if (dragonImg) {
-        if (dragonImg.complete && dragonImg.naturalWidth > 0) {
-          // already loaded from cache
-          enableDragon();
-        } else {
-          dragonImg.addEventListener('load', enableDragon);
-          dragonImg.addEventListener('error', () => {
-            dragonImg.style.background = 'radial-gradient(circle, #e85ee8, #5e7fff)';
-            dragonImg.removeAttribute('src');
-            enableDragon();
-          });
+        dragonImg.addEventListener('error', swapToOrb);
+        // If the image already finished its load attempt before we attached
+        // listeners (e.g. broken path, missing assets folder), the error
+        // event will never fire — catch that case explicitly.
+        if (dragonImg.complete && dragonImg.naturalWidth === 0) {
+          swapToOrb();
         }
-      } else {
-        enableDragon();
       }
+      enableDragon();
     } catch (err) {
       console.error('[dragon cursor] init failed:', err);
     }
@@ -1975,7 +1972,6 @@ function buildCharacterCard(b) {
 
   if (b.pageId && !b.placeholder) {
     card.addEventListener('click', () => showCharacterPage(b.pageId));
-    card.style.cursor = 'none';
   } else if (b.url && !b.placeholder) {
     card.addEventListener('click', () => window.open(b.url, '_blank'));
   }
@@ -2020,12 +2016,15 @@ if (document.readyState === 'loading') {
 }
 
 /* ---------- SEARCH FILTER ---------- */
-const searchInput = document.getElementById('searchInput');
-if (searchInput) {
+// The search input lives inside the All Characters overlay, which appears in
+// the HTML AFTER this script block — so we have to wait for the DOM to be
+// parsed before wiring it up, or getElementById returns null and the field
+// silently does nothing.
+function wireSearchFilter() {
+  const searchInput = document.getElementById('searchInput');
+  if (!searchInput) return;
   searchInput.addEventListener('input', () => {
     const q = searchInput.value.trim().toLowerCase();
-    // Filter whichever grid is currently in the DOM (home grid removed,
-    // so this now affects the overlay grid when it's been built).
     document.querySelectorAll('#characterGrid .character-card, #allCharactersGrid .character-card').forEach(card => {
       const name = card.querySelector('.character-name').textContent.toLowerCase();
       const desc = card.querySelector('.character-desc').textContent.toLowerCase();
@@ -2034,13 +2033,18 @@ if (searchInput) {
     });
   });
 }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', wireSearchFilter);
+} else {
+  wireSearchFilter();
+}
 
 /* ---------- DISCORD WEBHOOK FORM ---------- */
 const form = document.getElementById('requestForm');
 const status = document.getElementById('formStatus');
 const submitBtn = document.getElementById('submitBtn');
 
-form.addEventListener('submit', async (e) => {
+if (form && status && submitBtn) form.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('PASTE_')) {
     status.className = 'form-status error';
