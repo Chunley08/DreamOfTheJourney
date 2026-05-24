@@ -446,11 +446,19 @@
   }
 
   /* ---------- ALL CHARACTERS OVERLAY ---------- */
-  /* This overlay should feel like an extension of the homepage, not a separate
-     metal-themed page. Transparent background lets the body's background image,
-     vignette (body::before), and stars canvas show through. */
+  /* Background is built to exactly match the body's visual stack so the
+     overlay feels like a continuation of the homepage:
+       layer 1 (top):   vignette gradient — same as body::before
+       layer 2 (mid):   the background image — same as body
+       layer 3 (base):  --bg-deep solid color — same as body fallback        */
   .all-characters-page {
-    background: transparent;
+    background:
+      radial-gradient(ellipse at center,
+        transparent 0%,
+        rgba(10, 4, 32, 0.12) 60%,
+        rgba(10, 4, 32, 0.45) 100%),
+      url('assets/background.jpg') center / cover no-repeat fixed,
+      var(--bg-deep);
     color: var(--text-primary);
     font-family: 'Outfit', sans-serif;
   }
@@ -460,6 +468,12 @@
   .all-characters-page::after {
     content: none;
     display: none;
+  }
+  /* Search bar lives inside the overlay now, between title and grid */
+  .overlay-search {
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+    animation: fadeUp 0.6s 0.1s ease both;
   }
   .all-characters-section {
     max-width: 1200px;
@@ -1444,16 +1458,6 @@
     <div class="creator">made by the insanity of Chunley's Brain</div>
   </header>
 
-  <section class="search-section">
-    <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search for a character, a world, a dream..." />
-    </div>
-  </section>
-
   <section class="section" id="characters">
     <button type="button" class="section-title-link" id="meetCharactersLink" aria-label="Open characters page">
       <h2 class="section-title">
@@ -2176,6 +2180,13 @@ document.addEventListener('DOMContentLoaded', function(){
   <section class="all-characters-section">
     <h1 class="all-characters-title">All Characters</h1>
     <p class="all-characters-sub">every dream Chunley's brain has dragged into the light</p>
+    <div class="search-wrap overlay-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search for a character, a world, a dream..." />
+    </div>
     <div class="character-grid" id="allCharactersGrid"></div>
   </section>
 </div>
