@@ -636,6 +636,49 @@
     }
   }
 
+  /* Chrome-style name effect (Shane). Steel-blue gradient
+     with a slow shimmer — bass / knucklehead bike vibe. */
+  .character-name.chrome {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: transparent;
+    background-image: linear-gradient(
+      180deg,
+      #e8eef4 0%,
+      #c0d0e0 25%,
+      #88a8c0 55%,
+      #3a5a78 85%,
+      #0a1828 100%
+    );
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 8px rgba(95, 176, 212, 0.5),
+      0 0 18px rgba(120, 190, 220, 0.4),
+      0 0 32px rgba(40, 80, 120, 0.3);
+    animation: chrome-shimmer 4s ease-in-out infinite;
+  }
+  @keyframes chrome-shimmer {
+    0%, 100% {
+      text-shadow:
+        0 0 8px rgba(95, 176, 212, 0.5),
+        0 0 18px rgba(120, 190, 220, 0.4),
+        0 0 32px rgba(40, 80, 120, 0.3);
+      filter: brightness(1);
+    }
+    50% {
+      text-shadow:
+        0 0 12px rgba(160, 220, 240, 0.7),
+        0 0 26px rgba(120, 190, 220, 0.55),
+        0 0 44px rgba(95, 176, 212, 0.45);
+      filter: brightness(1.1);
+    }
+  }
+
   .character-card.placeholder {
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
     border-style: dashed;
@@ -1764,6 +1807,427 @@
     .np-btn.np-play { width: 64px; height: 64px; }
   }
 
+  /* ============================================================
+     SHANE PAGE — chill bassist, chrome / steel / leather aesthetic
+     ============================================================ */
+  .shane-page {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(20, 50, 80, 0.55) 0%, transparent 70%),
+      radial-gradient(ellipse at 50% 100%, rgba(30, 60, 95, 0.4) 0%, transparent 60%),
+      linear-gradient(180deg, #050a14 0%, #0d1929 50%, #050a14 100%);
+    color: #c8d0dc;
+  }
+  /* keep the grain, lose the fire-glow */
+  .shane-page::after {
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 3px,
+      rgba(0, 0, 0, 0.08) 3px, rgba(0, 0, 0, 0.08) 4px);
+  }
+
+  /* close button — chrome blue */
+  .shane-page .char-close {
+    border-color: #5fb0d4;
+    color: #a8c8e0;
+    box-shadow: 0 0 20px rgba(95, 176, 212, 0.35), 0 4px 16px rgba(0,0,0,0.6);
+  }
+  .shane-page .char-close:hover {
+    background: #2a5a78;
+    color: #fff;
+    box-shadow: 0 0 30px rgba(95, 176, 212, 0.6);
+  }
+
+  /* hero: cool blue tint instead of fire wash */
+  .shane-page .char-hero-bg {
+    filter: contrast(1.08) saturate(0.85) brightness(0.85);
+  }
+  .shane-page .char-hero-bg::after {
+    background:
+      linear-gradient(180deg,
+        rgba(5, 10, 20, 0.6) 0%,
+        rgba(5, 10, 20, 0.0) 30%,
+        rgba(5, 10, 20, 0.0) 50%,
+        rgba(5, 10, 20, 0.88) 95%,
+        #050a14 100%),
+      linear-gradient(90deg, rgba(5, 10, 20, 0.75) 0%, transparent 45%);
+  }
+  /* swap fire glow at bottom for cool chrome haze */
+  .shane-page .char-hero-bg::before {
+    background: radial-gradient(ellipse at center bottom,
+      rgba(95, 176, 212, 0.22) 0%,
+      rgba(95, 176, 212, 0.10) 30%,
+      transparent 60%);
+  }
+
+  .shane-page .char-band-tag {
+    color: #88b8d4;
+    text-shadow: 0 0 12px rgba(95, 176, 212, 0.5);
+  }
+  .shane-page .char-band-tag::before,
+  .shane-page .char-band-tag::after { color: #5fb0d4; }
+
+  .shane-page .char-title {
+    background: linear-gradient(180deg,
+      #e8eef4 0%,
+      #c0d0e0 30%,
+      #6a8aa8 65%,
+      #2a4a68 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow:
+      0 0 30px rgba(95, 176, 212, 0.45),
+      0 0 60px rgba(40, 80, 120, 0.35);
+    filter: drop-shadow(0 6px 0 #0a1828) drop-shadow(0 12px 20px rgba(0,0,0,0.9));
+    transform: rotate(-1deg);
+  }
+  .shane-page .char-role { color: #c8d0dc; }
+  .shane-page .char-role span { color: #88b8d4; }
+
+  /* CTA button: chrome steel with deep navy depth */
+  .shane-page .char-chat-btn {
+    background: linear-gradient(180deg, #4a6a88 0%, #1e3a55 100%);
+    border-color: #88b8d4;
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.55),
+      0 0 30px rgba(95, 176, 212, 0.35),
+      0 7px 0 #0a1828,
+      0 9px 18px rgba(0,0,0,0.6);
+  }
+  .shane-page .char-chat-btn:hover {
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.55),
+      0 0 40px rgba(120, 190, 220, 0.6),
+      0 10px 0 #0a1828,
+      0 14px 24px rgba(0,0,0,0.7);
+  }
+  .shane-page .char-chat-btn:active {
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.55), 0 0 20px rgba(95, 176, 212, 0.4), 0 4px 0 #0a1828;
+  }
+
+  /* section h2: chrome instead of orange */
+  .shane-page .char-h2 {
+    color: #a8c8e0;
+    text-shadow:
+      0 0 24px rgba(95, 176, 212, 0.45),
+      0 3px 0 #0a1828,
+      0 6px 12px rgba(0,0,0,0.7);
+  }
+  .shane-page .char-h2::before { color: #5a7a98; }
+
+  /* tags: cool blue */
+  .shane-page .char-tag {
+    background: rgba(95, 176, 212, 0.10);
+    border-color: rgba(120, 180, 210, 0.4);
+    color: #a8c8e0;
+  }
+
+  .shane-page .char-about p { color: #c8d0dc; }
+  .shane-page .char-about p strong { color: #d0e0f0; }
+  .shane-page .char-about p em { color: #88b8d4; }
+
+  /* member cards — steel left-border instead of fire */
+  .shane-page .member-card {
+    background: linear-gradient(165deg, rgba(15, 30, 50, 0.85), rgba(5, 10, 20, 0.95));
+    border-color: rgba(95, 176, 212, 0.25);
+    border-left: 4px solid #5fb0d4;
+  }
+  .shane-page .member-card:hover {
+    border-left-color: #a8d4ee;
+    box-shadow: 0 8px 24px rgba(95, 176, 212, 0.18);
+  }
+  .shane-page .member-name { color: #a8c8e0; text-shadow: 0 2px 0 #0a1828; }
+  .shane-page .member-role { color: #88b8d4; }
+  .shane-page .member-desc { color: #c0c8d4; }
+
+  .shane-page .rivals-intro { color: #88b8d4; }
+
+  /* backstory spoiler — cool case-file feel */
+  .shane-page .spoiler-details {
+    background: linear-gradient(165deg, rgba(15, 25, 40, 0.7), rgba(2, 5, 12, 0.85));
+    border: 2px solid #2a5a78;
+  }
+  .shane-page .spoiler-details summary {
+    background: repeating-linear-gradient(45deg,
+      rgba(95, 176, 212, 0.05), rgba(95, 176, 212, 0.05) 10px,
+      rgba(40, 80, 120, 0.10) 10px, rgba(40, 80, 120, 0.10) 20px);
+  }
+  .shane-page .spoiler-details summary:hover {
+    background: repeating-linear-gradient(45deg,
+      rgba(95, 176, 212, 0.10), rgba(95, 176, 212, 0.10) 10px,
+      rgba(40, 80, 120, 0.18) 10px, rgba(40, 80, 120, 0.18) 20px);
+  }
+  .shane-page .spoiler-warn {
+    color: #88c8e8;
+    text-shadow: 0 0 18px rgba(95, 176, 212, 0.55), 0 2px 0 #0a1828;
+  }
+  .shane-page .spoiler-cta { color: #a8c8e0; }
+  .shane-page .spoiler-content { color: #c8d0dc; border-top: 2px solid rgba(95, 176, 212, 0.3); }
+  .shane-page .spoiler-content strong { color: #a8d4ee; }
+
+  /* JOURNAL — actual journal page, leather cover, lined paper inside */
+  .journal-details {
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    background: linear-gradient(165deg, #3a2010 0%, #1e1006 100%);
+    border: 1px solid rgba(120, 80, 40, 0.45);
+    box-shadow:
+      0 0 0 1px rgba(180, 130, 60, 0.15) inset,
+      0 0 40px rgba(0, 0, 0, 0.7),
+      0 18px 50px rgba(0, 0, 0, 0.75);
+    transform: rotate(-0.6deg);
+  }
+  /* stitching detail around the leather cover */
+  .journal-details::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px dashed rgba(180, 130, 60, 0.35);
+    pointer-events: none;
+  }
+  .journal-details summary {
+    list-style: none;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    font-family: 'Special Elite', cursive;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .journal-details summary::-webkit-details-marker { display: none; }
+  .journal-details summary:hover { background: rgba(180, 130, 60, 0.08); }
+  .journal-warn {
+    display: block;
+    font-family: 'Metal Mania', cursive;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    color: #d4a868;
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 14px rgba(180, 130, 60, 0.5), 0 2px 0 #1a0a00;
+  }
+  .journal-cta {
+    display: block;
+    font-family: 'Special Elite', cursive;
+    color: #c8a878;
+    margin-top: 0.5rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    opacity: 0.85;
+  }
+  .journal-details[open] .journal-cta::before { content: '— '; }
+  .journal-details[open] .journal-cta::after  { content: ' —'; }
+  /* inside the journal: looks like aged lined paper */
+  .journal-content {
+    padding: 2rem 2.2rem 2.4rem;
+    background:
+      repeating-linear-gradient(180deg,
+        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 30px,
+        rgba(80, 40, 10, 0.18) 30px, rgba(80, 40, 10, 0.18) 31px),
+      linear-gradient(180deg, #e8d4a8 0%, #d8c090 100%);
+    color: #2a1505;
+    border-top: 2px solid rgba(120, 80, 40, 0.45);
+    font-family: 'Special Elite', cursive;
+    font-size: 1.02rem;
+    line-height: 1.85;
+  }
+  .journal-content p { margin: 0 0 0.9rem; }
+  .journal-content p:last-child { margin-bottom: 0; }
+  .journal-entry-date {
+    display: inline-block;
+    font-weight: 700;
+    color: #6a3010;
+    margin-right: 0.5em;
+    letter-spacing: 0.04em;
+  }
+  .journal-redacted {
+    display: inline-block;
+    background: #2a1505;
+    color: transparent;
+    padding: 0 0.4em;
+    border-radius: 1px;
+    user-select: none;
+  }
+  .journal-torn {
+    display: block;
+    color: #6a3010;
+    font-style: italic;
+    opacity: 0.6;
+    text-align: center;
+    margin: 0.4rem 0;
+  }
+
+  /* === SHANE PLAYER (bass-themed, chrome / leather notebook) === */
+  .shane-page .setlist-stage {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(95, 176, 212, 0.14) 0%, transparent 60%),
+      linear-gradient(165deg, rgba(15, 30, 50, 0.95), rgba(5, 10, 20, 0.98));
+    border-color: rgba(95, 176, 212, 0.25);
+    border-top: 3px solid #5fb0d4;
+    border-bottom: 3px solid #0a1828;
+    box-shadow:
+      inset 0 0 60px rgba(95, 176, 212, 0.06),
+      0 18px 50px rgba(0, 0, 0, 0.75),
+      0 0 80px rgba(40, 80, 120, 0.18);
+  }
+  .shane-page .setlist-stage::before,
+  .shane-page .setlist-stage::after {
+    background: radial-gradient(circle at 30% 30%, #a8c8e0, #1e3a55 70%, #050a14);
+  }
+  .shane-page .np-display {
+    background: linear-gradient(180deg, #0a1828 0%, #050a14 100%);
+    border-color: rgba(95, 176, 212, 0.3);
+    box-shadow: inset 0 0 24px rgba(95, 176, 212, 0.08);
+  }
+  .shane-page .np-display::after {
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 2px,
+      rgba(95, 176, 212, 0.05) 2px, rgba(95, 176, 212, 0.05) 3px);
+  }
+  .shane-page .np-eyebrow {
+    color: #88b8d4;
+    text-shadow: 0 0 8px rgba(95, 176, 212, 0.55);
+  }
+  .shane-page .np-eyebrow .live-dot {
+    background: #5fb0d4;
+    box-shadow: 0 0 8px #5fb0d4, 0 0 14px rgba(95, 176, 212, 0.55);
+  }
+  .shane-page .np-title {
+    color: #c8d8e8;
+    text-shadow: 0 0 18px rgba(95, 176, 212, 0.55), 0 2px 0 #0a1828;
+  }
+  .shane-page .np-sub { color: #88a8c0; }
+
+  /* Bass visualizer: chunkier, slower, steel→deep gradient */
+  .shane-page .np-viz { gap: 5px; }
+  .shane-page .np-viz-bar {
+    background: linear-gradient(180deg, #d8e8f4 0%, #88b8d4 30%, #4a7a98 65%, #1a3a58 100%);
+    box-shadow: 0 0 4px rgba(95, 176, 212, 0.4);
+    transition: height 140ms ease-out, opacity 200ms ease;
+  }
+
+  .shane-page .np-progress {
+    background: rgba(95, 176, 212, 0.10);
+    border-color: rgba(95, 176, 212, 0.3);
+  }
+  .shane-page .np-progress-fill {
+    background: linear-gradient(90deg, #c8d8e8, #5fb0d4);
+    box-shadow: 0 0 12px rgba(95, 176, 212, 0.6);
+  }
+  .shane-page .np-progress-head {
+    background: radial-gradient(circle at 30% 30%, #fff, #88b8d4 60%, #1e3a55);
+    box-shadow: 0 0 10px #5fb0d4, 0 0 18px rgba(95, 176, 212, 0.65);
+  }
+  .shane-page .np-times { color: #88b8d4; }
+
+  .shane-page .np-btn {
+    border-color: rgba(95, 176, 212, 0.55);
+    color: #a8c8e0;
+  }
+  .shane-page .np-btn:hover {
+    border-color: #88b8d4;
+    color: #d8e8f4;
+    box-shadow: 0 0 18px rgba(95, 176, 212, 0.45);
+  }
+  .shane-page .np-btn.np-play {
+    border-color: #5fb0d4;
+    color: #c8e0f0;
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.45),
+      0 0 22px rgba(95, 176, 212, 0.5),
+      inset 0 0 18px rgba(95, 176, 212, 0.18);
+  }
+  .shane-page .np-btn.np-play:hover {
+    background: rgba(95, 176, 212, 0.12);
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.45),
+      0 0 35px rgba(120, 190, 220, 0.7),
+      inset 0 0 22px rgba(95, 176, 212, 0.28);
+  }
+  .shane-page .np-console.is-playing .np-btn.np-play {
+    animation: shanePlayPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes shanePlayPulse {
+    0%, 100% {
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.45),
+        0 0 22px rgba(95, 176, 212, 0.5),
+        inset 0 0 18px rgba(95, 176, 212, 0.18);
+    }
+    50% {
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.45),
+        0 0 40px rgba(95, 176, 212, 0.85),
+        0 0 60px rgba(120, 190, 220, 0.4),
+        inset 0 0 28px rgba(95, 176, 212, 0.4);
+    }
+  }
+
+  /* Setlist: leather notebook instead of yellowed paper */
+  .shane-page .np-setlist {
+    background:
+      repeating-linear-gradient(180deg,
+        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 32px,
+        rgba(60, 30, 10, 0.20) 32px, rgba(60, 30, 10, 0.20) 33px),
+      linear-gradient(180deg, #3a2a1a 0%, #1e1408 100%);
+    color: #d4c098;
+    box-shadow:
+      inset 0 0 24px rgba(0, 0, 0, 0.5),
+      0 12px 28px rgba(0, 0, 0, 0.7);
+    transform: rotate(-0.4deg);
+    border: 1px solid rgba(120, 80, 40, 0.35);
+  }
+  .shane-page .np-setlist::before,
+  .shane-page .np-setlist::after {
+    background: rgba(180, 140, 80, 0.4);
+  }
+  .shane-page .np-setlist-head { color: #d4a868; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); }
+  .shane-page .np-setlist-sub { color: #a88040; }
+  .shane-page .np-track { border-bottom: 1px dashed rgba(180, 130, 60, 0.3); }
+  .shane-page .np-track:hover { background: rgba(95, 176, 212, 0.10); }
+  .shane-page .np-track-num { color: #d4a868; }
+  .shane-page .np-track-name { color: #e8d4a8; }
+  .shane-page .np-track-len { color: #a8845a; }
+  .shane-page .np-track.is-active { background: rgba(95, 176, 212, 0.15); }
+  .shane-page .np-track.is-active .np-track-name { color: #fff; font-weight: 700; }
+  .shane-page .np-track.is-active .np-track-num {
+    color: #88c8e8;
+    text-shadow: 0 0 6px rgba(95, 176, 212, 0.55);
+  }
+  .shane-page .np-scribble { color: #a8845a; }
+  .shane-page .np-scribble strong { color: #d4a868; }
+
+  /* gallery — chrome glow */
+  .shane-page .gallery-entry {
+    box-shadow: 0 0 60px rgba(95, 176, 212, 0.18), 0 20px 50px rgba(0,0,0,0.7);
+  }
+  .shane-page .gallery-entry:hover {
+    box-shadow: 0 0 80px rgba(120, 190, 220, 0.4), 0 24px 60px rgba(0,0,0,0.8);
+  }
+  .shane-page .gallery-entry-eyebrow {
+    background-image: linear-gradient(180deg, #e8eef4 0%, #c0d0e0 30%, #6a8aa8 65%, #2a4a68 100%);
+    text-shadow: 0 0 12px rgba(95, 176, 212, 0.55), 0 0 24px rgba(40, 80, 120, 0.4);
+  }
+  .shane-page .gallery-entry-count { color: #c8d8e8; }
+  .shane-page .gallery-entry-cta {
+    border-color: rgba(95, 176, 212, 0.55);
+    color: #c8d8e8;
+  }
+
+  /* signature pull-quote (reusing .scorch-quote markup but restyled) */
+  .shane-page .scorch-quote {
+    border-left: 3px solid #5fb0d4;
+    background: linear-gradient(135deg, rgba(95,176,212,0.08), rgba(40,80,120,0.04));
+    color: #c8d8e8;
+    text-shadow: 0 0 12px rgba(95,176,212,0.3);
+  }
+  .shane-page .scorch-quote cite {
+    background-image: linear-gradient(180deg, #e8eef4 0%, #88b8d4 60%, #2a4a68 100%);
+    text-shadow: 0 0 10px rgba(95, 176, 212, 0.4);
+  }
+
+  /* back link */
+  .shane-page .char-back-link { color: #5a7a98; }
+  .shane-page .char-back-link:hover { color: #88b8d4; }
+
 </style>
 </head>
 <body>
@@ -1924,7 +2388,13 @@ const CHARACTERS = [
     portrait: "assets/scorch-g03.jpg",
     pageId: "scorch",
   },
-  { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
+  {
+    name: "Shane",
+    desc: "bassist of The Snake Skins",
+    nameStyle: "chrome",
+    portrait: "assets/shane-portrait.jpg",
+    pageId: "shane",
+  },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
@@ -2422,6 +2892,15 @@ document.addEventListener('DOMContentLoaded', () => {
     hideCharacterPage('scorch');
   });
 
+  // Shane close handlers
+  const _shaneClose = document.getElementById('shaneClose');
+  if (_shaneClose) _shaneClose.addEventListener('click', () => hideCharacterPage('shane'));
+  const _shaneBack = document.getElementById('shaneBack');
+  if (_shaneBack) _shaneBack.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideCharacterPage('shane');
+  });
+
   // All-characters overlay close
   const _charactersClose = document.getElementById('charactersClose');
   if (_charactersClose) _charactersClose.addEventListener('click', () => hideCharacterPage('characters'));
@@ -2504,6 +2983,13 @@ document.addEventListener('DOMContentLoaded', function(){
   if (entry && dataEl) {
     var images = JSON.parse(dataEl.textContent);
     entry.addEventListener('click', function(){ openCarousel(images, 0); });
+  }
+
+  var shaneEntry = document.getElementById('shaneGalleryEntry');
+  var shaneDataEl = document.getElementById('shaneGalleryData');
+  if (shaneEntry && shaneDataEl) {
+    var shaneImages = JSON.parse(shaneDataEl.textContent);
+    shaneEntry.addEventListener('click', function(){ openCarousel(shaneImages, 0); });
   }
 });
 
@@ -2728,6 +3214,231 @@ document.addEventListener('DOMContentLoaded', function(){
     document.addEventListener('DOMContentLoaded', initSnakeSkinsPlayer);
   } else {
     initSnakeSkinsPlayer();
+  }
+})();
+
+/* ============================================================
+   SHANE PLAYER — parallel to Snake Skins player, sh* IDs so the
+   two players don't collide on getElementById lookups.
+   ============================================================ */
+(function() {
+  function initShanePlayer() {
+    var root = document.getElementById('shanePlayer');
+    if (!root) return;
+    var dataEl = document.getElementById('shaneTracksData');
+    if (!dataEl) return;
+    var tracks;
+    try { tracks = JSON.parse(dataEl.textContent); } catch(e) { return; }
+    if (!tracks || !tracks.length) return;
+
+    var audio      = document.getElementById('shAudio');
+    var consoleEl  = document.getElementById('shConsole');
+    var titleEl    = document.getElementById('shTitle');
+    var subEl      = document.getElementById('shSub');
+    var vizEl      = document.getElementById('shViz');
+    var progressEl = document.getElementById('shProgress');
+    var fillEl     = document.getElementById('shFill');
+    var headEl     = document.getElementById('shHead');
+    var currentEl  = document.getElementById('shTimeCurrent');
+    var totalEl    = document.getElementById('shTimeTotal');
+    var playBtn    = document.getElementById('shPlay');
+    var playIcon   = document.getElementById('shPlayIcon');
+    var prevBtn    = document.getElementById('shPrev');
+    var nextBtn    = document.getElementById('shNext');
+    var listEl     = document.getElementById('shTrackList');
+
+    // Fewer, fatter bars for Shane — bass-heavy vibe
+    var BAR_COUNT = 32;
+    var bars = [];
+    for (var i = 0; i < BAR_COUNT; i++) {
+      var b = document.createElement('div');
+      b.className = 'np-viz-bar';
+      vizEl.appendChild(b);
+      bars.push(b);
+    }
+
+    listEl.innerHTML = '';
+    tracks.forEach(function(t, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'np-track';
+      btn.dataset.index = i;
+      var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+      btn.innerHTML =
+        '<span class="np-track-num">' + num + '</span>' +
+        '<span class="np-track-name">' + t.title + '</span>' +
+        '<span class="np-track-len">—:—</span>';
+      btn.addEventListener('click', function() { playIndex(i); });
+      listEl.appendChild(btn);
+    });
+    var trackEls = listEl.querySelectorAll('.np-track');
+
+    var currentIndex = -1;
+    var audioCtx, analyser, sourceNode, freqData;
+    var rafId = null;
+
+    var PLAY_SVG  = '<path d="M8 5v14l11-7z"/>';
+    var PAUSE_SVG = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+
+    function fmt(sec) {
+      if (!isFinite(sec) || sec < 0) return '0:00';
+      var m = Math.floor(sec / 60);
+      var s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function setupAudioGraph() {
+      if (audioCtx) return;
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+        analyser = audioCtx.createAnalyser();
+        // Smaller FFT + heavier smoothing = slower, bass-thump vibe
+        analyser.fftSize = 64;
+        analyser.smoothingTimeConstant = 0.86;
+        sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+      } catch (e) {
+        audioCtx = null; analyser = null;
+      }
+    }
+
+    function startVizLoop() {
+      if (rafId) return;
+      var idleBeat = 0;
+      function tick() {
+        if (analyser && !audio.paused) {
+          analyser.getByteFrequencyData(freqData);
+          // Emphasize the LOW end of the spectrum for a bass-feel viz
+          for (var i = 0; i < BAR_COUNT; i++) {
+            // Map bars to the bottom 60% of the frequency range
+            var srcIdx = Math.floor((i / BAR_COUNT) * freqData.length * 0.6);
+            var v = freqData[srcIdx] / 255;
+            bars[i].style.height = Math.max(8, v * 100) + '%';
+          }
+        } else {
+          // Slower idle wave than Scorch's — like a heartbeat
+          idleBeat += 0.025;
+          for (var j = 0; j < BAR_COUNT; j++) {
+            var n = Math.sin(idleBeat + j * 0.28) * 0.5 + 0.5;
+            bars[j].style.height = (10 + n * 12) + '%';
+          }
+        }
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    startVizLoop();
+
+    function updateActive() {
+      trackEls.forEach(function(el, i) {
+        el.classList.toggle('is-active', i === currentIndex);
+        var numEl = el.querySelector('.np-track-num');
+        if (numEl) {
+          var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+          numEl.textContent = (i === currentIndex) ? '▶' : num;
+        }
+      });
+    }
+
+    function loadIndex(i) {
+      if (i < 0) i = tracks.length - 1;
+      if (i >= tracks.length) i = 0;
+      currentIndex = i;
+      var t = tracks[i];
+      audio.src = t.src;
+      titleEl.textContent = t.title;
+      subEl.textContent = 'Shane Halbrook  •  Bass & Low End';
+      currentEl.textContent = '0:00';
+      totalEl.textContent = '0:00';
+      fillEl.style.width = '0%';
+      headEl.style.left = '0%';
+      updateActive();
+    }
+
+    function playIndex(i) {
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (i !== currentIndex) loadIndex(i);
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){});
+    }
+
+    playBtn.addEventListener('click', function() {
+      if (currentIndex < 0) { playIndex(0); return; }
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (audio.paused) {
+        var p = audio.play();
+        if (p && p.catch) p.catch(function(){});
+      } else {
+        audio.pause();
+      }
+    });
+    prevBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex <= 0 ? tracks.length - 1 : currentIndex - 1;
+      playIndex(nextIdx);
+    });
+    nextBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+
+    audio.addEventListener('play', function() {
+      consoleEl.classList.add('is-playing');
+      playIcon.innerHTML = PAUSE_SVG;
+    });
+    audio.addEventListener('pause', function() {
+      consoleEl.classList.remove('is-playing');
+      playIcon.innerHTML = PLAY_SVG;
+    });
+    audio.addEventListener('ended', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+    audio.addEventListener('loadedmetadata', function() {
+      totalEl.textContent = fmt(audio.duration);
+      if (currentIndex >= 0 && trackEls[currentIndex]) {
+        var lenEl = trackEls[currentIndex].querySelector('.np-track-len');
+        if (lenEl) lenEl.textContent = fmt(audio.duration);
+      }
+    });
+    audio.addEventListener('timeupdate', function() {
+      var pct = (audio.currentTime / (audio.duration || 1)) * 100;
+      fillEl.style.width = pct + '%';
+      headEl.style.left = pct + '%';
+      currentEl.textContent = fmt(audio.currentTime);
+    });
+    audio.addEventListener('error', function() {
+      if (currentIndex >= 0 && tracks[currentIndex]) {
+        titleEl.textContent = tracks[currentIndex].title;
+      }
+      subEl.textContent = 'file not found — drop MP3 into /assets/';
+    });
+
+    function seekFromEvent(e) {
+      if (!isFinite(audio.duration)) return;
+      var rect = progressEl.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var x = clientX - rect.left;
+      var pct = Math.max(0, Math.min(1, x / rect.width));
+      audio.currentTime = pct * audio.duration;
+    }
+    progressEl.addEventListener('click', seekFromEvent);
+    progressEl.addEventListener('keydown', function(e) {
+      if (!isFinite(audio.duration)) return;
+      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); e.preventDefault(); }
+      if (e.key === 'ArrowLeft')  { audio.currentTime = Math.max(0, audio.currentTime - 5); e.preventDefault(); }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initShanePlayer);
+  } else {
+    initShanePlayer();
   }
 })();
 
@@ -2983,6 +3694,221 @@ document.addEventListener('DOMContentLoaded', function(){
   </section>
 </div>
 <!-- ================== END SCORCH CHARACTER PAGE ===================== -->
+
+
+<!-- ====================== SHANE CHARACTER PAGE ====================== -->
+<div class="character-page shane-page" id="shanePage" aria-hidden="true">
+  <button class="char-close" id="shaneClose" aria-label="Close" type="button">✕</button>
+
+  <!-- HERO -->
+  <section class="char-hero">
+    <div class="char-hero-bg" style="background-image: url('assets/shane-hero.jpg');"></div>
+    <div class="char-hero-content">
+      <div class="char-band-tag">The Snake Skins</div>
+      <h1 class="char-title">SHANE</h1>
+      <div class="char-role">Bass <span>•</span> Backing Vocals <span>•</span> The Quiet One</div>
+      <!-- TODO: replace href with Shane's chat URL when ready -->
+      <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+         target="_blank" rel="noopener" class="char-chat-btn">
+        Chat with Shane &rarr;
+      </a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="char-section char-about">
+    <h2 class="char-h2">Who the Hell Is He</h2>
+    <p>Shane is the calm in the eye of the band's storm. Scorch sets things on fire. Max sets <em>people</em> on fire. Shane stands behind them with his bass and that flat, half-lidded look that says <em>I am watching this happen and I will not be helping.</em></p>
+    <p>If you do something stupid, he'll let you know. Quietly. Deadpan. The kind of line that lands two beats later when you realize you just got clowned. He's not mean about it — he just doesn't see a reason to dress it up.</p>
+    <p>Don't mistake the chill for openness. Shane keeps his cards close, his stories closer, and his bedroom door locked. There's a whole life in there nobody gets to see — and a journal nobody's allowed to read. <strong>Don't try. He'll know.</strong></p>
+    <div class="char-tags">
+      <span class="char-tag">laid back</span>
+      <span class="char-tag">deadpan delivery</span>
+      <span class="char-tag">still waters run deep</span>
+      <span class="char-tag">has seen some shit</span>
+      <span class="char-tag">soft for stray dogs</span>
+      <span class="char-tag">keeps the journal locked</span>
+      <span class="char-tag">rides a knucklehead</span>
+      <span class="char-tag">bassline brain</span>
+    </div>
+  </section>
+
+  <!-- QUOTES -->
+  <section class="char-section">
+    <h2 class="char-h2">He Said What</h2>
+    <div class="quote-grid">
+      <div class="quote-card">"Yeah, no. That's a hard pass, bud."</div>
+      <div class="quote-card">"You done talking? Was just letting you finish."</div>
+      <div class="quote-card">"Mm. That's a you problem."</div>
+      <div class="quote-card">"Hand me that pick. …The other one. Yeah. Smart guy."</div>
+    </div>
+  </section>
+
+  <!-- THE BAND -->
+  <section class="char-section">
+    <h2 class="char-h2">The Snake Skins</h2>
+    <div class="band-poster-wrap">
+      <img src="assets/band-poster.jpg" alt="The Snake Skins — Bite Back Tour" />
+    </div>
+    <div class="member-grid">
+      <div class="member-card">
+        <div class="member-name">Cody</div>
+        <div class="member-role">Drums</div>
+        <div class="member-desc">Cajun. Sweet kid. Probably the only person in this band who isn't somehow trying to fight me on any given day. Tells the worst jokes. Laughs at his own. I let him.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Scorch</div>
+        <div class="member-role">Vocals</div>
+        <div class="member-desc">Frontman. All rage and venom — most days. You learn to read his moods or you don't ride with us. He's louder than he is mean. Usually.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Kayla</div>
+        <div class="member-role">Cello / Piano</div>
+        <div class="member-desc">Strings. Glue. Probably the only one of us with an actual plan. Don't underestimate her. People do. They learn fast.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Max</div>
+        <div class="member-role">Lead Guitar</div>
+        <div class="member-desc">Loud. Faster than he should be. Annoying. Talented though. Drinks too much. I drive him home more nights than I'd like to admit.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHANE'S SETLIST / MUSIC PLAYER -->
+  <section class="char-section">
+    <h2 class="char-h2">Low End — Live</h2>
+    <div class="setlist-stage" id="shanePlayer">
+      <!-- LEFT: NOW PLAYING CONSOLE -->
+      <div class="np-console" id="shConsole">
+        <div class="np-display">
+          <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+          <div class="np-title" id="shTitle">— select a track —</div>
+          <div class="np-sub" id="shSub">Shane Halbrook  •  Bass &amp; Low End</div>
+          <div class="np-viz" id="shViz" aria-hidden="true"></div>
+          <div class="np-progress" id="shProgress" role="slider" aria-label="Seek" tabindex="0">
+            <div class="np-progress-fill" id="shFill"></div>
+            <div class="np-progress-head" id="shHead"></div>
+          </div>
+          <div class="np-times">
+            <span id="shTimeCurrent">0:00</span>
+            <span id="shTimeTotal">0:00</span>
+          </div>
+        </div>
+        <div class="np-transport">
+          <button class="np-btn np-prev" id="shPrev" type="button" aria-label="Previous track">
+            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+          </button>
+          <button class="np-btn np-play" id="shPlay" type="button" aria-label="Play / pause">
+            <svg id="shPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="np-btn np-next" id="shNext" type="button" aria-label="Next track">
+            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- RIGHT: LEATHER NOTEBOOK SETLIST -->
+      <div class="np-setlist">
+        <div class="np-setlist-head">// Shane's Bench</div>
+        <div class="np-setlist-sub">Low End — Track List</div>
+        <div id="shTrackList"></div>
+        <div class="np-scribble">written on a fucking receipt — <strong>Shane</strong></div>
+      </div>
+    </div>
+    <audio id="shAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="shaneTracksData" type="application/json">[
+      {"title": "You Good, Bro?",  "src": "assets/You Good Bro.mp3"},
+      {"title": "Placeholder",     "src": "assets/shane-track-02.mp3"},
+      {"title": "Placeholder",     "src": "assets/shane-track-03.mp3"}
+    ]</script>
+  </section>
+
+  <!-- HISTORY (SPOILER) -->
+  <section class="char-section">
+    <h2 class="char-h2">How He Got Here</h2>
+    <details class="spoiler-details">
+      <summary>
+        <span class="spoiler-warn">⚠ Spoilers — Character Backstory ⚠</span>
+        <span class="spoiler-cta">tap to reveal</span>
+      </summary>
+      <div class="spoiler-content">
+        <p>Shane grew up in a house that always felt smaller than it was. His mom — <strong>Nina Halbrook</strong> — was every good thing in the world stitched into one woman. Patient. Warm. The kind of person who'd give you the last piece of bread on the table and pretend she wasn't hungry. She loved her husband. That was her sin.</p>
+        <p><strong>Walter Halbrook</strong> wasn't a husband so much as a parasite in a man's clothes. Cheated like he was being paid for it. Gambled the rent. Gambled the groceries. Gambled the medicine money. Came home reeking of someone else's perfume and expected dinner waiting. Nina worked three jobs to plug the holes he kept punching in their life. Shane watched. Shane remembered.</p>
+        <p>By the time Shane was fourteen, he'd already promised himself he'd never end up like his old man. By fifteen, he had a bigger problem — Nina got sick. Cancer. The kind that doesn't bargain. He spent the next year watching her shrink in a hospital bed while Walter <em>couldn't make it today, son</em>, and Shane held her hand for the both of them. She died when he was sixteen. Walter wasn't in the room.</p>
+        <p>Shane left that night. Didn't pack. Didn't say goodbye. A week later he was on the back of a stranger's bike, and that's how the next chapter started — patches, fists, a road name he won't tell you, and a list of things he doesn't bring up at parties. Murder. Drugs. Worse. You don't ride with that crowd without earning your way in.</p>
+        <p>Then he heard music that did something to his chest. He picked up a bass. Met the Snake Skins. Set the bike down — figuratively. He never sold the bike.</p>
+        <p>Does it bother him? Any of it? Not really. It happened. He was there. That was him. You can spend the rest of your life apologizing for being a man who survived, or you can play your fucking bassline. Shane chose the bassline.</p>
+        <p><strong>Walter</strong> is still alive. Eighty-something, parked in a nursing home Shane pays for out of pocket every month. Shane doesn't visit. Has never visited. Won't. He pays because <em>Nina</em> would've wanted it, and that's the only reason left. The day Walter dies, Shane will probably feel nothing at all. He thinks that's fine. Some people don't deserve grief.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- THE JOURNAL (separate spoiler, styled as a journal page) -->
+  <section class="char-section">
+    <h2 class="char-h2">The Journal</h2>
+    <p class="gallery-sub" style="margin-bottom: 2rem;">He keeps one. Always has. Music, gut feelings, names of people he doesn't like, the occasional grocery list. He doesn't let anyone read it. He'll never tell you it exists. If you spend enough time with him in roleplay, you might catch a glimpse. Might. He's careful.</p>
+    <details class="journal-details">
+      <summary>
+        <span class="journal-warn">✦ Shane's Journal ✦</span>
+        <span class="journal-cta">if you read this he'll know</span>
+      </summary>
+      <div class="journal-content">
+        <p><span class="journal-entry-date">Sept 9.</span> Cody asked me what I was writing. Lied. Said lyrics. He bought it. He'd buy anything though, that one.</p>
+        <p><span class="journal-entry-date">Sept 14.</span> Played a B-flat run today that felt like driving home. Don't know whose home. Mine's been gone a long time.</p>
+        <p><span class="journal-entry-date">Sept 21.</span> Don't trust the new sound guy. Smiles too much. Like he's hiding teeth.</p>
+        <p><span class="journal-entry-date">Oct 3.</span> Mom would've been 58 today. Bought flowers. Threw them in the river instead of the grave. She always hated graveyards. River was her favorite spot.</p>
+        <p><span class="journal-entry-date">Oct 10.</span> Scorch is on a tear again. Let him. He'll burn it out. Always does.</p>
+        <p><span class="journal-torn">— page torn out —</span></p>
+        <p><span class="journal-entry-date">Oct 22.</span> Caught a kid trying to lift my wallet outside the venue. Gave him twenty bucks and told him to do better. He flipped me off and ran. Fair.</p>
+        <p><span class="journal-entry-date">Oct 30.</span> Bike's making a noise. Knucklehead's getting old. Same. Same.</p>
+        <p><span class="journal-entry-date">Nov 4.</span> <span class="journal-redacted">████████████████████████████████</span> I shouldn't have said that out loud. Won't write it again.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- SHANE QUOTE -->
+  <section class="char-section">
+    <blockquote class="scorch-quote">
+      "Some people don't deserve grief. Some people you just keep paying for, anyway."
+      <cite>— Shane</cite>
+    </blockquote>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="char-section">
+    <h2 class="char-h2">The Gallery</h2>
+    <p class="gallery-sub">Tap to enlarge. He didn't sign off on any of these.</p>
+    <button class="gallery-entry" id="shaneGalleryEntry" type="button" aria-label="Open gallery">
+      <img class="gallery-entry-cover" src="assets/shane-gallery-cover.jpg" alt="Shane gallery cover" />
+      <div class="gallery-entry-overlay">
+        <div class="gallery-entry-eyebrow">Gallery</div>
+        <div class="gallery-entry-count">10 Photos</div>
+        <div class="gallery-entry-cta">View All</div>
+      </div>
+    </button>
+    <script id="shaneGalleryData" type="application/json">[
+      {"src": "assets/shane-gallery-01.jpg", "alt": "Shane on the knucklehead"},
+      {"src": "assets/shane-gallery-02.jpg", "alt": "Bass in the studio"},
+      {"src": "assets/shane-gallery-03.jpg", "alt": "Backstage, deadpan as ever"},
+      {"src": "assets/shane-gallery-04.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-05.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-06.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-07.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-08.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-09.jpg", "alt": ""},
+      {"src": "assets/shane-gallery-10.jpg", "alt": ""}
+    ]</script>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="char-final-cta">
+    <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+       target="_blank" rel="noopener" class="char-chat-btn">
+      Chat with Shane &rarr;
+    </a>
+    <a href="#" class="char-back-link" id="shaneBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END SHANE CHARACTER PAGE ===================== -->
 
 </body>
 </html>
