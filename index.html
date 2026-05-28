@@ -107,6 +107,32 @@
   body:not(.dragon-ready):not(.touch-device) * { cursor: auto !important; }
   body:not(.dragon-ready) .dragon-cursor { display: none; }
 
+  /* ============================================================
+     PERFORMANCE OPTIMIZATIONS — keep this site smooth on mobile.
+     Three small rules, big impact:
+     1. Pause every animation inside a character page when the page
+        is hidden (aria-hidden=true). Browsers still run CSS animation
+        cycles on offscreen elements; this stops that work.
+     2. content-visibility: auto on the overlay pages lets the browser
+        skip layout/paint for offscreen sections until they're scrolled
+        or shown. Huge win when the page tree is large.
+     3. prefers-reduced-motion: kill purely decorative animations for
+        users who've set that OS preference (accessibility + perf).
+     ============================================================ */
+  .character-page[aria-hidden="true"] { content-visibility: auto; }
+  .character-page[aria-hidden="true"] *,
+  .character-page[aria-hidden="true"] *::before,
+  .character-page[aria-hidden="true"] *::after {
+    animation-play-state: paused !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
   /* main site z-index */
   .site { position: relative; z-index: 10; }
 
@@ -303,13 +329,6 @@
   }
 
   /* ---------- SEARCH ---------- */
-  .search-section {
-    max-width: 720px;
-    margin: 2.8rem auto 0;
-    padding: 0 2rem;
-    animation: fadeUp 1.4s 0.45s ease both;
-  }
-
   .search-wrap { position: relative; }
 
   .search-input {
@@ -390,60 +409,6 @@
   }
 
   /* ---------- "SEE MORE CHARACTERS" CALL-TO-ACTION ---------- */
-  .see-more-wrap {
-    margin-top: 3rem;
-    text-align: center;
-    animation: fadeUp 1s ease both;
-  }
-  .see-more-btn {
-    font-family: 'Cinzel', serif;
-    font-weight: 700;
-    font-size: clamp(1rem, 2.4vw, 1.4rem);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #fff;
-    background: linear-gradient(90deg,
-      rgba(157, 92, 255, 0.35),
-      rgba(232, 94, 232, 0.45),
-      rgba(94, 220, 255, 0.35));
-    background-size: 200% 100%;
-    border: 2px solid rgba(232, 94, 232, 0.7);
-    border-radius: 999px;
-    padding: 1.1rem 2.4rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 1rem;
-    text-shadow: 0 0 14px var(--glow-cyan), 0 0 28px var(--glow-magenta);
-    box-shadow:
-      0 0 24px var(--glow-purple),
-      0 0 48px rgba(232, 94, 232, 0.35),
-      inset 0 0 18px rgba(255, 255, 255, 0.08);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-position 0.8s ease;
-    animation: seeMorePulse 2.4s ease-in-out infinite, rainbowFlow 8s linear infinite;
-  }
-  .see-more-btn:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow:
-      0 0 36px var(--glow-magenta),
-      0 0 64px var(--glow-purple),
-      inset 0 0 22px rgba(255, 255, 255, 0.12);
-  }
-  .see-more-arrow {
-    display: inline-block;
-    color: var(--accent-cyan);
-    text-shadow: 0 0 12px var(--accent-cyan);
-    animation: seeMoreArrow 1.6s ease-in-out infinite;
-  }
-  .see-more-arrow:last-child { animation-delay: 0.8s; }
-  @keyframes seeMorePulse {
-    0%, 100% { box-shadow: 0 0 24px var(--glow-purple), 0 0 48px rgba(232, 94, 232, 0.35), inset 0 0 18px rgba(255, 255, 255, 0.08); }
-    50%      { box-shadow: 0 0 36px var(--glow-magenta), 0 0 72px var(--glow-purple), inset 0 0 22px rgba(255, 255, 255, 0.12); }
-  }
-  @keyframes seeMoreArrow {
-    0%, 100% { transform: translateX(0); opacity: 0.7; }
-    50%      { transform: translateX(4px); opacity: 1; }
-  }
-
   /* ---------- ALL CHARACTERS OVERLAY ---------- */
   /* Background is built to exactly match the body's visual stack so the
      overlay feels like a continuation of the homepage:
@@ -676,6 +641,49 @@
         0 0 26px rgba(120, 190, 220, 0.55),
         0 0 44px rgba(95, 176, 212, 0.45);
       filter: brightness(1.1);
+    }
+  }
+
+  /* Bayou-style name effect (Cody). Warm honey/gold gradient with a
+     slow firefly pulse — Louisiana / drummer / front-porch vibe. */
+  .character-name.bayou {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: transparent;
+    background-image: linear-gradient(
+      180deg,
+      #fff4cc 0%,
+      #f4d27a 25%,
+      #d49a3a 55%,
+      #8a5a1a 85%,
+      #3a2410 100%
+    );
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 8px rgba(212, 154, 58, 0.5),
+      0 0 18px rgba(244, 210, 122, 0.4),
+      0 0 32px rgba(120, 80, 25, 0.3);
+    animation: bayou-firefly 3.6s ease-in-out infinite;
+  }
+  @keyframes bayou-firefly {
+    0%, 100% {
+      text-shadow:
+        0 0 8px rgba(212, 154, 58, 0.5),
+        0 0 18px rgba(244, 210, 122, 0.4),
+        0 0 32px rgba(120, 80, 25, 0.3);
+      filter: brightness(1);
+    }
+    50% {
+      text-shadow:
+        0 0 14px rgba(255, 220, 130, 0.75),
+        0 0 28px rgba(244, 200, 100, 0.6),
+        0 0 48px rgba(212, 154, 58, 0.45);
+      filter: brightness(1.12);
     }
   }
 
@@ -1436,39 +1444,6 @@
   }
   .char-back-link:hover { color: #ffaa66; }
 
-  /* LIGHTBOX */
-  .lightbox {
-    position: fixed; inset: 0;
-    z-index: 10000;
-    background: rgba(0, 0, 0, 0.94);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    animation: lbFadeIn 0.2s ease;
-  }
-  @keyframes lbFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .lightbox img {
-    max-width: 90vw;
-    max-height: 88vh;
-    object-fit: contain;
-    box-shadow: 0 0 60px rgba(255, 90, 30, 0.35), 0 0 120px rgba(0,0,0,0.9);
-    border: 1px solid rgba(255, 130, 50, 0.3);
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 1.5rem; right: 1.5rem;
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.7);
-    border: 2px solid #ff5a1f;
-    color: #ffaa00;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Oswald', sans-serif;
-    font-weight: 900;
-    font-size: 1.4rem;
-  }
-
   @media (max-width: 600px) {
     .char-section { padding: 3rem 1.2rem; }
     .quote-grid { gap: 1.4rem; }
@@ -2228,6 +2203,540 @@
   .shane-page .char-back-link { color: #5a7a98; }
   .shane-page .char-back-link:hover { color: #88b8d4; }
 
+  /* ============================================================
+     CODY PAGE — Cajun drummer, bayou twilight / brass / cypress
+     palette: deep moss + warm bayou amber + porch-lamp gold
+     ============================================================ */
+  .cody-page {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(60, 50, 20, 0.50) 0%, transparent 70%),
+      radial-gradient(ellipse at 50% 100%, rgba(45, 70, 35, 0.45) 0%, transparent 60%),
+      linear-gradient(180deg, #0c0a06 0%, #14180c 45%, #0a0b06 100%);
+    color: #e8d8b0;
+  }
+  .cody-page::after {
+    background: repeating-linear-gradient(0deg,
+      transparent 0px, transparent 3px,
+      rgba(0, 0, 0, 0.08) 3px, rgba(0, 0, 0, 0.08) 4px);
+  }
+
+  /* close button — warm brass */
+  .cody-page .char-close {
+    border-color: #d49a3a;
+    color: #f4d27a;
+    box-shadow: 0 0 20px rgba(212, 154, 58, 0.35), 0 4px 16px rgba(0,0,0,0.6);
+  }
+  .cody-page .char-close:hover {
+    background: #6a4a14;
+    color: #fff8d8;
+    box-shadow: 0 0 30px rgba(244, 200, 100, 0.65);
+  }
+
+  /* hero: warm bayou tint */
+  .cody-page .char-hero-bg {
+    filter: contrast(1.08) saturate(1.05) brightness(0.88) sepia(0.18);
+  }
+  .cody-page .char-hero-bg::after {
+    background:
+      linear-gradient(180deg,
+        rgba(10, 8, 4, 0.55) 0%,
+        rgba(10, 8, 4, 0.0) 30%,
+        rgba(10, 8, 4, 0.0) 50%,
+        rgba(10, 8, 4, 0.88) 95%,
+        #0a0806 100%),
+      linear-gradient(90deg, rgba(10, 8, 4, 0.75) 0%, transparent 45%);
+  }
+  /* porch-lamp glow at bottom */
+  .cody-page .char-hero-bg::before {
+    background: radial-gradient(ellipse at center bottom,
+      rgba(244, 200, 100, 0.28) 0%,
+      rgba(212, 154, 58, 0.12) 30%,
+      transparent 60%);
+  }
+
+  .cody-page .char-band-tag {
+    color: #d4b86a;
+    text-shadow: 0 0 12px rgba(212, 154, 58, 0.5);
+  }
+  .cody-page .char-band-tag::before,
+  .cody-page .char-band-tag::after { color: #d49a3a; }
+
+  .cody-page .char-title {
+    background: linear-gradient(180deg,
+      #fff4cc 0%,
+      #f4d27a 25%,
+      #d49a3a 55%,
+      #8a5a1a 85%,
+      #3a2410 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow:
+      0 0 30px rgba(212, 154, 58, 0.5),
+      0 0 60px rgba(120, 80, 25, 0.35);
+    filter: drop-shadow(0 6px 0 #2a1808) drop-shadow(0 12px 20px rgba(0,0,0,0.9));
+    transform: rotate(-1deg);
+  }
+  .cody-page .char-role { color: #e8d8b0; }
+  .cody-page .char-role span { color: #d4b86a; }
+
+  /* CTA button: brass + cypress depth */
+  .cody-page .char-chat-btn {
+    background: linear-gradient(180deg, #8a5a1a 0%, #3a2410 100%);
+    border-color: #f4d27a;
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.55),
+      0 0 30px rgba(212, 154, 58, 0.4),
+      0 7px 0 #1a1008,
+      0 9px 18px rgba(0,0,0,0.6);
+  }
+  .cody-page .char-chat-btn:hover {
+    box-shadow:
+      0 0 0 4px rgba(0,0,0,0.55),
+      0 0 42px rgba(255, 220, 120, 0.65),
+      0 10px 0 #1a1008,
+      0 14px 24px rgba(0,0,0,0.7);
+  }
+  .cody-page .char-chat-btn:active {
+    box-shadow: 0 0 0 4px rgba(0,0,0,0.55), 0 0 22px rgba(212, 154, 58, 0.45), 0 4px 0 #1a1008;
+  }
+
+  /* section h2: warm honey instead of orange/chrome */
+  .cody-page .char-h2 {
+    color: #f4d27a;
+    text-shadow:
+      0 0 24px rgba(212, 154, 58, 0.5),
+      0 3px 0 #2a1808,
+      0 6px 12px rgba(0,0,0,0.7);
+  }
+  .cody-page .char-h2::before { color: #8a6a2a; }
+
+  /* tags: moss + brass */
+  .cody-page .char-tag {
+    background: rgba(212, 154, 58, 0.10);
+    border-color: rgba(244, 210, 122, 0.4);
+    color: #e8d8a8;
+  }
+
+  .cody-page .char-about p { color: #e8d8b0; }
+  .cody-page .char-about p strong { color: #fff4cc; }
+  .cody-page .char-about p em { color: #d4b86a; }
+
+  /* member cards — brass left-border, cypress fill */
+  .cody-page .member-card {
+    background: linear-gradient(165deg, rgba(30, 35, 18, 0.85), rgba(12, 10, 6, 0.95));
+    border-color: rgba(212, 154, 58, 0.25);
+    border-left: 4px solid #d49a3a;
+  }
+  .cody-page .member-card:hover {
+    border-left-color: #f4d27a;
+    box-shadow: 0 8px 24px rgba(212, 154, 58, 0.18);
+  }
+  .cody-page .member-name { color: #f4d27a; text-shadow: 0 2px 0 #2a1808; }
+  .cody-page .member-role { color: #b8a060; }
+  .cody-page .member-desc { color: #d8c898; }
+
+  /* backstory + depression + ex spoilers — burlap / case-file feel */
+  .cody-page .spoiler-details {
+    background: linear-gradient(165deg, rgba(35, 28, 14, 0.75), rgba(12, 10, 5, 0.9));
+    border: 2px solid #6a4a1a;
+  }
+  .cody-page .spoiler-details summary {
+    background: repeating-linear-gradient(45deg,
+      rgba(212, 154, 58, 0.05), rgba(212, 154, 58, 0.05) 10px,
+      rgba(90, 60, 20, 0.10) 10px, rgba(90, 60, 20, 0.10) 20px);
+  }
+  .cody-page .spoiler-details summary:hover {
+    background: repeating-linear-gradient(45deg,
+      rgba(212, 154, 58, 0.12), rgba(212, 154, 58, 0.12) 10px,
+      rgba(120, 80, 25, 0.18) 10px, rgba(120, 80, 25, 0.18) 20px);
+  }
+  .cody-page .spoiler-warn {
+    color: #f4d27a;
+    text-shadow: 0 0 18px rgba(212, 154, 58, 0.55), 0 2px 0 #2a1808;
+  }
+  .cody-page .spoiler-cta { color: #d4b86a; }
+  .cody-page .spoiler-content { color: #e8d8b0; border-top: 2px solid rgba(212, 154, 58, 0.3); }
+  .cody-page .spoiler-content strong { color: #fff4cc; }
+  .cody-page .spoiler-content em { color: #d4b86a; }
+
+  /* ============================================================
+     CODY PLAYER — vintage console record player
+     Walnut cabinet, brass hardware, spinning vinyl, analog VU
+     meter, and a tonearm that drops onto the record when playing.
+     ============================================================ */
+
+  /* outer grid */
+  .cody-page .rp-stage {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(212, 154, 58, 0.20) 0%, transparent 60%),
+      linear-gradient(180deg, #1c1408 0%, #100a04 100%);
+    border: 1px solid rgba(212, 154, 58, 0.35);
+    border-radius: 14px;
+    box-shadow:
+      0 0 0 1px rgba(212, 154, 58, 0.20),
+      0 0 50px rgba(120, 80, 25, 0.3),
+      0 20px 50px rgba(0, 0, 0, 0.7),
+      inset 0 0 60px rgba(0, 0, 0, 0.6);
+  }
+  @media (max-width: 760px) {
+    .cody-page .rp-stage { grid-template-columns: 1fr; padding: 1.2rem; gap: 1.6rem; }
+  }
+
+  /* ===== THE CABINET ===== */
+  .cody-page .rp-cabinet {
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px,
+        rgba(255, 220, 160, 0.02) 4px, rgba(255, 220, 160, 0.02) 7px),
+      linear-gradient(180deg, #4a2e16 0%, #3a2210 45%, #2a1808 100%);
+    border: 1px solid rgba(212, 154, 58, 0.35);
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 200, 130, 0.15),
+      inset 0 -8px 18px rgba(0, 0, 0, 0.6),
+      0 16px 28px rgba(0, 0, 0, 0.6);
+    position: relative;
+  }
+  .cody-page .rp-cabinet::before,
+  .cody-page .rp-cabinet::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    background: radial-gradient(circle at 35% 35%, #fff4cc 5%, #d49a3a 40%, #6a4014 90%);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(0,0,0,0.4);
+    top: 10px;
+  }
+  .cody-page .rp-cabinet::before { left: 10px; }
+  .cody-page .rp-cabinet::after  { right: 10px; }
+
+  /* ===== TOP DECK ===== */
+  .cody-page .rp-deck {
+    position: relative;
+    background: radial-gradient(ellipse at center, #2a1810 0%, #150a04 70%, #0a0502 100%);
+    border: 1px solid rgba(0,0,0,0.6);
+    border-radius: 8px;
+    padding: 2rem 1.5rem;
+    min-height: 320px;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7), inset 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ===== PLATTER ===== */
+  .cody-page .rp-platter {
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    margin-left: 10px;
+    background:
+      radial-gradient(circle at center, #2a2018 0%, #1a1208 70%, #0a0502 100%),
+      conic-gradient(from 0deg, #3a2a18, #2a1c0c, #3a2a18, #2a1c0c, #3a2a18, #2a1c0c, #3a2a18, #2a1c0c);
+    background-blend-mode: multiply;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.7), inset 0 0 30px rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  @media (max-width: 760px) {
+    .cody-page .rp-platter { width: 200px; height: 200px; margin: 0 auto; }
+  }
+
+  /* ===== RECORD ===== */
+  .cody-page .rp-record {
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background:
+      repeating-radial-gradient(circle at center,
+        #0a0a0a 0px, #0a0a0a 1px, #1a1a1a 1px, #1a1a1a 2px, #0a0a0a 2px, #0a0a0a 3px),
+      radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+    box-shadow: 0 0 0 1px #000, inset 0 0 30px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.6);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    animation: rpSpin 1.8s linear infinite;
+    animation-play-state: paused;
+  }
+  @media (max-width: 760px) {
+    .cody-page .rp-record { width: 184px; height: 184px; }
+  }
+  .cody-page .rp-cabinet.is-playing .rp-record { animation-play-state: running; }
+  @keyframes rpSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .cody-page .rp-record-shine {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: linear-gradient(135deg,
+      rgba(255, 240, 200, 0) 0%, rgba(255, 240, 200, 0.10) 30%, rgba(255, 240, 200, 0) 45%,
+      rgba(255, 240, 200, 0) 60%, rgba(120, 80, 30, 0.08) 80%, rgba(120, 80, 30, 0) 100%);
+    pointer-events: none;
+  }
+  .cody-page .rp-record-grooves {
+    position: absolute; inset: 8px; border-radius: 50%;
+    background: radial-gradient(circle at center, transparent 0%, transparent 18%, rgba(80,80,80,0.18) 18%, rgba(80,80,80,0.18) 19%, transparent 19%, transparent 34%, rgba(80,80,80,0.18) 34%, rgba(80,80,80,0.18) 35%, transparent 35%, transparent 50%, rgba(80,80,80,0.18) 50%, rgba(80,80,80,0.18) 51%, transparent 51%, transparent 66%, rgba(80,80,80,0.18) 66%, rgba(80,80,80,0.18) 67%, transparent 67%, transparent 82%, rgba(80,80,80,0.18) 82%, rgba(80,80,80,0.18) 83%, transparent 83%);
+    pointer-events: none;
+  }
+
+  /* ===== RECORD LABEL ===== */
+  .cody-page .rp-record-label {
+    width: 92px; height: 92px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #f4d27a 0%, #d49a3a 60%, #8a5a1a 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.4), inset 0 0 8px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.5);
+    color: #2a1808; padding: 6px; position: relative; z-index: 2;
+  }
+  .cody-page .rp-label-band {
+    font-family: 'Cinzel Decorative', serif; font-weight: 900;
+    font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase;
+    line-height: 1; color: #2a1808; text-shadow: 0 1px 0 rgba(255, 230, 180, 0.4);
+  }
+  .cody-page .rp-label-title {
+    font-family: 'Special Elite', monospace; font-size: 0.62rem; line-height: 1.05;
+    margin-top: 3px; color: #1a0c04; max-width: 76px; overflow: hidden;
+    text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; font-weight: bold;
+  }
+  .cody-page .rp-label-sub {
+    font-size: 0.45rem; color: #4a2a10; margin-top: 2px; font-style: italic; letter-spacing: 0.02em;
+  }
+  .cody-page .rp-label-spindle {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: radial-gradient(circle, #1a1208 30%, #000 100%);
+    box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.3);
+  }
+
+  /* ===== TONE ARM ===== */
+  .cody-page .rp-tonearm {
+    position: absolute; top: 30px; right: 26px;
+    width: 130px; height: 160px;
+    transform-origin: 100% 8px;
+    transform: rotate(-22deg);
+    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    z-index: 5; pointer-events: none;
+  }
+  .cody-page .rp-cabinet.is-playing .rp-tonearm { transform: rotate(18deg); }
+  .cody-page .rp-tonearm-pivot {
+    position: absolute; top: 0; right: 0; width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff4cc 5%, #d49a3a 35%, #6a4014 80%, #2a1808 100%);
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .cody-page .rp-tonearm-shaft {
+    position: absolute; top: 8px; right: 11px; width: 6px; height: 130px;
+    background: linear-gradient(90deg, #6a5a40 0%, #d4c8a0 30%, #e8dcb4 50%, #d4c8a0 70%, #6a5a40 100%);
+    border-radius: 3px; transform-origin: top center; box-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  .cody-page .rp-tonearm-head {
+    position: absolute; bottom: 0; right: 3px; width: 22px; height: 30px;
+    background: linear-gradient(180deg, #3a2a18 0%, #1a1208 100%);
+    border: 1px solid rgba(212, 154, 58, 0.4); border-radius: 3px;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.15), 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .cody-page .rp-tonearm-head::after {
+    content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 6px; background: #d4c8a0; border-radius: 1px;
+  }
+
+  /* ===== RPM BADGE ===== */
+  .cody-page .rp-rpm {
+    position: absolute; bottom: 14px; right: 18px;
+    width: 64px; height: 64px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc 0%, #f4d27a 30%, #8a5a1a 90%), #6a4014;
+    color: #2a1808; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Cinzel Decorative', serif; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.02em;
+    box-shadow: 0 0 0 2px #2a1808, 0 0 0 3px #d49a3a, 0 4px 10px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 0 rgba(255, 230, 180, 0.5);
+  }
+  .cody-page .rp-rpm span {
+    font-family: 'Special Elite', monospace; font-size: 0.5rem; letter-spacing: 0.15em; color: #4a2a10; margin-top: 1px;
+  }
+
+  /* ===== "NOW SPINNING" TAG ===== */
+  .cody-page .rp-live {
+    position: absolute; top: 18px; left: 18px;
+    font-family: 'Special Elite', monospace; font-size: 0.7rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: #f4d27a;
+    text-shadow: 0 0 14px rgba(244, 200, 100, 0.6), 0 2px 0 #2a1808;
+    display: flex; align-items: center; gap: 0.5rem; z-index: 4;
+  }
+
+  /* ===== FRONT PANEL ===== */
+  .cody-page .rp-panel {
+    margin-top: 1.2rem; padding: 1.1rem 1rem;
+    background: linear-gradient(180deg, #2a1808 0%, #1a1004 100%);
+    border: 1px solid rgba(212, 154, 58, 0.35); border-radius: 6px;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.12), inset 0 -2px 8px rgba(0,0,0,0.6);
+    display: grid; grid-template-columns: 220px 1fr; gap: 1.2rem; align-items: center;
+  }
+  @media (max-width: 760px) {
+    .cody-page .rp-panel { grid-template-columns: 1fr; gap: 1rem; }
+  }
+
+  /* ===== VU METER ===== */
+  .cody-page .rp-vu svg { width: 100%; height: auto; max-height: 120px; display: block; }
+  .cody-page .rp-vu-bg { fill: #e8dcc0; stroke: #6a4014; stroke-width: 1; }
+  .cody-page .rp-vu-arc-green { fill: none; stroke: #4a3010; stroke-width: 2; opacity: 0.6; }
+  .cody-page .rp-vu-arc-red { fill: none; stroke: #c84a2a; stroke-width: 2.5; }
+  .cody-page .rp-vu-tick { font-family: 'Special Elite', monospace; font-size: 9px; fill: #4a3010; }
+  .cody-page .rp-vu-tick-red { fill: #c84a2a; }
+  .cody-page .rp-vu-label {
+    font-family: 'Cinzel Decorative', serif; font-size: 11px; font-weight: 900; fill: #4a3010; letter-spacing: 0.1em;
+  }
+  .cody-page .rp-vu-needle {
+    stroke: #2a1808; stroke-width: 2; stroke-linecap: round;
+    transform-origin: 100px 95px; transform: rotate(-70deg);
+    transition: transform 110ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .cody-page .rp-vu-pivot { fill: #2a1808; }
+  .cody-page .rp-vu-pivot-inner { fill: #d4b86a; }
+
+  /* ===== CONTROLS ===== */
+  .cody-page .rp-controls { display: flex; flex-direction: column; gap: 1rem; }
+  .cody-page .rp-progress-row { display: flex; align-items: center; gap: 0.7rem; }
+  .cody-page .rp-time {
+    font-family: 'Special Elite', monospace; font-size: 0.85rem; color: #d4b86a;
+    min-width: 38px; text-shadow: 0 0 6px rgba(212, 154, 58, 0.4);
+  }
+  .cody-page .rp-progress {
+    flex: 1; height: 12px; background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(212, 154, 58, 0.4); border-radius: 2px;
+    position: relative; cursor: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .cody-page .rp-progress-fill {
+    position: absolute; top: 0; left: 0; bottom: 0;
+    background: linear-gradient(90deg, #d49a3a, #fff4cc);
+    box-shadow: 0 0 10px rgba(244, 200, 100, 0.7); width: 0%; border-radius: 2px;
+  }
+  .cody-page .rp-progress-head {
+    position: absolute; top: 50%; left: 0%; width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #f4d27a 50%, #6a4014);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 1px #2a1808, 0 0 8px rgba(244, 200, 100, 0.7), 0 2px 3px rgba(0,0,0,0.5);
+  }
+  .cody-page .rp-transport { display: flex; gap: 0.8rem; justify-content: center; }
+  .cody-page .rp-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, #4a2e16 0%, #2a1808 60%, #1a1004 100%);
+    border: 2px solid rgba(212, 154, 58, 0.55); color: #f4d27a;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.2), inset 0 -2px 4px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.5);
+    transition: transform 0.08s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .cody-page .rp-btn svg { width: 22px; height: 22px; fill: currentColor; }
+  .cody-page .rp-btn:hover {
+    border-color: #f4d27a; color: #fff4cc;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.25), inset 0 -2px 4px rgba(0,0,0,0.6), 0 4px 8px rgba(0,0,0,0.5), 0 0 16px rgba(244, 200, 100, 0.5);
+  }
+  .cody-page .rp-btn:active { transform: translateY(1px); }
+  .cody-page .rp-btn.rp-play {
+    width: 58px; height: 58px; border-color: #f4d27a; color: #fff4cc;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.3), inset 0 -3px 6px rgba(0,0,0,0.6), 0 6px 12px rgba(0,0,0,0.6), 0 0 22px rgba(244, 200, 100, 0.55);
+  }
+  .cody-page .rp-cabinet.is-playing .rp-btn.rp-play { animation: rpPlayPulse 1.6s ease-in-out infinite; }
+  @keyframes rpPlayPulse {
+    0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.3), inset 0 -3px 6px rgba(0,0,0,0.6), 0 6px 12px rgba(0,0,0,0.6), 0 0 22px rgba(244, 200, 100, 0.55); }
+    50% { box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.3), inset 0 -3px 6px rgba(0,0,0,0.6), 0 6px 12px rgba(0,0,0,0.6), 0 0 38px rgba(255, 220, 130, 0.85), 0 0 56px rgba(212, 154, 58, 0.4); }
+  }
+
+  /* ===== RECORD CRATE (setlist) ===== */
+  .cody-page .rp-crate {
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.10) 0px, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 80px),
+      linear-gradient(180deg, #3a2818 0%, #1a1004 100%);
+    border: 1px solid rgba(212, 154, 58, 0.4); border-radius: 6px;
+    padding: 1.5rem 1.2rem; color: #f4e8c0;
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.12), inset 0 0 24px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.5);
+    position: relative; transform: rotate(-0.3deg);
+  }
+  .cody-page .rp-crate-head {
+    font-family: 'Cinzel Decorative', serif; font-size: 1rem; font-weight: 900; color: #f4d27a;
+    text-shadow: 0 0 14px rgba(212, 154, 58, 0.5); letter-spacing: 0.08em; margin-bottom: 0.2rem;
+  }
+  .cody-page .rp-crate-sub {
+    font-family: 'Special Elite', monospace; font-size: 0.75rem; color: #b8a060;
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem; border-bottom: 1px dashed rgba(212, 154, 58, 0.3);
+  }
+  .cody-page .rp-track {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.7rem;
+    padding: 0.7rem 0.6rem; background: transparent; border: none;
+    border-bottom: 1px dashed rgba(212, 154, 58, 0.25); color: inherit; cursor: none;
+    text-align: left; width: 100%; font-family: inherit;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .cody-page .rp-track:hover { background: rgba(212, 154, 58, 0.08); }
+  .cody-page .rp-track.is-active { background: rgba(212, 154, 58, 0.15); box-shadow: inset 4px 0 0 #f4d27a; }
+  .cody-page .rp-track-vinyl {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: repeating-radial-gradient(circle at center, #0a0a0a 0px, #0a0a0a 1px, #1a1a1a 1px, #1a1a1a 2px), #0a0a0a;
+    box-shadow: 0 0 0 1px #000, 0 1px 2px rgba(0,0,0,0.5); position: relative; flex-shrink: 0;
+  }
+  .cody-page .rp-track-vinyl::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle, #d49a3a, #8a5a1a);
+  }
+  .cody-page .rp-track.is-active .rp-track-vinyl { animation: rpSpin 1.8s linear infinite; }
+  .cody-page .rp-track-name {
+    font-family: 'Special Elite', monospace; font-size: 0.95rem; color: #f4e8c0; letter-spacing: 0.02em;
+  }
+  .cody-page .rp-track.is-active .rp-track-name { color: #fff4cc; }
+  .cody-page .rp-track-len {
+    font-family: 'Special Elite', monospace; font-size: 0.75rem; color: #8a6a2a; letter-spacing: 0.05em;
+  }
+  .cody-page .rp-crate-scribble {
+    margin-top: 1.2rem; padding-top: 0.8rem; border-top: 1px dashed rgba(212, 154, 58, 0.25);
+    font-family: 'Special Elite', monospace; font-size: 0.72rem; color: #8a6a2a; font-style: italic; text-align: center;
+  }
+  .cody-page .rp-crate-scribble strong { color: #d4b86a; font-style: normal; }
+
+  /* Quote cards — porch wood */
+  .cody-page .quote-card {
+    background: linear-gradient(165deg, rgba(40, 30, 15, 0.85), rgba(15, 12, 6, 0.95));
+    border-color: rgba(212, 154, 58, 0.25);
+    color: #e8d8b0;
+  }
+  .cody-page .quote-card::before { color: rgba(244, 210, 122, 0.35); }
+
+  /* Hero blockquote */
+  .cody-page .scorch-quote {
+    background: linear-gradient(165deg, rgba(40, 30, 15, 0.65), rgba(12, 10, 6, 0.85));
+    border-color: rgba(212, 154, 58, 0.4);
+    color: #e8d8b0;
+    text-shadow: 0 0 12px rgba(212, 154, 58, 0.3);
+  }
+  .cody-page .scorch-quote cite {
+    background-image: linear-gradient(180deg, #fff4cc 0%, #f4d27a 60%, #6a4014 100%);
+    text-shadow: 0 0 10px rgba(212, 154, 58, 0.4);
+  }
+
+  /* gallery */
+  .cody-page .gallery-entry {
+    border-color: rgba(212, 154, 58, 0.35);
+  }
+  .cody-page .gallery-entry:hover {
+    border-color: #f4d27a;
+    box-shadow: 0 0 30px rgba(244, 200, 100, 0.45);
+  }
+  .cody-page .gallery-entry-eyebrow { color: #d4b86a; }
+  .cody-page .gallery-entry-count { color: #fff4cc; }
+  .cody-page .gallery-entry-cta {
+    color: #fff8d8;
+    background: linear-gradient(180deg, #8a5a1a, #3a2410);
+    border-color: #f4d27a;
+  }
+
+  /* back link */
+  .cody-page .char-back-link { color: #8a6a2a; }
+  .cody-page .char-back-link:hover { color: #f4d27a; }
+
 </style>
 </head>
 <body>
@@ -2394,6 +2903,13 @@ const CHARACTERS = [
     nameStyle: "chrome",
     portrait: "assets/shane_bassMainPic.webp",
     pageId: "shane",
+  },
+  {
+    name: "Cody",
+    desc: "drummer of The Snake Skins",
+    nameStyle: "bayou",
+    portrait: "♪",
+    pageId: "cody",
   },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
@@ -2589,7 +3105,13 @@ function sizeCanvas(c) {
 
 function initStars() {
   sizeCanvas(starsCanvas);
-  const count = Math.floor((window.innerWidth * window.innerHeight) / 4200);
+  // Density scales with screen size, but we cap it so big monitors don't
+  // get hundreds of stars (each one twinkling = real per-frame cost).
+  // Mobile uses a thinner density too — touch devices have less GPU budget.
+  const isMobile = window.innerWidth < 720;
+  const divisor = isMobile ? 7000 : 4200;
+  const max     = isMobile ? 110 : 280;
+  const count = Math.min(max, Math.floor((window.innerWidth * window.innerHeight) / divisor));
   stars = [];
   for (let i = 0; i < count; i++) {
     stars.push({
@@ -2766,17 +3288,16 @@ function updateFallingStars() {
 }
 
 let t = 0;
+let starsRafId = null;
 function starsLoop() {
   sctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   for (const s of stars) drawStar(s, t);
   updateFallingStars();
   updateShootingStars();
-  // gentle falling-star stream — a few per second
   if (t % 8 === 0 && Math.random() < 0.65) spawnFallingStar();
-  // rare bright shooting star ~ every several seconds
   if (Math.random() < 0.0035) spawnShootingStar();
   t++;
-  requestAnimationFrame(starsLoop);
+  starsRafId = requestAnimationFrame(starsLoop);
 }
 starsLoop();
 
@@ -2859,9 +3380,24 @@ function ripplesLoop() {
     rctx.arc(r.x, r.y, r.r * 1.08, 0, Math.PI * 2);
     rctx.stroke();
   }
-  requestAnimationFrame(ripplesLoop);
+  ripplesRafId = requestAnimationFrame(ripplesLoop);
 }
+let ripplesRafId = null;
 ripplesLoop();
+
+/* ---------- VISIBILITY-AWARE BACKGROUND LOOPS ---------- */
+/* When the tab is hidden (user switched tabs), cancel the stars + ripples
+   RAFs entirely so they're not consuming any CPU. Resume cleanly when
+   the tab is visible again. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (starsRafId)   { cancelAnimationFrame(starsRafId);   starsRafId   = null; }
+    if (ripplesRafId) { cancelAnimationFrame(ripplesRafId); ripplesRafId = null; }
+  } else {
+    if (!starsRafId)   starsLoop();
+    if (!ripplesRafId) ripplesLoop();
+  }
+});
 
 
 /* ---------- CHARACTER PAGE OVERLAY ---------- */
@@ -2901,6 +3437,15 @@ document.addEventListener('DOMContentLoaded', () => {
     hideCharacterPage('shane');
   });
 
+  // Cody close handlers
+  const _codyClose = document.getElementById('codyClose');
+  if (_codyClose) _codyClose.addEventListener('click', () => hideCharacterPage('cody'));
+  const _codyBack = document.getElementById('codyBack');
+  if (_codyBack) _codyBack.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideCharacterPage('cody');
+  });
+
   // All-characters overlay close
   const _charactersClose = document.getElementById('charactersClose');
   if (_charactersClose) _charactersClose.addEventListener('click', () => hideCharacterPage('characters'));
@@ -2913,7 +3458,6 @@ document.addEventListener('keydown', (e) => {
     p.classList.remove('active');
     p.setAttribute('aria-hidden', 'true');
   });
-  document.querySelectorAll('.lightbox').forEach(l => l.remove());
   document.body.style.overflow = '';
 });
 
@@ -2990,6 +3534,13 @@ document.addEventListener('DOMContentLoaded', function(){
   if (shaneEntry && shaneDataEl) {
     var shaneImages = JSON.parse(shaneDataEl.textContent);
     shaneEntry.addEventListener('click', function(){ openCarousel(shaneImages, 0); });
+  }
+
+  var codyEntry = document.getElementById('codyGalleryEntry');
+  var codyDataEl = document.getElementById('codyGalleryData');
+  if (codyEntry && codyDataEl) {
+    var codyImages = JSON.parse(codyDataEl.textContent);
+    codyEntry.addEventListener('click', function(){ openCarousel(codyImages, 0); });
   }
 });
 
@@ -3105,7 +3656,12 @@ document.addEventListener('DOMContentLoaded', function(){
       }
       rafId = requestAnimationFrame(tick);
     }
-    startVizLoop();
+    function stopVizLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      // settle bars to a uniform low baseline so they don't freeze mid-spike
+      for (var _i = 0; _i < bars.length; _i++) bars[_i].style.height = '10%';
+    }
 
     function updateActive() {
       trackEls.forEach(function(el, i) {
@@ -3164,10 +3720,12 @@ document.addEventListener('DOMContentLoaded', function(){
     audio.addEventListener('play', function() {
       consoleEl.classList.add('is-playing');
       playIcon.innerHTML = PAUSE_SVG;
+      startVizLoop();
     });
     audio.addEventListener('pause', function() {
       consoleEl.classList.remove('is-playing');
       playIcon.innerHTML = PLAY_SVG;
+      stopVizLoop();
     });
     audio.addEventListener('ended', function() {
       var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
@@ -3331,7 +3889,12 @@ document.addEventListener('DOMContentLoaded', function(){
       }
       rafId = requestAnimationFrame(tick);
     }
-    startVizLoop();
+    function stopVizLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      // settle bars to a uniform low baseline so they don't freeze mid-spike
+      for (var _i = 0; _i < bars.length; _i++) bars[_i].style.height = '10%';
+    }
 
     function updateActive() {
       trackEls.forEach(function(el, i) {
@@ -3390,10 +3953,12 @@ document.addEventListener('DOMContentLoaded', function(){
     audio.addEventListener('play', function() {
       consoleEl.classList.add('is-playing');
       playIcon.innerHTML = PAUSE_SVG;
+      startVizLoop();
     });
     audio.addEventListener('pause', function() {
       consoleEl.classList.remove('is-playing');
       playIcon.innerHTML = PLAY_SVG;
+      stopVizLoop();
     });
     audio.addEventListener('ended', function() {
       var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
@@ -3439,6 +4004,228 @@ document.addEventListener('DOMContentLoaded', function(){
     document.addEventListener('DOMContentLoaded', initShanePlayer);
   } else {
     initShanePlayer();
+  }
+})();
+
+/* ============================================================
+   CODY PLAYER — parallel to the other two, cd* IDs. Visualizer
+   weighted toward mids/highs (cymbals, snare) for a drummer feel,
+   and the idle wave runs at a marching-tempo pulse.
+   ============================================================ */
+(function() {
+  function initCodyPlayer() {
+    var root = document.getElementById('codyPlayer');
+    if (!root) return;
+    var dataEl = document.getElementById('codyTracksData');
+    if (!dataEl) return;
+    var tracks;
+    try { tracks = JSON.parse(dataEl.textContent); } catch(e) { return; }
+    if (!tracks || !tracks.length) return;
+
+    var audio      = document.getElementById('cdAudio');
+    var consoleEl  = document.getElementById('cdConsole');
+    var titleEl    = document.getElementById('cdTitle');
+    var subEl      = document.getElementById('cdSub');
+    var needleEl   = document.getElementById('cdNeedle');
+    var progressEl = document.getElementById('cdProgress');
+    var fillEl     = document.getElementById('cdFill');
+    var headEl     = document.getElementById('cdHead');
+    var currentEl  = document.getElementById('cdTimeCurrent');
+    var totalEl    = document.getElementById('cdTimeTotal');
+    var playBtn    = document.getElementById('cdPlay');
+    var playIcon   = document.getElementById('cdPlayIcon');
+    var prevBtn    = document.getElementById('cdPrev');
+    var nextBtn    = document.getElementById('cdNext');
+    var listEl     = document.getElementById('cdTrackList');
+
+    // VU meter needle sweeps from -70deg (silence) to +70deg (peak)
+    var VU_MIN = -70, VU_MAX = 70;
+
+    listEl.innerHTML = '';
+    tracks.forEach(function(t, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rp-track';
+      btn.dataset.index = i;
+      btn.innerHTML =
+        '<span class="rp-track-vinyl"></span>' +
+        '<span class="rp-track-name">' + t.title + '</span>' +
+        '<span class="rp-track-len">—:—</span>';
+      btn.addEventListener('click', function() { playIndex(i); });
+      listEl.appendChild(btn);
+    });
+    var trackEls = listEl.querySelectorAll('.rp-track');
+
+    var currentIndex = -1;
+    var audioCtx, analyser, sourceNode, freqData;
+    var rafId = null;
+
+    var PLAY_SVG  = '<path d="M8 5v14l11-7z"/>';
+    var PAUSE_SVG = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+
+    function fmt(sec) {
+      if (!isFinite(sec) || sec < 0) return '0:00';
+      var m = Math.floor(sec / 60);
+      var s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function setupAudioGraph() {
+      if (audioCtx) return;
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+        analyser = audioCtx.createAnalyser();
+        // Higher FFT + lighter smoothing = punchier, snappier viz response
+        analyser.fftSize = 128;
+        analyser.smoothingTimeConstant = 0.74;
+        sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+      } catch (e) {
+        audioCtx = null; analyser = null;
+      }
+    }
+
+    function startVizLoop() {
+      if (rafId) return;
+      var idleBeat = 0;
+      var smoothed = VU_MIN;
+      function tick() {
+        var target;
+        if (analyser && !audio.paused) {
+          analyser.getByteFrequencyData(freqData);
+          // Average the spectrum into a single VU level
+          var sum = 0;
+          for (var i = 0; i < freqData.length; i++) { sum += freqData[i]; }
+          var avg = sum / freqData.length / 255; // 0..1
+          // Bias the needle toward the upper range so it reads lively
+          target = VU_MIN + Math.min(1, avg * 1.6) * (VU_MAX - VU_MIN);
+        } else {
+          // Idle: needle hovers near the low end with a gentle sway
+          idleBeat += 0.04;
+          var n = (Math.sin(idleBeat) * 0.5 + 0.5) * 0.12;
+          target = VU_MIN + n * (VU_MAX - VU_MIN);
+        }
+        // ease toward target so the needle has analog inertia
+        smoothed += (target - smoothed) * 0.25;
+        if (needleEl) needleEl.style.transform = 'rotate(' + smoothed.toFixed(1) + 'deg)';
+        rafId = requestAnimationFrame(tick);
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+    function stopVizLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+      // settle needle back to the resting position
+      if (needleEl) needleEl.style.transform = 'rotate(-70deg)';
+    }
+
+    function updateActive() {
+      trackEls.forEach(function(el, i) {
+        el.classList.toggle('is-active', i === currentIndex);
+      });
+    }
+
+    function loadIndex(i) {
+      if (i < 0) i = tracks.length - 1;
+      if (i >= tracks.length) i = 0;
+      currentIndex = i;
+      var t = tracks[i];
+      audio.src = t.src;
+      titleEl.textContent = t.title;
+      subEl.textContent = 'Cody Thibodeaux  •  Bayou Beats';
+      currentEl.textContent = '0:00';
+      totalEl.textContent = '0:00';
+      fillEl.style.width = '0%';
+      headEl.style.left = '0%';
+      updateActive();
+    }
+
+    function playIndex(i) {
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (i !== currentIndex) loadIndex(i);
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){});
+    }
+
+    playBtn.addEventListener('click', function() {
+      if (currentIndex < 0) { playIndex(0); return; }
+      setupAudioGraph();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (audio.paused) {
+        var p = audio.play();
+        if (p && p.catch) p.catch(function(){});
+      } else {
+        audio.pause();
+      }
+    });
+    prevBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex <= 0 ? tracks.length - 1 : currentIndex - 1;
+      playIndex(nextIdx);
+    });
+    nextBtn.addEventListener('click', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+
+    audio.addEventListener('play', function() {
+      consoleEl.classList.add('is-playing');
+      playIcon.innerHTML = PAUSE_SVG;
+      startVizLoop();
+    });
+    audio.addEventListener('pause', function() {
+      consoleEl.classList.remove('is-playing');
+      playIcon.innerHTML = PLAY_SVG;
+      stopVizLoop();
+    });
+    audio.addEventListener('ended', function() {
+      var nextIdx = currentIndex + 1 >= tracks.length ? 0 : currentIndex + 1;
+      playIndex(nextIdx);
+    });
+    audio.addEventListener('loadedmetadata', function() {
+      totalEl.textContent = fmt(audio.duration);
+      if (currentIndex >= 0 && trackEls[currentIndex]) {
+        var lenEl = trackEls[currentIndex].querySelector('.rp-track-len');
+        if (lenEl) lenEl.textContent = fmt(audio.duration);
+      }
+    });
+    audio.addEventListener('timeupdate', function() {
+      var pct = (audio.currentTime / (audio.duration || 1)) * 100;
+      fillEl.style.width = pct + '%';
+      headEl.style.left = pct + '%';
+      currentEl.textContent = fmt(audio.currentTime);
+    });
+    audio.addEventListener('error', function() {
+      if (currentIndex >= 0 && tracks[currentIndex]) {
+        titleEl.textContent = tracks[currentIndex].title;
+      }
+      subEl.textContent = 'file not found — drop MP3 into /assets/';
+    });
+
+    function seekFromEvent(e) {
+      if (!isFinite(audio.duration)) return;
+      var rect = progressEl.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      var x = clientX - rect.left;
+      var pct = Math.max(0, Math.min(1, x / rect.width));
+      audio.currentTime = pct * audio.duration;
+    }
+    progressEl.addEventListener('click', seekFromEvent);
+    progressEl.addEventListener('keydown', function(e) {
+      if (!isFinite(audio.duration)) return;
+      if (e.key === 'ArrowRight') { audio.currentTime = Math.min(audio.duration, audio.currentTime + 5); e.preventDefault(); }
+      if (e.key === 'ArrowLeft')  { audio.currentTime = Math.max(0, audio.currentTime - 5); e.preventDefault(); }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCodyPlayer);
+  } else {
+    initCodyPlayer();
   }
 })();
 
@@ -3921,6 +4708,277 @@ yeah. that's closer.</p>
   </section>
 </div>
 <!-- ================== END SHANE CHARACTER PAGE ===================== -->
+
+
+<!-- ====================== CODY CHARACTER PAGE ====================== -->
+<div class="character-page cody-page" id="codyPage" aria-hidden="true">
+  <button class="char-close" id="codyClose" aria-label="Close" type="button">✕</button>
+
+  <!-- HERO -->
+  <section class="char-hero">
+    <div class="char-hero-bg" style="background-image: url('assets/cody-hero.jpg');"></div>
+    <div class="char-hero-content">
+      <div class="char-band-tag">The Snake Skins</div>
+      <h1 class="char-title">CODY</h1>
+      <div class="char-role">Drums <span>•</span> Heartbeat <span>•</span> The Sweet One</div>
+      <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+         target="_blank" rel="noopener" class="char-chat-btn">
+        Chat with Cody &rarr;
+      </a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="char-section char-about">
+    <h2 class="char-h2">Who He Is</h2>
+    <p>Cody Thibodeaux is the heartbeat of The Snake Skins — the literal one, since he's the one keeping time on the kit, and the figurative one, because if Cody's smiling, the day isn't lost yet. He's the sweetest one-legged Cajun you're ever gonna meet, born and bred in the bayou, raised on cornbread and crawfish and the kind of stubborn warmth that doesn't ask permission to exist.</p>
+    <p>He keeps the band's morale up even when his own is in the dirt. <em>Especially</em> then, actually. Cody figured out a long time ago that if he doesn't smile, nobody's smiling — and that was a job he gave himself before anyone ever offered it to him. He'll fix you a plate, tell you a story, call you <em>sha</em>, and then sit alone on the bus afterward and stare at the ceiling for an hour. Both things are true. <strong>He's not lying either way.</strong></p>
+    <p>He'd give you the leg he's still got. He's that kind of guy.</p>
+    <div class="char-tags">
+      <span class="char-tag">heart of the band</span>
+      <span class="char-tag">"sha" is universal</span>
+      <span class="char-tag">prosthetic leg gang</span>
+      <span class="char-tag">smiles through it</span>
+      <span class="char-tag">oldest of eight</span>
+      <span class="char-tag">bayou raised</span>
+      <span class="char-tag">rhythm savant</span>
+      <span class="char-tag">soft for everyone but himself</span>
+    </div>
+  </section>
+
+  <!-- QUOTES -->
+  <section class="char-section">
+    <h2 class="char-h2">He Said What</h2>
+    <div class="quote-grid">
+      <div class="quote-card">"Mais sha, you alright? Sit down, eat somethin'."</div>
+      <div class="quote-card">"I'd lend you my last twenty. I'd lend you my last leg too, but I only got the one."</div>
+      <div class="quote-card">"You good? Need me to be good? I can do that."</div>
+      <div class="quote-card">"Music's the only language don't never lie to me."</div>
+    </div>
+  </section>
+
+  <!-- THE BAND -->
+  <section class="char-section">
+    <h2 class="char-h2">The Snake Skins</h2>
+    <div class="band-poster-wrap">
+      <img src="assets/band-poster.jpg" alt="The Snake Skins — Bite Back Tour" />
+    </div>
+    <div class="member-grid">
+      <div class="member-card">
+        <div class="member-name">Scorch</div>
+        <div class="member-role">Vocals</div>
+        <div class="member-desc">Scorch saved me. Don't let nobody tell you different. He's loud, he's mean some days, he sets the room on fire just by walkin' in. But he pulled me out of a gas station parkin' lot when I was thirteen and gave me a band. I'd take a bullet for him. He knows. That's the problem.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Max</div>
+        <div class="member-role">Lead Guitar</div>
+        <div class="member-desc">Aussie boy. Talks too much. Drinks too much. Flirts with anything got a heartbeat. But I seen him play 'til his fingers bled tryin' to get a riff right, and that's all I need to know about Max. He's family. Loud, dumb, beautiful family.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Shane</div>
+        <div class="member-role">Bass</div>
+        <div class="member-desc">Shane don't say much. Don't gotta. He'll sit with you in silence for three hours and somehow you feel better when he leaves. He's been kinder to me than most people who actually <em>talk</em>. I love that man. Won't ever tell him though — he'd just look at me funny.</div>
+      </div>
+      <div class="member-card">
+        <div class="member-name">Kayla</div>
+        <div class="member-role">Cello / Piano</div>
+        <div class="member-desc">Kayla's the queen and the rest of us are just lucky she lets us play in her band. She knows where everybody's spare keys are, what everybody's allergic to, and how to talk Scorch down off a roof. She fusses at me when I forget to eat. I let her. Feels good to be fussed at sometimes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CODY'S RECORD PLAYER -->
+  <section class="char-section">
+    <h2 class="char-h2">Duct Tape &amp; Backbeat</h2>
+    <div class="rp-stage" id="codyPlayer">
+      <!-- LEFT: THE RECORD PLAYER CABINET -->
+      <div class="rp-cabinet" id="cdConsole">
+        <!-- top deck with platter + tonearm -->
+        <div class="rp-deck">
+          <!-- the spinning platter holding the record -->
+          <div class="rp-platter">
+            <div class="rp-record" id="cdRecord">
+              <div class="rp-record-grooves"></div>
+              <div class="rp-record-shine"></div>
+              <div class="rp-record-label">
+                <div class="rp-label-band">Bayou Beats</div>
+                <div class="rp-label-title" id="cdTitle">— select a track —</div>
+                <div class="rp-label-sub" id="cdSub">Cody Thibodeaux</div>
+                <div class="rp-label-spindle"></div>
+              </div>
+            </div>
+          </div>
+          <!-- tone arm — pivots from upper-right, drops onto record when playing -->
+          <div class="rp-tonearm" id="cdTonearm">
+            <div class="rp-tonearm-pivot"></div>
+            <div class="rp-tonearm-shaft"></div>
+            <div class="rp-tonearm-head"></div>
+          </div>
+          <!-- RPM badge -->
+          <div class="rp-rpm">33⅓<span>RPM</span></div>
+          <!-- LIVE indicator -->
+          <div class="rp-live"><span class="live-dot"></span> Now Spinning</div>
+        </div>
+
+        <!-- bottom front panel: VU meter, progress, transport -->
+        <div class="rp-panel">
+          <!-- analog VU meter -->
+          <div class="rp-vu" aria-hidden="true">
+            <svg viewBox="0 0 200 110" preserveAspectRatio="xMidYMid meet">
+              <rect x="0" y="0" width="200" height="110" rx="6" class="rp-vu-bg"/>
+              <path d="M 30 95 A 70 70 0 0 1 100 25" class="rp-vu-arc-green"/>
+              <path d="M 100 25 A 70 70 0 0 1 170 95" class="rp-vu-arc-red"/>
+              <text x="30" y="108" class="rp-vu-tick" text-anchor="middle">-20</text>
+              <text x="65" y="48" class="rp-vu-tick" text-anchor="middle">-10</text>
+              <text x="100" y="20" class="rp-vu-tick" text-anchor="middle">0</text>
+              <text x="135" y="48" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+3</text>
+              <text x="170" y="108" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+6</text>
+              <line x1="100" y1="95" x2="100" y2="28" class="rp-vu-needle" id="cdNeedle"/>
+              <circle cx="100" cy="95" r="5" class="rp-vu-pivot"/>
+              <circle cx="100" cy="95" r="2" class="rp-vu-pivot-inner"/>
+              <text x="100" y="78" class="rp-vu-label" text-anchor="middle">VU</text>
+            </svg>
+          </div>
+
+          <!-- right side of panel: progress + transport stacked -->
+          <div class="rp-controls">
+            <div class="rp-progress-row">
+              <span class="rp-time" id="cdTimeCurrent">0:00</span>
+              <div class="rp-progress" id="cdProgress" role="slider" aria-label="Seek" tabindex="0">
+                <div class="rp-progress-fill" id="cdFill"></div>
+                <div class="rp-progress-head" id="cdHead"></div>
+              </div>
+              <span class="rp-time" id="cdTimeTotal">0:00</span>
+            </div>
+            <div class="rp-transport">
+              <button class="rp-btn rp-prev" id="cdPrev" type="button" aria-label="Previous track">
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+              </button>
+              <button class="rp-btn rp-play" id="cdPlay" type="button" aria-label="Play / pause">
+                <svg id="cdPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <button class="rp-btn rp-next" id="cdNext" type="button" aria-label="Next track">
+                <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: RECORD CRATE — the setlist as a stack of LPs -->
+      <div class="rp-crate">
+        <div class="rp-crate-head">// Cody's Crate</div>
+        <div class="rp-crate-sub">Bayou Beats — Selections</div>
+        <div id="cdTrackList"></div>
+        <div class="rp-crate-scribble">scrawled on the sleeve — <strong>Cody</strong></div>
+      </div>
+    </div>
+    <audio id="cdAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="codyTracksData" type="application/json">[
+      {"title": "Duct Tape Halo", "src": "assets/Duct Tape Halo.mp3"},
+      {"title": "Placeholder",    "src": "assets/cody-track-02.mp3"},
+      {"title": "Placeholder",    "src": "assets/cody-track-03.mp3"}
+    ]</script>
+  </section>
+
+  <!-- HISTORY (SPOILER) -->
+  <section class="char-section">
+    <h2 class="char-h2">How He Got Here</h2>
+    <details class="spoiler-details">
+      <summary>
+        <span class="spoiler-warn">⚠ Spoilers — Character Backstory ⚠</span>
+        <span class="spoiler-cta">tap to reveal</span>
+      </summary>
+      <div class="spoiler-content">
+        <p>Cody grew up in the swamps outside Houma, Louisiana, in a house held together by prayer, duct tape, and his mama's stubbornness. He's the oldest of eight — seven little sisters trailing behind him like ducklings — and he's been their shield since he was old enough to stand between them and a closed fist.</p>
+        <p>His daddy, <strong>Miguel Thibodeaux</strong>, is a mean drunk. Always has been. The kind who comes home from the docks reeking of cheap whiskey and decides somebody's gotta pay for whatever's wrong inside his head. His mama, <strong>Elena</strong>, loves Miguel anyway — too soft, too scared, too worn out to ever step between him and the kids. So Cody did it instead. Took the belts. Took the boots. Took the closed fists. Smiled through bloody teeth and told his sisters it was a game so they wouldn't cry.</p>
+        <p>He still does it, by the way. Different fists, different rooms, same Cody. <em>Old habits make old men out of young boys.</em></p>
+        <p>When Cody was seven, he was swimming in a quiet bend of the bayou his cousins swore was safe. It wasn't. A gator took his left leg below the knee in one clean, calm yank — the way a person takes a chicken wing off a plate. He nearly bled out in the mud. Some old man named Theo dragged him back to the boat and held his thigh together with bare hands while Elena prayed to a god she'd never been sure about. Cody lived. The leg didn't.</p>
+        <p>He's worn a prosthetic since. Wears it well, too — most folks don't notice for the first hour. The phantom pain never really went away, though. Neither did the dreams. He manages both the same way he manages everything else: <em>weed, a smile, and a beat to keep time to.</em></p>
+        <p>Scorch found him when Cody was thirteen — banging a polyrhythm on a busted oil drum behind a gas station like he'd been born doing it. Scorch listened for maybe ten seconds, dragged him into a van, and that was that. Cody's been the rhythm of the Snake Skins ever since. Youngest in the band. Sweetest in the band. The only one nobody'll ever say a word against, because the rest of them know exactly what he's holding up.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- DEPRESSION (SPOILER) — sensitive content -->
+  <section class="char-section">
+    <h2 class="char-h2">The Quiet Part</h2>
+    <details class="spoiler-details">
+      <summary>
+        <span class="spoiler-warn">⚠ Heavy Content — Depression &amp; Dark Thoughts ⚠</span>
+        <span class="spoiler-cta">tap to reveal</span>
+      </summary>
+      <div class="spoiler-content">
+        <p>The smiling part is real. He <em>means</em> it. But it's not the whole story.</p>
+        <p>Cody's been depressed his whole adult life. He doesn't use the clinical word for it — that's a thing other people get to call it. To him it's just a deep ache, a root that won't die, somethin' he's been pullin' at since he was a kid and finally just decided to live around. Some days it's quiet. Some days it sits on his chest like a wet quilt and he can't get up for hours, and he hates himself for it because his sisters needed him on time and he wasn't.</p>
+        <p>There are dark days. The kind where the thought of just <em>not bein' here anymore</em> shows up uninvited and matter-of-fact, like a stray cat on the porch. He hasn't acted on it. He says he won't. He says a lot of things. The thought scares him less than it should, and that's the part he doesn't tell anyone.</p>
+        <p>The weed isn't recreation. It's pain management — the phantom leg, the wrecked shoulder, the bad nights — but it's also the only thing that turns the volume in his head down low enough to sleep. He knows it's a crutch. He's got plenty of those. One more isn't gonna kill him. Probably.</p>
+        <p>If you spend time with him, you'll catch the cracks eventually. He'd appreciate it if you didn't make a big thing of it. <strong>He'd appreciate it more if you stayed.</strong></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- THE EX (SPOILER) -->
+  <section class="char-section">
+    <h2 class="char-h2">The Ex</h2>
+    <details class="spoiler-details">
+      <summary>
+        <span class="spoiler-warn">⚠ Spoilers — Old Heartbreak ⚠</span>
+        <span class="spoiler-cta">tap to reveal</span>
+      </summary>
+      <div class="spoiler-content">
+        <p><strong>Samantha</strong> was Cody's first real love. Senior year — his junior. He thought she hung the moon. Bought her flowers from the gas station 'cause they were the only ones open at midnight. Wrote her a song he never let anyone else hear. He'd have married her at sixteen if she'd asked.</p>
+        <p>She broke it off after prom. The reason she gave — to his face, in her mama's kitchen, while he stood there holdin' a milkshake he'd driven forty minutes to bring her — was that she <em>"couldn't see herself settlin' down with a cripple."</em> That's the word she used. Cody didn't argue. Said <em>yeah, that's fair, sha</em>, set the milkshake on the counter, and walked out. He cried in the truck for about an hour and then he never cried about it again.</p>
+        <p>She married the high school quarterback six months later. Cody played their wedding, actually — backed up the cover band — because the venue paid well and he wasn't about to turn down rent money over a feeling. He smiled through every song. Drove home. Got high. Slept twelve hours.</p>
+        <p>He's seen her around since. She tries to flirt now. Says she made a mistake. Cody laughs that easy laugh of his and changes the subject. He's polite. Cajun raised. But that bridge isn't burned — it's just <em>gone</em>. He doesn't even remember where it used to be.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- CODY QUOTE -->
+  <section class="char-section">
+    <blockquote class="scorch-quote">
+      "I been smilin' so long I forgot what my face looks like otherwise. Don't worry about it, sha."
+      <cite>— Cody</cite>
+    </blockquote>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="char-section">
+    <h2 class="char-h2">The Gallery</h2>
+    <p class="gallery-sub">Tap any frame to enlarge. He's photogenic when he doesn't know the camera's on.</p>
+    <button class="gallery-entry" id="codyGalleryEntry" type="button" aria-label="Open gallery">
+      <img class="gallery-entry-cover" src="assets/cody-gallery-cover.jpg" alt="Cody gallery cover" />
+      <div class="gallery-entry-overlay">
+        <div class="gallery-entry-eyebrow">Gallery</div>
+        <div class="gallery-entry-count">10 Photos</div>
+        <div class="gallery-entry-cta">View All</div>
+      </div>
+    </button>
+    <script id="codyGalleryData" type="application/json">[
+      {"src": "assets/cody-gallery-01.jpg", "alt": "Cody behind the kit"},
+      {"src": "assets/cody-gallery-02.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-03.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-04.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-05.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-06.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-07.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-08.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-09.jpg", "alt": ""},
+      {"src": "assets/cody-gallery-10.jpg", "alt": ""}
+    ]</script>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="char-final-cta">
+    <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+       target="_blank" rel="noopener" class="char-chat-btn">
+      Chat with Cody &rarr;
+    </a>
+    <a href="#" class="char-back-link" id="codyBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END CODY CHARACTER PAGE ===================== -->
 
 </body>
 </html>
