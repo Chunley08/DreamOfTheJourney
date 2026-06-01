@@ -2737,6 +2737,2278 @@
   .cody-page .char-back-link { color: #8a6a2a; }
   .cody-page .char-back-link:hover { color: #f4d27a; }
 
+  /* ================================================================
+     SCORCH — DEATH METAL TOUR POSTER
+     Stapled-to-a-pole transformation. Full overhaul scoped to
+     .scorch-page so other characters stay clean. Uses fonts already
+     loaded (Metal Mania, Cinzel Decorative, Special Elite, Oswald).
+     ================================================================ */
+
+  /* ----- OUTER PAGE: the wall/pole the poster is stapled to ----- */
+  .scorch-page {
+    background:
+      /* dim wood-grain plank texture */
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.4) 0px, rgba(0,0,0,0.4) 1px,
+        transparent 1px, transparent 200px),
+      repeating-linear-gradient(0deg,
+        rgba(255, 200, 120, 0.012) 0px, rgba(255, 200, 120, 0.012) 2px,
+        transparent 2px, transparent 5px),
+      radial-gradient(ellipse at 50% 20%, #2a1a0a 0%, #1a0a02 50%, #0a0402 100%);
+    color: #2a1408;
+  }
+  /* Drop the diagonal scanlines from .character-page::after; not poster-y */
+  .scorch-page::after { display: none; }
+
+  /* ----- THE POSTER PAPER (each section becomes a stapled sheet) ----- */
+  .scorch-page .char-section {
+    position: relative;
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 2.5rem 2.2rem 3rem;
+    background:
+      /* halftone dot grain */
+      radial-gradient(circle, rgba(60, 30, 10, 0.07) 0.5px, transparent 0.8px) 0 0 / 4px 4px,
+      /* yellowed splotches */
+      radial-gradient(ellipse at 25% 18%, rgba(170, 60, 20, 0.06) 0%, transparent 35%),
+      radial-gradient(ellipse at 80% 70%, rgba(60, 30, 10, 0.10) 0%, transparent 40%),
+      /* aged cream paper base */
+      linear-gradient(165deg, #e8d8b0 0%, #d4be88 60%, #b8a06a 100%);
+    border: 1px solid rgba(80, 40, 10, 0.4);
+    box-shadow:
+      0 10px 22px rgba(0, 0, 0, 0.6),
+      0 2px 4px rgba(0, 0, 0, 0.5),
+      inset 0 0 80px rgba(80, 30, 10, 0.10);
+    transform: rotate(-0.4deg);
+  }
+  .scorch-page .char-section:nth-of-type(even) { transform: rotate(0.5deg); }
+  .scorch-page .char-section:nth-of-type(3n)   { transform: rotate(-0.8deg); }
+  /* staple marks at the top of every section */
+  .scorch-page .char-section::before,
+  .scorch-page .char-section::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    width: 14px; height: 6px;
+    background:
+      linear-gradient(90deg,
+        transparent 0%, transparent 15%,
+        #888 15%, #c8c8c8 40%, #888 60%,
+        transparent 60%, transparent 85%,
+        #888 85%, #888 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    z-index: 3;
+  }
+  .scorch-page .char-section::before { left: 18%; transform: rotate(-3deg); }
+  .scorch-page .char-section::after  { right: 18%; transform: rotate(2deg); }
+
+  /* ----- HERO: top of the tour poster ----- */
+  .scorch-page .char-hero {
+    position: relative;
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    min-height: 540px;
+    padding: 0;
+    background:
+      /* halftone */
+      radial-gradient(circle, rgba(40, 10, 5, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      /* deep crimson + black ink */
+      radial-gradient(ellipse at 50% 70%, #5a0808 0%, #2a0404 60%, #100202 100%);
+    border: 2px solid #6a1010;
+    box-shadow:
+      0 0 0 4px #1a0404,
+      0 0 0 5px #4a0808,
+      0 18px 36px rgba(0, 0, 0, 0.85),
+      inset 0 0 90px rgba(0, 0, 0, 0.6);
+    transform: rotate(-0.6deg);
+    overflow: hidden;
+  }
+  /* Charred / torn edges of the hero poster */
+  .scorch-page .char-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 100%, rgba(0,0,0,0.85) 0%, transparent 18%),
+      radial-gradient(ellipse at 100% 100%, rgba(0,0,0,0.85) 0%, transparent 18%),
+      radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.8) 0%, transparent 25%),
+      radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.6) 0%, transparent 18%);
+    z-index: 2;
+  }
+  /* staples on the hero too */
+  .scorch-page .char-hero::after {
+    content: '';
+    position: absolute;
+    top: 18px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 0;
+    border-top: 6px dashed rgba(200, 200, 200, 0.65);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    z-index: 4;
+  }
+  /* The hero background image becomes a halftone duotone photograph */
+  .scorch-page .char-hero-bg {
+    filter: contrast(1.4) saturate(0.4) sepia(0.7) hue-rotate(-15deg) brightness(0.55);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+  }
+  .scorch-page .char-hero-bg::after { display: none; }
+
+  .scorch-page .char-hero-content {
+    position: relative;
+    z-index: 3;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+  }
+  /* "THE SNAKE SKINS" tag becomes a black bar across the top */
+  .scorch-page .char-band-tag {
+    display: inline-block;
+    padding: 0.6rem 2.5rem;
+    background: #0a0202;
+    color: #f4e8c0;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.4em;
+    border: 2px solid #f4e8c0;
+    box-shadow: 0 3px 0 #4a0808, 0 5px 10px rgba(0,0,0,0.6);
+    transform: rotate(-1deg);
+    text-shadow: none;
+  }
+  .scorch-page .char-band-tag::before,
+  .scorch-page .char-band-tag::after { display: none; }
+
+  /* The big SCORCH title — gothic metal logo */
+  .scorch-page .char-title {
+    font-family: 'Metal Mania', 'Cinzel Decorative', serif;
+    font-size: clamp(5rem, 16vw, 11rem);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    line-height: 0.85;
+    margin: 1.8rem 0 1rem;
+    color: #f4e8c0;
+    background: none;
+    -webkit-text-fill-color: #f4e8c0;
+    text-shadow:
+      0 0 4px #f4e8c0,
+      0 0 14px rgba(255, 110, 30, 0.6),
+      4px 4px 0 #1a0202,
+      8px 8px 0 #4a0808,
+      0 0 50px rgba(255, 90, 20, 0.8);
+    filter:
+      drop-shadow(0 0 20px rgba(255, 80, 20, 0.7))
+      drop-shadow(0 6px 12px rgba(0,0,0,0.8));
+    transform: rotate(-1.2deg);
+    /* ink-bleed feel via slight horizontal stretch */
+    font-stretch: ultra-condensed;
+  }
+
+  .scorch-page .char-role {
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+    color: #f4e8c0;
+    text-transform: uppercase;
+    margin: 0.5rem 0 2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .scorch-page .char-role span { color: #ff7a2a; }
+
+  /* CHAT button becomes a TICKET STUB */
+  .scorch-page .char-hero .char-chat-btn,
+  .scorch-page .char-final-cta .char-chat-btn {
+    display: inline-block;
+    padding: 1.3rem 2.5rem 1.3rem 4.5rem;
+    background:
+      radial-gradient(circle at 8% 50%, transparent 9px, #f4e8c0 10px) left center / 100% 100% no-repeat,
+      linear-gradient(180deg, #f4e8c0 0%, #d4be88 100%);
+    color: #1a0404;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    box-shadow:
+      0 0 0 2px #1a0404,
+      0 5px 0 #4a0808,
+      0 10px 18px rgba(0, 0, 0, 0.7);
+    text-shadow: none;
+    transform: rotate(-2deg);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .scorch-page .char-hero .char-chat-btn::before {
+    /* perforated edge */
+    content: '';
+    position: absolute;
+    top: 8%; bottom: 8%;
+    left: 30px;
+    border-left: 2px dashed #1a0404;
+  }
+  .scorch-page .char-hero .char-chat-btn::after {
+    content: 'ADMIT ONE';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: #4a0808;
+    white-space: nowrap;
+  }
+  .scorch-page .char-hero .char-chat-btn:hover,
+  .scorch-page .char-final-cta .char-chat-btn:hover {
+    transform: rotate(-1deg) translateY(-3px);
+    box-shadow:
+      0 0 0 2px #1a0404,
+      0 7px 0 #4a0808,
+      0 14px 24px rgba(0, 0, 0, 0.8),
+      0 0 28px rgba(255, 80, 20, 0.55);
+  }
+
+  /* SOLD OUT diagonal stamp on the hero */
+  .scorch-page .char-hero-content::after {
+    content: 'SOLD OUT';
+    position: absolute;
+    top: 18%;
+    right: -10%;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: 0.1em;
+    color: rgba(255, 60, 40, 0.85);
+    border: 6px solid rgba(255, 60, 40, 0.85);
+    padding: 0.6rem 1.5rem;
+    transform: rotate(18deg);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    box-shadow: inset 0 0 0 3px rgba(255, 60, 40, 0.85);
+    background: transparent;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.85;
+  }
+  /* BITE BACK TOUR ribbon under the title */
+  .scorch-page .char-hero-content::before {
+    content: '★ BITE BACK TOUR · 2025 · ONE NIGHT ONLY ★';
+    position: absolute;
+    bottom: 22%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    background: #ff5a20;
+    color: #1a0404;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    padding: 0.5rem 2rem;
+    border: 2px solid #1a0404;
+    box-shadow: 0 4px 0 #1a0404;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* ----- SECTION HEADERS: poster banners ----- */
+  .scorch-page .char-h2 {
+    display: inline-block;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: #1a0404;
+    color: #f4e8c0;
+    padding: 0.6rem 1.5rem;
+    margin: 0 0 2rem;
+    border: 3px solid #4a0808;
+    box-shadow: 6px 6px 0 #4a0808, 0 6px 12px rgba(0,0,0,0.4);
+    transform: rotate(-1deg);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .scorch-page .char-h2::before { content: '★ '; color: #ff7a2a; }
+  .scorch-page .char-h2::after  { content: ' ★'; color: #ff7a2a; }
+
+  /* ----- ABOUT section: newsprint feature ----- */
+  .scorch-page .char-about p {
+    font-family: 'Special Elite', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #2a1408;
+    margin-bottom: 1.2rem;
+    text-shadow: none;
+  }
+  .scorch-page .char-about p strong { color: #8a1010; }
+  .scorch-page .char-about p em { color: #6a3010; font-style: italic; }
+  /* Drop-cap on the first paragraph */
+  .scorch-page .char-about p:first-of-type::first-letter {
+    font-family: 'Metal Mania', serif;
+    float: left;
+    font-size: 5.5rem;
+    line-height: 0.85;
+    margin: 0.2rem 0.6rem 0 0;
+    color: #8a1010;
+    text-shadow: 3px 3px 0 #1a0404;
+  }
+  /* Tags become punk show pin badges / patches */
+  .scorch-page .char-tag {
+    background: #1a0404;
+    color: #f4e8c0;
+    border: 2px dashed #ff5a20;
+    border-radius: 0;
+    font-family: 'Special Elite', monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.9rem;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 #4a0808;
+    transform: rotate(-1deg);
+  }
+  .scorch-page .char-tags > .char-tag:nth-child(even) { transform: rotate(1.5deg); }
+  .scorch-page .char-tags > .char-tag:nth-child(3n) { transform: rotate(-2deg); }
+
+  /* ----- QUOTES: torn newsprint clippings ----- */
+  .scorch-page .quote-card {
+    background:
+      radial-gradient(circle, rgba(40, 10, 5, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #f4e8c0 0%, #d4be88 100%);
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    color: #1a0404;
+    font-family: 'Special Elite', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+    padding: 1.6rem 1.4rem;
+    position: relative;
+    transform: rotate(-1.5deg);
+  }
+  .scorch-page .quote-grid > .quote-card:nth-child(2) { transform: rotate(1.2deg); }
+  .scorch-page .quote-grid > .quote-card:nth-child(3) { transform: rotate(-0.7deg); }
+  /* Big newspaper quote mark */
+  .scorch-page .quote-card::before {
+    content: '“';
+    position: absolute;
+    top: -1.2rem;
+    left: 0.6rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #8a1010;
+    line-height: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+  /* tape strip at top */
+  .scorch-page .quote-card::after {
+    content: '';
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 60px; height: 18px;
+    background: rgba(244, 232, 192, 0.55);
+    border: 1px solid rgba(120, 80, 30, 0.25);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ----- THE BAND: tour billing card ----- */
+  .scorch-page .band-poster-wrap {
+    border: 2px solid #1a0404;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6), 0 0 0 4px #f4e8c0;
+    filter: contrast(1.15) saturate(0.7);
+    transform: rotate(-1deg);
+    max-width: 580px;
+    margin: 0 auto 2.5rem;
+  }
+  .scorch-page .member-grid {
+    background: #1a0404;
+    border: 3px solid #4a0808;
+    padding: 1.8rem 1.5rem;
+    box-shadow: 6px 6px 0 #4a0808, 0 8px 18px rgba(0, 0, 0, 0.5);
+    transform: rotate(0.4deg);
+    position: relative;
+  }
+  /* "FEATURING" banner above the lineup */
+  .scorch-page .member-grid::before {
+    content: '★ FEATURING ★';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    background: #ff5a20;
+    color: #1a0404;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 0.3em;
+    padding: 0.4rem 1.6rem;
+    border: 2px solid #1a0404;
+    box-shadow: 0 3px 0 #1a0404;
+  }
+  .scorch-page .member-card {
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed rgba(255, 122, 42, 0.4);
+    border-radius: 0;
+    padding: 1rem 0;
+    box-shadow: none;
+  }
+  .scorch-page .member-card:last-child { border-bottom: none; }
+  .scorch-page .member-name {
+    color: #f4e8c0;
+    font-family: 'Metal Mania', serif;
+    font-size: 1.8rem;
+    text-shadow: 2px 2px 0 #4a0808;
+  }
+  .scorch-page .member-role {
+    color: #ff7a2a;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  .scorch-page .member-desc {
+    color: #d4be88;
+    font-family: 'Special Elite', serif;
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+  }
+
+  /* ============================================================
+     MUSIC PLAYER — paper setlist taped to the poster
+     ============================================================ */
+  .scorch-page .setlist-stage {
+    background:
+      radial-gradient(circle, rgba(40, 10, 5, 0.08) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(165deg, #f4e8c0 0%, #d4be88 60%, #b8a06a 100%);
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.55), 0 2px 4px rgba(0, 0, 0, 0.4);
+    transform: rotate(-1deg);
+    padding: 2rem;
+  }
+  .scorch-page .setlist-stage::before,
+  .scorch-page .setlist-stage::after {
+    background: none;
+    box-shadow: none;
+  }
+  /* tape strips at corners of the setlist paper */
+  .scorch-page .setlist-stage::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: 12%;
+    width: 70px; height: 22px;
+    background: rgba(244, 232, 192, 0.55);
+    border: 1px solid rgba(120, 80, 30, 0.25);
+    transform: rotate(-4deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .scorch-page .setlist-stage::after {
+    content: '';
+    position: absolute;
+    top: -10px; right: 12%;
+    width: 70px; height: 22px;
+    background: rgba(244, 232, 192, 0.55);
+    border: 1px solid rgba(120, 80, 30, 0.25);
+    transform: rotate(3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+
+  /* Now-playing display becomes a "TONIGHT'S SHOW" notice */
+  .scorch-page .np-display {
+    background: transparent;
+    border: 2px dashed #8a1010;
+    border-radius: 0;
+    padding: 1.2rem;
+  }
+  .scorch-page .np-display::after { display: none; }
+  .scorch-page .np-eyebrow {
+    color: #8a1010;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    text-shadow: none;
+    letter-spacing: 0.3em;
+  }
+  .scorch-page .np-eyebrow .live-dot { background: #ff3a10; box-shadow: 0 0 8px #ff3a10; }
+  .scorch-page .np-title {
+    color: #1a0404;
+    font-family: 'Metal Mania', serif;
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    line-height: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+  .scorch-page .np-sub {
+    color: #6a3010;
+    font-family: 'Special Elite', monospace;
+    text-shadow: none;
+  }
+  /* visualizer bars become a "signal level" graphic on the poster */
+  .scorch-page .np-viz-bar {
+    background: linear-gradient(180deg, #1a0404 0%, #4a0808 40%, #8a1010 70%, #ff5a20 100%);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+    border-radius: 0;
+  }
+  /* progress bar = a strip of masking tape with red marker progress */
+  .scorch-page .np-progress {
+    background: rgba(244, 232, 192, 0.5);
+    border: 1px solid rgba(80, 40, 10, 0.4);
+    border-radius: 0;
+    height: 14px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .scorch-page .np-progress-fill {
+    background: repeating-linear-gradient(45deg,
+      #c8281a 0px, #c8281a 6px,
+      #8a1010 6px, #8a1010 12px);
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .scorch-page .np-progress-head {
+    background: radial-gradient(circle at 30% 30%, #ff5a20, #8a1010 80%);
+    box-shadow: 0 0 0 2px #1a0404, 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .scorch-page .np-times {
+    color: #6a3010;
+    font-family: 'Special Elite', monospace;
+  }
+  /* Transport buttons — stamped paper feel */
+  .scorch-page .np-btn {
+    background: #f4e8c0;
+    border: 2px solid #1a0404;
+    color: #1a0404;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0 #4a0808;
+    transition: transform 0.1s, box-shadow 0.15s;
+  }
+  .scorch-page .np-btn:hover {
+    background: #ff5a20;
+    color: #f4e8c0;
+    border-color: #1a0404;
+    box-shadow: 4px 4px 0 #1a0404;
+  }
+  .scorch-page .np-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #4a0808;
+  }
+  .scorch-page .np-btn.np-play {
+    background: #ff5a20;
+    color: #f4e8c0;
+    border-color: #1a0404;
+    box-shadow: 4px 4px 0 #1a0404;
+  }
+  .scorch-page .np-btn.np-play:hover {
+    background: #ff7a2a;
+    box-shadow: 5px 5px 0 #1a0404;
+  }
+
+  /* The setlist paper on the right */
+  .scorch-page .np-setlist {
+    background:
+      /* notebook ruled lines */
+      repeating-linear-gradient(180deg,
+        transparent 0px, transparent 31px,
+        rgba(80, 40, 10, 0.25) 31px, rgba(80, 40, 10, 0.25) 32px),
+      /* red margin line */
+      linear-gradient(90deg,
+        transparent 0%, transparent 12%,
+        rgba(170, 30, 20, 0.4) 12%, rgba(170, 30, 20, 0.4) 12.4%,
+        transparent 12.4%, transparent 100%),
+      /* paper */
+      linear-gradient(180deg, #fef4d0 0%, #e8d8a8 100%);
+    color: #1a0404;
+    box-shadow:
+      inset 0 0 0 1px rgba(80, 40, 10, 0.3),
+      0 6px 14px rgba(0, 0, 0, 0.5);
+    transform: rotate(-1.5deg);
+    border: none;
+    padding: 1.4rem 1rem 1.4rem 3rem;
+    font-family: 'Special Elite', 'Cinzel Decorative', serif;
+  }
+  .scorch-page .np-setlist::before,
+  .scorch-page .np-setlist::after { background: none; box-shadow: none; }
+  .scorch-page .np-setlist-head {
+    color: #8a1010;
+    font-family: 'Metal Mania', serif;
+    font-size: 1.6rem;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+    margin-bottom: 0.3rem;
+    text-decoration: underline;
+    text-decoration-color: #8a1010;
+    text-decoration-thickness: 2px;
+  }
+  .scorch-page .np-setlist-sub {
+    color: #6a3010;
+    font-family: 'Special Elite', monospace;
+    border-bottom: 1px solid rgba(80, 40, 10, 0.3);
+    padding-bottom: 0.6rem;
+  }
+  .scorch-page .np-track {
+    border-bottom: 1px dashed rgba(80, 40, 10, 0.25);
+    color: #1a0404;
+    font-family: 'Special Elite', monospace;
+    padding: 0.7rem 0.4rem;
+  }
+  .scorch-page .np-track:hover {
+    background: rgba(255, 122, 42, 0.12);
+  }
+  .scorch-page .np-track.active {
+    background: rgba(170, 30, 20, 0.12);
+    box-shadow: inset 4px 0 0 #8a1010;
+  }
+  .scorch-page .np-track-num {
+    color: #8a1010;
+    font-weight: bold;
+    font-family: 'Metal Mania', serif;
+    font-size: 1.2rem;
+  }
+  .scorch-page .np-track-name { color: #1a0404; }
+  .scorch-page .np-track.active .np-track-name {
+    color: #8a1010;
+    text-decoration: line-through;
+    text-decoration-color: rgba(138, 16, 16, 0.4);
+  }
+  .scorch-page .np-track-len {
+    color: #6a3010;
+    font-family: 'Special Elite', monospace;
+  }
+  /* The "signed by" scribble */
+  .scorch-page .np-scribble {
+    color: #1a0404;
+    font-family: 'Metal Mania', cursive;
+    font-style: normal;
+    font-size: 1rem;
+  }
+  .scorch-page .np-scribble strong {
+    color: #8a1010;
+    font-family: 'Metal Mania', cursive;
+  }
+
+  /* ----- SPOILER: classified dossier ----- */
+  .scorch-page .spoiler-details {
+    background:
+      radial-gradient(circle, rgba(40, 10, 5, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #d4be88 0%, #b8a06a 100%);
+    border: 2px solid #4a0808;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+    transform: rotate(0.3deg);
+  }
+  .scorch-page .spoiler-details summary {
+    background:
+      repeating-linear-gradient(45deg,
+        #ff5a20 0px, #ff5a20 22px,
+        #1a0404 22px, #1a0404 44px);
+    padding: 1.2rem;
+    border-bottom: 3px solid #1a0404;
+  }
+  .scorch-page .spoiler-warn {
+    color: #f4e8c0;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-shadow: 2px 2px 0 #1a0404;
+  }
+  .scorch-page .spoiler-cta {
+    color: #f4e8c0;
+    font-family: 'Special Elite', monospace;
+    text-shadow: 1px 1px 0 #1a0404;
+  }
+  .scorch-page .spoiler-content {
+    color: #1a0404;
+    font-family: 'Special Elite', serif;
+    line-height: 1.7;
+    padding: 2rem;
+  }
+  .scorch-page .spoiler-content p { color: #1a0404; }
+  .scorch-page .spoiler-content strong { color: #8a1010; }
+  .scorch-page .spoiler-content em { color: #6a3010; }
+
+  /* ----- BIG QUOTE — newspaper pull-quote ----- */
+  .scorch-page .scorch-quote {
+    background:
+      radial-gradient(circle, rgba(40, 10, 5, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #f4e8c0 0%, #d4be88 100%);
+    border-top: 4px solid #8a1010;
+    border-bottom: 4px solid #8a1010;
+    border-left: none;
+    border-right: none;
+    color: #1a0404;
+    font-family: 'Cinzel Decorative', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    text-shadow: none;
+    transform: rotate(-0.6deg);
+    padding: 2rem;
+    position: relative;
+  }
+  .scorch-page .scorch-quote::before {
+    content: '“';
+    position: absolute;
+    top: -2rem;
+    left: 1rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 8rem;
+    font-weight: 900;
+    color: #8a1010;
+    line-height: 1;
+    opacity: 0.3;
+  }
+  .scorch-page .scorch-quote cite {
+    background: none;
+    -webkit-text-fill-color: #8a1010;
+    color: #8a1010;
+    font-family: 'Metal Mania', serif;
+    font-style: normal;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  }
+
+  /* ----- GALLERY — polaroid taped to the poster ----- */
+  .scorch-page .gallery-entry {
+    background: #f4e8c0;
+    border: none;
+    padding: 0.8rem 0.8rem 3rem;
+    transform: rotate(-2deg);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+    position: relative;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .scorch-page .gallery-entry::before {
+    /* tape strip at top */
+    content: '';
+    position: absolute;
+    top: -12px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 80px; height: 22px;
+    background: rgba(244, 232, 192, 0.5);
+    border: 1px solid rgba(120, 80, 30, 0.25);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    z-index: 3;
+  }
+  .scorch-page .gallery-entry:hover {
+    transform: rotate(-1deg) translateY(-4px);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+  .scorch-page .gallery-entry-cover {
+    filter: contrast(1.1) saturate(0.85);
+  }
+  .scorch-page .gallery-entry-overlay {
+    background: transparent;
+    color: #1a0404;
+    bottom: 0;
+    padding: 0.6rem 0.8rem;
+  }
+  .scorch-page .gallery-entry-eyebrow {
+    color: #8a1010;
+    font-family: 'Special Elite', monospace;
+  }
+  .scorch-page .gallery-entry-count {
+    color: #1a0404;
+    font-family: 'Metal Mania', serif;
+    font-size: 1.3rem;
+  }
+  .scorch-page .gallery-entry-cta {
+    background: #1a0404;
+    color: #f4e8c0;
+    border: 1px solid #8a1010;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #8a1010;
+  }
+  .scorch-page .gallery-sub {
+    color: #d4be88;
+    font-family: 'Special Elite', monospace;
+  }
+
+  /* ----- FINAL CTA — oversized ticket stub ----- */
+  .scorch-page .char-final-cta {
+    max-width: 900px;
+    margin: 3rem auto 4rem;
+    padding: 2.5rem 2rem;
+    background: transparent;
+    border: none;
+  }
+  .scorch-page .char-final-cta .char-chat-btn {
+    font-size: 1.35rem;
+    padding: 1.6rem 3rem 1.6rem 5.5rem;
+    transform: rotate(-1.5deg);
+  }
+  .scorch-page .char-back-link {
+    color: #d4be88;
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.15em;
+  }
+  .scorch-page .char-back-link:hover { color: #ff7a2a; }
+
+  /* close button on the poster */
+  .scorch-page .char-close {
+    background: #1a0404;
+    color: #ff5a20;
+    border: 2px solid #ff5a20;
+    border-radius: 0;
+    box-shadow: 0 4px 0 #8a1010;
+  }
+  .scorch-page .char-close:hover {
+    background: #ff5a20;
+    color: #1a0404;
+    box-shadow: 0 4px 0 #1a0404;
+  }
+
+  /* Mobile tweaks for the poster */
+  @media (max-width: 760px) {
+    .scorch-page .char-section { padding: 2rem 1.2rem 2.4rem; margin: 1.6rem 0.6rem; }
+    .scorch-page .char-section::before,
+    .scorch-page .char-section::after { display: none; }
+    .scorch-page .char-hero-content::after { font-size: 2rem; right: -5%; padding: 0.4rem 1rem; }
+    .scorch-page .char-hero-content::before { font-size: 0.7rem; padding: 0.4rem 1rem; }
+    .scorch-page .np-setlist { padding: 1.2rem 0.8rem 1.2rem 2rem; }
+  }
+
+
+  /* ================================================================
+     SHANE — LEATHER BIKER ZINE / BLACK-AND-WHITE PHOTOCOPY FANZINE
+     Cold, low-key, photocopied, stenciled. Keeps his chrome palette
+     but transforms the page into a stapled-together punk fanzine.
+     ================================================================ */
+  .shane-page {
+    background:
+      /* asphalt grain */
+      radial-gradient(circle, rgba(255,255,255,0.015) 0.4px, transparent 0.8px) 0 0 / 3px 3px,
+      /* tar mottling */
+      radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 70%, rgba(60,80,100,0.04) 0%, transparent 35%),
+      linear-gradient(180deg, #0a0d12 0%, #050709 100%);
+    color: #1a1a1a;
+  }
+  .shane-page::after { display: none; }
+
+  /* sections = sheets of off-white photocopied zine paper */
+  .shane-page .char-section {
+    position: relative;
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 2.5rem 2.2rem 3rem;
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.06) 0.5px, transparent 0.7px) 0 0 / 3.5px 3.5px,
+      radial-gradient(ellipse at 80% 10%, rgba(0,0,0,0.05) 0%, transparent 30%),
+      linear-gradient(165deg, #e8e4d8 0%, #d4d0c0 60%, #b8b4a4 100%);
+    border: 1px solid #1a1a1a;
+    box-shadow:
+      0 10px 22px rgba(0,0,0,0.7),
+      0 2px 4px rgba(0,0,0,0.6),
+      inset 0 0 80px rgba(0,0,0,0.08);
+    transform: rotate(-0.3deg);
+    transition: transform 0.3s ease;
+  }
+  .shane-page .char-section:nth-of-type(even) { transform: rotate(0.4deg); }
+  .shane-page .char-section:nth-of-type(3n) { transform: rotate(-0.6deg); }
+  .shane-page .char-section:hover { transform: rotate(0deg); }
+  /* electrical tape strips at top (not staples — biker vibe) */
+  .shane-page .char-section::before,
+  .shane-page .char-section::after {
+    content: '';
+    position: absolute;
+    top: -8px;
+    width: 56px; height: 20px;
+    background: #0a0a0a;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    z-index: 3;
+  }
+  .shane-page .char-section::before { left: 15%; transform: rotate(-4deg); }
+  .shane-page .char-section::after  { right: 15%; transform: rotate(3deg); }
+
+  /* HERO = top of the zine — moody asphalt + chrome */
+  .shane-page .char-hero {
+    position: relative;
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    min-height: 540px;
+    padding: 0;
+    background:
+      radial-gradient(circle, rgba(255,255,255,0.04) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      radial-gradient(ellipse at 50% 50%, #1a2030 0%, #0a0e16 70%, #050709 100%);
+    border: 2px solid #2a3548;
+    box-shadow:
+      0 0 0 4px #0a0e16,
+      0 0 0 5px #4a5a78,
+      0 18px 36px rgba(0,0,0,0.9),
+      inset 0 0 90px rgba(0,0,0,0.5);
+    transform: rotate(-0.5deg);
+    overflow: hidden;
+  }
+  .shane-page .char-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 100%, rgba(0,0,0,0.85) 0%, transparent 20%),
+      radial-gradient(ellipse at 100% 100%, rgba(0,0,0,0.85) 0%, transparent 20%),
+      radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.5) 0%, transparent 20%);
+    z-index: 2;
+  }
+  /* black electrical tape across the top of the hero */
+  .shane-page .char-hero::after {
+    content: '';
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 120px; height: 18px;
+    background: #0a0a0a;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    z-index: 4;
+  }
+  /* hero bg image goes hard B&W with halftone */
+  .shane-page .char-hero-bg {
+    filter: grayscale(1) contrast(1.6) brightness(0.6);
+    opacity: 0.6;
+    mix-blend-mode: lighten;
+  }
+  .shane-page .char-hero-bg::after { display: none; }
+
+  .shane-page .char-hero-content {
+    position: relative;
+    z-index: 3;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+  }
+  /* "THE SNAKE SKINS" white-on-black industrial tag */
+  .shane-page .char-band-tag {
+    display: inline-block;
+    padding: 0.6rem 2.5rem;
+    background: #0a0a0a;
+    color: #e8e4d8;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.4em;
+    border: 2px solid #88b8d4;
+    box-shadow: 0 3px 0 #2a3548, 0 5px 10px rgba(0,0,0,0.6);
+    transform: rotate(-0.8deg);
+    text-shadow: none;
+  }
+  .shane-page .char-band-tag::before,
+  .shane-page .char-band-tag::after { display: none; }
+
+  /* "SHANE" title — military stencil look, brushed chrome */
+  .shane-page .char-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: clamp(5rem, 16vw, 11rem);
+    letter-spacing: 0.12em;
+    line-height: 0.9;
+    margin: 1.8rem 0 1rem;
+    text-transform: uppercase;
+    color: transparent;
+    background-image:
+      linear-gradient(180deg,
+        #ffffff 0%,
+        #d4dce4 25%,
+        #88b8d4 55%,
+        #4a5a78 85%,
+        #1a2030 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter:
+      drop-shadow(2px 2px 0 #0a0e16)
+      drop-shadow(4px 4px 0 #2a3548)
+      drop-shadow(0 0 30px rgba(136, 184, 212, 0.5))
+      drop-shadow(0 6px 12px rgba(0,0,0,0.8));
+    transform: rotate(-0.8deg);
+  }
+
+  .shane-page .char-role {
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: #e8e4d8;
+    text-transform: uppercase;
+    margin: 0.5rem 0 2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .shane-page .char-role span { color: #88b8d4; }
+
+  /* Shane's chat button = brushed chrome VIP laminated card */
+  .shane-page .char-hero .char-chat-btn,
+  .shane-page .char-final-cta .char-chat-btn {
+    display: inline-block;
+    padding: 1.3rem 2.5rem 1.3rem 3rem;
+    background:
+      linear-gradient(180deg, #d4dce4 0%, #88b8d4 50%, #5a7898 100%);
+    color: #0a0e16;
+    border: 2px solid #0a0e16;
+    border-radius: 0;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    box-shadow:
+      0 0 0 2px #d4dce4,
+      0 5px 0 #2a3548,
+      0 10px 18px rgba(0,0,0,0.7);
+    text-shadow: none;
+    transform: rotate(-1.5deg);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .shane-page .char-hero .char-chat-btn::before {
+    /* lanyard hole at top */
+    content: '';
+    position: absolute;
+    top: -1px; left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 6px;
+    background: #0a0e16;
+    border-radius: 0 0 4px 4px;
+  }
+  .shane-page .char-hero .char-chat-btn::after {
+    content: 'VIP';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: #2a3548;
+    font-weight: 900;
+  }
+  .shane-page .char-hero .char-chat-btn:hover,
+  .shane-page .char-final-cta .char-chat-btn:hover {
+    transform: rotate(-0.5deg) translateY(-3px);
+    box-shadow:
+      0 0 0 2px #ffffff,
+      0 8px 0 #2a3548,
+      0 14px 24px rgba(0,0,0,0.8),
+      0 0 28px rgba(136, 184, 212, 0.55);
+  }
+
+  /* "MEMBERS ONLY" diagonal stamp */
+  .shane-page .char-hero-content::after {
+    content: 'MEMBERS ONLY';
+    position: absolute;
+    top: 18%;
+    right: -8%;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.5rem, 3.8vw, 2.5rem);
+    letter-spacing: 0.15em;
+    color: rgba(136, 184, 212, 0.95);
+    border: 5px solid rgba(136, 184, 212, 0.95);
+    padding: 0.5rem 1.2rem;
+    transform: rotate(15deg);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 0 2px rgba(136, 184, 212, 0.95);
+    background: transparent;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.9;
+  }
+  /* TONIGHT banner under title */
+  .shane-page .char-hero-content::before {
+    content: '◆  TONIGHT ONLY · BLACKOUT TOUR · 1% MC PRESENTS  ◆';
+    position: absolute;
+    bottom: 22%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    background: #e8e4d8;
+    color: #0a0e16;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    padding: 0.5rem 1.6rem;
+    border: 2px solid #0a0e16;
+    box-shadow: 0 4px 0 #2a3548;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* section headers — black industrial bar */
+  .shane-page .char-h2 {
+    display: inline-block;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: #0a0a0a;
+    color: #d4dce4;
+    padding: 0.6rem 1.5rem;
+    margin: 0 0 2rem;
+    border: 3px solid #88b8d4;
+    box-shadow: 6px 6px 0 #2a3548, 0 6px 12px rgba(0,0,0,0.4);
+    transform: rotate(-0.8deg);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .shane-page .char-h2::before { content: '◆ '; color: #88b8d4; }
+  .shane-page .char-h2::after  { content: ' ◆'; color: #88b8d4; }
+
+  /* about body — fanzine typewriter */
+  .shane-page .char-about p {
+    font-family: 'Special Elite', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #1a1a1a;
+    margin-bottom: 1.2rem;
+    text-shadow: none;
+  }
+  .shane-page .char-about p strong { color: #0a0e16; }
+  .shane-page .char-about p em { color: #4a5a78; font-style: italic; }
+  .shane-page .char-about p:first-of-type::first-letter {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    float: left;
+    font-size: 5rem;
+    line-height: 0.85;
+    margin: 0.2rem 0.6rem 0 0;
+    color: #0a0e16;
+    text-shadow: 3px 3px 0 #88b8d4;
+  }
+  /* tags = black canvas patches */
+  .shane-page .char-tag {
+    background: #0a0a0a;
+    color: #d4dce4;
+    border: 2px dashed #88b8d4;
+    border-radius: 0;
+    font-family: 'Special Elite', monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.9rem;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 #2a3548;
+    transform: rotate(-1deg);
+    transition: transform 0.2s ease;
+  }
+  .shane-page .char-tags > .char-tag:nth-child(even) { transform: rotate(1.5deg); }
+  .shane-page .char-tags > .char-tag:nth-child(3n) { transform: rotate(-2deg); }
+  .shane-page .char-tag:hover { transform: rotate(0deg) translateY(-2px); }
+
+  /* quotes = B&W polaroids with handwritten captions */
+  .shane-page .quote-card {
+    background: #f4f0e4;
+    border: 1px solid #1a1a1a;
+    color: #0a0e16;
+    font-family: 'Special Elite', monospace;
+    font-style: normal;
+    font-size: 1rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+    padding: 1.6rem 1.4rem 2rem;
+    position: relative;
+    transform: rotate(-1.5deg);
+    transition: transform 0.25s ease;
+  }
+  .shane-page .quote-grid > .quote-card:nth-child(2) { transform: rotate(1.2deg); }
+  .shane-page .quote-grid > .quote-card:nth-child(3) { transform: rotate(-0.7deg); }
+  .shane-page .quote-card:hover { transform: rotate(0deg) scale(1.03); }
+  /* "—" mark and sharpie quote feel */
+  .shane-page .quote-card::before {
+    content: '—';
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #4a5a78;
+  }
+  /* electrical tape at top */
+  .shane-page .quote-card::after {
+    content: '';
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 50px; height: 16px;
+    background: #0a0a0a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  /* THE BAND — black tour lineup card */
+  .shane-page .band-poster-wrap {
+    border: 2px solid #0a0e16;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.7), 0 0 0 4px #d4dce4;
+    filter: grayscale(0.85) contrast(1.2);
+    transform: rotate(-0.8deg);
+    max-width: 580px;
+    margin: 0 auto 2.5rem;
+  }
+  .shane-page .member-grid {
+    background: #0a0a0a;
+    border: 3px solid #88b8d4;
+    padding: 1.8rem 1.5rem;
+    box-shadow: 6px 6px 0 #2a3548, 0 8px 18px rgba(0,0,0,0.6);
+    transform: rotate(0.3deg);
+    position: relative;
+  }
+  .shane-page .member-grid::before {
+    content: '◆ FEATURING ◆';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-0.8deg);
+    background: #d4dce4;
+    color: #0a0e16;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 0.3em;
+    padding: 0.4rem 1.6rem;
+    border: 2px solid #0a0e16;
+    box-shadow: 0 3px 0 #0a0e16;
+  }
+  .shane-page .member-card {
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed rgba(136, 184, 212, 0.4);
+    border-left: none;
+    border-radius: 0;
+    padding: 1rem 0;
+    box-shadow: none;
+    transition: padding-left 0.2s ease;
+  }
+  .shane-page .member-card:hover { padding-left: 0.8rem; }
+  .shane-page .member-card:last-child { border-bottom: none; }
+  .shane-page .member-name {
+    color: #d4dce4;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    text-shadow: 2px 2px 0 #2a3548;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .shane-page .member-role {
+    color: #88b8d4;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  .shane-page .member-desc {
+    color: #b8b4a4;
+    font-family: 'Special Elite', serif;
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+  }
+
+  /* SHANE'S MUSIC PLAYER — folded zine setlist + chrome accents */
+  .shane-page .setlist-stage {
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.06) 0.5px, transparent 0.7px) 0 0 / 3.5px 3.5px,
+      linear-gradient(165deg, #e8e4d8 0%, #c8c4b4 60%, #a8a494 100%);
+    border: 1px solid #0a0e16;
+    box-shadow: 0 12px 22px rgba(0,0,0,0.65), 0 2px 4px rgba(0,0,0,0.5);
+    transform: rotate(-0.8deg);
+    padding: 2rem;
+  }
+  .shane-page .setlist-stage::before {
+    content: '';
+    position: absolute;
+    top: -8px; left: 14%;
+    width: 60px; height: 18px;
+    background: #0a0a0a;
+    transform: rotate(-4deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .shane-page .setlist-stage::after {
+    content: '';
+    position: absolute;
+    top: -8px; right: 14%;
+    width: 60px; height: 18px;
+    background: #0a0a0a;
+    transform: rotate(3deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .shane-page .np-display {
+    background: transparent;
+    border: 2px solid #0a0e16;
+    border-radius: 0;
+    padding: 1.2rem;
+  }
+  .shane-page .np-display::after { display: none; }
+  .shane-page .np-eyebrow {
+    color: #0a0e16;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    text-shadow: none;
+    letter-spacing: 0.3em;
+  }
+  .shane-page .np-eyebrow .live-dot { background: #4a5a78; box-shadow: 0 0 6px #4a5a78; }
+  .shane-page .np-title {
+    color: #0a0e16;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+    letter-spacing: 0.1em;
+    text-shadow: 2px 2px 0 #88b8d4;
+  }
+  .shane-page .np-sub {
+    color: #4a5a78;
+    font-family: 'Special Elite', monospace;
+    text-shadow: none;
+  }
+  .shane-page .np-viz-bar {
+    background: linear-gradient(180deg, #d4dce4 0%, #88b8d4 40%, #4a5a78 80%, #0a0e16 100%);
+    box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+    border-radius: 0;
+  }
+  .shane-page .np-progress {
+    background: rgba(244, 240, 228, 0.5);
+    border: 1px solid #0a0e16;
+    border-radius: 0;
+    height: 14px;
+  }
+  .shane-page .np-progress-fill {
+    background: linear-gradient(90deg, #4a5a78, #88b8d4);
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .shane-page .np-progress-head {
+    background: radial-gradient(circle at 30% 30%, #ffffff, #88b8d4 60%, #4a5a78);
+    box-shadow: 0 0 0 2px #0a0e16, 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .shane-page .np-times {
+    color: #4a5a78;
+    font-family: 'Special Elite', monospace;
+  }
+  /* Transport buttons — brushed steel stamps */
+  .shane-page .np-btn {
+    background: linear-gradient(180deg, #d4dce4, #88b8d4 60%, #5a7898);
+    border: 2px solid #0a0e16;
+    color: #0a0e16;
+    border-radius: 50%;
+    box-shadow: 3px 3px 0 #2a3548;
+  }
+  .shane-page .np-btn:hover {
+    background: #0a0a0a;
+    color: #88b8d4;
+    box-shadow: 4px 4px 0 #88b8d4;
+  }
+  .shane-page .np-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #2a3548;
+  }
+  .shane-page .np-btn.np-play {
+    background: linear-gradient(180deg, #88b8d4, #4a5a78);
+    color: #ffffff;
+    border-color: #0a0e16;
+    box-shadow: 4px 4px 0 #0a0e16;
+  }
+  .shane-page .np-btn.np-play:hover {
+    background: #0a0a0a;
+    color: #88b8d4;
+    box-shadow: 5px 5px 0 #88b8d4;
+  }
+
+  /* setlist on right = folded zine paper, lined */
+  .shane-page .np-setlist {
+    background:
+      repeating-linear-gradient(180deg,
+        transparent 0px, transparent 31px,
+        rgba(0,0,0,0.18) 31px, rgba(0,0,0,0.18) 32px),
+      linear-gradient(180deg, #f4f0e4 0%, #d8d4c4 100%);
+    color: #0a0e16;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), 0 6px 14px rgba(0,0,0,0.55);
+    transform: rotate(-1.2deg);
+    border: none;
+    padding: 1.4rem 1rem;
+    font-family: 'Special Elite', serif;
+  }
+  .shane-page .np-setlist::before,
+  .shane-page .np-setlist::after { background: none; box-shadow: none; }
+  .shane-page .np-setlist-head {
+    color: #0a0e16;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.3rem;
+    text-decoration: underline;
+    text-decoration-color: #4a5a78;
+    text-decoration-thickness: 2px;
+  }
+  .shane-page .np-setlist-sub {
+    color: #4a5a78;
+    font-family: 'Special Elite', monospace;
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+    padding-bottom: 0.6rem;
+  }
+  .shane-page .np-track {
+    border-bottom: 1px dashed rgba(0,0,0,0.2);
+    color: #0a0e16;
+    font-family: 'Special Elite', monospace;
+    padding: 0.7rem 0.4rem;
+    transition: padding-left 0.15s ease;
+  }
+  .shane-page .np-track:hover {
+    background: rgba(136, 184, 212, 0.12);
+    padding-left: 0.8rem;
+  }
+  .shane-page .np-track.active {
+    background: rgba(74, 90, 120, 0.15);
+    box-shadow: inset 4px 0 0 #4a5a78;
+  }
+  .shane-page .np-track-num {
+    color: #4a5a78;
+    font-weight: bold;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+  }
+  .shane-page .np-track-name { color: #0a0e16; }
+  .shane-page .np-track.active .np-track-name {
+    color: #4a5a78;
+    text-decoration: line-through;
+    text-decoration-color: rgba(74, 90, 120, 0.5);
+  }
+  .shane-page .np-track-len { color: #4a5a78; font-family: 'Special Elite', monospace; }
+  .shane-page .np-scribble { color: #0a0e16; font-family: 'Special Elite', serif; }
+  .shane-page .np-scribble strong { color: #4a5a78; }
+
+  /* SHANE spoiler — wax-sealed envelope feel */
+  .shane-page .spoiler-details {
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.06) 0.5px, transparent 0.7px) 0 0 / 3.5px 3.5px,
+      linear-gradient(180deg, #c8c4b4 0%, #a8a494 100%);
+    border: 2px solid #2a3548;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+    transform: rotate(0.4deg);
+  }
+  .shane-page .spoiler-details summary {
+    background:
+      repeating-linear-gradient(45deg,
+        #88b8d4 0px, #88b8d4 20px,
+        #0a0a0a 20px, #0a0a0a 40px);
+    padding: 1.2rem;
+    border-bottom: 3px solid #0a0a0a;
+  }
+  .shane-page .spoiler-warn {
+    color: #f4f0e4;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-shadow: 2px 2px 0 #0a0a0a;
+  }
+  .shane-page .spoiler-cta {
+    color: #f4f0e4;
+    font-family: 'Special Elite', monospace;
+    text-shadow: 1px 1px 0 #0a0a0a;
+  }
+  .shane-page .spoiler-content { color: #0a0e16; font-family: 'Special Elite', serif; padding: 2rem; }
+  .shane-page .spoiler-content p { color: #0a0e16; }
+  .shane-page .spoiler-content strong { color: #2a3548; }
+  .shane-page .spoiler-content em { color: #4a5a78; }
+
+  /* Shane's big pull-quote = newspaper feature */
+  .shane-page .scorch-quote {
+    background:
+      radial-gradient(circle, rgba(0,0,0,0.06) 0.5px, transparent 0.7px) 0 0 / 3.5px 3.5px,
+      linear-gradient(180deg, #e8e4d8 0%, #c8c4b4 100%);
+    border-top: 4px solid #4a5a78;
+    border-bottom: 4px solid #4a5a78;
+    border-left: none;
+    border-right: none;
+    color: #0a0e16;
+    font-family: 'Special Elite', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+    text-shadow: none;
+    transform: rotate(-0.5deg);
+    padding: 2rem;
+    position: relative;
+  }
+  .shane-page .scorch-quote::before {
+    content: '“';
+    position: absolute;
+    top: -1.8rem;
+    left: 1rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 7rem;
+    font-weight: 900;
+    color: #4a5a78;
+    line-height: 1;
+    opacity: 0.3;
+  }
+  .shane-page .scorch-quote cite {
+    background: none;
+    -webkit-text-fill-color: #4a5a78;
+    color: #4a5a78;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    letter-spacing: 0.1em;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  }
+
+  /* gallery = polaroid corkboard */
+  .shane-page .gallery-entry {
+    background: #f4f0e4;
+    border: none;
+    padding: 0.8rem 0.8rem 3rem;
+    transform: rotate(-2deg);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+    max-width: 360px;
+    margin: 0 auto;
+    transition: transform 0.25s ease;
+  }
+  .shane-page .gallery-entry::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 60px; height: 16px;
+    background: #0a0a0a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 3;
+  }
+  .shane-page .gallery-entry:hover {
+    transform: rotate(-0.5deg) translateY(-6px);
+  }
+  .shane-page .gallery-entry-cover { filter: grayscale(0.7) contrast(1.15); }
+  .shane-page .gallery-entry-overlay { background: transparent; color: #0a0e16; bottom: 0; padding: 0.6rem 0.8rem; }
+  .shane-page .gallery-entry-eyebrow { color: #4a5a78; font-family: 'Special Elite', monospace; }
+  .shane-page .gallery-entry-count { color: #0a0e16; font-family: 'Oswald', sans-serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 0.1em; }
+  .shane-page .gallery-entry-cta {
+    background: #0a0a0a;
+    color: #d4dce4;
+    border: 1px solid #88b8d4;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #4a5a78;
+  }
+  .shane-page .gallery-sub { color: #d4dce4; font-family: 'Special Elite', monospace; }
+
+  /* JOURNAL section (unique to Shane) keeps existing styling — minimal override */
+  .shane-page .journal-card,
+  .shane-page .journal-cover { transition: transform 0.3s ease; }
+  .shane-page .journal-card:hover, .shane-page .journal-cover:hover { transform: rotate(0deg); }
+
+  /* Final CTA + back link */
+  .shane-page .char-final-cta {
+    max-width: 900px;
+    margin: 3rem auto 4rem;
+    padding: 2.5rem 2rem;
+    background: transparent;
+    border: none;
+  }
+  .shane-page .char-final-cta .char-chat-btn {
+    font-size: 1.35rem;
+    padding: 1.6rem 3rem 1.6rem 4rem;
+    transform: rotate(-1.2deg);
+  }
+  .shane-page .char-back-link {
+    color: #b8b4a4;
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.15em;
+  }
+  .shane-page .char-back-link:hover { color: #88b8d4; }
+
+  /* close button */
+  .shane-page .char-close {
+    background: #0a0a0a;
+    color: #88b8d4;
+    border: 2px solid #88b8d4;
+    border-radius: 0;
+    box-shadow: 0 4px 0 #4a5a78;
+  }
+  .shane-page .char-close:hover {
+    background: #88b8d4;
+    color: #0a0e16;
+    box-shadow: 0 4px 0 #0a0e16;
+  }
+
+  @media (max-width: 760px) {
+    .shane-page .char-section { padding: 2rem 1.2rem 2.4rem; margin: 1.6rem 0.6rem; }
+    .shane-page .char-section::before, .shane-page .char-section::after { display: none; }
+    .shane-page .char-hero-content::after { font-size: 1.4rem; right: -3%; padding: 0.4rem 0.8rem; }
+    .shane-page .char-hero-content::before { font-size: 0.65rem; padding: 0.4rem 0.8rem; }
+    .shane-page .np-setlist { padding: 1.2rem 0.6rem; }
+  }
+
+
+  /* ================================================================
+     CODY — BAYOU JUKE JOINT HANDBILL
+     Tea-stained paper tacked to weathered cypress wood with brass
+     tacks. Hand-painted festival flyer warmth. Mardi Gras gold/green
+     accents. The record player stays intact — handbill paper wraps
+     around it like the turntable is sitting on the bar at a juke.
+     ================================================================ */
+  .cody-page {
+    background:
+      /* cypress wood grain — vertical planks */
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.45) 0px, rgba(0,0,0,0.45) 1px,
+        transparent 1px, transparent 140px),
+      repeating-linear-gradient(0deg,
+        rgba(255, 200, 100, 0.015) 0px, rgba(255, 200, 100, 0.015) 2px,
+        transparent 2px, transparent 4px),
+      radial-gradient(ellipse at 50% 30%, #2a1a08 0%, #1a1004 60%, #0a0502 100%);
+    color: #2a1808;
+  }
+  .cody-page::after { display: none; }
+
+  /* sections = tea-stained handbills tacked to the wood */
+  .cody-page .char-section {
+    position: relative;
+    max-width: 900px;
+    margin: 2.5rem auto;
+    padding: 2.5rem 2.2rem 3rem;
+    background:
+      radial-gradient(circle, rgba(120, 70, 20, 0.07) 0.5px, transparent 0.8px) 0 0 / 4px 4px,
+      radial-gradient(ellipse at 18% 22%, rgba(180, 110, 30, 0.12) 0%, transparent 30%),
+      radial-gradient(ellipse at 82% 78%, rgba(120, 70, 20, 0.10) 0%, transparent 35%),
+      linear-gradient(165deg, #f4e0a8 0%, #e8c878 60%, #c8a85a 100%);
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    box-shadow:
+      0 12px 24px rgba(0,0,0,0.6),
+      0 2px 4px rgba(0,0,0,0.5),
+      inset 0 0 80px rgba(120, 70, 20, 0.12);
+    transform: rotate(-0.5deg);
+    transition: transform 0.3s ease;
+  }
+  .cody-page .char-section:nth-of-type(even) { transform: rotate(0.6deg); }
+  .cody-page .char-section:nth-of-type(3n) { transform: rotate(-0.9deg); }
+  .cody-page .char-section:hover { transform: rotate(0deg); }
+  /* BRASS TACKS in corners (not staples — bayou vibe) */
+  .cody-page .char-section::before,
+  .cody-page .char-section::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc 0%, #f4d27a 30%, #8a5a1a 90%);
+    box-shadow:
+      0 0 0 1px #2a1808,
+      0 2px 4px rgba(0,0,0,0.6),
+      inset 0 -2px 3px rgba(60, 30, 8, 0.5);
+    z-index: 3;
+  }
+  .cody-page .char-section::before { left: 16px; }
+  .cody-page .char-section::after  { right: 16px; }
+
+  /* HERO — top of the handbill */
+  .cody-page .char-hero {
+    position: relative;
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    min-height: 540px;
+    padding: 0;
+    background:
+      radial-gradient(circle, rgba(80, 40, 10, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      radial-gradient(ellipse at 50% 70%, #5a3a14 0%, #2a1808 70%, #100a04 100%);
+    border: 2px solid #6a4014;
+    box-shadow:
+      0 0 0 4px #2a1808,
+      0 0 0 5px #d49a3a,
+      0 18px 36px rgba(0,0,0,0.85),
+      inset 0 0 90px rgba(0,0,0,0.5);
+    transform: rotate(-0.7deg);
+    overflow: hidden;
+  }
+  .cody-page .char-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 100%, rgba(0,0,0,0.85) 0%, transparent 18%),
+      radial-gradient(ellipse at 100% 100%, rgba(0,0,0,0.85) 0%, transparent 18%),
+      radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.7) 0%, transparent 22%);
+    z-index: 2;
+  }
+  /* brass tacks holding hero down */
+  .cody-page .char-hero::after {
+    content: '';
+    position: absolute;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc 0%, #f4d27a 30%, #8a5a1a 90%);
+    box-shadow: 0 0 0 1px #2a1808, 0 2px 4px rgba(0,0,0,0.7);
+    z-index: 4;
+  }
+  .cody-page .char-hero-bg {
+    filter: contrast(1.1) saturate(0.85) sepia(0.35) brightness(0.7);
+    opacity: 0.6;
+    mix-blend-mode: screen;
+  }
+  .cody-page .char-hero-bg::after { display: none; }
+
+  .cody-page .char-hero-content {
+    position: relative;
+    z-index: 3;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+  }
+  /* band tag = warm cream bar */
+  .cody-page .char-band-tag {
+    display: inline-block;
+    padding: 0.6rem 2.5rem;
+    background: #2a1808;
+    color: #fff4cc;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 0.95rem;
+    letter-spacing: 0.3em;
+    border: 2px solid #f4d27a;
+    box-shadow: 0 3px 0 #6a4014, 0 5px 10px rgba(0,0,0,0.6);
+    transform: rotate(-0.8deg);
+    text-shadow: none;
+  }
+  .cody-page .char-band-tag::before,
+  .cody-page .char-band-tag::after { display: none; }
+
+  /* "CODY" title = hand-painted juke joint sign */
+  .cody-page .char-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(5rem, 16vw, 11rem);
+    letter-spacing: 0.04em;
+    line-height: 0.85;
+    margin: 1.8rem 0 1rem;
+    color: transparent;
+    background-image:
+      linear-gradient(180deg,
+        #fff8d8 0%,
+        #f4d27a 25%,
+        #d49a3a 55%,
+        #8a5a1a 85%,
+        #3a2410 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter:
+      drop-shadow(3px 3px 0 #2a1808)
+      drop-shadow(6px 6px 0 #6a4014)
+      drop-shadow(0 0 30px rgba(244, 200, 100, 0.6))
+      drop-shadow(0 6px 12px rgba(0,0,0,0.8));
+    transform: rotate(-1deg);
+  }
+
+  .cody-page .char-role {
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: #fff4cc;
+    text-transform: uppercase;
+    margin: 0.5rem 0 2rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .cody-page .char-role span { color: #d49a3a; }
+
+  /* CHAT button = paper RAFFLE TICKET with brass border */
+  .cody-page .char-hero .char-chat-btn,
+  .cody-page .char-final-cta .char-chat-btn {
+    display: inline-block;
+    padding: 1.3rem 2.5rem 1.3rem 4.5rem;
+    background:
+      radial-gradient(circle at 8% 50%, transparent 9px, #fff4cc 10px) left center / 100% 100% no-repeat,
+      linear-gradient(180deg, #fff4cc 0%, #e8c878 100%);
+    color: #2a1808;
+    border: 3px solid #8a5a1a;
+    border-radius: 4px;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow:
+      0 0 0 2px #2a1808,
+      0 5px 0 #6a4014,
+      0 10px 18px rgba(0,0,0,0.6);
+    text-shadow: none;
+    transform: rotate(-2deg);
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .cody-page .char-hero .char-chat-btn::before {
+    content: '';
+    position: absolute;
+    top: 8%; bottom: 8%;
+    left: 30px;
+    border-left: 2px dashed #2a1808;
+  }
+  .cody-page .char-hero .char-chat-btn::after {
+    content: 'ADMIT ONE';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: #6a4014;
+    font-weight: 900;
+  }
+  .cody-page .char-hero .char-chat-btn:hover,
+  .cody-page .char-final-cta .char-chat-btn:hover {
+    transform: rotate(-1deg) translateY(-3px);
+    box-shadow:
+      0 0 0 2px #2a1808,
+      0 8px 0 #6a4014,
+      0 14px 24px rgba(0,0,0,0.7),
+      0 0 28px rgba(244, 200, 100, 0.6);
+  }
+
+  /* BAYOU NIGHT diagonal stamp */
+  .cody-page .char-hero-content::after {
+    content: '⚜ BAYOU NIGHT ⚜';
+    position: absolute;
+    top: 18%;
+    right: -10%;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.4rem, 3.6vw, 2.4rem);
+    letter-spacing: 0.1em;
+    color: rgba(244, 200, 100, 0.95);
+    border: 5px solid rgba(244, 200, 100, 0.95);
+    padding: 0.5rem 1.4rem;
+    transform: rotate(16deg);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 0 2px rgba(244, 200, 100, 0.95);
+    background: transparent;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.9;
+  }
+  /* ZYDECO LIVE banner */
+  .cody-page .char-hero-content::before {
+    content: '⚜ ZYDECO LIVE · BAYOU BEATS · ALL NIGHT LONG ⚜';
+    position: absolute;
+    bottom: 22%;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    background: #d49a3a;
+    color: #2a1808;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    padding: 0.5rem 1.6rem;
+    border: 2px solid #2a1808;
+    box-shadow: 0 4px 0 #6a4014;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* section headers = hand-painted sign on weathered wood */
+  .cody-page .char-h2 {
+    display: inline-block;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: #2a1808;
+    color: #fff4cc;
+    padding: 0.6rem 1.6rem;
+    margin: 0 0 2rem;
+    border: 3px solid #f4d27a;
+    box-shadow: 6px 6px 0 #6a4014, 0 6px 12px rgba(0,0,0,0.4);
+    transform: rotate(-1deg);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .cody-page .char-h2::before { content: '⚜ '; color: #f4d27a; }
+  .cody-page .char-h2::after  { content: ' ⚜'; color: #f4d27a; }
+
+  /* about — newsprint feature in sepia */
+  .cody-page .char-about p {
+    font-family: 'Special Elite', 'Times New Roman', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: #2a1808;
+    margin-bottom: 1.2rem;
+    text-shadow: none;
+  }
+  .cody-page .char-about p strong { color: #6a4014; }
+  .cody-page .char-about p em { color: #8a5a1a; font-style: italic; }
+  .cody-page .char-about p:first-of-type::first-letter {
+    font-family: 'Cinzel Decorative', serif;
+    float: left;
+    font-size: 5.5rem;
+    line-height: 0.85;
+    margin: 0.2rem 0.6rem 0 0;
+    color: #8a5a1a;
+    text-shadow: 3px 3px 0 #2a1808;
+  }
+  /* tags = embroidered patches with brass thread */
+  .cody-page .char-tag {
+    background: #2a1808;
+    color: #fff4cc;
+    border: 2px dashed #d49a3a;
+    border-radius: 0;
+    font-family: 'Special Elite', monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding: 0.4rem 0.9rem;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 #6a4014;
+    transform: rotate(-1deg);
+    transition: transform 0.2s ease;
+  }
+  .cody-page .char-tags > .char-tag:nth-child(even) { transform: rotate(1.5deg); }
+  .cody-page .char-tags > .char-tag:nth-child(3n) { transform: rotate(-2deg); }
+  .cody-page .char-tag:hover { transform: rotate(0deg) translateY(-2px); }
+
+  /* quotes = torn handbills with marker writing */
+  .cody-page .quote-card {
+    background:
+      radial-gradient(circle, rgba(80, 40, 10, 0.08) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #fff4cc 0%, #e8c878 100%);
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    color: #2a1808;
+    font-family: 'Special Elite', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
+    padding: 1.6rem 1.4rem;
+    position: relative;
+    transform: rotate(-1.5deg);
+    transition: transform 0.25s ease;
+  }
+  .cody-page .quote-grid > .quote-card:nth-child(2) { transform: rotate(1.2deg); }
+  .cody-page .quote-grid > .quote-card:nth-child(3) { transform: rotate(-0.7deg); }
+  .cody-page .quote-grid > .quote-card:nth-child(4) { transform: rotate(1.8deg); }
+  .cody-page .quote-card:hover { transform: rotate(0deg) scale(1.03); }
+  .cody-page .quote-card::before {
+    content: '“';
+    position: absolute;
+    top: -1.2rem;
+    left: 0.6rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #8a5a1a;
+    line-height: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  }
+  /* brass tack instead of tape */
+  .cody-page .quote-card::after {
+    content: '';
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc, #d49a3a 50%, #6a4014);
+    box-shadow: 0 0 0 1px #2a1808, 0 1px 2px rgba(0,0,0,0.6);
+  }
+
+  /* THE BAND — warm wood tour billing */
+  .cody-page .band-poster-wrap {
+    border: 2px solid #2a1808;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.6), 0 0 0 4px #f4d27a;
+    filter: contrast(1.08) saturate(0.85) sepia(0.18);
+    transform: rotate(-0.8deg);
+    max-width: 580px;
+    margin: 0 auto 2.5rem;
+  }
+  .cody-page .member-grid {
+    background: #2a1808;
+    border: 3px solid #d49a3a;
+    padding: 1.8rem 1.5rem;
+    box-shadow: 6px 6px 0 #6a4014, 0 8px 18px rgba(0,0,0,0.5);
+    transform: rotate(0.4deg);
+    position: relative;
+  }
+  .cody-page .member-grid::before {
+    content: '⚜ PRESENTING ⚜';
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    background: #d49a3a;
+    color: #2a1808;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 0.9rem;
+    letter-spacing: 0.25em;
+    padding: 0.4rem 1.6rem;
+    border: 2px solid #2a1808;
+    box-shadow: 0 3px 0 #2a1808;
+  }
+  .cody-page .member-card {
+    background: transparent;
+    border: none;
+    border-bottom: 2px dashed rgba(212, 154, 58, 0.4);
+    border-left: none;
+    border-radius: 0;
+    padding: 1rem 0;
+    box-shadow: none;
+    transition: padding-left 0.2s ease;
+  }
+  .cody-page .member-card:hover { padding-left: 0.8rem; }
+  .cody-page .member-card:last-child { border-bottom: none; }
+  .cody-page .member-name {
+    color: #f4d27a;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.7rem;
+    text-shadow: 2px 2px 0 #6a4014;
+  }
+  .cody-page .member-role {
+    color: #d4b86a;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+  .cody-page .member-desc {
+    color: #f4e8c0;
+    font-family: 'Special Elite', serif;
+    font-size: 0.95rem;
+    margin-top: 0.4rem;
+  }
+
+  /* RECORD PLAYER — wrapped in handbill paper, brass tacks corner it.
+     The platter / record / VU / tonearm core stays as-is (works great).
+     Only the cabinet/crate get the handbill treatment. */
+  .cody-page .rp-stage {
+    background:
+      radial-gradient(circle, rgba(120, 70, 20, 0.07) 0.5px, transparent 0.8px) 0 0 / 4px 4px,
+      radial-gradient(ellipse at 25% 18%, rgba(180, 110, 30, 0.10) 0%, transparent 35%),
+      linear-gradient(165deg, #f4e0a8 0%, #e8c878 60%, #c8a85a 100%);
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    border-radius: 10px;
+    box-shadow:
+      0 12px 22px rgba(0, 0, 0, 0.55),
+      0 2px 4px rgba(0, 0, 0, 0.4),
+      inset 0 0 60px rgba(120, 70, 20, 0.10);
+    transform: rotate(-0.8deg);
+    position: relative;
+  }
+  /* brass tacks at corners of the rp-stage */
+  .cody-page .rp-stage::before,
+  .cody-page .rp-stage::after {
+    content: '';
+    position: absolute;
+    top: 12px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc 0%, #f4d27a 30%, #8a5a1a 90%);
+    box-shadow: 0 0 0 1px #2a1808, 0 2px 4px rgba(0,0,0,0.6);
+    z-index: 5;
+  }
+  .cody-page .rp-stage::before { left: 12px; }
+  .cody-page .rp-stage::after  { right: 12px; }
+
+  /* The crate gets the handbill setlist treatment */
+  .cody-page .rp-crate {
+    background:
+      repeating-linear-gradient(180deg,
+        transparent 0px, transparent 31px,
+        rgba(80, 40, 10, 0.18) 31px, rgba(80, 40, 10, 0.18) 32px),
+      linear-gradient(180deg, #fff4cc 0%, #e8c878 100%);
+    color: #2a1808;
+    border: 1px solid rgba(80, 40, 10, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 220, 160, 0.3), 0 8px 16px rgba(0,0,0,0.5);
+    transform: rotate(-1.2deg);
+  }
+  .cody-page .rp-crate-head {
+    color: #2a1808;
+    font-family: 'Cinzel Decorative', serif;
+    text-decoration: underline;
+    text-decoration-color: #8a5a1a;
+    text-decoration-thickness: 2px;
+  }
+  .cody-page .rp-crate-sub {
+    color: #6a4014;
+    border-bottom: 1px dashed rgba(80, 40, 10, 0.4);
+  }
+  .cody-page .rp-track { border-bottom: 1px dashed rgba(80, 40, 10, 0.25); transition: padding-left 0.15s ease; }
+  .cody-page .rp-track:hover { background: rgba(212, 154, 58, 0.15); padding-left: 0.8rem; }
+  .cody-page .rp-track.is-active {
+    background: rgba(138, 90, 26, 0.18);
+    box-shadow: inset 4px 0 0 #8a5a1a;
+  }
+  .cody-page .rp-track-name { color: #2a1808; font-family: 'Special Elite', monospace; }
+  .cody-page .rp-track-len { color: #6a4014; }
+  .cody-page .rp-crate-scribble {
+    color: #6a4014;
+    border-top: 1px dashed rgba(80, 40, 10, 0.4);
+    font-family: 'Special Elite', serif;
+  }
+  .cody-page .rp-crate-scribble strong { color: #2a1808; font-family: 'Cinzel Decorative', serif; }
+
+  /* spoiler = bayou journal page */
+  .cody-page .spoiler-details {
+    background:
+      radial-gradient(circle, rgba(80, 40, 10, 0.10) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #e8c878 0%, #c8a85a 100%);
+    border: 2px solid #6a4014;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+    transform: rotate(0.4deg);
+  }
+  .cody-page .spoiler-details summary {
+    background:
+      repeating-linear-gradient(45deg,
+        #d49a3a 0px, #d49a3a 20px,
+        #2a1808 20px, #2a1808 40px);
+    padding: 1.2rem;
+    border-bottom: 3px solid #2a1808;
+  }
+  .cody-page .spoiler-warn {
+    color: #fff4cc;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-shadow: 2px 2px 0 #2a1808;
+  }
+  .cody-page .spoiler-cta {
+    color: #fff4cc;
+    font-family: 'Special Elite', monospace;
+    text-shadow: 1px 1px 0 #2a1808;
+  }
+  .cody-page .spoiler-content { color: #2a1808; font-family: 'Special Elite', serif; padding: 2rem; line-height: 1.7; }
+  .cody-page .spoiler-content p { color: #2a1808; }
+  .cody-page .spoiler-content strong { color: #6a4014; }
+  .cody-page .spoiler-content em { color: #8a5a1a; }
+
+  /* big quote = newspaper pull-quote with brass borders */
+  .cody-page .scorch-quote {
+    background:
+      radial-gradient(circle, rgba(80, 40, 10, 0.08) 0.6px, transparent 0.9px) 0 0 / 3px 3px,
+      linear-gradient(180deg, #fff4cc 0%, #e8c878 100%);
+    border-top: 4px solid #8a5a1a;
+    border-bottom: 4px solid #8a5a1a;
+    border-left: none;
+    border-right: none;
+    color: #2a1808;
+    font-family: 'Cinzel Decorative', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2.1rem);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.55);
+    text-shadow: none;
+    transform: rotate(-0.6deg);
+    padding: 2rem;
+    position: relative;
+  }
+  .cody-page .scorch-quote::before {
+    content: '“';
+    position: absolute;
+    top: -2rem;
+    left: 1rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 8rem;
+    font-weight: 900;
+    color: #8a5a1a;
+    line-height: 1;
+    opacity: 0.3;
+  }
+  .cody-page .scorch-quote cite {
+    background: none;
+    -webkit-text-fill-color: #8a5a1a;
+    color: #8a5a1a;
+    font-family: 'Cinzel Decorative', serif;
+    font-style: normal;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  }
+
+  /* gallery — photo with tea stains and brass tack corners */
+  .cody-page .gallery-entry {
+    background: #fff4cc;
+    border: none;
+    padding: 0.8rem 0.8rem 3rem;
+    transform: rotate(-2deg);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4);
+    position: relative;
+    max-width: 360px;
+    margin: 0 auto;
+    transition: transform 0.25s ease;
+  }
+  /* 2 brass tacks at top corners */
+  .cody-page .gallery-entry::before,
+  .cody-page .gallery-entry::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff4cc, #d49a3a 50%, #6a4014);
+    box-shadow: 0 0 0 1px #2a1808, 0 1px 2px rgba(0,0,0,0.6);
+    z-index: 3;
+  }
+  .cody-page .gallery-entry::before { left: 8px; }
+  .cody-page .gallery-entry::after  { right: 8px; }
+  .cody-page .gallery-entry:hover { transform: rotate(-0.5deg) translateY(-5px); }
+  .cody-page .gallery-entry-cover { filter: contrast(1.05) saturate(0.9) sepia(0.15); }
+  .cody-page .gallery-entry-overlay { background: transparent; color: #2a1808; bottom: 0; padding: 0.6rem 0.8rem; }
+  .cody-page .gallery-entry-eyebrow { color: #8a5a1a; font-family: 'Special Elite', monospace; }
+  .cody-page .gallery-entry-count { color: #2a1808; font-family: 'Cinzel Decorative', serif; font-size: 1.4rem; font-weight: 900; }
+  .cody-page .gallery-entry-cta {
+    background: #2a1808;
+    color: #fff4cc;
+    border: 1px solid #d49a3a;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 #6a4014;
+  }
+  .cody-page .gallery-sub { color: #f4d27a; font-family: 'Special Elite', monospace; }
+
+  /* final CTA */
+  .cody-page .char-final-cta {
+    max-width: 900px;
+    margin: 3rem auto 4rem;
+    padding: 2.5rem 2rem;
+    background: transparent;
+    border: none;
+  }
+  .cody-page .char-final-cta .char-chat-btn {
+    font-size: 1.35rem;
+    padding: 1.6rem 3rem 1.6rem 5.5rem;
+    transform: rotate(-1.5deg);
+  }
+  .cody-page .char-back-link {
+    color: #b8a060;
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.15em;
+  }
+  .cody-page .char-back-link:hover { color: #f4d27a; }
+
+  /* close button */
+  .cody-page .char-close {
+    background: #2a1808;
+    color: #d49a3a;
+    border: 2px solid #d49a3a;
+    border-radius: 0;
+    box-shadow: 0 4px 0 #6a4014;
+  }
+  .cody-page .char-close:hover {
+    background: #d49a3a;
+    color: #2a1808;
+    box-shadow: 0 4px 0 #2a1808;
+  }
+
+  @media (max-width: 760px) {
+    .cody-page .char-section { padding: 2rem 1.2rem 2.4rem; margin: 1.6rem 0.6rem; }
+    .cody-page .char-hero-content::after { font-size: 1.3rem; right: -3%; padding: 0.4rem 0.8rem; }
+    .cody-page .char-hero-content::before { font-size: 0.6rem; padding: 0.4rem 0.8rem; }
+  }
+
+
 </style>
 </head>
 <body>
@@ -4252,7 +6524,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 <!-- ====================== SCORCH CHARACTER PAGE ====================== -->
-<div class="character-page" id="scorchPage" aria-hidden="true">
+<div class="character-page scorch-page" id="scorchPage" aria-hidden="true">
   <button class="char-close" id="scorchClose" aria-label="Close" type="button">✕</button>
 
   <!-- HERO -->
