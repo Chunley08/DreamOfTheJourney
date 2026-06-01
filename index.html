@@ -5009,6 +5009,1271 @@
   }
 
 
+  /* ================================================================
+     MOBILE FIX — poster transformations were designed desktop-first.
+     This block forces all three character pages (.scorch-page,
+     .shane-page, .cody-page) to behave well on phones:
+       - kill the crooked rotations (they overflow viewports + look
+         worse on small screens because there's less canvas around them)
+       - shrink and reposition diagonal stamps that hung off the edge
+       - cap title/font sizes
+       - collapse multi-column layouts to single column
+       - reduce expensive shadow stacks
+       - hide/disable hover-only effects on touch
+     One :is() block keeps selector count down.
+     ================================================================ */
+  @media (max-width: 760px) {
+    /* hard stop on any sideways scrolling caused by rotated boxes */
+    html, body { overflow-x: hidden; max-width: 100%; }
+    .character-page { overflow-x: hidden; }
+
+    /* ---- ALL THREE POSTER PAGES: section straightening + sizing ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-section,
+    :is(.scorch-page, .shane-page, .cody-page) .char-section:nth-of-type(even),
+    :is(.scorch-page, .shane-page, .cody-page) .char-section:nth-of-type(3n),
+    :is(.scorch-page, .shane-page, .cody-page) .char-section:hover {
+      transform: none;
+      margin: 1.2rem 0.5rem;
+      padding: 1.8rem 1.1rem 2.2rem;
+      max-width: calc(100% - 1rem);
+    }
+    /* hide decorative staples / tape / brass tacks on tiny screens
+       (they hung off the edge and were noisy at this scale) */
+    :is(.scorch-page, .shane-page, .cody-page) .char-section::before,
+    :is(.scorch-page, .shane-page, .cody-page) .char-section::after {
+      display: none;
+    }
+
+    /* ---- HERO: smaller, no rotation, stamps brought in-frame ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero {
+      min-height: 380px;
+      transform: none;
+      margin: 0.5rem;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero-content {
+      padding: 2.5rem 1rem 1.8rem;
+    }
+    /* diagonal "SOLD OUT" / "MEMBERS ONLY" / "BAYOU NIGHT" stamps */
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero-content::after {
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      right: 6%;
+      top: 6%;
+      padding: 0.3rem 0.7rem;
+      border-width: 3px;
+      box-shadow: inset 0 0 0 1.5px currentColor;
+    }
+    /* tour ribbon banners */
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero-content::before {
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      padding: 0.35rem 0.7rem;
+      bottom: 16%;
+      max-width: 90%;
+      white-space: normal;
+      text-align: center;
+    }
+
+    /* ---- TITLES: cap smaller, kill rotation ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-title {
+      font-size: clamp(3rem, 14vw, 5rem);
+      transform: none;
+      margin: 1rem 0 0.6rem;
+      letter-spacing: 0.03em;
+    }
+    /* Shane's stencil + Cody's gradient have extra drop-shadows we don't
+       need stacked on a small screen — simplify them */
+    .shane-page .char-title,
+    .cody-page .char-title {
+      filter:
+        drop-shadow(2px 2px 0 #0a0e16)
+        drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+    }
+    .scorch-page .char-title {
+      text-shadow:
+        0 0 4px #f4e8c0,
+        3px 3px 0 #1a0202,
+        0 0 30px rgba(255, 90, 20, 0.7);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+    }
+
+    /* ---- SECTION HEADERS: smaller, no offset shadow ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-h2 {
+      font-size: clamp(1.2rem, 5vw, 1.7rem);
+      transform: none;
+      padding: 0.5rem 1rem;
+      box-shadow: 3px 3px 0 #2a3548, 0 4px 8px rgba(0,0,0,0.3);
+      letter-spacing: 0.06em;
+    }
+
+    /* ---- ABOUT: drop cap shrunk so it doesn't eat the paragraph ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-about p:first-of-type::first-letter {
+      font-size: 3.2rem;
+    }
+
+    /* ---- TAGS: unrotate so they wrap cleanly ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-tag,
+    :is(.scorch-page, .shane-page, .cody-page) .char-tags > .char-tag:nth-child(n) {
+      transform: none;
+      font-size: 0.7rem;
+      padding: 0.35rem 0.7rem;
+    }
+
+    /* ---- QUOTES: unrotate ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .quote-card,
+    :is(.scorch-page, .shane-page, .cody-page) .quote-grid > .quote-card:nth-child(n) {
+      transform: none;
+      font-size: 1rem;
+      padding: 1.2rem 1rem 1.4rem;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .quote-card:hover {
+      transform: none;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .quote-card::before {
+      font-size: 3rem;
+      top: -0.6rem;
+    }
+
+    /* ---- BAND lineup: unrotate, tighter ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .member-grid {
+      transform: none;
+      padding: 1.4rem 1rem;
+      box-shadow: 4px 4px 0 #2a3548, 0 6px 12px rgba(0,0,0,0.4);
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .member-grid::before {
+      font-size: 0.75rem;
+      padding: 0.3rem 1rem;
+      letter-spacing: 0.2em;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .member-name { font-size: 1.4rem; }
+    :is(.scorch-page, .shane-page, .cody-page) .band-poster-wrap {
+      transform: none;
+      max-width: 100%;
+      margin-bottom: 1.6rem;
+    }
+
+    /* ---- MUSIC PLAYERS: single column, no rotation ---- */
+    :is(.scorch-page, .shane-page) .setlist-stage {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1.4rem 1rem;
+      transform: none;
+    }
+    :is(.scorch-page, .shane-page) .np-setlist {
+      transform: none;
+      padding: 1.2rem 1rem;
+    }
+    .scorch-page .np-setlist { padding-left: 2.2rem; } /* keep room for red margin line */
+    .cody-page .rp-stage {
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+      padding: 1.2rem 0.8rem;
+      transform: none;
+    }
+    .cody-page .rp-crate { transform: none; }
+    /* Cody's record player platter is fine — it's already responsive */
+
+    /* ---- CHAT BUTTONS: bigger touch target, less rotation, less padding ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-chat-btn {
+      transform: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      padding: 1rem 1.4rem 1rem 2.6rem;
+      min-height: 48px;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-chat-btn:hover {
+      transform: translateY(-2px);
+    }
+    /* shrink the ADMIT ONE / VIP sideways text */
+    :is(.scorch-page, .shane-page, .cody-page) .char-chat-btn::after {
+      font-size: 0.45rem;
+    }
+
+    /* ---- BIG PULL-QUOTE ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .scorch-quote {
+      transform: none;
+      padding: 1.5rem 1.1rem;
+      font-size: 1.1rem;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .scorch-quote::before {
+      font-size: 5rem;
+      top: -1.2rem;
+    }
+
+    /* ---- SPOILER block ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .spoiler-details {
+      transform: none;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .spoiler-content {
+      padding: 1.2rem 1rem;
+      font-size: 0.95rem;
+    }
+
+    /* ---- GALLERY ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .gallery-entry {
+      transform: none;
+      max-width: 280px;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .gallery-entry:hover {
+      transform: translateY(-3px);
+    }
+
+    /* ---- FINAL CTA + close button ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-final-cta {
+      padding: 1.5rem 1rem;
+      margin: 1.5rem auto 2.5rem;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-final-cta .char-chat-btn {
+      font-size: 1rem;
+      padding: 1.1rem 1.4rem 1.1rem 2.6rem;
+      transform: none;
+    }
+
+    /* ---- CLOSE BUTTON: bigger, easier to tap ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .char-close {
+      width: 44px; height: 44px;
+      font-size: 1.4rem;
+    }
+
+    /* ---- "is-playing" pulses can chug on weak GPUs — keep static ---- */
+    :is(.scorch-page, .shane-page, .cody-page) .np-console.is-playing .np-btn.np-play,
+    .cody-page .rp-cabinet.is-playing .rp-btn.rp-play {
+      animation: none;
+    }
+  }
+
+  /* ---- EXTRA-TINY screens (≤ 380px): shave more ---- */
+  @media (max-width: 380px) {
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero {
+      min-height: 320px;
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-title {
+      font-size: clamp(2.6rem, 14vw, 4rem);
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-hero-content::before {
+      display: none; /* tour banner gets in the way at this size */
+    }
+    :is(.scorch-page, .shane-page, .cody-page) .char-band-tag {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      padding: 0.4rem 1.4rem;
+    }
+  }
+
+
+
+  /* ============================================================
+     SCORCH HEAVY-METAL CONCERT POSTER REDESIGN
+     A poster aesthetic — torn paper, stamps, tape, blood splatter,
+     ticket stubs, polaroids, merch. All CSS — zero new RAF loops.
+     ============================================================ */
+
+  /* === POSTER HERO === */
+  .scorch-page .poster-hero {
+    position: relative;
+    min-height: 100vh;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(255, 90, 31, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(120, 20, 10, 0.4) 0%, transparent 60%),
+      linear-gradient(180deg, #0a0606 0%, #18080a 50%, #0a0606 100%);
+  }
+  /* photocopy/halftone grit overlay */
+  .scorch-page .poster-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 3px),
+      radial-gradient(circle at 20% 30%, rgba(255, 90, 31, 0.08), transparent 25%),
+      radial-gradient(circle at 80% 70%, rgba(232, 50, 50, 0.06), transparent 25%);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* hero photo behind everything */
+  .scorch-page .poster-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: contrast(1.25) saturate(0.6) brightness(0.42) grayscale(0.4);
+    mix-blend-mode: luminosity;
+    z-index: 0;
+  }
+  .scorch-page .poster-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(10,6,6,0.85) 70%, #0a0606 100%);
+  }
+
+  /* the band tag at top */
+  .scorch-page .poster-tag {
+    position: relative;
+    z-index: 2;
+    font-family: 'Special Elite', monospace;
+    font-size: clamp(0.7rem, 1.6vw, 0.95rem);
+    letter-spacing: 0.6em;
+    text-transform: uppercase;
+    color: #ffaa00;
+    text-shadow: 0 0 18px rgba(255, 90, 31, 0.7), 0 2px 0 #1a0606;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px dashed rgba(255, 170, 0, 0.4);
+    margin-bottom: 1.5rem;
+  }
+
+  /* massive title */
+  .scorch-page .poster-title {
+    position: relative;
+    z-index: 2;
+    font-family: 'Metal Mania', 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(4.5rem, 18vw, 14rem);
+    letter-spacing: 0.02em;
+    line-height: 0.9;
+    color: transparent;
+    background-image: linear-gradient(180deg,
+      #fff4cc 0%,
+      #ffaa00 25%,
+      #ff5a1f 55%,
+      #c8281a 80%,
+      #4a0808 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    filter:
+      drop-shadow(0 6px 0 #1a0606)
+      drop-shadow(0 0 30px rgba(255, 90, 31, 0.5))
+      drop-shadow(0 0 60px rgba(200, 40, 26, 0.35));
+    text-shadow: 0 0 32px rgba(255, 100, 30, 0.3);
+    transform: rotate(-1deg) skewX(-1deg);
+    margin: 0;
+  }
+
+  .scorch-page .poster-subtitle {
+    position: relative;
+    z-index: 2;
+    margin-top: 1rem;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 3.5vw, 2rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #f4e8c0;
+    text-shadow:
+      0 0 18px rgba(255, 170, 0, 0.6),
+      2px 2px 0 #1a0606;
+    transform: rotate(0.5deg);
+  }
+  .scorch-page .poster-role {
+    position: relative;
+    z-index: 2;
+    margin-top: 0.8rem;
+    font-family: 'Special Elite', monospace;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    color: #d4b860;
+    letter-spacing: 0.15em;
+  }
+  .scorch-page .poster-role span { color: #ff5a1f; }
+
+  /* the ticket-stub chat CTA */
+  .scorch-page .ticket-cta {
+    position: relative;
+    z-index: 2;
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
+    display: inline-block;
+    padding: 1.2rem 2rem 1.2rem 3.2rem;
+    background: linear-gradient(95deg, #f4e8c0 0%, #d4b860 100%);
+    color: #1a0606;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(0.95rem, 2.3vw, 1.25rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    /* perforated edge on the left */
+    -webkit-mask:
+      radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
+            mask:
+      radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
+    box-shadow:
+      0 4px 0 #6a4014,
+      0 8px 20px rgba(0,0,0,0.6),
+      inset 0 0 14px rgba(120, 70, 20, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transform: rotate(-2deg);
+  }
+  .scorch-page .ticket-cta::before {
+    content: 'ADMIT ONE';
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: #6a4014;
+  }
+  .scorch-page .ticket-cta:hover {
+    transform: rotate(0deg) translateY(-3px) scale(1.02);
+    box-shadow:
+      0 7px 0 #6a4014,
+      0 12px 28px rgba(0,0,0,0.7),
+      inset 0 0 14px rgba(120, 70, 20, 0.3);
+  }
+
+  /* TONIGHT stamp — slammed onto poster */
+  .scorch-page .stamp {
+    position: absolute;
+    z-index: 3;
+    padding: 0.6rem 1.2rem;
+    border: 4px double #ff3a1a;
+    background: rgba(10, 6, 6, 0.4);
+    color: #ff5a1f;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(0.7rem, 1.8vw, 1.1rem);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 0 0 14px rgba(255, 90, 31, 0.6);
+    box-shadow:
+      0 0 0 1px #ff3a1a,
+      0 0 30px rgba(255, 90, 31, 0.3),
+      inset 0 0 12px rgba(0,0,0,0.4);
+    transform: rotate(-12deg);
+  }
+  .scorch-page .stamp--tonight { top: 8%; right: 6%; transform: rotate(-12deg); }
+  .scorch-page .stamp--age     { bottom: 9%; left: 7%; transform: rotate(8deg); color: #ffaa00; border-color: #ffaa00; box-shadow: 0 0 0 1px #ffaa00, 0 0 30px rgba(255, 170, 0, 0.35), inset 0 0 12px rgba(0,0,0,0.4); }
+  @media (max-width: 700px) {
+    .scorch-page .stamp--tonight { top: 4%; right: 4%; padding: 0.4rem 0.8rem; }
+    .scorch-page .stamp--age     { bottom: 4%; left: 4%; padding: 0.4rem 0.8rem; }
+  }
+
+  /* washi-tape strips */
+  .scorch-page .tape {
+    position: absolute;
+    width: 90px;
+    height: 22px;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(255, 255, 255, 0.18) 0px,
+        rgba(255, 255, 255, 0.18) 8px,
+        transparent 8px, transparent 16px),
+      linear-gradient(180deg, #ffd86a 0%, #d49a3a 100%);
+    opacity: 0.85;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  /* blood / fire splatter scribbles using SVG inline as background */
+  .scorch-page .splat {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.55;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+  /* SVG splatter — embedded so we don't fetch an asset */
+  .scorch-page .splat--tl {
+    top: -2%; left: -2%;
+    width: 280px; height: 280px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23c8281a' opacity='0.85'><circle cx='40' cy='40' r='32'/><circle cx='95' cy='25' r='10'/><circle cx='25' cy='100' r='8'/><circle cx='110' cy='70' r='14'/><circle cx='70' cy='85' r='6'/><circle cx='50' cy='130' r='4'/><circle cx='130' cy='110' r='5'/><ellipse cx='150' cy='40' rx='15' ry='8' transform='rotate(20 150 40)'/></g></svg>");
+  }
+  .scorch-page .splat--br {
+    bottom: -2%; right: -2%;
+    width: 240px; height: 240px;
+    transform: scaleX(-1) rotate(15deg);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23ff5a1f' opacity='0.7'><circle cx='50' cy='50' r='26'/><circle cx='100' cy='35' r='12'/><circle cx='130' cy='95' r='15'/><circle cx='75' cy='110' r='8'/><circle cx='40' cy='140' r='10'/><circle cx='110' cy='150' r='6'/></g></svg>");
+  }
+
+  /* scroll hint */
+  .scorch-page .poster-scroll {
+    position: absolute;
+    z-index: 2;
+    bottom: 1.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Special Elite', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: rgba(244, 232, 192, 0.55);
+    text-transform: uppercase;
+    animation: posterScrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes posterScrollPulse {
+    0%, 100% { opacity: 0.4; transform: translate(-50%, 0); }
+    50%      { opacity: 0.9; transform: translate(-50%, 4px); }
+  }
+
+  /* === POSTER SECTIONS ===
+     A reusable wrapper for every section below the hero — torn-paper feel. */
+  .scorch-page .poster-section {
+    position: relative;
+    padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 5vw, 3rem);
+  }
+  /* stamped-on section header */
+  .scorch-page .poster-h2 {
+    display: inline-block;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ff5a1f;
+    text-shadow:
+      0 0 24px rgba(255, 90, 31, 0.5),
+      3px 3px 0 #1a0606,
+      0 6px 12px rgba(0,0,0,0.7);
+    transform: rotate(-1deg);
+    margin-bottom: 1.5rem;
+    border: 4px double #ff5a1f;
+    padding: 0.4rem 1.5rem;
+    background: rgba(10, 6, 6, 0.4);
+    box-shadow: 0 0 0 1px #ff5a1f, 0 0 24px rgba(255, 90, 31, 0.25), inset 0 0 12px rgba(0,0,0,0.5);
+  }
+  .scorch-page .poster-eyebrow {
+    display: block;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85rem;
+    color: #d4b860;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  /* === TOUR DATES === */
+  .scorch-page .tour-dates {
+    max-width: 900px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    border: 2px solid #1a0606;
+    box-shadow:
+      0 10px 0 #4a0808,
+      0 14px 30px rgba(0,0,0,0.6);
+    transform: rotate(-0.4deg);
+    padding: 1.5rem clamp(1rem, 3vw, 2rem);
+  }
+  .scorch-page .tour-dates-head {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: #4a0808;
+    text-align: center;
+    border-bottom: 2px dashed #4a0808;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .scorch-page .tour-dates-sub {
+    text-align: center;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.8rem;
+    color: #6a3408;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+  .scorch-page .tour-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 130px;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 0.4rem;
+    border-bottom: 1px dashed rgba(74, 8, 8, 0.4);
+    font-family: 'Special Elite', monospace;
+    transition: background 0.15s ease, transform 0.15s ease;
+    cursor: none;
+  }
+  @media (max-width: 640px) {
+    .scorch-page .tour-row {
+      grid-template-columns: 1fr 100px;
+      gap: 0.5rem 0.8rem;
+    }
+    .scorch-page .tour-date { grid-column: 1; }
+    .scorch-page .tour-status { grid-column: 2; grid-row: 1; text-align: right; }
+    .scorch-page .tour-where { grid-column: 1 / -1; font-size: 0.85rem; }
+  }
+  .scorch-page .tour-row:last-child { border-bottom: none; }
+  .scorch-page .tour-row:hover {
+    background: rgba(74, 8, 8, 0.08);
+    transform: translateX(4px);
+  }
+  .scorch-page .tour-date {
+    font-weight: bold;
+    color: #4a0808;
+    font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+    letter-spacing: 0.1em;
+  }
+  .scorch-page .tour-where { color: #1a0606; font-size: clamp(0.85rem, 2vw, 1rem); }
+  .scorch-page .tour-where strong { color: #4a0808; }
+  .scorch-page .tour-status {
+    text-align: right;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .scorch-page .tour-status--sold    { color: #c8281a; }
+  .scorch-page .tour-status--few     { color: #c87a1a; }
+  .scorch-page .tour-status--avail   { color: #2a5a1a; }
+  .scorch-page .tour-status--tba     { color: #6a3408; opacity: 0.65; }
+
+  /* === BIO PANEL (torn paper) === */
+  .scorch-page .bio-panel {
+    max-width: 800px;
+    margin: 0 auto;
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(74, 8, 8, 0.05) 28px, rgba(74, 8, 8, 0.05) 29px),
+      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 2px solid #1a0606;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+    transform: rotate(0.4deg);
+    position: relative;
+    font-family: 'Special Elite', monospace;
+  }
+  .scorch-page .bio-panel p {
+    font-size: clamp(0.95rem, 2.1vw, 1.1rem);
+    line-height: 1.7;
+    color: #1a0606;
+    margin-bottom: 1rem;
+  }
+  .scorch-page .bio-panel p strong { color: #c8281a; }
+  .scorch-page .bio-panel p em { color: #4a0808; font-style: italic; }
+  .scorch-page .bio-panel::before,
+  .scorch-page .bio-panel::after {
+    content: '';
+    position: absolute;
+    width: 100px; height: 24px;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 8px, transparent 8px, transparent 16px),
+      linear-gradient(180deg, #ffd86a, #d49a3a);
+    opacity: 0.85;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .scorch-page .bio-panel::before { top: -10px; left: 16%; transform: rotate(-6deg); }
+  .scorch-page .bio-panel::after  { bottom: -10px; right: 18%; transform: rotate(4deg); }
+
+  /* sticker-patch tags */
+  .scorch-page .sticker-tags {
+    margin-top: 1.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    justify-content: center;
+  }
+  .scorch-page .sticker-patch {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #f4e8c0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: #4a0808;
+    border: 1px dashed #f4e8c0;
+    box-shadow: 0 2px 0 #1a0606, 0 4px 8px rgba(0,0,0,0.5);
+    transform: rotate(var(--rot, -2deg));
+    transition: transform 0.15s ease;
+  }
+  .scorch-page .sticker-patch:nth-child(3n) { --rot: 3deg; background: #c8281a; }
+  .scorch-page .sticker-patch:nth-child(3n+1) { --rot: -3deg; }
+  .scorch-page .sticker-patch:nth-child(5n) { background: #6a3408; }
+  .scorch-page .sticker-patch:hover {
+    transform: rotate(0deg) scale(1.08);
+  }
+
+  /* === QUOTE STUBS === */
+  .scorch-page .stub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.6rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .scorch-page .stub {
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 18px, rgba(74, 8, 8, 0.06) 18px, rgba(74, 8, 8, 0.06) 19px),
+      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    padding: 1.2rem 1.4rem;
+    font-family: 'Special Elite', monospace;
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    line-height: 1.5;
+    border: 1px solid #1a0606;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+    position: relative;
+    transition: transform 0.15s ease;
+  }
+  .scorch-page .stub:nth-child(1) { transform: rotate(-2deg); }
+  .scorch-page .stub:nth-child(2) { transform: rotate(1.5deg); }
+  .scorch-page .stub:nth-child(3) { transform: rotate(-0.8deg); }
+  .scorch-page .stub:hover { transform: rotate(0) scale(1.03); z-index: 2; }
+  .scorch-page .stub::before {
+    content: 'SCORCH SAID';
+    position: absolute;
+    top: -8px; left: 12px;
+    background: #c8281a;
+    color: #f4e8c0;
+    padding: 2px 8px;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    border: 1px solid #1a0606;
+  }
+
+  /* === LINEUP POLAROID ROW === */
+  .scorch-page .lineup-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1rem, 3vw, 2rem);
+    justify-content: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .scorch-page .polaroid {
+    background: #f4e8c0;
+    padding: 0.7rem 0.7rem 2rem;
+    width: clamp(140px, 22vw, 200px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
+    transform: rotate(var(--rot, -3deg));
+    transition: transform 0.2s ease, box-shadow 0.2s ease, z-index 0s linear 0.2s;
+    position: relative;
+    color: #1a0606;
+  }
+  .scorch-page .polaroid:nth-child(2n) { --rot: 2deg; }
+  .scorch-page .polaroid:nth-child(3n) { --rot: -2deg; }
+  .scorch-page .polaroid:nth-child(5n) { --rot: 4deg; }
+  .scorch-page .polaroid:hover {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.7), 0 0 30px rgba(255, 90, 31, 0.3), 0 0 0 1px rgba(0,0,0,0.5);
+    z-index: 10;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .scorch-page .polaroid-photo {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(244, 232, 192, 0.4);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 3rem;
+    overflow: hidden;
+    position: relative;
+  }
+  .scorch-page .polaroid-photo::after {
+    /* paper-grain texture overlay */
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
+    mix-blend-mode: overlay;
+  }
+  .scorch-page .polaroid-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .scorch-page .polaroid-caption {
+    margin-top: 0.6rem;
+    text-align: center;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.95rem;
+    color: #1a0606;
+    line-height: 1.15;
+  }
+  .scorch-page .polaroid-caption small {
+    display: block;
+    font-size: 0.7rem;
+    color: #6a3408;
+    letter-spacing: 0.12em;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+  /* tape on one corner of every polaroid */
+  .scorch-page .polaroid::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-4deg);
+    width: 70px;
+    height: 18px;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 6px, transparent 6px, transparent 12px),
+      linear-gradient(180deg, #ffd86a, #d49a3a);
+    opacity: 0.85;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+
+  /* === MUSIC PLAYER POSTER FRAME ===
+     Wraps the existing setlist-stage in a "concert" header bar. */
+  .scorch-page .stage-frame {
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 3px solid #1a0606;
+    background: #1a0606;
+    box-shadow: 0 0 0 1px #ff5a1f, 0 0 40px rgba(255, 90, 31, 0.25), 0 20px 40px rgba(0,0,0,0.7);
+  }
+  .scorch-page .stage-frame-head {
+    background: linear-gradient(180deg, #c8281a 0%, #4a0808 100%);
+    color: #f4e8c0;
+    padding: 0.7rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-size: clamp(0.8rem, 2vw, 1.05rem);
+    text-shadow: 0 2px 0 #1a0606;
+  }
+  .scorch-page .stage-frame-head .live-dot { background: #ffaa00; box-shadow: 0 0 14px #ffaa00; }
+  .scorch-page .stage-frame-head small { font-family: 'Special Elite', monospace; font-weight: normal; font-size: 0.7em; opacity: 0.85; letter-spacing: 0.3em; }
+
+  /* === MERCH = THE GALLERY ===
+     The photo gallery doubles as merch with decorative price-tag stickers
+     that play on the joke: "Scorch IS the merch." */
+  .scorch-page .merch-board {
+    position: relative;
+    overflow: visible;
+  }
+  .scorch-page .price-tag {
+    position: absolute;
+    z-index: 5;
+    padding: 0.5rem 0.9rem 0.5rem 1.2rem;
+    background: linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    font-family: 'Special Elite', monospace;
+    font-weight: bold;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 2px solid #1a0606;
+    box-shadow: 0 4px 0 #4a0808, 0 6px 14px rgba(0,0,0,0.5);
+    /* cut a notch on the left side for the tag-shape silhouette */
+    clip-path: polygon(0.7rem 0, 100% 0, 100% 100%, 0.7rem 100%, 0 50%);
+    transition: transform 0.15s ease;
+    pointer-events: none;
+  }
+  /* the little hole where a string would tie on */
+  .scorch-page .price-tag::before {
+    content: '';
+    position: absolute;
+    left: 0.45rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #1a0606;
+  }
+
+  .scorch-page .tag-1of1 {
+    top: 12%;
+    left: 8%;
+    transform: rotate(-14deg);
+    background: linear-gradient(180deg, #ffd86a 0%, #d49a3a 100%);
+    font-size: 1rem;
+  }
+  .scorch-page .tag-priceless {
+    top: 48%;
+    right: 6%;
+    transform: rotate(10deg);
+    font-size: 1.6rem;
+    padding: 0.5rem 1.1rem 0.5rem 1.4rem;
+    background: linear-gradient(180deg, #c8281a 0%, #4a0808 100%);
+    color: #f4e8c0;
+    border-color: #f4e8c0;
+    box-shadow: 0 4px 0 #1a0606, 0 6px 14px rgba(0,0,0,0.6);
+    letter-spacing: 0.05em;
+  }
+  .scorch-page .tag-noresale {
+    bottom: 10%;
+    left: 5%;
+    transform: rotate(-7deg);
+    background: linear-gradient(180deg, #1a0606 0%, #4a0808 100%);
+    color: #f4e8c0;
+    border-color: #f4e8c0;
+    box-shadow: 0 4px 0 #c8281a, 0 6px 14px rgba(0,0,0,0.6);
+  }
+  /* on mobile, snug the tags closer to corners so they don't overlap the photo */
+  @media (max-width: 640px) {
+    .scorch-page .tag-1of1     { top: 4%;   left: 2%; font-size: 0.85rem; }
+    .scorch-page .tag-priceless { top: auto; bottom: 4%; right: 2%; font-size: 1.2rem; }
+    .scorch-page .tag-noresale { display: none; }
+  }
+
+  /* === WANTED CARDS (rivals) === */
+  .scorch-page .wanted-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .scorch-page .wanted {
+    background:
+      repeating-linear-gradient(45deg, transparent 0, transparent 4px, rgba(74, 8, 8, 0.04) 4px, rgba(74, 8, 8, 0.04) 5px),
+      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    padding: 1rem;
+    border: 3px solid #1a0606;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+    text-align: center;
+    transform: rotate(var(--rot, -1deg));
+    font-family: 'Special Elite', monospace;
+    transition: transform 0.15s ease;
+  }
+  .scorch-page .wanted:nth-child(2n) { --rot: 1deg; }
+  .scorch-page .wanted:nth-child(3n) { --rot: -1.5deg; }
+  .scorch-page .wanted:hover { transform: rotate(0deg) scale(1.04); z-index: 2; }
+  .scorch-page .wanted-head {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #c8281a;
+    letter-spacing: 0.25em;
+    border-bottom: 2px dashed #4a0808;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+  .scorch-page .wanted-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: #1a0606;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .scorch-page .wanted-role {
+    font-size: 0.85rem;
+    color: #6a3408;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .scorch-page .wanted-desc {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #1a0606;
+  }
+  .scorch-page .wanted.traitor {
+    border-color: #c8281a;
+    box-shadow: 0 8px 18px rgba(200, 40, 26, 0.5);
+  }
+  .scorch-page .wanted-stamp {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.2rem 0.7rem;
+    border: 2px solid #c8281a;
+    color: #c8281a;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transform: rotate(-4deg);
+  }
+
+  /* === CASE FILE (backstory spoiler) === */
+  .scorch-page .case-file {
+    max-width: 900px;
+    margin: 0 auto;
+    background:
+      linear-gradient(180deg, #c8a868 0%, #a08440 100%);
+    border: 2px solid #4a3010;
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.6),
+      inset 0 0 0 8px #b89858,
+      inset 0 0 0 10px #4a3010;
+    padding: 0;
+    overflow: hidden;
+  }
+  .scorch-page .case-file summary {
+    list-style: none;
+    padding: 1.5rem 1.5rem;
+    cursor: none;
+    background: rgba(74, 48, 16, 0.1);
+    border-bottom: 2px dashed #4a3010;
+    text-align: center;
+    transition: background 0.15s ease;
+  }
+  .scorch-page .case-file summary::-webkit-details-marker { display: none; }
+  .scorch-page .case-file summary:hover { background: rgba(74, 48, 16, 0.2); }
+  .scorch-page .case-file-label {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border: 3px double #c8281a;
+    color: #c8281a;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.2rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transform: rotate(-3deg);
+    background: rgba(74, 8, 8, 0.05);
+    text-shadow: 0 0 8px rgba(200, 40, 26, 0.3);
+  }
+  .scorch-page .case-file-sub {
+    display: block;
+    margin-top: 0.6rem;
+    font-family: 'Special Elite', monospace;
+    color: #4a3010;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .scorch-page .case-file[open] summary .case-file-sub::after { content: ' — open'; }
+  .scorch-page .case-file-body {
+    padding: 2rem clamp(1rem, 4vw, 2rem);
+    background: #f4e8c0;
+    color: #1a0606;
+    font-family: 'Special Elite', monospace;
+  }
+  .scorch-page .case-file-body p {
+    font-size: clamp(0.95rem, 2vw, 1.1rem);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+  .scorch-page .case-file-body p strong { color: #c8281a; }
+  .scorch-page .case-file-body p em { color: #4a0808; font-style: italic; }
+
+  /* === SPRAY-PAINT QUOTE === */
+  .scorch-page .spray-quote {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem);
+    background:
+      repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(255, 255, 255, 0.02) 28px, rgba(255, 255, 255, 0.02) 29px),
+      linear-gradient(180deg, #18080a 0%, #0a0404 100%);
+    border: 1px solid #4a0808;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .scorch-page .spray-quote::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 30%, rgba(255, 90, 31, 0.10), transparent 25%),
+      radial-gradient(ellipse at 80% 70%, rgba(200, 40, 26, 0.10), transparent 25%);
+    pointer-events: none;
+  }
+  .scorch-page .spray-quote q {
+    display: block;
+    font-family: 'Cinzel Decorative', serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: clamp(1.3rem, 4vw, 2.4rem);
+    line-height: 1.3;
+    color: #ff5a1f;
+    text-shadow:
+      0 0 18px rgba(255, 90, 31, 0.55),
+      2px 2px 0 #1a0606,
+      0 0 60px rgba(200, 40, 26, 0.4);
+    transform: rotate(-1.2deg);
+    quotes: none;
+  }
+  .scorch-page .spray-quote q::before,
+  .scorch-page .spray-quote q::after { content: '"'; opacity: 0.6; }
+  .scorch-page .spray-quote cite {
+    display: block;
+    margin-top: 1rem;
+    font-family: 'Metal Mania', serif;
+    font-style: normal;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    color: #ffaa00;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 18px rgba(255, 170, 0, 0.5);
+  }
+
+  /* === POLAROID GALLERY BOARD === */
+  .scorch-page .pit-board {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(0,0,0,0.04) 14px, rgba(0,0,0,0.04) 15px),
+      linear-gradient(180deg, #3a2818 0%, #1a1004 100%);
+    border: 4px solid #1a0606;
+    box-shadow:
+      inset 0 0 60px rgba(0,0,0,0.8),
+      0 10px 24px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  .scorch-page .pit-cta {
+    display: block;
+    max-width: 320px;
+    margin: 0 auto;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: none;
+    transform: rotate(-2deg);
+    transition: transform 0.2s ease;
+  }
+  .scorch-page .pit-cta:hover { transform: rotate(0deg) scale(1.04); }
+  .scorch-page .pit-cta .polaroid {
+    width: 100%;
+    transform: none;
+  }
+  .scorch-page .pit-cta .polaroid:hover {
+    transform: none;
+  }
+
+  /* === BACKSTAGE PASS === */
+  .scorch-page .backstage-pass {
+    max-width: 520px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #1a0606 0%, #4a0808 100%);
+    border: 3px solid #ffaa00;
+    padding: 0;
+    box-shadow:
+      0 0 0 1px #1a0606,
+      0 0 40px rgba(255, 170, 0, 0.45),
+      0 18px 36px rgba(0,0,0,0.7);
+    position: relative;
+    transform: rotate(-1.5deg);
+  }
+  /* the "lanyard" hole at top */
+  .scorch-page .backstage-pass::before {
+    content: '';
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    width: 48px; height: 12px;
+    background: #0a0404;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 2px rgba(255, 170, 0, 0.2);
+  }
+  .scorch-page .pass-head {
+    background: linear-gradient(90deg, #ffaa00 0%, #ff5a1f 100%);
+    color: #1a0606;
+    padding: 2rem 1rem 0.8rem;
+    text-align: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    text-shadow: 1px 1px 0 #ffd86a;
+  }
+  .scorch-page .pass-body {
+    padding: 1.5rem 1.5rem 0.5rem;
+    text-align: center;
+    color: #f4e8c0;
+  }
+  .scorch-page .pass-name {
+    font-family: 'Metal Mania', serif;
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    color: #ff5a1f;
+    text-shadow: 0 0 24px rgba(255, 90, 31, 0.6), 2px 2px 0 #1a0606;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.02em;
+  }
+  .scorch-page .pass-role {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.95rem;
+    color: #d4b860;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .scorch-page .pass-cta {
+    display: inline-block;
+    padding: 0.9rem 2.2rem;
+    background: linear-gradient(180deg, #ffaa00 0%, #ff5a1f 100%);
+    color: #1a0606;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 2px solid #1a0606;
+    box-shadow: 0 4px 0 #4a0808, 0 8px 16px rgba(0,0,0,0.6);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .scorch-page .pass-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 0 #4a0808, 0 12px 22px rgba(0,0,0,0.7);
+  }
+  .scorch-page .pass-cta:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #4a0808, 0 4px 8px rgba(0,0,0,0.5);
+  }
+  /* barcode at the bottom */
+  .scorch-page .pass-barcode {
+    margin: 1.5rem auto 1rem;
+    display: block;
+    width: 80%;
+    height: 36px;
+    background:
+      repeating-linear-gradient(90deg, #f4e8c0 0 2px, transparent 2px 3px, #f4e8c0 3px 7px, transparent 7px 9px, #f4e8c0 9px 10px, transparent 10px 14px);
+  }
+  .scorch-page .pass-barcode-num {
+    display: block;
+    text-align: center;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.7rem;
+    color: #d4b860;
+    letter-spacing: 0.35em;
+    padding-bottom: 1rem;
+  }
+
+  /* === SCROLL-IN ANIMATIONS ===
+     Triggered by IntersectionObserver adding .is-visible. */
+  .scorch-page .reveal-stamp {
+    opacity: 0;
+    transform: scale(1.5) rotate(-15deg);
+    transition: opacity 0.3s ease;
+  }
+  .scorch-page .reveal-stamp.is-visible {
+    animation: stampDown 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes stampDown {
+    0%   { opacity: 0; transform: scale(2.4) rotate(-25deg); }
+    60%  { opacity: 1; transform: scale(0.92) rotate(-1deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-1deg); }
+  }
+  .scorch-page .reveal-up {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.55s ease, transform 0.55s ease;
+  }
+  .scorch-page .reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .scorch-page .reveal-tilt {
+    opacity: 0;
+    transform: translateY(40px) rotate(-6deg);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+  .scorch-page .reveal-tilt.is-visible {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--rot, -1deg));
+  }
+
+  /* mobile pass tweaks */
+  @media (max-width: 540px) {
+    .scorch-page .pass-head { padding-top: 1.6rem; }
+    .scorch-page .backstage-pass { transform: rotate(-1deg); }
+  }
+
 </style>
 </head>
 <body>
@@ -5673,6 +6938,31 @@ document.addEventListener('visibilitychange', () => {
 
 
 /* ---------- CHARACTER PAGE OVERLAY ---------- */
+/* Single IntersectionObserver for all scroll-in animations (stamps, fade-ups, tilts).
+   Watches every element with .reveal-stamp, .reveal-up, or .reveal-tilt and adds
+   .is-visible when they scroll into view. One-shot — unobserved after firing. */
+const _revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      _revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+function _wireReveals(scope) {
+  (scope || document).querySelectorAll('.reveal-stamp, .reveal-up, .reveal-tilt').forEach(el => {
+    _revealObserver.observe(el);
+  });
+}
+// Wire on initial load AND every time a character page is opened (its content
+// may have just become scroll-observable).
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => _wireReveals());
+} else {
+  _wireReveals();
+}
+
 function showCharacterPage(pageId) {
   const page = document.getElementById(pageId + 'Page');
   if (!page) return;
@@ -5680,6 +6970,9 @@ function showCharacterPage(pageId) {
   page.setAttribute('aria-hidden', 'false');
   page.scrollTop = 0;
   document.body.style.overflow = 'hidden';
+  // After the page is laid out, re-observe its reveal-elements so any that
+  // weren't laid out earlier (content-visibility: auto) start ticking now.
+  requestAnimationFrame(() => _wireReveals(page));
 }
 function hideCharacterPage(pageId) {
   const page = document.getElementById(pageId + 'Page');
@@ -6527,119 +7820,193 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="character-page scorch-page" id="scorchPage" aria-hidden="true">
   <button class="char-close" id="scorchClose" aria-label="Close" type="button">✕</button>
 
-  <!-- HERO -->
-  <section class="char-hero">
-    <div class="char-hero-bg" style="background-image: url('assets/scorch-hero.jpg');"></div>
-    <div class="char-hero-content">
-      <div class="char-band-tag">The Snake Skins</div>
-      <h1 class="char-title">SCORCH</h1>
-      <div class="char-role">Frontman <span>•</span> Vocals <span>•</span> Walking Dumpster Fire</div>
-      <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
-         target="_blank" rel="noopener" class="char-chat-btn">
-        Chat with Scorch &rarr;
-      </a>
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/scorch-hero.jpg');"></div>
+
+    <!-- decorative blood/fire splats -->
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <!-- corner stamps -->
+    <div class="stamp stamp--tonight reveal-stamp">★ Tonight ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">One Night Only</small></div>
+    <div class="stamp stamp--age reveal-stamp">21 + Over</div>
+
+    <!-- decorative tape -->
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">SCORCH</h1>
+    <div class="poster-subtitle">Bite Back Tour</div>
+    <div class="poster-role">Frontman <span>•</span> Vocals <span>•</span> Walking Dumpster Fire</div>
+
+    <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Scorch &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Live ★ Loud ★ Unhinged ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="char-section char-about">
-    <h2 class="char-h2">Who the Hell Is He</h2>
-    <p>Scorch is an emotional dumpster fire on two legs. He says whatever the fuck he wants, when he wants, and your feelings can take a hike if they don't like it. He's not a bad guy. Not <em>really</em>. Just an asshole. A misunderstood one — but an asshole all the same.</p>
-    <p>Catch him on the right day and you'll see the boyish charm hiding under all that scowl. Win his heart and that asshole is <strong>your</strong> asshole. He's got layers, like an onion. Peel carefully — he bites.</p>
-    <div class="char-tags">
-      <span class="char-tag">asshole with a heart</span>
-      <span class="char-tag">emotional dumpster fire</span>
-      <span class="char-tag">no filter</span>
-      <span class="char-tag">misunderstood</span>
-      <span class="char-tag">boyish charm</span>
-      <span class="char-tag">touch him and die</span>
-      <span class="char-tag">layers like an onion</span>
+  <!-- ====== THE FRONTMAN (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Frontman</h2>
+    <span class="poster-eyebrow reveal-up">Who the Hell Is He</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Scorch is an emotional dumpster fire on two legs. He says whatever the fuck he wants, when he wants, and your feelings can take a hike if they don't like it. He's not a bad guy. Not <em>really</em>. Just an asshole. A misunderstood one &mdash; but an asshole all the same.</p>
+      <p>Catch him on the right day and you'll see the boyish charm hiding under all that scowl. Win his heart and that asshole is <strong>your</strong> asshole. He's got layers, like an onion. Peel carefully &mdash; he bites.</p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">asshole with a heart</span>
+      <span class="sticker-patch">emotional dumpster fire</span>
+      <span class="sticker-patch">no filter</span>
+      <span class="sticker-patch">misunderstood</span>
+      <span class="sticker-patch">boyish charm</span>
+      <span class="sticker-patch">touch him and die</span>
+      <span class="sticker-patch">layers like an onion</span>
     </div>
   </section>
 
-  <!-- QUOTES -->
-  <section class="char-section">
-    <h2 class="char-h2">He Said What</h2>
-    <div class="quote-grid">
-      <div class="quote-card">"Heh. Yeah, you're cute. Until you open your fucking mouth."</div>
-      <div class="quote-card">"Yeah? Well you can suck my dick, you little bitch."</div>
-      <div class="quote-card">"Yeah, cool. Whatever. I don't give a shit anyways."</div>
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" style="--rot:-2deg;">"Heh. Yeah, you're cute. Until you open your fucking mouth."</div>
+      <div class="stub reveal-tilt" style="--rot:1.5deg;">"Yeah? Well you can suck my dick, you little bitch."</div>
+      <div class="stub reveal-tilt" style="--rot:-0.8deg;">"Yeah, cool. Whatever. I don't give a shit anyways."</div>
     </div>
   </section>
 
-  <!-- THE BAND -->
-  <section class="char-section">
-    <h2 class="char-h2">The Snake Skins</h2>
-    <div class="band-poster-wrap">
-      <img src="assets/band-poster.jpg" alt="The Snake Skins — Bite Back Tour" />
-    </div>
-    <div class="member-grid">
-      <div class="member-card">
-        <div class="member-name">Shane</div>
-        <div class="member-role">Bass</div>
-        <div class="member-desc">Chill, laid back, mysterious as hell. Carries a past nobody's allowed to ask about. His default setting is "I don't give a fuck" and somehow it works on him.</div>
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪</div>
+        <div class="polaroid-caption">Shane<small>Bass</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Kayla</div>
-        <div class="member-role">Cello / Piano</div>
-        <div class="member-desc">The queen of the scene. Strings the band together — literally. Don't mistake the classical training for softness; she'll eat you alive.</div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪</div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Cody</div>
-        <div class="member-role">Drums</div>
-        <div class="member-desc">Sweet one-legged Cajun out of Louisiana. Heart of the band, mouth full of sugar and stories. If Cody's smiling, the day's not lost yet.</div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪</div>
+        <div class="polaroid-caption">Cody<small>Drums</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Max</div>
-        <div class="member-role">Lead Guitar</div>
-        <div class="member-desc">Aussie heartthrob. Bestest playboi this side of the equator. Plays guitar like he flirts — too fast, too loud, way too good.</div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪</div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Ricky</div>
-        <div class="member-role">Band Manager</div>
-        <div class="member-desc">Permanently fed up. Permanently angry. Scorch gives him heart palpitations on a near-daily basis. He's still here though. Has to count for something.</div>
+      <div class="polaroid reveal-tilt" style="--rot:-1deg;">
+        <div class="polaroid-photo">♪</div>
+        <div class="polaroid-caption">Ricky<small>Manager</small></div>
       </div>
     </div>
   </section>
 
-  <!-- BITE BACK SETLIST / MUSIC PLAYER -->
-  <section class="char-section">
-    <h2 class="char-h2">Bite Back — Live</h2>
-    <div class="setlist-stage" id="snakeSkinsPlayer">
-      <!-- LEFT: NOW PLAYING CONSOLE -->
-      <div class="np-console" id="npConsole">
-        <div class="np-display">
-          <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
-          <div class="np-title" id="npTitle">— select a track —</div>
-          <div class="np-sub" id="npSub">The Snake Skins  •  Bite Back Tour</div>
-          <div class="np-viz" id="npViz" aria-hidden="true"></div>
-          <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
-            <div class="np-progress-fill" id="npFill"></div>
-            <div class="np-progress-head" id="npHead"></div>
+  <!-- ====== MUSIC PLAYER (existing wiring, wrapped in stage frame) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Bite Back — Live</h2>
+    <span class="poster-eyebrow reveal-up">Bootleg Recording &mdash; Stage Left</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>The Snake Skins // Bite Back Tour</small>
+      </div>
+      <div class="setlist-stage" id="snakeSkinsPlayer">
+        <div class="np-console" id="npConsole">
+          <div class="np-display">
+            <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+            <div class="np-title" id="npTitle">— select a track —</div>
+            <div class="np-sub" id="npSub">The Snake Skins  •  Bite Back Tour</div>
+            <div class="np-viz" id="npViz" aria-hidden="true"></div>
+            <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
+              <div class="np-progress-fill" id="npFill"></div>
+              <div class="np-progress-head" id="npHead"></div>
+            </div>
+            <div class="np-times">
+              <span id="npTimeCurrent">0:00</span>
+              <span id="npTimeTotal">0:00</span>
+            </div>
           </div>
-          <div class="np-times">
-            <span id="npTimeCurrent">0:00</span>
-            <span id="npTimeTotal">0:00</span>
+          <div class="np-transport">
+            <button class="np-btn np-prev" id="npPrev" type="button" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+            </button>
+            <button class="np-btn np-play" id="npPlay" type="button" aria-label="Play / pause">
+              <svg id="npPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="np-btn np-next" id="npNext" type="button" aria-label="Next track">
+              <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+            </button>
           </div>
         </div>
-        <div class="np-transport">
-          <button class="np-btn np-prev" id="npPrev" type="button" aria-label="Previous track">
-            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
-          </button>
-          <button class="np-btn np-play" id="npPlay" type="button" aria-label="Play / pause">
-            <svg id="npPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-          <button class="np-btn np-next" id="npNext" type="button" aria-label="Next track">
-            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
-          </button>
+        <div class="np-setlist">
+          <div class="np-setlist-head">// The Setlist</div>
+          <div class="np-setlist-sub">Bite Back Tour — Track List</div>
+          <div id="npTrackList"></div>
+          <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
         </div>
-      </div>
-      <!-- RIGHT: SETLIST -->
-      <div class="np-setlist">
-        <div class="np-setlist-head">// The Setlist</div>
-        <div class="np-setlist-sub">Bite Back Tour — Track List</div>
-        <div id="npTrackList"></div>
-        <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
       </div>
     </div>
     <audio id="npAudio" preload="metadata" crossorigin="anonymous"></audio>
@@ -6650,61 +8017,72 @@ document.addEventListener('DOMContentLoaded', function(){
     ]</script>
   </section>
 
-  <!-- BABY MOMMA DRAMA -->
-  <section class="char-section">
-    <h2 class="char-h2">Baby Momma Drama</h2>
-    <div class="member-grid">
-      <div class="member-card">
-        <div class="member-name">Naomi</div>
-        <div class="member-role">The Ex</div>
-        <div class="member-desc">She hates him. He hates her. What a happy fucking family. She wants Scorch nowhere near her — or their kid — and she'll burn the world down to keep it that way. He just wants to be in his son's life. Pick a side or don't, but it's getting ugly either way.</div>
+  <!-- ====== FAMILY DRAMA ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Family Drama</h2>
+    <span class="poster-eyebrow reveal-up">Baby Momma + Kid</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">The Ex</div>
+        <div class="wanted-name">Naomi</div>
+        <div class="wanted-role">Mother of his child</div>
+        <div class="wanted-desc">She hates him. He hates her. What a happy fucking family. She wants Scorch nowhere near her — or their kid — and she'll burn the world down to keep it that way. He just wants to be in his son's life. Pick a side or don't, but it's getting ugly either way.</div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Conner</div>
-        <div class="member-role">Five Years Old</div>
-        <div class="member-desc">Scorch's kid. A sweet boy, most of the time. The reason Scorch still gives a shit about anything at all.</div>
+      <div class="wanted reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">The Reason</div>
+        <div class="wanted-name">Conner</div>
+        <div class="wanted-role">Five years old</div>
+        <div class="wanted-desc">Scorch's kid. A sweet boy, most of the time. The reason Scorch still gives a shit about anything at all.</div>
       </div>
     </div>
   </section>
 
-  <!-- RIVALS -->
-  <section class="char-section">
-    <h2 class="char-h2">The Street Rats</h2>
-    <p class="rivals-intro">Scorch fucking hates these guys</p>
-    <div class="member-grid">
-      <div class="member-card">
-        <div class="member-name">Sin</div>
-        <div class="member-role">Frontman</div>
-        <div class="member-desc">"Whiney little bitch." — Scorch</div>
+  <!-- ====== STREET RATS (RIVALS) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ Wanted ★</h2>
+    <span class="poster-eyebrow reveal-up">The Street Rats — Scorch fucking hates these guys</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-1deg;">
+        <div class="wanted-head">Wanted</div>
+        <div class="wanted-name">Sin</div>
+        <div class="wanted-role">Frontman</div>
+        <div class="wanted-desc">"Whiney little bitch." &mdash; Scorch</div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Mason</div>
-        <div class="member-role">Drummer</div>
-        <div class="member-desc">"Heartbeat of the band? Yeah, fucking right." — Scorch</div>
+      <div class="wanted reveal-tilt" style="--rot:1.5deg;">
+        <div class="wanted-head">Wanted</div>
+        <div class="wanted-name">Mason</div>
+        <div class="wanted-role">Drummer</div>
+        <div class="wanted-desc">"Heartbeat of the band? Yeah, fucking right." &mdash; Scorch</div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Ash</div>
-        <div class="member-role">Guitarist</div>
-        <div class="member-desc">"Idiot. But the most tolerable one of the bunch." — Scorch</div>
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">Wanted</div>
+        <div class="wanted-name">Ash</div>
+        <div class="wanted-role">Guitarist</div>
+        <div class="wanted-desc">"Idiot. But the most tolerable one of the bunch." &mdash; Scorch</div>
       </div>
-      <div class="member-card traitor">
-        <div class="member-name">Skye</div>
-        <div class="member-role">Bass</div>
-        <div class="member-desc">Ex-best friend. Brother in everything but blood — once. Now? A traitor.</div>
-        <span class="member-tag">⚠ Traitor</span>
+      <div class="wanted traitor reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">Traitor</div>
+        <div class="wanted-name">Skye</div>
+        <div class="wanted-role">Bass</div>
+        <div class="wanted-desc">Ex-best friend. Brother in everything but blood — once. Now? A traitor.</div>
+        <div class="wanted-stamp">⚠ Traitor</div>
       </div>
     </div>
   </section>
 
-  <!-- HISTORY (SPOILER) -->
-  <section class="char-section">
-    <h2 class="char-h2">How He Got Here</h2>
-    <details class="spoiler-details">
+  <!-- ====== CASE FILE (BACKSTORY SPOILER) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
       <summary>
-        <span class="spoiler-warn">⚠ Spoilers — Character Backstory ⚠</span>
-        <span class="spoiler-cta">tap to reveal</span>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
       </summary>
-      <div class="spoiler-content">
+      <div class="case-file-body">
         <p>Scorch grew up in a shitty household. His dad died on an oil rig — an explosion — when Scorch was just a kid. His mom, <strong>Miranda</strong>, blamed him for it. Took it out on her only kid in every way a mother can. Emotional. Physical. Monstrous.</p>
         <p><strong>Skye</strong> was Scorch's best friend growing up. His brother in everything but blood. Scorch spent every hour he could over at Skye's place — and <strong>Donna</strong>, Skye's mom, always opened the door. Together, Skye and Scorch started <em>The Snake Skins</em>.</p>
         <p>Then came the drugs. Scorch got addicted. Skye tried to help — for a while. And then, when nothing else worked, Skye thought turning him over to the police might save his life. Maybe it did.</p>
@@ -6715,40 +8093,63 @@ document.addEventListener('DOMContentLoaded', function(){
     </details>
   </section>
 
-
-  <!-- SCORCH QUOTE -->
-  <section class="char-section">
-    <blockquote class="scorch-quote">
-      "I'm not a good person. I'm just done pretending to be a bad one."
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>I'm not a good person. I'm just done pretending to be a bad one.</q>
       <cite>— Scorch</cite>
-    </blockquote>
+    </div>
   </section>
 
-  <!-- GALLERY -->
-  <section class="char-section">
-    <h2 class="char-h2">The Gallery</h2>
-    <p class="gallery-sub">Tap any frame to enlarge. He looks better in real life. Probably.</p>
-    <button class="gallery-entry" id="scorchGalleryEntry" type="button" aria-label="Open gallery">
-      <img class="gallery-entry-cover" src="assets/scorch-gallery-cover.jpg" alt="Scorch gallery cover" />
-      <div class="gallery-entry-overlay">
-        <div class="gallery-entry-eyebrow">Gallery</div>
-        <div class="gallery-entry-count">12 Photos</div>
-        <div class="gallery-entry-cta">View All</div>
+  <!-- ====== MERCH (= the photo gallery, because Scorch IS the merch) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Scorch IS the merch &middot; Stock: 1 &middot; Apply within</span>
+
+    <div class="pit-board merch-board">
+      <!-- Decorative price-tag stickers playing on the "merch = Scorch" joke. -->
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
+
+      <button class="pit-cta gallery-entry" id="scorchGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/scorch-gallery-cover.jpg" alt="Scorch gallery cover" />
+          </div>
+          <div class="polaroid-caption">Scorch<small>Limited Edition &middot; 12 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="scorchGalleryData" type="application/json">[
+        {"src": "assets/scorch-gallery-01.jpg", "alt": "Scorch on stage"},
+        {"src": "assets/scorch-gallery-02.jpg", "alt": "Backstage with the band"},
+        {"src": "assets/scorch-gallery-03.jpg", "alt": "Snake Skins live"}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS (CTA) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Scorch</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">SCORCH</div>
+        <div class="pass-role">Frontman &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Scorch &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-001</span>
       </div>
-    </button>
-    <script id="scorchGalleryData" type="application/json">[
-      {"src": "assets/scorch-gallery-01.jpg", "alt": "Scorch on stage"},
-      {"src": "assets/scorch-gallery-02.jpg", "alt": "Backstage with the band"},
-      {"src": "assets/scorch-gallery-03.jpg", "alt": "Snake Skins live"}
-    ]</script>
+    </div>
   </section>
 
-  <!-- FINAL CTA -->
+  <!-- ====== FOOTER / BACK ====== -->
   <section class="char-final-cta">
-    <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
-       target="_blank" rel="noopener" class="char-chat-btn">
-      Chat with Scorch &rarr;
-    </a>
     <a href="#" class="char-back-link" id="scorchBack">← Back to DreamjourneyAI</a>
   </section>
 </div>
