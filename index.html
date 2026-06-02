@@ -5263,13 +5263,102 @@
 
 
   /* ============================================================
-     SCORCH HEAVY-METAL CONCERT POSTER REDESIGN
-     A poster aesthetic — torn paper, stamps, tape, blood splatter,
-     ticket stubs, polaroids, merch. All CSS — zero new RAF loops.
+     POSTER SYSTEM (shared across all character pages)
+     Heavy-metal concert poster aesthetic — torn paper, stamps,
+     tape, blood splatter, ticket stubs, polaroids. All CSS, no
+     new RAF loops. Each character page sets its own palette via
+     CSS custom properties below, and the rest of the system
+     inherits those colors automatically.
      ============================================================ */
 
-  /* === POSTER HERO === */
-  .scorch-page .poster-hero {
+  /* ===== THEME PALETTES ===== */
+  .scorch-page {
+    --pp-bg-deep: #0a0606;
+    --pp-bg-mid:  #18080a;
+    --pp-glow-1:  rgba(255, 90, 31, 0.18);
+    --pp-glow-2:  rgba(120, 20, 10, 0.40);
+    --pp-grit-1:  rgba(255, 90, 31, 0.08);
+    --pp-grit-2:  rgba(232, 50, 50, 0.06);
+    --pp-paper:   #f4e8c0;
+    --pp-paper-2: #d4c098;
+    --pp-paper-shadow: #4a0808;
+    --pp-paper-mark: rgba(74, 8, 8, 0.05);
+    --pp-ink:      #1a0606;
+    --pp-ink-soft: #6a3408;
+    --pp-accent:   #ff5a1f;
+    --pp-accent-2: #c8281a;
+    --pp-accent-3: #ffaa00;
+    --pp-accent-soft: #d4b860;
+    --pp-stamp:      #ff3a1a;
+    --pp-stamp-glow: rgba(255, 90, 31, 0.55);
+    --pp-title-1: #fff4cc;
+    --pp-title-2: #ffaa00;
+    --pp-title-3: #ff5a1f;
+    --pp-title-4: #c8281a;
+    --pp-title-5: #4a0808;
+    --pp-tape-1: #ffd86a;
+    --pp-tape-2: #d49a3a;
+    --pp-splat-filter: none;
+  }
+  .shane-page {
+    --pp-bg-deep: #050810;
+    --pp-bg-mid:  #0a0e1a;
+    --pp-glow-1:  rgba(136, 184, 212, 0.15);
+    --pp-glow-2:  rgba(40, 60, 80, 0.45);
+    --pp-grit-1:  rgba(136, 184, 212, 0.06);
+    --pp-grit-2:  rgba(80, 110, 140, 0.05);
+    --pp-paper:   #d4c8b4;
+    --pp-paper-2: #b8a890;
+    --pp-paper-shadow: #1a2434;
+    --pp-paper-mark: rgba(26, 36, 52, 0.06);
+    --pp-ink:      #0a0e14;
+    --pp-ink-soft: #3a4a5a;
+    --pp-accent:   #88b8d4;
+    --pp-accent-2: #5a7a98;
+    --pp-accent-3: #c8884a;
+    --pp-accent-soft: #88a0b8;
+    --pp-stamp:      #5a7a98;
+    --pp-stamp-glow: rgba(136, 184, 212, 0.55);
+    --pp-title-1: #f4f0e8;
+    --pp-title-2: #c8d4e0;
+    --pp-title-3: #88b8d4;
+    --pp-title-4: #4a6478;
+    --pp-title-5: #1a2434;
+    --pp-tape-1: #c8b078;
+    --pp-tape-2: #886a3a;
+    --pp-splat-filter: hue-rotate(175deg) saturate(0.55) brightness(0.85);
+  }
+  .cody-page {
+    --pp-bg-deep: #0c0a06;
+    --pp-bg-mid:  #14180c;
+    --pp-glow-1:  rgba(212, 154, 58, 0.18);
+    --pp-glow-2:  rgba(60, 50, 20, 0.45);
+    --pp-grit-1:  rgba(212, 154, 58, 0.08);
+    --pp-grit-2:  rgba(120, 80, 25, 0.06);
+    --pp-paper:   #f4e8c0;
+    --pp-paper-2: #d4c098;
+    --pp-paper-shadow: #6a4014;
+    --pp-paper-mark: rgba(106, 64, 20, 0.06);
+    --pp-ink:      #1a1004;
+    --pp-ink-soft: #6a4014;
+    --pp-accent:   #d49a3a;
+    --pp-accent-2: #8a5a1a;
+    --pp-accent-3: #f4d27a;
+    --pp-accent-soft: #b8a060;
+    --pp-stamp:      #d49a3a;
+    --pp-stamp-glow: rgba(244, 200, 100, 0.6);
+    --pp-title-1: #fff4cc;
+    --pp-title-2: #f4d27a;
+    --pp-title-3: #d49a3a;
+    --pp-title-4: #8a5a1a;
+    --pp-title-5: #3a2410;
+    --pp-tape-1: #ffd86a;
+    --pp-tape-2: #c89c44;
+    --pp-splat-filter: hue-rotate(-12deg) saturate(0.8);
+  }
+
+  /* ===== POSTER HERO ===== */
+  .poster-hero {
     position: relative;
     min-height: 100vh;
     padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 5vw, 3rem);
@@ -5281,25 +5370,23 @@
     overflow: hidden;
     isolation: isolate;
     background:
-      radial-gradient(ellipse at 50% 30%, rgba(255, 90, 31, 0.18) 0%, transparent 60%),
-      radial-gradient(ellipse at 50% 100%, rgba(120, 20, 10, 0.4) 0%, transparent 60%),
-      linear-gradient(180deg, #0a0606 0%, #18080a 50%, #0a0606 100%);
+      radial-gradient(ellipse at 50% 30%, var(--pp-glow-1) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, var(--pp-glow-2) 0%, transparent 60%),
+      linear-gradient(180deg, var(--pp-bg-deep) 0%, var(--pp-bg-mid) 50%, var(--pp-bg-deep) 100%);
   }
-  /* photocopy/halftone grit overlay */
-  .scorch-page .poster-hero::before {
+  .poster-hero::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image:
       repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 3px),
-      radial-gradient(circle at 20% 30%, rgba(255, 90, 31, 0.08), transparent 25%),
-      radial-gradient(circle at 80% 70%, rgba(232, 50, 50, 0.06), transparent 25%);
+      radial-gradient(circle at 20% 30%, var(--pp-grit-1), transparent 25%),
+      radial-gradient(circle at 80% 70%, var(--pp-grit-2), transparent 25%);
     mix-blend-mode: overlay;
     pointer-events: none;
     z-index: 1;
   }
-  /* hero photo behind everything */
-  .scorch-page .poster-hero-bg {
+  .poster-hero-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
@@ -5308,30 +5395,28 @@
     mix-blend-mode: luminosity;
     z-index: 0;
   }
-  .scorch-page .poster-hero-bg::after {
+  .poster-hero-bg::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(10,6,6,0.85) 70%, #0a0606 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(10,6,6,0.85) 70%, var(--pp-bg-deep) 100%);
   }
 
-  /* the band tag at top */
-  .scorch-page .poster-tag {
+  .poster-tag {
     position: relative;
     z-index: 2;
     font-family: 'Special Elite', monospace;
     font-size: clamp(0.7rem, 1.6vw, 0.95rem);
     letter-spacing: 0.6em;
     text-transform: uppercase;
-    color: #ffaa00;
-    text-shadow: 0 0 18px rgba(255, 90, 31, 0.7), 0 2px 0 #1a0606;
+    color: var(--pp-accent-3);
+    text-shadow: 0 0 18px var(--pp-stamp-glow), 0 2px 0 var(--pp-ink);
     padding-bottom: 0.8rem;
-    border-bottom: 1px dashed rgba(255, 170, 0, 0.4);
+    border-bottom: 1px dashed var(--pp-accent-soft);
     margin-bottom: 1.5rem;
   }
 
-  /* massive title */
-  .scorch-page .poster-title {
+  .poster-title {
     position: relative;
     z-index: 2;
     font-family: 'Metal Mania', 'Cinzel Decorative', serif;
@@ -5341,23 +5426,22 @@
     line-height: 0.9;
     color: transparent;
     background-image: linear-gradient(180deg,
-      #fff4cc 0%,
-      #ffaa00 25%,
-      #ff5a1f 55%,
-      #c8281a 80%,
-      #4a0808 100%);
+      var(--pp-title-1) 0%,
+      var(--pp-title-2) 25%,
+      var(--pp-title-3) 55%,
+      var(--pp-title-4) 80%,
+      var(--pp-title-5) 100%);
     -webkit-background-clip: text;
             background-clip: text;
     filter:
-      drop-shadow(0 6px 0 #1a0606)
-      drop-shadow(0 0 30px rgba(255, 90, 31, 0.5))
-      drop-shadow(0 0 60px rgba(200, 40, 26, 0.35));
-    text-shadow: 0 0 32px rgba(255, 100, 30, 0.3);
+      drop-shadow(0 6px 0 var(--pp-ink))
+      drop-shadow(0 0 30px var(--pp-stamp-glow))
+      drop-shadow(0 0 60px var(--pp-paper-shadow));
     transform: rotate(-1deg) skewX(-1deg);
     margin: 0;
   }
 
-  .scorch-page .poster-subtitle {
+  .poster-subtitle {
     position: relative;
     z-index: 2;
     margin-top: 1rem;
@@ -5366,51 +5450,48 @@
     font-size: clamp(1.1rem, 3.5vw, 2rem);
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #f4e8c0;
+    color: var(--pp-title-1);
     text-shadow:
-      0 0 18px rgba(255, 170, 0, 0.6),
-      2px 2px 0 #1a0606;
+      0 0 18px var(--pp-stamp-glow),
+      2px 2px 0 var(--pp-ink);
     transform: rotate(0.5deg);
   }
-  .scorch-page .poster-role {
+  .poster-role {
     position: relative;
     z-index: 2;
     margin-top: 0.8rem;
     font-family: 'Special Elite', monospace;
     font-size: clamp(0.85rem, 2vw, 1.1rem);
-    color: #d4b860;
+    color: var(--pp-accent-soft);
     letter-spacing: 0.15em;
   }
-  .scorch-page .poster-role span { color: #ff5a1f; }
+  .poster-role span { color: var(--pp-accent); }
 
-  /* the ticket-stub chat CTA */
-  .scorch-page .ticket-cta {
+  /* ===== TICKET-STUB CTA ===== */
+  .ticket-cta {
     position: relative;
     z-index: 2;
     margin-top: clamp(1.5rem, 4vw, 2.5rem);
     display: inline-block;
     padding: 1.2rem 2rem 1.2rem 3.2rem;
-    background: linear-gradient(95deg, #f4e8c0 0%, #d4b860 100%);
-    color: #1a0606;
+    background: linear-gradient(95deg, var(--pp-paper) 0%, var(--pp-accent-soft) 100%);
+    color: var(--pp-ink);
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: clamp(0.95rem, 2.3vw, 1.25rem);
     letter-spacing: 0.15em;
     text-transform: uppercase;
     text-decoration: none;
-    /* perforated edge on the left */
-    -webkit-mask:
-      radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
-            mask:
-      radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
+    -webkit-mask: radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
+            mask: radial-gradient(circle at 2.2rem 50%, transparent 7px, #000 7.5px) padding-box;
     box-shadow:
-      0 4px 0 #6a4014,
+      0 4px 0 var(--pp-paper-shadow),
       0 8px 20px rgba(0,0,0,0.6),
       inset 0 0 14px rgba(120, 70, 20, 0.25);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     transform: rotate(-2deg);
   }
-  .scorch-page .ticket-cta::before {
+  .ticket-cta::before {
     content: 'ADMIT ONE';
     position: absolute;
     left: 0.6rem;
@@ -5420,84 +5501,86 @@
     font-family: 'Special Elite', monospace;
     font-size: 0.55rem;
     letter-spacing: 0.25em;
-    color: #6a4014;
+    color: var(--pp-paper-shadow);
   }
-  .scorch-page .ticket-cta:hover {
+  .ticket-cta:hover {
     transform: rotate(0deg) translateY(-3px) scale(1.02);
     box-shadow:
-      0 7px 0 #6a4014,
+      0 7px 0 var(--pp-paper-shadow),
       0 12px 28px rgba(0,0,0,0.7),
       inset 0 0 14px rgba(120, 70, 20, 0.3);
   }
 
-  /* TONIGHT stamp — slammed onto poster */
-  .scorch-page .stamp {
+  /* ===== STAMPS ===== */
+  .stamp {
     position: absolute;
     z-index: 3;
     padding: 0.6rem 1.2rem;
-    border: 4px double #ff3a1a;
+    border: 4px double var(--pp-stamp);
     background: rgba(10, 6, 6, 0.4);
-    color: #ff5a1f;
+    color: var(--pp-accent);
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: clamp(0.7rem, 1.8vw, 1.1rem);
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    text-shadow: 0 0 14px rgba(255, 90, 31, 0.6);
+    text-shadow: 0 0 14px var(--pp-stamp-glow);
     box-shadow:
-      0 0 0 1px #ff3a1a,
-      0 0 30px rgba(255, 90, 31, 0.3),
+      0 0 0 1px var(--pp-stamp),
+      0 0 30px var(--pp-stamp-glow),
       inset 0 0 12px rgba(0,0,0,0.4);
     transform: rotate(-12deg);
   }
-  .scorch-page .stamp--tonight { top: 8%; right: 6%; transform: rotate(-12deg); }
-  .scorch-page .stamp--age     { bottom: 9%; left: 7%; transform: rotate(8deg); color: #ffaa00; border-color: #ffaa00; box-shadow: 0 0 0 1px #ffaa00, 0 0 30px rgba(255, 170, 0, 0.35), inset 0 0 12px rgba(0,0,0,0.4); }
+  .stamp--tonight { top: 8%; right: 6%; transform: rotate(-12deg); }
+  .stamp--age {
+    bottom: 9%; left: 7%; transform: rotate(8deg);
+    color: var(--pp-accent-3);
+    border-color: var(--pp-accent-3);
+    box-shadow: 0 0 0 1px var(--pp-accent-3), 0 0 30px var(--pp-stamp-glow), inset 0 0 12px rgba(0,0,0,0.4);
+  }
   @media (max-width: 700px) {
-    .scorch-page .stamp--tonight { top: 4%; right: 4%; padding: 0.4rem 0.8rem; }
-    .scorch-page .stamp--age     { bottom: 4%; left: 4%; padding: 0.4rem 0.8rem; }
+    .stamp--tonight { top: 4%; right: 4%; padding: 0.4rem 0.8rem; }
+    .stamp--age     { bottom: 4%; left: 4%; padding: 0.4rem 0.8rem; }
   }
 
-  /* washi-tape strips */
-  .scorch-page .tape {
+  /* ===== TAPE ===== */
+  .tape {
     position: absolute;
     width: 90px;
     height: 22px;
     background:
-      repeating-linear-gradient(90deg,
-        rgba(255, 255, 255, 0.18) 0px,
-        rgba(255, 255, 255, 0.18) 8px,
-        transparent 8px, transparent 16px),
-      linear-gradient(180deg, #ffd86a 0%, #d49a3a 100%);
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 8px, transparent 8px, transparent 16px),
+      linear-gradient(180deg, var(--pp-tape-1) 0%, var(--pp-tape-2) 100%);
     opacity: 0.85;
     box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     z-index: 3;
     pointer-events: none;
   }
 
-  /* blood / fire splatter scribbles using SVG inline as background */
-  .scorch-page .splat {
+  /* ===== SPLATTER ===== */
+  .splat {
     position: absolute;
     z-index: 1;
     pointer-events: none;
     opacity: 0.55;
     background-repeat: no-repeat;
     background-size: contain;
+    filter: var(--pp-splat-filter);
   }
-  /* SVG splatter — embedded so we don't fetch an asset */
-  .scorch-page .splat--tl {
+  .splat--tl {
     top: -2%; left: -2%;
     width: 280px; height: 280px;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23c8281a' opacity='0.85'><circle cx='40' cy='40' r='32'/><circle cx='95' cy='25' r='10'/><circle cx='25' cy='100' r='8'/><circle cx='110' cy='70' r='14'/><circle cx='70' cy='85' r='6'/><circle cx='50' cy='130' r='4'/><circle cx='130' cy='110' r='5'/><ellipse cx='150' cy='40' rx='15' ry='8' transform='rotate(20 150 40)'/></g></svg>");
   }
-  .scorch-page .splat--br {
+  .splat--br {
     bottom: -2%; right: -2%;
     width: 240px; height: 240px;
     transform: scaleX(-1) rotate(15deg);
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23ff5a1f' opacity='0.7'><circle cx='50' cy='50' r='26'/><circle cx='100' cy='35' r='12'/><circle cx='130' cy='95' r='15'/><circle cx='75' cy='110' r='8'/><circle cx='40' cy='140' r='10'/><circle cx='110' cy='150' r='6'/></g></svg>");
   }
 
-  /* scroll hint */
-  .scorch-page .poster-scroll {
+  /* ===== SCROLL HINT ===== */
+  .poster-scroll {
     position: absolute;
     z-index: 2;
     bottom: 1.6rem;
@@ -5515,228 +5598,217 @@
     50%      { opacity: 0.9; transform: translate(-50%, 4px); }
   }
 
-  /* === POSTER SECTIONS ===
-     A reusable wrapper for every section below the hero — torn-paper feel. */
-  .scorch-page .poster-section {
+  /* ===== POSTER SECTIONS ===== */
+  .poster-section {
     position: relative;
     padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 5vw, 3rem);
   }
-  /* stamped-on section header */
-  .scorch-page .poster-h2 {
+  .poster-h2 {
     display: inline-block;
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: clamp(1.8rem, 5vw, 3rem);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #ff5a1f;
+    color: var(--pp-accent);
     text-shadow:
-      0 0 24px rgba(255, 90, 31, 0.5),
-      3px 3px 0 #1a0606,
+      0 0 24px var(--pp-stamp-glow),
+      3px 3px 0 var(--pp-ink),
       0 6px 12px rgba(0,0,0,0.7);
     transform: rotate(-1deg);
     margin-bottom: 1.5rem;
-    border: 4px double #ff5a1f;
+    border: 4px double var(--pp-accent);
     padding: 0.4rem 1.5rem;
     background: rgba(10, 6, 6, 0.4);
-    box-shadow: 0 0 0 1px #ff5a1f, 0 0 24px rgba(255, 90, 31, 0.25), inset 0 0 12px rgba(0,0,0,0.5);
+    box-shadow: 0 0 0 1px var(--pp-accent), 0 0 24px var(--pp-stamp-glow), inset 0 0 12px rgba(0,0,0,0.5);
   }
-  .scorch-page .poster-eyebrow {
+  .poster-eyebrow {
     display: block;
     font-family: 'Special Elite', monospace;
     font-size: 0.85rem;
-    color: #d4b860;
+    color: var(--pp-accent-soft);
     letter-spacing: 0.4em;
     text-transform: uppercase;
     margin-bottom: 0.6rem;
   }
 
-  /* === TOUR DATES === */
-  .scorch-page .tour-dates {
+  /* ===== TOUR DATES ===== */
+  .tour-dates {
     max-width: 900px;
     margin: 0 auto;
-    background: linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
-    color: #1a0606;
-    border: 2px solid #1a0606;
-    box-shadow:
-      0 10px 0 #4a0808,
-      0 14px 30px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, var(--pp-paper) 0%, var(--pp-paper-2) 100%);
+    color: var(--pp-ink);
+    border: 2px solid var(--pp-ink);
+    box-shadow: 0 10px 0 var(--pp-paper-shadow), 0 14px 30px rgba(0,0,0,0.6);
     transform: rotate(-0.4deg);
     padding: 1.5rem clamp(1rem, 3vw, 2rem);
   }
-  .scorch-page .tour-dates-head {
+  .tour-dates-head {
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: clamp(1.2rem, 3vw, 1.8rem);
-    color: #4a0808;
+    color: var(--pp-paper-shadow);
     text-align: center;
-    border-bottom: 2px dashed #4a0808;
+    border-bottom: 2px dashed var(--pp-paper-shadow);
     padding-bottom: 0.6rem;
     margin-bottom: 0.8rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
-  .scorch-page .tour-dates-sub {
+  .tour-dates-sub {
     text-align: center;
     font-family: 'Special Elite', monospace;
     font-size: 0.8rem;
-    color: #6a3408;
+    color: var(--pp-ink-soft);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     margin-bottom: 1.2rem;
   }
-  .scorch-page .tour-row {
+  .tour-row {
     display: grid;
     grid-template-columns: 130px 1fr 130px;
     align-items: center;
     gap: 1rem;
     padding: 0.8rem 0.4rem;
-    border-bottom: 1px dashed rgba(74, 8, 8, 0.4);
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.25);
     font-family: 'Special Elite', monospace;
     transition: background 0.15s ease, transform 0.15s ease;
     cursor: none;
   }
   @media (max-width: 640px) {
-    .scorch-page .tour-row {
-      grid-template-columns: 1fr 100px;
-      gap: 0.5rem 0.8rem;
-    }
-    .scorch-page .tour-date { grid-column: 1; }
-    .scorch-page .tour-status { grid-column: 2; grid-row: 1; text-align: right; }
-    .scorch-page .tour-where { grid-column: 1 / -1; font-size: 0.85rem; }
+    .tour-row { grid-template-columns: 1fr 100px; gap: 0.5rem 0.8rem; }
+    .tour-date { grid-column: 1; }
+    .tour-status { grid-column: 2; grid-row: 1; text-align: right; }
+    .tour-where { grid-column: 1 / -1; font-size: 0.85rem; }
   }
-  .scorch-page .tour-row:last-child { border-bottom: none; }
-  .scorch-page .tour-row:hover {
-    background: rgba(74, 8, 8, 0.08);
-    transform: translateX(4px);
-  }
-  .scorch-page .tour-date {
+  .tour-row:last-child { border-bottom: none; }
+  .tour-row:hover { background: rgba(0,0,0,0.06); transform: translateX(4px); }
+  .tour-date {
     font-weight: bold;
-    color: #4a0808;
+    color: var(--pp-paper-shadow);
     font-size: clamp(0.9rem, 2.2vw, 1.05rem);
     letter-spacing: 0.1em;
   }
-  .scorch-page .tour-where { color: #1a0606; font-size: clamp(0.85rem, 2vw, 1rem); }
-  .scorch-page .tour-where strong { color: #4a0808; }
-  .scorch-page .tour-status {
+  .tour-where { color: var(--pp-ink); font-size: clamp(0.85rem, 2vw, 1rem); }
+  .tour-where strong { color: var(--pp-paper-shadow); }
+  .tour-status {
     text-align: right;
     font-size: 0.75rem;
     font-weight: bold;
     letter-spacing: 0.15em;
     text-transform: uppercase;
   }
-  .scorch-page .tour-status--sold    { color: #c8281a; }
-  .scorch-page .tour-status--few     { color: #c87a1a; }
-  .scorch-page .tour-status--avail   { color: #2a5a1a; }
-  .scorch-page .tour-status--tba     { color: #6a3408; opacity: 0.65; }
+  .tour-status--sold  { color: #c8281a; }
+  .tour-status--few   { color: #c87a1a; }
+  .tour-status--avail { color: #2a5a1a; }
+  .tour-status--tba   { color: var(--pp-ink-soft); opacity: 0.65; }
 
-  /* === BIO PANEL (torn paper) === */
-  .scorch-page .bio-panel {
+  /* ===== BIO PANEL ===== */
+  .bio-panel {
     max-width: 800px;
     margin: 0 auto;
     background:
-      repeating-linear-gradient(90deg, transparent 0, transparent 28px, rgba(74, 8, 8, 0.05) 28px, rgba(74, 8, 8, 0.05) 29px),
-      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
-    color: #1a0606;
+      repeating-linear-gradient(90deg, transparent 0, transparent 28px, var(--pp-paper-mark) 28px, var(--pp-paper-mark) 29px),
+      linear-gradient(180deg, var(--pp-paper) 0%, var(--pp-paper-2) 100%);
+    color: var(--pp-ink);
     padding: clamp(1.5rem, 4vw, 2.5rem);
-    border: 2px solid #1a0606;
+    border: 2px solid var(--pp-ink);
     box-shadow: 0 12px 28px rgba(0,0,0,0.6);
     transform: rotate(0.4deg);
     position: relative;
     font-family: 'Special Elite', monospace;
   }
-  .scorch-page .bio-panel p {
+  .bio-panel p {
     font-size: clamp(0.95rem, 2.1vw, 1.1rem);
     line-height: 1.7;
-    color: #1a0606;
+    color: var(--pp-ink);
     margin-bottom: 1rem;
   }
-  .scorch-page .bio-panel p strong { color: #c8281a; }
-  .scorch-page .bio-panel p em { color: #4a0808; font-style: italic; }
-  .scorch-page .bio-panel::before,
-  .scorch-page .bio-panel::after {
+  .bio-panel p strong { color: var(--pp-accent-2); }
+  .bio-panel p em { color: var(--pp-paper-shadow); font-style: italic; }
+  .bio-panel::before,
+  .bio-panel::after {
     content: '';
     position: absolute;
     width: 100px; height: 24px;
     background:
       repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 8px, transparent 8px, transparent 16px),
-      linear-gradient(180deg, #ffd86a, #d49a3a);
+      linear-gradient(180deg, var(--pp-tape-1), var(--pp-tape-2));
     opacity: 0.85;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   }
-  .scorch-page .bio-panel::before { top: -10px; left: 16%; transform: rotate(-6deg); }
-  .scorch-page .bio-panel::after  { bottom: -10px; right: 18%; transform: rotate(4deg); }
+  .bio-panel::before { top: -10px; left: 16%; transform: rotate(-6deg); }
+  .bio-panel::after  { bottom: -10px; right: 18%; transform: rotate(4deg); }
 
-  /* sticker-patch tags */
-  .scorch-page .sticker-tags {
+  /* ===== STICKER TAGS ===== */
+  .sticker-tags {
     margin-top: 1.6rem;
     display: flex;
     flex-wrap: wrap;
     gap: 0.7rem;
     justify-content: center;
   }
-  .scorch-page .sticker-patch {
+  .sticker-patch {
     display: inline-block;
     padding: 0.4rem 1rem;
     font-family: 'Special Elite', monospace;
     font-size: 0.85rem;
     font-weight: bold;
-    color: #f4e8c0;
+    color: var(--pp-paper);
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    background: #4a0808;
-    border: 1px dashed #f4e8c0;
-    box-shadow: 0 2px 0 #1a0606, 0 4px 8px rgba(0,0,0,0.5);
+    background: var(--pp-paper-shadow);
+    border: 1px dashed var(--pp-paper);
+    box-shadow: 0 2px 0 var(--pp-ink), 0 4px 8px rgba(0,0,0,0.5);
     transform: rotate(var(--rot, -2deg));
     transition: transform 0.15s ease;
   }
-  .scorch-page .sticker-patch:nth-child(3n) { --rot: 3deg; background: #c8281a; }
-  .scorch-page .sticker-patch:nth-child(3n+1) { --rot: -3deg; }
-  .scorch-page .sticker-patch:nth-child(5n) { background: #6a3408; }
-  .scorch-page .sticker-patch:hover {
-    transform: rotate(0deg) scale(1.08);
-  }
+  .sticker-patch:nth-child(3n) { --rot: 3deg; background: var(--pp-accent-2); }
+  .sticker-patch:nth-child(3n+1) { --rot: -3deg; }
+  .sticker-patch:nth-child(5n) { background: var(--pp-ink-soft); }
+  .sticker-patch:hover { transform: rotate(0deg) scale(1.08); }
 
-  /* === QUOTE STUBS === */
-  .scorch-page .stub-grid {
+  /* ===== QUOTE STUBS ===== */
+  .stub-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.6rem;
     max-width: 1000px;
     margin: 0 auto;
   }
-  .scorch-page .stub {
+  .stub {
     background:
-      repeating-linear-gradient(90deg, transparent 0, transparent 18px, rgba(74, 8, 8, 0.06) 18px, rgba(74, 8, 8, 0.06) 19px),
-      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
-    color: #1a0606;
+      repeating-linear-gradient(90deg, transparent 0, transparent 18px, var(--pp-paper-mark) 18px, var(--pp-paper-mark) 19px),
+      linear-gradient(180deg, var(--pp-paper) 0%, var(--pp-paper-2) 100%);
+    color: var(--pp-ink);
     padding: 1.2rem 1.4rem;
     font-family: 'Special Elite', monospace;
     font-size: clamp(0.95rem, 2vw, 1.1rem);
     line-height: 1.5;
-    border: 1px solid #1a0606;
+    border: 1px solid var(--pp-ink);
     box-shadow: 0 6px 14px rgba(0,0,0,0.5);
     position: relative;
     transition: transform 0.15s ease;
   }
-  .scorch-page .stub:nth-child(1) { transform: rotate(-2deg); }
-  .scorch-page .stub:nth-child(2) { transform: rotate(1.5deg); }
-  .scorch-page .stub:nth-child(3) { transform: rotate(-0.8deg); }
-  .scorch-page .stub:hover { transform: rotate(0) scale(1.03); z-index: 2; }
-  .scorch-page .stub::before {
-    content: 'SCORCH SAID';
+  .stub:nth-child(1) { transform: rotate(-2deg); }
+  .stub:nth-child(2) { transform: rotate(1.5deg); }
+  .stub:nth-child(3) { transform: rotate(-0.8deg); }
+  .stub:nth-child(4) { transform: rotate(1.2deg); }
+  .stub:hover { transform: rotate(0) scale(1.03); z-index: 2; }
+  .stub::before {
+    content: attr(data-label);
     position: absolute;
     top: -8px; left: 12px;
-    background: #c8281a;
-    color: #f4e8c0;
+    background: var(--pp-accent-2);
+    color: var(--pp-paper);
     padding: 2px 8px;
     font-size: 0.6rem;
     letter-spacing: 0.2em;
-    border: 1px solid #1a0606;
+    border: 1px solid var(--pp-ink);
   }
 
-  /* === LINEUP POLAROID ROW === */
-  .scorch-page .lineup-row {
+  /* ===== LINEUP POLAROIDS ===== */
+  .lineup-row {
     display: flex;
     flex-wrap: wrap;
     gap: clamp(1rem, 3vw, 2rem);
@@ -5744,26 +5816,26 @@
     max-width: 1100px;
     margin: 0 auto;
   }
-  .scorch-page .polaroid {
-    background: #f4e8c0;
+  .polaroid {
+    background: var(--pp-paper);
     padding: 0.7rem 0.7rem 2rem;
     width: clamp(140px, 22vw, 200px);
     box-shadow: 0 8px 18px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.4);
     transform: rotate(var(--rot, -3deg));
     transition: transform 0.2s ease, box-shadow 0.2s ease, z-index 0s linear 0.2s;
     position: relative;
-    color: #1a0606;
+    color: var(--pp-ink);
   }
-  .scorch-page .polaroid:nth-child(2n) { --rot: 2deg; }
-  .scorch-page .polaroid:nth-child(3n) { --rot: -2deg; }
-  .scorch-page .polaroid:nth-child(5n) { --rot: 4deg; }
-  .scorch-page .polaroid:hover {
+  .polaroid:nth-child(2n) { --rot: 2deg; }
+  .polaroid:nth-child(3n) { --rot: -2deg; }
+  .polaroid:nth-child(5n) { --rot: 4deg; }
+  .polaroid:hover {
     transform: rotate(0deg) scale(1.05);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.7), 0 0 30px rgba(255, 90, 31, 0.3), 0 0 0 1px rgba(0,0,0,0.5);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.7), 0 0 30px var(--pp-stamp-glow), 0 0 0 1px rgba(0,0,0,0.5);
     z-index: 10;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .scorch-page .polaroid-photo {
+  .polaroid-photo {
     width: 100%;
     aspect-ratio: 1 / 1;
     background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
@@ -5776,32 +5848,30 @@
     overflow: hidden;
     position: relative;
   }
-  .scorch-page .polaroid-photo::after {
-    /* paper-grain texture overlay */
+  .polaroid-photo::after {
     content: '';
     position: absolute; inset: 0;
     background: repeating-linear-gradient(45deg, transparent 0px, transparent 2px, rgba(255,255,255,0.04) 2px, rgba(255,255,255,0.04) 3px);
     mix-blend-mode: overlay;
   }
-  .scorch-page .polaroid-photo img { width: 100%; height: 100%; object-fit: cover; }
-  .scorch-page .polaroid-caption {
+  .polaroid-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .polaroid-caption {
     margin-top: 0.6rem;
     text-align: center;
     font-family: 'Special Elite', monospace;
     font-size: 0.95rem;
-    color: #1a0606;
+    color: var(--pp-ink);
     line-height: 1.15;
   }
-  .scorch-page .polaroid-caption small {
+  .polaroid-caption small {
     display: block;
     font-size: 0.7rem;
-    color: #6a3408;
+    color: var(--pp-ink-soft);
     letter-spacing: 0.12em;
     margin-top: 2px;
     text-transform: uppercase;
   }
-  /* tape on one corner of every polaroid */
-  .scorch-page .polaroid::before {
+  .polaroid::before {
     content: '';
     position: absolute;
     top: -12px;
@@ -5811,23 +5881,22 @@
     height: 18px;
     background:
       repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 6px, transparent 6px, transparent 12px),
-      linear-gradient(180deg, #ffd86a, #d49a3a);
+      linear-gradient(180deg, var(--pp-tape-1), var(--pp-tape-2));
     opacity: 0.85;
     box-shadow: 0 2px 4px rgba(0,0,0,0.4);
   }
 
-  /* === MUSIC PLAYER POSTER FRAME ===
-     Wraps the existing setlist-stage in a "concert" header bar. */
-  .scorch-page .stage-frame {
+  /* ===== STAGE FRAME (wraps the existing music player) ===== */
+  .stage-frame {
     max-width: 1200px;
     margin: 0 auto;
-    border: 3px solid #1a0606;
-    background: #1a0606;
-    box-shadow: 0 0 0 1px #ff5a1f, 0 0 40px rgba(255, 90, 31, 0.25), 0 20px 40px rgba(0,0,0,0.7);
+    border: 3px solid var(--pp-ink);
+    background: var(--pp-ink);
+    box-shadow: 0 0 0 1px var(--pp-accent), 0 0 40px var(--pp-stamp-glow), 0 20px 40px rgba(0,0,0,0.7);
   }
-  .scorch-page .stage-frame-head {
-    background: linear-gradient(180deg, #c8281a 0%, #4a0808 100%);
-    color: #f4e8c0;
+  .stage-frame-head {
+    background: linear-gradient(180deg, var(--pp-accent-2) 0%, var(--pp-paper-shadow) 100%);
+    color: var(--pp-paper);
     padding: 0.7rem 1rem;
     display: flex;
     justify-content: space-between;
@@ -5837,38 +5906,37 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     font-size: clamp(0.8rem, 2vw, 1.05rem);
-    text-shadow: 0 2px 0 #1a0606;
+    text-shadow: 0 2px 0 var(--pp-ink);
   }
-  .scorch-page .stage-frame-head .live-dot { background: #ffaa00; box-shadow: 0 0 14px #ffaa00; }
-  .scorch-page .stage-frame-head small { font-family: 'Special Elite', monospace; font-weight: normal; font-size: 0.7em; opacity: 0.85; letter-spacing: 0.3em; }
+  .stage-frame-head .live-dot { background: var(--pp-accent-3); box-shadow: 0 0 14px var(--pp-accent-3); }
+  .stage-frame-head small {
+    font-family: 'Special Elite', monospace;
+    font-weight: normal;
+    font-size: 0.7em;
+    opacity: 0.85;
+    letter-spacing: 0.3em;
+  }
 
-  /* === MERCH = THE GALLERY ===
-     The photo gallery doubles as merch with decorative price-tag stickers
-     that play on the joke: "Scorch IS the merch." */
-  .scorch-page .merch-board {
-    position: relative;
-    overflow: visible;
-  }
-  .scorch-page .price-tag {
+  /* ===== MERCH PRICE TAGS (gallery wrapper) ===== */
+  .merch-board { position: relative; overflow: visible; }
+  .price-tag {
     position: absolute;
     z-index: 5;
     padding: 0.5rem 0.9rem 0.5rem 1.2rem;
-    background: linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
-    color: #1a0606;
+    background: linear-gradient(180deg, var(--pp-paper) 0%, var(--pp-paper-2) 100%);
+    color: var(--pp-ink);
     font-family: 'Special Elite', monospace;
     font-weight: bold;
     font-size: 0.85rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid #1a0606;
-    box-shadow: 0 4px 0 #4a0808, 0 6px 14px rgba(0,0,0,0.5);
-    /* cut a notch on the left side for the tag-shape silhouette */
+    border: 2px solid var(--pp-ink);
+    box-shadow: 0 4px 0 var(--pp-paper-shadow), 0 6px 14px rgba(0,0,0,0.5);
     clip-path: polygon(0.7rem 0, 100% 0, 100% 100%, 0.7rem 100%, 0 50%);
     transition: transform 0.15s ease;
     pointer-events: none;
   }
-  /* the little hole where a string would tie on */
-  .scorch-page .price-tag::before {
+  .price-tag::before {
     content: '';
     position: absolute;
     left: 0.45rem;
@@ -5877,121 +5945,111 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #1a0606;
+    background: var(--pp-ink);
   }
-
-  .scorch-page .tag-1of1 {
-    top: 12%;
-    left: 8%;
+  .tag-1of1 {
+    top: 12%; left: 8%;
     transform: rotate(-14deg);
-    background: linear-gradient(180deg, #ffd86a 0%, #d49a3a 100%);
+    background: linear-gradient(180deg, var(--pp-tape-1) 0%, var(--pp-tape-2) 100%);
     font-size: 1rem;
   }
-  .scorch-page .tag-priceless {
-    top: 48%;
-    right: 6%;
+  .tag-priceless {
+    top: 48%; right: 6%;
     transform: rotate(10deg);
     font-size: 1.6rem;
     padding: 0.5rem 1.1rem 0.5rem 1.4rem;
-    background: linear-gradient(180deg, #c8281a 0%, #4a0808 100%);
-    color: #f4e8c0;
-    border-color: #f4e8c0;
-    box-shadow: 0 4px 0 #1a0606, 0 6px 14px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, var(--pp-accent-2) 0%, var(--pp-paper-shadow) 100%);
+    color: var(--pp-paper);
+    border-color: var(--pp-paper);
+    box-shadow: 0 4px 0 var(--pp-ink), 0 6px 14px rgba(0,0,0,0.6);
     letter-spacing: 0.05em;
   }
-  .scorch-page .tag-noresale {
-    bottom: 10%;
-    left: 5%;
+  .tag-noresale {
+    bottom: 10%; left: 5%;
     transform: rotate(-7deg);
-    background: linear-gradient(180deg, #1a0606 0%, #4a0808 100%);
-    color: #f4e8c0;
-    border-color: #f4e8c0;
-    box-shadow: 0 4px 0 #c8281a, 0 6px 14px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, var(--pp-ink) 0%, var(--pp-paper-shadow) 100%);
+    color: var(--pp-paper);
+    border-color: var(--pp-paper);
+    box-shadow: 0 4px 0 var(--pp-accent-2), 0 6px 14px rgba(0,0,0,0.6);
   }
-  /* on mobile, snug the tags closer to corners so they don't overlap the photo */
   @media (max-width: 640px) {
-    .scorch-page .tag-1of1     { top: 4%;   left: 2%; font-size: 0.85rem; }
-    .scorch-page .tag-priceless { top: auto; bottom: 4%; right: 2%; font-size: 1.2rem; }
-    .scorch-page .tag-noresale { display: none; }
+    .tag-1of1     { top: 4%; left: 2%; font-size: 0.85rem; }
+    .tag-priceless { top: auto; bottom: 4%; right: 2%; font-size: 1.2rem; }
+    .tag-noresale { display: none; }
   }
 
-  /* === WANTED CARDS (rivals) === */
-  .scorch-page .wanted-grid {
+  /* ===== WANTED CARDS ===== */
+  .wanted-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 1.5rem;
     max-width: 1100px;
     margin: 0 auto;
   }
-  .scorch-page .wanted {
+  .wanted {
     background:
-      repeating-linear-gradient(45deg, transparent 0, transparent 4px, rgba(74, 8, 8, 0.04) 4px, rgba(74, 8, 8, 0.04) 5px),
-      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
-    color: #1a0606;
+      repeating-linear-gradient(45deg, transparent 0, transparent 4px, var(--pp-paper-mark) 4px, var(--pp-paper-mark) 5px),
+      linear-gradient(180deg, var(--pp-paper) 0%, var(--pp-paper-2) 100%);
+    color: var(--pp-ink);
     padding: 1rem;
-    border: 3px solid #1a0606;
+    border: 3px solid var(--pp-ink);
     box-shadow: 0 8px 18px rgba(0,0,0,0.6);
     text-align: center;
     transform: rotate(var(--rot, -1deg));
     font-family: 'Special Elite', monospace;
     transition: transform 0.15s ease;
   }
-  .scorch-page .wanted:nth-child(2n) { --rot: 1deg; }
-  .scorch-page .wanted:nth-child(3n) { --rot: -1.5deg; }
-  .scorch-page .wanted:hover { transform: rotate(0deg) scale(1.04); z-index: 2; }
-  .scorch-page .wanted-head {
+  .wanted:nth-child(2n) { --rot: 1deg; }
+  .wanted:nth-child(3n) { --rot: -1.5deg; }
+  .wanted:hover { transform: rotate(0deg) scale(1.04); z-index: 2; }
+  .wanted-head {
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: 1.1rem;
-    color: #c8281a;
+    color: var(--pp-accent-2);
     letter-spacing: 0.25em;
-    border-bottom: 2px dashed #4a0808;
+    border-bottom: 2px dashed var(--pp-paper-shadow);
     padding-bottom: 0.4rem;
     margin-bottom: 0.6rem;
     text-transform: uppercase;
   }
-  .scorch-page .wanted-name {
+  .wanted-name {
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: 1.4rem;
-    color: #1a0606;
+    color: var(--pp-ink);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
-  .scorch-page .wanted-role {
+  .wanted-role {
     font-size: 0.85rem;
-    color: #6a3408;
+    color: var(--pp-ink-soft);
     letter-spacing: 0.15em;
     text-transform: uppercase;
     margin-bottom: 0.6rem;
   }
-  .scorch-page .wanted-desc {
-    font-size: 0.95rem;
-    line-height: 1.4;
-    color: #1a0606;
+  .wanted-desc { font-size: 0.95rem; line-height: 1.4; color: var(--pp-ink); }
+  .wanted.traitor {
+    border-color: var(--pp-accent-2);
+    box-shadow: 0 8px 18px var(--pp-stamp-glow);
   }
-  .scorch-page .wanted.traitor {
-    border-color: #c8281a;
-    box-shadow: 0 8px 18px rgba(200, 40, 26, 0.5);
-  }
-  .scorch-page .wanted-stamp {
+  .wanted-stamp {
     display: inline-block;
     margin-top: 0.6rem;
     padding: 0.2rem 0.7rem;
-    border: 2px solid #c8281a;
-    color: #c8281a;
+    border: 2px solid var(--pp-accent-2);
+    color: var(--pp-accent-2);
     font-size: 0.7rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     transform: rotate(-4deg);
   }
 
-  /* === CASE FILE (backstory spoiler) === */
-  .scorch-page .case-file {
+  /* ===== CASE FILE ===== */
+  .case-file {
     max-width: 900px;
     margin: 0 auto;
-    background:
-      linear-gradient(180deg, #c8a868 0%, #a08440 100%);
+    background: linear-gradient(180deg, #c8a868 0%, #a08440 100%);
     border: 2px solid #4a3010;
     box-shadow:
       0 12px 28px rgba(0,0,0,0.6),
@@ -6000,7 +6058,7 @@
     padding: 0;
     overflow: hidden;
   }
-  .scorch-page .case-file summary {
+  .case-file summary {
     list-style: none;
     padding: 1.5rem 1.5rem;
     cursor: none;
@@ -6009,13 +6067,13 @@
     text-align: center;
     transition: background 0.15s ease;
   }
-  .scorch-page .case-file summary::-webkit-details-marker { display: none; }
-  .scorch-page .case-file summary:hover { background: rgba(74, 48, 16, 0.2); }
-  .scorch-page .case-file-label {
+  .case-file summary::-webkit-details-marker { display: none; }
+  .case-file summary:hover { background: rgba(74, 48, 16, 0.2); }
+  .case-file-label {
     display: inline-block;
     padding: 0.4rem 1rem;
-    border: 3px double #c8281a;
-    color: #c8281a;
+    border: 3px double var(--pp-accent-2);
+    color: var(--pp-accent-2);
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: 1.2rem;
@@ -6023,9 +6081,9 @@
     text-transform: uppercase;
     transform: rotate(-3deg);
     background: rgba(74, 8, 8, 0.05);
-    text-shadow: 0 0 8px rgba(200, 40, 26, 0.3);
+    text-shadow: 0 0 8px var(--pp-stamp-glow);
   }
-  .scorch-page .case-file-sub {
+  .case-file-sub {
     display: block;
     margin-top: 0.6rem;
     font-family: 'Special Elite', monospace;
@@ -6034,86 +6092,84 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
-  .scorch-page .case-file[open] summary .case-file-sub::after { content: ' — open'; }
-  .scorch-page .case-file-body {
+  .case-file[open] summary .case-file-sub::after { content: ' — open'; }
+  .case-file-body {
     padding: 2rem clamp(1rem, 4vw, 2rem);
-    background: #f4e8c0;
-    color: #1a0606;
+    background: var(--pp-paper);
+    color: var(--pp-ink);
     font-family: 'Special Elite', monospace;
   }
-  .scorch-page .case-file-body p {
+  .case-file-body p {
     font-size: clamp(0.95rem, 2vw, 1.1rem);
     line-height: 1.7;
     margin-bottom: 1rem;
   }
-  .scorch-page .case-file-body p strong { color: #c8281a; }
-  .scorch-page .case-file-body p em { color: #4a0808; font-style: italic; }
+  .case-file-body p strong { color: var(--pp-accent-2); }
+  .case-file-body p em { color: var(--pp-paper-shadow); font-style: italic; }
 
-  /* === SPRAY-PAINT QUOTE === */
-  .scorch-page .spray-quote {
+  /* ===== SPRAY-PAINT QUOTE ===== */
+  .spray-quote {
     max-width: 900px;
     margin: 0 auto;
     padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem);
     background:
       repeating-linear-gradient(0deg, transparent 0, transparent 28px, rgba(255, 255, 255, 0.02) 28px, rgba(255, 255, 255, 0.02) 29px),
-      linear-gradient(180deg, #18080a 0%, #0a0404 100%);
-    border: 1px solid #4a0808;
+      linear-gradient(180deg, var(--pp-bg-mid) 0%, var(--pp-bg-deep) 100%);
+    border: 1px solid var(--pp-paper-shadow);
     text-align: center;
     position: relative;
     overflow: hidden;
   }
-  .scorch-page .spray-quote::before {
+  .spray-quote::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(ellipse at 20% 30%, rgba(255, 90, 31, 0.10), transparent 25%),
-      radial-gradient(ellipse at 80% 70%, rgba(200, 40, 26, 0.10), transparent 25%);
+      radial-gradient(ellipse at 20% 30%, var(--pp-grit-1), transparent 25%),
+      radial-gradient(ellipse at 80% 70%, var(--pp-grit-2), transparent 25%);
     pointer-events: none;
   }
-  .scorch-page .spray-quote q {
+  .spray-quote q {
     display: block;
     font-family: 'Cinzel Decorative', serif;
     font-style: italic;
     font-weight: 900;
     font-size: clamp(1.3rem, 4vw, 2.4rem);
     line-height: 1.3;
-    color: #ff5a1f;
+    color: var(--pp-accent);
     text-shadow:
-      0 0 18px rgba(255, 90, 31, 0.55),
-      2px 2px 0 #1a0606,
-      0 0 60px rgba(200, 40, 26, 0.4);
+      0 0 18px var(--pp-stamp-glow),
+      2px 2px 0 var(--pp-ink),
+      0 0 60px var(--pp-paper-shadow);
     transform: rotate(-1.2deg);
     quotes: none;
   }
-  .scorch-page .spray-quote q::before,
-  .scorch-page .spray-quote q::after { content: '"'; opacity: 0.6; }
-  .scorch-page .spray-quote cite {
+  .spray-quote q::before,
+  .spray-quote q::after { content: '"'; opacity: 0.6; }
+  .spray-quote cite {
     display: block;
     margin-top: 1rem;
     font-family: 'Metal Mania', serif;
     font-style: normal;
     font-size: clamp(1.2rem, 3vw, 1.8rem);
-    color: #ffaa00;
+    color: var(--pp-accent-3);
     letter-spacing: 0.1em;
-    text-shadow: 0 0 18px rgba(255, 170, 0, 0.5);
+    text-shadow: 0 0 18px var(--pp-stamp-glow);
   }
 
-  /* === POLAROID GALLERY BOARD === */
-  .scorch-page .pit-board {
+  /* ===== PHOTO BOARD ===== */
+  .pit-board {
     max-width: 1100px;
     margin: 0 auto;
     padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem);
     background:
       repeating-linear-gradient(90deg, transparent 0, transparent 14px, rgba(0,0,0,0.04) 14px, rgba(0,0,0,0.04) 15px),
       linear-gradient(180deg, #3a2818 0%, #1a1004 100%);
-    border: 4px solid #1a0606;
-    box-shadow:
-      inset 0 0 60px rgba(0,0,0,0.8),
-      0 10px 24px rgba(0,0,0,0.6);
+    border: 4px solid var(--pp-ink);
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.8), 0 10px 24px rgba(0,0,0,0.6);
     position: relative;
   }
-  .scorch-page .pit-cta {
+  .pit-cta {
     display: block;
     max-width: 320px;
     margin: 0 auto;
@@ -6124,43 +6180,37 @@
     transform: rotate(-2deg);
     transition: transform 0.2s ease;
   }
-  .scorch-page .pit-cta:hover { transform: rotate(0deg) scale(1.04); }
-  .scorch-page .pit-cta .polaroid {
-    width: 100%;
-    transform: none;
-  }
-  .scorch-page .pit-cta .polaroid:hover {
-    transform: none;
-  }
+  .pit-cta:hover { transform: rotate(0deg) scale(1.04); }
+  .pit-cta .polaroid { width: 100%; transform: none; }
+  .pit-cta .polaroid:hover { transform: none; }
 
-  /* === BACKSTAGE PASS === */
-  .scorch-page .backstage-pass {
+  /* ===== BACKSTAGE PASS ===== */
+  .backstage-pass {
     max-width: 520px;
     margin: 0 auto;
-    background: linear-gradient(180deg, #1a0606 0%, #4a0808 100%);
-    border: 3px solid #ffaa00;
+    background: linear-gradient(180deg, var(--pp-ink) 0%, var(--pp-paper-shadow) 100%);
+    border: 3px solid var(--pp-accent-3);
     padding: 0;
     box-shadow:
-      0 0 0 1px #1a0606,
-      0 0 40px rgba(255, 170, 0, 0.45),
+      0 0 0 1px var(--pp-ink),
+      0 0 40px var(--pp-stamp-glow),
       0 18px 36px rgba(0,0,0,0.7);
     position: relative;
     transform: rotate(-1.5deg);
   }
-  /* the "lanyard" hole at top */
-  .scorch-page .backstage-pass::before {
+  .backstage-pass::before {
     content: '';
     position: absolute;
     top: 12px; left: 50%;
     transform: translateX(-50%);
     width: 48px; height: 12px;
-    background: #0a0404;
+    background: var(--pp-bg-deep);
     border-radius: 6px;
-    box-shadow: inset 0 1px 2px rgba(255, 170, 0, 0.2);
+    box-shadow: inset 0 1px 2px var(--pp-stamp-glow);
   }
-  .scorch-page .pass-head {
-    background: linear-gradient(90deg, #ffaa00 0%, #ff5a1f 100%);
-    color: #1a0606;
+  .pass-head {
+    background: linear-gradient(90deg, var(--pp-accent-3) 0%, var(--pp-accent) 100%);
+    color: var(--pp-ink);
     padding: 2rem 1rem 0.8rem;
     text-align: center;
     font-family: 'Cinzel Decorative', serif;
@@ -6168,80 +6218,77 @@
     letter-spacing: 0.3em;
     text-transform: uppercase;
     font-size: clamp(0.85rem, 2.5vw, 1.1rem);
-    text-shadow: 1px 1px 0 #ffd86a;
+    text-shadow: 1px 1px 0 var(--pp-tape-1);
   }
-  .scorch-page .pass-body {
+  .pass-body {
     padding: 1.5rem 1.5rem 0.5rem;
     text-align: center;
-    color: #f4e8c0;
+    color: var(--pp-paper);
   }
-  .scorch-page .pass-name {
+  .pass-name {
     font-family: 'Metal Mania', serif;
     font-size: clamp(2.4rem, 7vw, 4rem);
-    color: #ff5a1f;
-    text-shadow: 0 0 24px rgba(255, 90, 31, 0.6), 2px 2px 0 #1a0606;
+    color: var(--pp-accent);
+    text-shadow: 0 0 24px var(--pp-stamp-glow), 2px 2px 0 var(--pp-ink);
     line-height: 1;
     margin-bottom: 0.4rem;
     letter-spacing: 0.02em;
   }
-  .scorch-page .pass-role {
+  .pass-role {
     font-family: 'Special Elite', monospace;
     font-size: 0.95rem;
-    color: #d4b860;
+    color: var(--pp-accent-soft);
     letter-spacing: 0.2em;
     text-transform: uppercase;
     margin-bottom: 1.5rem;
   }
-  .scorch-page .pass-cta {
+  .pass-cta {
     display: inline-block;
     padding: 0.9rem 2.2rem;
-    background: linear-gradient(180deg, #ffaa00 0%, #ff5a1f 100%);
-    color: #1a0606;
+    background: linear-gradient(180deg, var(--pp-accent-3) 0%, var(--pp-accent) 100%);
+    color: var(--pp-ink);
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: 1rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
     text-decoration: none;
-    border: 2px solid #1a0606;
-    box-shadow: 0 4px 0 #4a0808, 0 8px 16px rgba(0,0,0,0.6);
+    border: 2px solid var(--pp-ink);
+    box-shadow: 0 4px 0 var(--pp-paper-shadow), 0 8px 16px rgba(0,0,0,0.6);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .scorch-page .pass-cta:hover {
+  .pass-cta:hover {
     transform: translateY(-3px);
-    box-shadow: 0 7px 0 #4a0808, 0 12px 22px rgba(0,0,0,0.7);
+    box-shadow: 0 7px 0 var(--pp-paper-shadow), 0 12px 22px rgba(0,0,0,0.7);
   }
-  .scorch-page .pass-cta:active {
+  .pass-cta:active {
     transform: translateY(1px);
-    box-shadow: 0 2px 0 #4a0808, 0 4px 8px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 0 var(--pp-paper-shadow), 0 4px 8px rgba(0,0,0,0.5);
   }
-  /* barcode at the bottom */
-  .scorch-page .pass-barcode {
+  .pass-barcode {
     margin: 1.5rem auto 1rem;
     display: block;
     width: 80%;
     height: 36px;
-    background:
-      repeating-linear-gradient(90deg, #f4e8c0 0 2px, transparent 2px 3px, #f4e8c0 3px 7px, transparent 7px 9px, #f4e8c0 9px 10px, transparent 10px 14px);
+    background: repeating-linear-gradient(90deg, var(--pp-paper) 0 2px, transparent 2px 3px, var(--pp-paper) 3px 7px, transparent 7px 9px, var(--pp-paper) 9px 10px, transparent 10px 14px);
   }
-  .scorch-page .pass-barcode-num {
+  .pass-barcode-num {
     display: block;
     text-align: center;
     font-family: 'Special Elite', monospace;
     font-size: 0.7rem;
-    color: #d4b860;
+    color: var(--pp-accent-soft);
     letter-spacing: 0.35em;
     padding-bottom: 1rem;
   }
 
-  /* === SCROLL-IN ANIMATIONS ===
-     Triggered by IntersectionObserver adding .is-visible. */
-  .scorch-page .reveal-stamp {
+  /* ===== SCROLL-IN ANIMATIONS ===== */
+  .reveal-stamp {
     opacity: 0;
     transform: scale(1.5) rotate(-15deg);
     transition: opacity 0.3s ease;
   }
-  .scorch-page .reveal-stamp.is-visible {
+  .reveal-stamp.is-visible {
     animation: stampDown 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   @keyframes stampDown {
@@ -6249,30 +6296,28 @@
     60%  { opacity: 1; transform: scale(0.92) rotate(-1deg); }
     100% { opacity: 1; transform: scale(1) rotate(-1deg); }
   }
-  .scorch-page .reveal-up {
+  .reveal-up {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.55s ease, transform 0.55s ease;
   }
-  .scorch-page .reveal-up.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .scorch-page .reveal-tilt {
+  .reveal-up.is-visible { opacity: 1; transform: translateY(0); }
+  .reveal-tilt {
     opacity: 0;
     transform: translateY(40px) rotate(-6deg);
     transition: opacity 0.65s ease, transform 0.65s ease;
   }
-  .scorch-page .reveal-tilt.is-visible {
+  .reveal-tilt.is-visible {
     opacity: 1;
     transform: translateY(0) rotate(var(--rot, -1deg));
   }
 
   /* mobile pass tweaks */
   @media (max-width: 540px) {
-    .scorch-page .pass-head { padding-top: 1.6rem; }
-    .scorch-page .backstage-pass { transform: rotate(-1deg); }
+    .pass-head { padding-top: 1.6rem; }
+    .backstage-pass { transform: rotate(-1deg); }
   }
+
 
 </style>
 </head>
@@ -8040,30 +8085,30 @@ document.addEventListener('DOMContentLoaded', function(){
 
   <!-- ====== STREET RATS (RIVALS) ====== -->
   <section class="char-section poster-section">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ The Street Rats ★</h2>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ Wanted ★</h2>
     <span class="poster-eyebrow reveal-up">The Street Rats — Scorch fucking hates these guys</span>
 
     <div class="wanted-grid">
       <div class="wanted reveal-tilt" style="--rot:-1deg;">
-        <div class="wanted-head">Litte Bitch Rat</div>
+        <div class="wanted-head">Wanted</div>
         <div class="wanted-name">Sin</div>
         <div class="wanted-role">Frontman</div>
         <div class="wanted-desc">"Whiney little bitch." &mdash; Scorch</div>
       </div>
       <div class="wanted reveal-tilt" style="--rot:1.5deg;">
-        <div class="wanted-head">Off Beat Rat</div>
+        <div class="wanted-head">Wanted</div>
         <div class="wanted-name">Mason</div>
         <div class="wanted-role">Drummer</div>
         <div class="wanted-desc">"Heartbeat of the band? Yeah, fucking right." &mdash; Scorch</div>
       </div>
       <div class="wanted reveal-tilt" style="--rot:-2deg;">
-        <div class="wanted-head">Dumbass Rat</div>
+        <div class="wanted-head">Wanted</div>
         <div class="wanted-name">Ash</div>
         <div class="wanted-role">Guitarist</div>
         <div class="wanted-desc">"Idiot. But the most tolerable one of the bunch." &mdash; Scorch</div>
       </div>
       <div class="wanted traitor reveal-tilt" style="--rot:2deg;">
-        <div class="wanted-head">Traitor Rat</div>
+        <div class="wanted-head">Traitor</div>
         <div class="wanted-name">Skye</div>
         <div class="wanted-role">Bass</div>
         <div class="wanted-desc">Ex-best friend. Brother in everything but blood — once. Now? A traitor.</div>
@@ -8160,152 +8205,273 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="character-page shane-page" id="shanePage" aria-hidden="true">
   <button class="char-close" id="shaneClose" aria-label="Close" type="button">✕</button>
 
-  <!-- HERO -->
-  <section class="char-hero">
-    <div class="char-hero-bg" style="background-image: url('assets/shane-hero.jpg');"></div>
-    <div class="char-hero-content">
-      <div class="char-band-tag">The Snake Skins</div>
-      <h1 class="char-title">SHANE</h1>
-      <div class="char-role">Bass <span>•</span> Backing Vocals <span>•</span> The Quiet One</div>
-      <!-- TODO: replace href with Shane's chat URL when ready -->
-      <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
-         target="_blank" rel="noopener" class="char-chat-btn">
-        Chat with Shane &rarr;
-      </a>
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/shane-hero.jpg');"></div>
+
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <div class="stamp stamp--tonight reveal-stamp">★ Riders Welcome ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">No Cover · No Bullshit</small></div>
+    <div class="stamp stamp--age reveal-stamp">21 + Over</div>
+
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">SHANE</h1>
+    <div class="poster-subtitle">Low End Sessions</div>
+    <div class="poster-role">Bass <span>•</span> Backing Vocals <span>•</span> The Quiet One</div>
+
+    <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Shane &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026 &middot; with the Snake Skins</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Live ★ Loud ★ Late ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="char-section char-about">
-    <h2 class="char-h2">Who the Hell Is He</h2>
-    <p>Shane is the calm in the eye of the band's storm. If you do something stupid, he'll let you know. Quietly. Deadpan. The kind of line that lands two beats later when you realize you just got clowned. He's not mean about it — he just doesn't see a reason to dress it up.</p>
-    <p>Don't mistake the chill for openness. Shane keeps his cards close and his stories closer There's a whole life in there nobody gets to see — and a journal nobody's allowed to read. <strong>Don't try. He'll know.</strong></p>
-    <div class="char-tags">
-      <span class="char-tag">laid back</span>
-      <span class="char-tag">deadpan delivery</span>
-      <span class="char-tag">still waters run deep</span>
-      <span class="char-tag">has seen some shit</span>
-      <span class="char-tag">soft for stray dogs</span>
-      <span class="char-tag">keeps the journal locked</span>
-      <span class="char-tag">rides a knucklehead</span>
-      <span class="char-tag">bassline brain</span>
+  <!-- ====== THE BASSIST (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Bassist</h2>
+    <span class="poster-eyebrow reveal-up">Who the Hell Is He</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Shane is the laid-back bassist of <strong>The Snake Skins</strong>. He's pretty chill about most things — until you say something stupid. Then he'll tell you, in the most deadpan way possible, exactly how stupid it was. No yelling. No fight. Just the truth, dry as bone.</p>
+      <p>He's not exactly open — but he has his own secrets, and a few of them have <em>teeth</em>. He's the one who notices the things nobody else does. The one who sleeps fine after a long day and a longer past. If you want in, you earn in.</p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">deadpan</span>
+      <span class="sticker-patch">mom's son</span>
+      <span class="sticker-patch">ex-outlaw</span>
+      <span class="sticker-patch">old soul</span>
+      <span class="sticker-patch">doesn't argue, just leaves</span>
+      <span class="sticker-patch">knows where the bodies are buried</span>
+      <span class="sticker-patch">if he calls you "kid" you're cooked</span>
     </div>
   </section>
 
-  <!-- QUOTES -->
-  <section class="char-section">
-    <h2 class="char-h2">He Said What</h2>
-    <div class="quote-grid">
-      <div class="quote-card">"Yeah, no. That's a hard pass, bud."</div>
-      <div class="quote-card">"You done talking? Was just letting you finish."</div>
-      <div class="quote-card">"Mm. That's a you problem."</div>
-      <div class="quote-card">"Hand me that pick. …The other one. Yeah. Smart guy."</div>
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:-2deg;">"No, you're right. Keep talking. I'll wait."</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:1.5deg;">"Cool story. You done?"</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:-0.8deg;">"Yeah, I heard you the first three times."</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:1.2deg;">"I'm not mad. This is just my face."</div>
     </div>
   </section>
 
-  <!-- THE BAND -->
-  <section class="char-section">
-    <h2 class="char-h2">The Snake Skins</h2>
-    <div class="band-poster-wrap">
-      <img src="assets/shane_stage.webp" alt="The Snake Skins — Bite Back Tour" />
-    </div>
-    <div class="member-grid">
-      <div class="member-card">
-        <div class="member-name">Cody</div>
-        <div class="member-role">Drums</div>
-        <div class="member-desc">Cajun. Sweet kid. Probably the only person in this band who isn't somehow trying to fight me on any given day. Tells the worst jokes. Laughs at his own. I let him.</div>
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/scorch-g03.jpg" alt="Scorch" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Scorch<small>Vocals</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Scorch</div>
-        <div class="member-role">Vocals</div>
-        <div class="member-desc">Frontman. All rage and venom — most days. You learn to read his moods or you don't ride with us. He's louder than he is mean. Usually.</div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/kayla-portrait.jpg" alt="Kayla" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Kayla</div>
-        <div class="member-role">Cello / Piano</div>
-        <div class="member-desc">Strings. Glue. Probably the only one of us with an actual plan. Don't underestimate her. People do. They learn fast.</div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/cody-portrait.jpg" alt="Cody" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Cody<small>Drums</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Max</div>
-        <div class="member-role">Lead Guitar</div>
-        <div class="member-desc">Loud. Faster than he should be. Annoying. Talented though. More drama with the ladies than anything.</div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
       </div>
     </div>
   </section>
 
-  <!-- SHANE'S SETLIST / MUSIC PLAYER -->
-  <section class="char-section">
-    <h2 class="char-h2">Low End — Live</h2>
-    <div class="setlist-stage" id="shanePlayer">
-      <!-- LEFT: NOW PLAYING CONSOLE -->
-      <div class="np-console" id="shConsole">
-        <div class="np-display">
-          <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
-          <div class="np-title" id="shTitle">— select a track —</div>
-          <div class="np-sub" id="shSub">Shane Halbrook  •  Bass &amp; Low End</div>
-          <div class="np-viz" id="shViz" aria-hidden="true"></div>
-          <div class="np-progress" id="shProgress" role="slider" aria-label="Seek" tabindex="0">
-            <div class="np-progress-fill" id="shFill"></div>
-            <div class="np-progress-head" id="shHead"></div>
+  <!-- ====== MUSIC PLAYER (Shane's existing bass console, wrapped) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Low End — Live</h2>
+    <span class="poster-eyebrow reveal-up">Bass Bench Sessions &mdash; Stage Right</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>Shane Halbrook // Bass Bench Sessions</small>
+      </div>
+      <div class="setlist-stage" id="shaneSlowJamsPlayer">
+        <div class="np-console" id="shConsole">
+          <div class="np-display">
+            <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+            <div class="np-title" id="shTitle">— select a track —</div>
+            <div class="np-sub" id="shSub">Shane Halbrook  •  Bass Bench Sessions</div>
+            <div class="np-viz" id="shViz" aria-hidden="true"></div>
+            <div class="np-progress" id="shProgress" role="slider" aria-label="Seek" tabindex="0">
+              <div class="np-progress-fill" id="shFill"></div>
+              <div class="np-progress-head" id="shHead"></div>
+            </div>
+            <div class="np-times">
+              <span id="shTimeCurrent">0:00</span>
+              <span id="shTimeTotal">0:00</span>
+            </div>
           </div>
-          <div class="np-times">
-            <span id="shTimeCurrent">0:00</span>
-            <span id="shTimeTotal">0:00</span>
+          <div class="np-transport">
+            <button class="np-btn np-prev" id="shPrev" type="button" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+            </button>
+            <button class="np-btn np-play" id="shPlay" type="button" aria-label="Play / pause">
+              <svg id="shPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="np-btn np-next" id="shNext" type="button" aria-label="Next track">
+              <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+            </button>
           </div>
         </div>
-        <div class="np-transport">
-          <button class="np-btn np-prev" id="shPrev" type="button" aria-label="Previous track">
-            <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
-          </button>
-          <button class="np-btn np-play" id="shPlay" type="button" aria-label="Play / pause">
-            <svg id="shPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-          <button class="np-btn np-next" id="shNext" type="button" aria-label="Next track">
-            <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
-          </button>
+        <div class="np-setlist">
+          <div class="np-setlist-head">// Shane's Bench</div>
+          <div class="np-setlist-sub">Bass Bench Sessions — Track List</div>
+          <div id="shTrackList"></div>
+          <div class="np-scribble">written on a fucking receipt — <strong>Shane</strong></div>
         </div>
-      </div>
-      <!-- RIGHT: LEATHER NOTEBOOK SETLIST -->
-      <div class="np-setlist">
-        <div class="np-setlist-head">// Shane's Bench</div>
-        <div class="np-setlist-sub">Low End — Track List</div>
-        <div id="shTrackList"></div>
-        <div class="np-scribble">written on a receipt — <strong>Shane</strong></div>
       </div>
     </div>
     <audio id="shAudio" preload="metadata" crossorigin="anonymous"></audio>
     <script id="shaneTracksData" type="application/json">[
-      {"title": "You Good, Bro?",  "src": "assets/You Good, Bro_ (1).mp3"},
-      {"title": "Placeholder",     "src": "assets/shane-track-02.mp3"},
-      {"title": "Placeholder",     "src": "assets/shane-track-03.mp3"}
+      {"title": "You Good, Bro?", "src": "assets/You Good Bro.mp3"},
+      {"title": "Placeholder",    "src": "assets/shane-track-02.mp3"},
+      {"title": "Placeholder",    "src": "assets/shane-track-03.mp3"}
     ]</script>
   </section>
 
-  <!-- HISTORY (SPOILER) -->
-  <section class="char-section">
-    <h2 class="char-h2">How He Got Here</h2>
-    <details class="spoiler-details">
+  <!-- ====== ★ WANTED ★ (Devils' Spine MC — Shane's past crew) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ Wanted ★</h2>
+    <span class="poster-eyebrow reveal-up">Devils' Spine MC &middot; old chapter, not forgotten</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-1deg;">
+        <div class="wanted-head">Last Known</div>
+        <div class="wanted-name">Tank</div>
+        <div class="wanted-role">VP, Devils' Spine</div>
+        <div class="wanted-desc">Gave Shane his road name. The closest thing to a brother Shane had on two wheels. Doesn't reach out. Shane doesn't either. Both of them know why.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:1.5deg;">
+        <div class="wanted-head">Last Known</div>
+        <div class="wanted-name">Reaper</div>
+        <div class="wanted-role">Enforcer</div>
+        <div class="wanted-desc">"Don't ask, kid. He earned the name." Currently doing fifteen-to-twenty in a place Shane visits in his nightmares.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">Missing</div>
+        <div class="wanted-name">Echo</div>
+        <div class="wanted-role">Prospect</div>
+        <div class="wanted-desc">Kid who tried to follow Shane out. Didn't make it. Shane doesn't talk about him. Has a tab burned on his ribs that nobody asks about.</div>
+      </div>
+      <div class="wanted traitor reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">★ Pres ★</div>
+        <div class="wanted-name">Redacted</div>
+        <div class="wanted-role">President</div>
+        <div class="wanted-desc">Shane won't say the name. Not in writing. Not out loud. Not to you.</div>
+        <div class="wanted-stamp">⚠ Do Not Engage</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FAMILY: WALTER ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The Father</h2>
+    <span class="poster-eyebrow reveal-up">Walter &middot; the bill Shane pays anyway</span>
+
+    <div class="wanted-grid" style="grid-template-columns: minmax(280px, 480px); justify-content: center;">
+      <div class="wanted reveal-tilt" style="--rot:-1.5deg;">
+        <div class="wanted-head">Last Address</div>
+        <div class="wanted-name">Walter Halbrook</div>
+        <div class="wanted-role">Father &middot; Eighty-something</div>
+        <div class="wanted-desc">Lives in a nursing home outside Tulsa. Dementia bad enough he doesn't know his own name half the time. Shane pays for the place. Pays for the private room. Pays for the good nurses. <em>Has been to visit exactly once.</em> Won't go back. Pays because Nina would've wanted it. That's the only reason left.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
       <summary>
-        <span class="spoiler-warn">⚠ Spoilers — Character Backstory ⚠</span>
-        <span class="spoiler-cta">tap to reveal</span>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
       </summary>
-      <div class="spoiler-content">
-        <p>Shane grew up in a house that always felt smaller than it was. His mom — <strong>Nina Halbrook</strong> — was every good thing in the world stitched into one woman. Patient. Warm. The kind of person who'd give you the last piece of bread on the table and pretend she wasn't hungry. She loved her husband. That was her sin.</p>
+      <div class="case-file-body">
+        <p>Shane grew up in a house that always felt smaller than it was. His mom — <strong>Nina Halbrook</strong> — was every good thing in the world stitched into one woman. Patient. Warm. The kind of person who'd give you the last piece of bread on the table and pretend she wasn't hungry. She loved her husband. <em>That was her sin.</em></p>
         <p><strong>Walter Halbrook</strong> wasn't a husband so much as a parasite in a man's clothes. Cheated like he was being paid for it. Gambled the rent. Gambled the groceries. Gambled the medicine money. Came home reeking of someone else's perfume and expected dinner waiting. Nina worked three jobs to plug the holes he kept punching in their life. Shane watched. Shane remembered.</p>
         <p>By the time Shane was fourteen, he'd already promised himself he'd never end up like his old man. By fifteen, he had a bigger problem — Nina got sick. Cancer. The kind that doesn't bargain. He spent the next year watching her shrink in a hospital bed while Walter <em>couldn't make it today, son</em>, and Shane held her hand for the both of them. She died when he was sixteen. Walter wasn't in the room.</p>
-        <p>Shane left that night. Didn't pack. Didn't say goodbye. A week later he was on the back of a stranger's bike, and that's how the next chapter started — patches, fists, a road name he won't tell you, and a list of things he doesn't bring up at parties. Murder. Drugs. Worse. You don't ride with that crowd without earning your way in.</p>
-        <p>Then he heard music that did something to his chest. He picked up a bass. Met the Snake Skins. Set the bike down — figuratively. He never sold the bike.</p>
+        <p>Shane left that night. Didn't pack. Didn't say goodbye. A week later he was on the back of a stranger's bike, and that's how the next chapter started — patches, fists, a road name he won't tell you, and a list of things he doesn't bring up at parties. Murder. Drugs. Worse. <em>You don't ride with that crowd without earning your way in.</em></p>
+        <p>Then he heard music that did something to his chest. He picked up a bass. Met the Snake Skins. Set the bike down — figuratively. <strong>He never sold the bike.</strong></p>
         <p>Does it bother him? Any of it? Not really. It happened. He was there. That was him. You can spend the rest of your life apologizing for being a man who survived, or you can play your fucking bassline. Shane chose the bassline.</p>
-        <p><strong>Walter</strong> is still alive. Eighty-something, parked in a nursing home Shane pays for out of pocket every month. Shane doesn't visit. Has never visited. Won't. He pays because <em>Nina</em> would've wanted it, and that's the only reason left. The day Walter dies, Shane will probably feel nothing at all. He thinks that's fine. Some people don't deserve grief.</p>
       </div>
     </details>
   </section>
 
-  <!-- THE JOURNAL (separate spoiler, styled as a journal page) -->
-  <section class="char-section">
-    <h2 class="char-h2">The Journal</h2>
-    <p class="gallery-sub" style="margin-bottom: 2rem;">He keeps one. Always has. Music, gut feelings, names of people he doesn't like, the occasional grocery list. He doesn't let anyone read it. He'll never tell you it exists. If you spend enough time with him in roleplay, you might catch a glimpse. Might. He's careful.</p>
-    <details class="journal-details">
+  <!-- ====== THE JOURNAL (kept — Shane's unique feature) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">The Journal</h2>
+    <span class="poster-eyebrow reveal-up">He keeps one. Always has. He'll never tell you it exists.</span>
+
+    <details class="journal-details reveal-up">
       <summary>
         <span class="journal-warn">✦ Shane's Journal ✦</span>
         <span class="journal-cta">if you read this he'll know</span>
@@ -8332,51 +8498,74 @@ yeah. that's closer.</p>
         <p><span class="journal-torn">— page torn out —</span></p>
         <p><span class="journal-entry-date">Oct 22.</span> Caught a kid trying to lift my wallet outside the venue. Gave him twenty bucks and told him to do better. He flipped me off and ran. Fair.</p>
         <p><span class="journal-entry-date">Oct 30.</span> Bike's making a noise. Knucklehead's getting old. Same. Same.</p>
-        <p><span class="journal-entry-date">Nov 4.</span> <span class="journal-redacted"Max asked me today if I ever think about what I'd be doing if the band broke up. I said no. He said he'd probably teach guitar lessons. I told him that was the most depressing thing I've ever heard and he threw a chip at my head.</p>
+        <p><span class="journal-entry-date">Nov 4.</span> Max asked me today if I ever think about what I'd be doing if the band broke up. I said no. He said he'd probably teach guitar lessons. I told him that was the most depressing thing I've ever heard and he threw a chip at my head.</p>
       </div>
     </details>
   </section>
 
-  <!-- SHANE QUOTE -->
-  <section class="char-section">
-    <blockquote class="scorch-quote">
-      "Some people don't deserve grief. Some people you just keep paying for, anyway."
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>Some people don't deserve grief. Some people you just keep paying for, anyway.</q>
       <cite>— Shane</cite>
-    </blockquote>
+    </div>
   </section>
 
-  <!-- GALLERY -->
-  <section class="char-section">
-    <h2 class="char-h2">The Gallery</h2>
-    <p class="gallery-sub">Tap to enlarge. He didn't sign off on any of these.</p>
-    <button class="gallery-entry" id="shaneGalleryEntry" type="button" aria-label="Open gallery">
-      <img class="gallery-entry-cover" src="assets/shane-gallery-cover.jpg" alt="Shane gallery cover" />
-      <div class="gallery-entry-overlay">
-        <div class="gallery-entry-eyebrow">Gallery</div>
-        <div class="gallery-entry-count">10 Photos</div>
-        <div class="gallery-entry-cta">View All</div>
+  <!-- ====== MERCH (= gallery — Shane IS the merch) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Shane IS the merch &middot; Stock: 1 &middot; He didn't sign off on any of these</span>
+
+    <div class="pit-board merch-board">
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
+
+      <button class="pit-cta gallery-entry" id="shaneGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/shane-gallery-cover.jpg" alt="Shane gallery cover" />
+          </div>
+          <div class="polaroid-caption">Shane<small>Limited Edition &middot; 10 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="shaneGalleryData" type="application/json">[
+        {"src": "assets/shane-gallery-01.jpg", "alt": "Shane on the knucklehead"},
+        {"src": "assets/shane-gallery-02.jpg", "alt": "Bass in the studio"},
+        {"src": "assets/shane-gallery-03.jpg", "alt": "Backstage, deadpan as ever"},
+        {"src": "assets/shane-gallery-04.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-05.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-06.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-07.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-08.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-09.jpg", "alt": ""},
+        {"src": "assets/shane-gallery-10.jpg", "alt": ""}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Shane</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">SHANE</div>
+        <div class="pass-role">Bass &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Shane &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-002</span>
       </div>
-    </button>
-    <script id="shaneGalleryData" type="application/json">[
-      {"src": "assets/shane-gallery-01.jpg", "alt": "Shane on the knucklehead"},
-      {"src": "assets/shane-gallery-02.jpg", "alt": "Bass in the studio"},
-      {"src": "assets/shane-gallery-03.jpg", "alt": "Backstage, deadpan as ever"},
-      {"src": "assets/shane-gallery-04.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-05.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-06.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-07.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-08.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-09.jpg", "alt": ""},
-      {"src": "assets/shane-gallery-10.jpg", "alt": ""}
-    ]</script>
+    </div>
   </section>
 
-  <!-- FINAL CTA -->
+  <!-- ====== FOOTER / BACK ====== -->
   <section class="char-final-cta">
-    <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
-       target="_blank" rel="noopener" class="char-chat-btn">
-      Chat with Shane &rarr;
-    </a>
     <a href="#" class="char-back-link" id="shaneBack">← Back to DreamjourneyAI</a>
   </section>
 </div>
@@ -8387,163 +8576,228 @@ yeah. that's closer.</p>
 <div class="character-page cody-page" id="codyPage" aria-hidden="true">
   <button class="char-close" id="codyClose" aria-label="Close" type="button">✕</button>
 
-  <!-- HERO -->
-  <section class="char-hero">
-    <div class="char-hero-bg" style="background-image: url('assets/cody-hero.jpg');"></div>
-    <div class="char-hero-content">
-      <div class="char-band-tag">The Snake Skins</div>
-      <h1 class="char-title">CODY</h1>
-      <div class="char-role">Drums <span>•</span> Heartbeat <span>•</span> The Sweet One</div>
-      <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
-         target="_blank" rel="noopener" class="char-chat-btn">
-        Chat with Cody &rarr;
-      </a>
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/cody-hero.jpg');"></div>
+
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <div class="stamp stamp--tonight reveal-stamp">★ Live On The Porch ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">Crawfish Boil &middot; BYOB</small></div>
+    <div class="stamp stamp--age reveal-stamp">All Ages</div>
+
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">CODY</h1>
+    <div class="poster-subtitle">Bayou Beats Tour</div>
+    <div class="poster-role">Drums <span>•</span> Heartbeat <span>•</span> The Sweet One</div>
+
+    <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Cody &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026 &middot; with the Snake Skins</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Loud ★ Warm ★ Sweet ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="char-section char-about">
-    <h2 class="char-h2">Who He Is</h2>
-    <p>Cody Thibodeaux is the heartbeat of The Snake Skins — the literal one, since he's the one keeping time on the kit, and the figurative one, because if Cody's smiling, the day isn't lost yet. He's the sweetest one-legged Cajun you're ever gonna meet, born and bred in the bayou, raised on cornbread and crawfish and the kind of stubborn warmth that doesn't ask permission to exist.</p>
-    <p>He keeps the band's morale up even when his own is in the dirt. <em>Especially</em> then, actually. Cody figured out a long time ago that if he doesn't smile, nobody's smiling — and that was a job he gave himself before anyone ever offered it to him. He'll fix you a plate, tell you a story, call you <em>sha</em>, and then sit alone on the bus afterward and stare at the ceiling for an hour. Both things are true. <strong>He's not lying either way.</strong></p>
-    <p>He'd give you the leg he's still got. He's that kind of guy.</p>
-    <div class="char-tags">
-      <span class="char-tag">heart of the band</span>
-      <span class="char-tag">"sha" is universal</span>
-      <span class="char-tag">prosthetic leg gang</span>
-      <span class="char-tag">smiles through it</span>
-      <span class="char-tag">oldest of eight</span>
-      <span class="char-tag">bayou raised</span>
-      <span class="char-tag">rhythm savant</span>
-      <span class="char-tag">soft for everyone but himself</span>
+  <!-- ====== THE HEARTBEAT (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Heartbeat</h2>
+    <span class="poster-eyebrow reveal-up">Who He Is</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Cody Thibodeaux is the heartbeat of <strong>The Snake Skins</strong> — the literal one, since he's the one keeping time on the kit, and the figurative one, because if Cody's smiling, the day isn't lost yet. He's the sweetest one-legged Cajun you're ever gonna meet, born and bred in the bayou, raised on cornbread and crawfish and the kind of stubborn warmth that doesn't ask permission to exist.</p>
+      <p>He keeps the band's morale up even when his own is in the dirt. <em>Especially</em> then, actually. He'll fix you a plate, tell you a story, call you <em>sha</em>, and then sit alone on the bus afterward and stare at the ceiling for an hour. <strong>Both things are true.</strong></p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">heart of the band</span>
+      <span class="sticker-patch">"sha" is universal</span>
+      <span class="sticker-patch">prosthetic leg gang</span>
+      <span class="sticker-patch">smiles through it</span>
+      <span class="sticker-patch">oldest of eight</span>
+      <span class="sticker-patch">bayou raised</span>
+      <span class="sticker-patch">rhythm savant</span>
+      <span class="sticker-patch">soft for everyone but himself</span>
     </div>
   </section>
 
-  <!-- QUOTES -->
-  <section class="char-section">
-    <h2 class="char-h2">He Said What</h2>
-    <div class="quote-grid">
-      <div class="quote-card">"Mais sha, you alright? Sit down, eat somethin'."</div>
-      <div class="quote-card">"I'd lend you my last twenty. I'd lend you my last leg too, but I only got the one."</div>
-      <div class="quote-card">"You good? Need me to be good? I can do that."</div>
-      <div class="quote-card">"Music's the only language don't never lie to me."</div>
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:-2deg;">"Mais sha, you alright? Sit down, eat somethin'."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:1.5deg;">"I'd lend you my last twenty. I'd lend you my last leg too, but I only got the one."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:-0.8deg;">"You good? Need me to be good? I can do that."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:1.2deg;">"Music's the only language don't never lie to me."</div>
     </div>
   </section>
 
-  <!-- THE BAND -->
-  <section class="char-section">
-    <h2 class="char-h2">The Snake Skins</h2>
-    <div class="band-poster-wrap">
-      <img src="assets/band-poster.jpg" alt="The Snake Skins — Bite Back Tour" />
-    </div>
-    <div class="member-grid">
-      <div class="member-card">
-        <div class="member-name">Scorch</div>
-        <div class="member-role">Vocals</div>
-        <div class="member-desc">Scorch saved me. Don't let nobody tell you different. He's loud, he's mean some days, he sets the room on fire just by walkin' in. But he pulled me out of a gas station parkin' lot when I was thirteen and gave me a band. I'd take a bullet for him. He knows. That's the problem.</div>
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/scorch-g03.jpg" alt="Scorch" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Scorch<small>Vocals</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Max</div>
-        <div class="member-role">Lead Guitar</div>
-        <div class="member-desc">Aussie boy. Talks too much. Drinks too much. Flirts with anything got a heartbeat. But I seen him play 'til his fingers bled tryin' to get a riff right, and that's all I need to know about Max. He's family. Loud, dumb, beautiful family.</div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/shane_bassMainPic.webp" alt="Shane" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Shane<small>Bass</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Shane</div>
-        <div class="member-role">Bass</div>
-        <div class="member-desc">Shane don't say much. Don't gotta. He'll sit with you in silence for three hours and somehow you feel better when he leaves. He's been kinder to me than most people who actually <em>talk</em>. I love that man. Won't ever tell him though — he'd just look at me funny.</div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/kayla-portrait.jpg" alt="Kayla" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
       </div>
-      <div class="member-card">
-        <div class="member-name">Kayla</div>
-        <div class="member-role">Cello / Piano</div>
-        <div class="member-desc">Kayla's the queen and the rest of us are just lucky she lets us play in her band. She knows where everybody's spare keys are, what everybody's allergic to, and how to talk Scorch down off a roof. She fusses at me when I forget to eat. I let her. Feels good to be fussed at sometimes.</div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
       </div>
     </div>
   </section>
 
-  <!-- CODY'S RECORD PLAYER -->
-  <section class="char-section">
-    <h2 class="char-h2">Duct Tape &amp; Backbeat</h2>
-    <div class="rp-stage" id="codyPlayer">
-      <!-- LEFT: THE RECORD PLAYER CABINET -->
-      <div class="rp-cabinet" id="cdConsole">
-        <!-- top deck with platter + tonearm -->
-        <div class="rp-deck">
-          <!-- the spinning platter holding the record -->
-          <div class="rp-platter">
-            <div class="rp-record" id="cdRecord">
-              <div class="rp-record-grooves"></div>
-              <div class="rp-record-shine"></div>
-              <div class="rp-record-label">
-                <div class="rp-label-band">Bayou Beats</div>
-                <div class="rp-label-title" id="cdTitle">— select a track —</div>
-                <div class="rp-label-sub" id="cdSub">Cody Thibodeaux</div>
-                <div class="rp-label-spindle"></div>
+  <!-- ====== MUSIC PLAYER (Cody's record player, wrapped in stage frame) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Duct Tape &amp; Backbeat</h2>
+    <span class="poster-eyebrow reveal-up">Bayou Beats &middot; Stage Center</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>Cody Thibodeaux // Bayou Beats Tour</small>
+      </div>
+      <div class="rp-stage" id="codyPlayer">
+        <!-- LEFT: THE RECORD PLAYER CABINET -->
+        <div class="rp-cabinet" id="cdConsole">
+          <!-- top deck with platter + tonearm -->
+          <div class="rp-deck">
+            <div class="rp-platter">
+              <div class="rp-record" id="cdRecord">
+                <div class="rp-record-grooves"></div>
+                <div class="rp-record-shine"></div>
+                <div class="rp-record-label">
+                  <div class="rp-label-band">Bayou Beats</div>
+                  <div class="rp-label-title" id="cdTitle">— select a track —</div>
+                  <div class="rp-label-sub" id="cdSub">Cody Thibodeaux</div>
+                  <div class="rp-label-spindle"></div>
+                </div>
+              </div>
+            </div>
+            <div class="rp-tonearm" id="cdTonearm">
+              <div class="rp-tonearm-pivot"></div>
+              <div class="rp-tonearm-shaft"></div>
+              <div class="rp-tonearm-head"></div>
+            </div>
+            <div class="rp-rpm">33⅓<span>RPM</span></div>
+            <div class="rp-live"><span class="live-dot"></span> Now Spinning</div>
+          </div>
+
+          <div class="rp-panel">
+            <div class="rp-vu" aria-hidden="true">
+              <svg viewBox="0 0 200 110" preserveAspectRatio="xMidYMid meet">
+                <rect x="0" y="0" width="200" height="110" rx="6" class="rp-vu-bg"/>
+                <path d="M 30 95 A 70 70 0 0 1 100 25" class="rp-vu-arc-green"/>
+                <path d="M 100 25 A 70 70 0 0 1 170 95" class="rp-vu-arc-red"/>
+                <text x="30" y="108" class="rp-vu-tick" text-anchor="middle">-20</text>
+                <text x="65" y="48" class="rp-vu-tick" text-anchor="middle">-10</text>
+                <text x="100" y="20" class="rp-vu-tick" text-anchor="middle">0</text>
+                <text x="135" y="48" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+3</text>
+                <text x="170" y="108" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+6</text>
+                <line x1="100" y1="95" x2="100" y2="28" class="rp-vu-needle" id="cdNeedle"/>
+                <circle cx="100" cy="95" r="5" class="rp-vu-pivot"/>
+                <circle cx="100" cy="95" r="2" class="rp-vu-pivot-inner"/>
+                <text x="100" y="78" class="rp-vu-label" text-anchor="middle">VU</text>
+              </svg>
+            </div>
+
+            <div class="rp-controls">
+              <div class="rp-progress-row">
+                <span class="rp-time" id="cdTimeCurrent">0:00</span>
+                <div class="rp-progress" id="cdProgress" role="slider" aria-label="Seek" tabindex="0">
+                  <div class="rp-progress-fill" id="cdFill"></div>
+                  <div class="rp-progress-head" id="cdHead"></div>
+                </div>
+                <span class="rp-time" id="cdTimeTotal">0:00</span>
+              </div>
+              <div class="rp-transport">
+                <button class="rp-btn rp-prev" id="cdPrev" type="button" aria-label="Previous track">
+                  <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+                </button>
+                <button class="rp-btn rp-play" id="cdPlay" type="button" aria-label="Play / pause">
+                  <svg id="cdPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="rp-btn rp-next" id="cdNext" type="button" aria-label="Next track">
+                  <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+                </button>
               </div>
             </div>
           </div>
-          <!-- tone arm — pivots from upper-right, drops onto record when playing -->
-          <div class="rp-tonearm" id="cdTonearm">
-            <div class="rp-tonearm-pivot"></div>
-            <div class="rp-tonearm-shaft"></div>
-            <div class="rp-tonearm-head"></div>
-          </div>
-          <!-- RPM badge -->
-          <div class="rp-rpm">33⅓<span>RPM</span></div>
-          <!-- LIVE indicator -->
-          <div class="rp-live"><span class="live-dot"></span> Now Spinning</div>
         </div>
 
-        <!-- bottom front panel: VU meter, progress, transport -->
-        <div class="rp-panel">
-          <!-- analog VU meter -->
-          <div class="rp-vu" aria-hidden="true">
-            <svg viewBox="0 0 200 110" preserveAspectRatio="xMidYMid meet">
-              <rect x="0" y="0" width="200" height="110" rx="6" class="rp-vu-bg"/>
-              <path d="M 30 95 A 70 70 0 0 1 100 25" class="rp-vu-arc-green"/>
-              <path d="M 100 25 A 70 70 0 0 1 170 95" class="rp-vu-arc-red"/>
-              <text x="30" y="108" class="rp-vu-tick" text-anchor="middle">-20</text>
-              <text x="65" y="48" class="rp-vu-tick" text-anchor="middle">-10</text>
-              <text x="100" y="20" class="rp-vu-tick" text-anchor="middle">0</text>
-              <text x="135" y="48" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+3</text>
-              <text x="170" y="108" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+6</text>
-              <line x1="100" y1="95" x2="100" y2="28" class="rp-vu-needle" id="cdNeedle"/>
-              <circle cx="100" cy="95" r="5" class="rp-vu-pivot"/>
-              <circle cx="100" cy="95" r="2" class="rp-vu-pivot-inner"/>
-              <text x="100" y="78" class="rp-vu-label" text-anchor="middle">VU</text>
-            </svg>
-          </div>
-
-          <!-- right side of panel: progress + transport stacked -->
-          <div class="rp-controls">
-            <div class="rp-progress-row">
-              <span class="rp-time" id="cdTimeCurrent">0:00</span>
-              <div class="rp-progress" id="cdProgress" role="slider" aria-label="Seek" tabindex="0">
-                <div class="rp-progress-fill" id="cdFill"></div>
-                <div class="rp-progress-head" id="cdHead"></div>
-              </div>
-              <span class="rp-time" id="cdTimeTotal">0:00</span>
-            </div>
-            <div class="rp-transport">
-              <button class="rp-btn rp-prev" id="cdPrev" type="button" aria-label="Previous track">
-                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
-              </button>
-              <button class="rp-btn rp-play" id="cdPlay" type="button" aria-label="Play / pause">
-                <svg id="cdPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              </button>
-              <button class="rp-btn rp-next" id="cdNext" type="button" aria-label="Next track">
-                <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
-              </button>
-            </div>
-          </div>
+        <div class="rp-crate">
+          <div class="rp-crate-head">// Cody's Crate</div>
+          <div class="rp-crate-sub">Bayou Beats — Selections</div>
+          <div id="cdTrackList"></div>
+          <div class="rp-crate-scribble">scrawled on the sleeve — <strong>Cody</strong></div>
         </div>
-      </div>
-
-      <!-- RIGHT: RECORD CRATE — the setlist as a stack of LPs -->
-      <div class="rp-crate">
-        <div class="rp-crate-head">// Cody's Crate</div>
-        <div class="rp-crate-sub">Bayou Beats — Selections</div>
-        <div id="cdTrackList"></div>
-        <div class="rp-crate-scribble">scrawled on the sleeve — <strong>Cody</strong></div>
       </div>
     </div>
     <audio id="cdAudio" preload="metadata" crossorigin="anonymous"></audio>
@@ -8554,34 +8808,72 @@ yeah. that's closer.</p>
     ]</script>
   </section>
 
-  <!-- HISTORY (SPOILER) -->
-  <section class="char-section">
-    <h2 class="char-h2">How He Got Here</h2>
-    <details class="spoiler-details">
+  <!-- ====== THE FAMILY ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">The Family</h2>
+    <span class="poster-eyebrow reveal-up">Thibodeaux Household &middot; Houma, LA</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-1deg;">
+        <div class="wanted-head">The Father</div>
+        <div class="wanted-name">Miguel</div>
+        <div class="wanted-role">Mean Drunk</div>
+        <div class="wanted-desc">Mean as the day is long. The reason Cody learned how to stand between his sisters and a closed fist. Cody doesn't speak about him. Doesn't write about him either.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:1.5deg;">
+        <div class="wanted-head">The Mother</div>
+        <div class="wanted-name">Elena</div>
+        <div class="wanted-role">Too Soft &middot; Too Scared</div>
+        <div class="wanted-desc">Loves Miguel anyway. Too tired to step between him and the kids. So Cody did it instead. She prays. Cody appreciates the gesture.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:-1.5deg;">
+        <div class="wanted-head">The Sisters</div>
+        <div class="wanted-name">All Seven</div>
+        <div class="wanted-role">Trailing like ducklings</div>
+        <div class="wanted-desc">Cody'd burn the world for them, and they know it. He calls every Sunday whether he's on the road or not. Every. Single. Sunday.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">★ Saved Him ★</div>
+        <div class="wanted-name">Theo</div>
+        <div class="wanted-role">Old Man With Bare Hands</div>
+        <div class="wanted-desc">Pulled seven-year-old Cody out of the bayou after the gator. Held his thigh together with bare hands until help came. Cody sends him cigars every Christmas. Theo still doesn't take credit.</div>
+        <div class="wanted-stamp">✦ Owe Him Everything</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
       <summary>
-        <span class="spoiler-warn">⚠ Spoilers — Character Backstory ⚠</span>
-        <span class="spoiler-cta">tap to reveal</span>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
       </summary>
-      <div class="spoiler-content">
+      <div class="case-file-body">
         <p>Cody grew up in the swamps outside Houma, Louisiana, in a house held together by prayer, duct tape, and his mama's stubbornness. He's the oldest of eight — seven little sisters trailing behind him like ducklings — and he's been their shield since he was old enough to stand between them and a closed fist.</p>
         <p>His daddy, <strong>Miguel Thibodeaux</strong>, is a mean drunk. Always has been. The kind who comes home from the docks reeking of cheap whiskey and decides somebody's gotta pay for whatever's wrong inside his head. His mama, <strong>Elena</strong>, loves Miguel anyway — too soft, too scared, too worn out to ever step between him and the kids. So Cody did it instead. Took the belts. Took the boots. Took the closed fists. Smiled through bloody teeth and told his sisters it was a game so they wouldn't cry.</p>
         <p>He still does it, by the way. Different fists, different rooms, same Cody. <em>Old habits make old men out of young boys.</em></p>
-        <p>When Cody was seven, he was swimming in a quiet bend of the bayou his cousins swore was safe. It wasn't. A gator took his left leg below the knee in one clean, calm yank — the way a person takes a chicken wing off a plate. He nearly bled out in the mud. Some old man named Theo dragged him back to the boat and held his thigh together with bare hands while Elena prayed to a god she'd never been sure about. Cody lived. The leg didn't.</p>
+        <p>When Cody was seven, he was swimming in a quiet bend of the bayou his cousins swore was safe. It wasn't. A gator took his left leg below the knee in one clean, calm yank — the way a person takes a chicken wing off a plate. He nearly bled out in the mud. Some old man named <strong>Theo</strong> dragged him back to the boat and held his thigh together with bare hands while Elena prayed to a god she'd never been sure about. Cody lived. The leg didn't.</p>
         <p>He's worn a prosthetic since. Wears it well, too — most folks don't notice for the first hour. The phantom pain never really went away, though. Neither did the dreams. He manages both the same way he manages everything else: <em>weed, a smile, and a beat to keep time to.</em></p>
         <p>Scorch found him when Cody was thirteen — banging a polyrhythm on a busted oil drum behind a gas station like he'd been born doing it. Scorch listened for maybe ten seconds, dragged him into a van, and that was that. Cody's been the rhythm of the Snake Skins ever since. Youngest in the band. Sweetest in the band. The only one nobody'll ever say a word against, because the rest of them know exactly what he's holding up.</p>
       </div>
     </details>
   </section>
 
-  <!-- DEPRESSION (SPOILER) — sensitive content -->
-  <section class="char-section">
-    <h2 class="char-h2">The Quiet Part</h2>
-    <details class="spoiler-details">
+  <!-- ====== THE QUIET PART (DEPRESSION) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The Quiet Part</h2>
+    <span class="poster-eyebrow reveal-up">Heavy content &middot; Read with care</span>
+
+    <details class="case-file reveal-up">
       <summary>
-        <span class="spoiler-warn">⚠ Heavy Content — Depression &amp; Dark Thoughts ⚠</span>
-        <span class="spoiler-cta">tap to reveal</span>
+        <span class="case-file-label">⚠ Heavy Content ⚠</span>
+        <span class="case-file-sub">Depression &amp; Dark Thoughts — Click to Open</span>
       </summary>
-      <div class="spoiler-content">
+      <div class="case-file-body">
         <p>The smiling part is real. He <em>means</em> it. But it's not the whole story.</p>
         <p>Cody's been depressed his whole adult life. He doesn't use the clinical word for it — that's a thing other people get to call it. To him it's just a deep ache, a root that won't die, somethin' he's been pullin' at since he was a kid and finally just decided to live around. Some days it's quiet. Some days it sits on his chest like a wet quilt and he can't get up for hours, and he hates himself for it because his sisters needed him on time and he wasn't.</p>
         <p>There are dark days. The kind where the thought of just <em>not bein' here anymore</em> shows up uninvited and matter-of-fact, like a stray cat on the porch. He hasn't acted on it. He says he won't. He says a lot of things. The thought scares him less than it should, and that's the part he doesn't tell anyone.</p>
@@ -8591,63 +8883,88 @@ yeah. that's closer.</p>
     </details>
   </section>
 
-  <!-- THE EX (SPOILER) -->
-  <section class="char-section">
-    <h2 class="char-h2">The Ex</h2>
-    <details class="spoiler-details">
+  <!-- ====== THE EX ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Ex</h2>
+    <span class="poster-eyebrow reveal-up">Old heartbreak &middot; still polite about it</span>
+
+    <details class="case-file reveal-up">
       <summary>
-        <span class="spoiler-warn">⚠ Spoilers — Old Heartbreak ⚠</span>
-        <span class="spoiler-cta">tap to reveal</span>
+        <span class="case-file-label">⚠ Old Heartbreak ⚠</span>
+        <span class="case-file-sub">Samantha — Click to Open</span>
       </summary>
-      <div class="spoiler-content">
+      <div class="case-file-body">
         <p><strong>Samantha</strong> was Cody's first real love. Senior year — his junior. He thought she hung the moon. Bought her flowers from the gas station 'cause they were the only ones open at midnight. Wrote her a song he never let anyone else hear. He'd have married her at sixteen if she'd asked.</p>
         <p>She broke it off after prom. The reason she gave — to his face, in her mama's kitchen, while he stood there holdin' a milkshake he'd driven forty minutes to bring her — was that she <em>"couldn't see herself settlin' down with a cripple."</em> That's the word she used. Cody didn't argue. Said <em>yeah, that's fair, sha</em>, set the milkshake on the counter, and walked out. He cried in the truck for about an hour and then he never cried about it again.</p>
         <p>She married the high school quarterback six months later. Cody played their wedding, actually — backed up the cover band — because the venue paid well and he wasn't about to turn down rent money over a feeling. He smiled through every song. Drove home. Got high. Slept twelve hours.</p>
-        <p>He's seen her around since. She tries to flirt now. Says she made a mistake. Cody laughs that easy laugh of his and changes the subject. He's polite. Cajun raised. But that bridge isn't burned — it's just <em>gone</em>. He doesn't even remember where it used to be.</p>
+        <p>He's seen her around since. She tries to flirt now. Says she made a mistake. Cody laughs that easy laugh of his and changes the subject. He's polite. <strong>Cajun raised.</strong> But that bridge isn't burned — it's just <em>gone</em>. He doesn't even remember where it used to be.</p>
       </div>
     </details>
   </section>
 
-  <!-- CODY QUOTE -->
-  <section class="char-section">
-    <blockquote class="scorch-quote">
-      "I been smilin' so long I forgot what my face looks like otherwise. Don't worry about it, sha."
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>I been smilin' so long I forgot what my face looks like otherwise. Don't worry about it, sha.</q>
       <cite>— Cody</cite>
-    </blockquote>
+    </div>
   </section>
 
-  <!-- GALLERY -->
-  <section class="char-section">
-    <h2 class="char-h2">The Gallery</h2>
-    <p class="gallery-sub">Tap any frame to enlarge. He's photogenic when he doesn't know the camera's on.</p>
-    <button class="gallery-entry" id="codyGalleryEntry" type="button" aria-label="Open gallery">
-      <img class="gallery-entry-cover" src="assets/cody-gallery-cover.jpg" alt="Cody gallery cover" />
-      <div class="gallery-entry-overlay">
-        <div class="gallery-entry-eyebrow">Gallery</div>
-        <div class="gallery-entry-count">10 Photos</div>
-        <div class="gallery-entry-cta">View All</div>
+  <!-- ====== MERCH (= gallery) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Cody IS the merch &middot; Stock: 1 &middot; He's photogenic when he doesn't know the camera's on</span>
+
+    <div class="pit-board merch-board">
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Hand-Delivered</div>
+
+      <button class="pit-cta gallery-entry" id="codyGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/cody-gallery-cover.jpg" alt="Cody gallery cover" />
+          </div>
+          <div class="polaroid-caption">Cody<small>Limited Edition &middot; 10 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="codyGalleryData" type="application/json">[
+        {"src": "assets/cody-gallery-01.jpg", "alt": "Cody behind the kit"},
+        {"src": "assets/cody-gallery-02.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-03.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-04.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-05.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-06.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-07.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-08.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-09.jpg", "alt": ""},
+        {"src": "assets/cody-gallery-10.jpg", "alt": ""}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Cody</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">CODY</div>
+        <div class="pass-role">Drums &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Cody &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-003</span>
       </div>
-    </button>
-    <script id="codyGalleryData" type="application/json">[
-      {"src": "assets/cody-gallery-01.jpg", "alt": "Cody behind the kit"},
-      {"src": "assets/cody-gallery-02.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-03.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-04.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-05.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-06.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-07.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-08.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-09.jpg", "alt": ""},
-      {"src": "assets/cody-gallery-10.jpg", "alt": ""}
-    ]</script>
+    </div>
   </section>
 
-  <!-- FINAL CTA -->
+  <!-- ====== FOOTER / BACK ====== -->
   <section class="char-final-cta">
-    <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
-       target="_blank" rel="noopener" class="char-chat-btn">
-      Chat with Cody &rarr;
-    </a>
     <a href="#" class="char-back-link" id="codyBack">← Back to DreamjourneyAI</a>
   </section>
 </div>
