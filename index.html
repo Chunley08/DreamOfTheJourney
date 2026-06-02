@@ -6587,6 +6587,14 @@
     visibility: visible;
     transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0s;
   }
+  /* Once the slide-up finishes we drop the transform entirely. A lingering
+     transform (even translateY(0)) makes this element the containing block
+     for position:fixed children, which would pin .dating-fx to the page
+     instead of the viewport and make the animated background scroll away.
+     With no transform, .dating-fx pins to the screen and stays visible. */
+  .dating-page.active.settled {
+    transform: none;
+  }
   .dating-page[aria-hidden="true"] { content-visibility: auto; }
   .dating-page[aria-hidden="true"] *,
   .dating-page[aria-hidden="true"] *::before,
@@ -6675,19 +6683,23 @@
   /* Make sure the actual content sits above the FX layer */
   .dating-wrap { position: relative; z-index: 1; }
 
-  /* Cards rise + fade in as they scroll into view (JS adds .in-view) */
-  .dating-reveal {
+  /* Cards rise + fade in as they scroll into view (JS adds .in-view).
+     IMPORTANT: the hidden start-state only applies when JS has explicitly
+     "armed" the element (.reveal-armed). That way, if the IntersectionObserver
+     never fires (layout race, content-visibility, old browser), content stays
+     visible by default instead of getting stuck at opacity:0. */
+  .dating-reveal.reveal-armed {
     opacity: 0;
     transform: translateY(26px);
     transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
   }
-  .dating-reveal.in-view { opacity: 1; transform: translateY(0); }
+  .dating-reveal.reveal-armed.in-view { opacity: 1; transform: translateY(0); }
 
   @media (prefers-reduced-motion: reduce) {
     .dating-fx .blob, .dating-fx .spark { animation: none !important; }
     .dating-fx .spark { display: none; }
     .dating-fx { transition: none; }
-    .dating-reveal { opacity: 1; transform: none; transition: none; }
+    .dating-reveal.reveal-armed { opacity: 1; transform: none; transition: none; }
   }
 
   .dating-close {
@@ -10219,7 +10231,8 @@ yeah. that's closer.</p>
     <!-- ===== PHOTO ===== -->
     <div class="dating-photo">
       <img src="assets/Scorch Pics/ScorchKissy.webp" alt="Backstage" onerror="this.parentElement.style.display='none'">
-      <div class="dating-photo-caption">Eat Your Heart Out.</p>
+      <div class="dating-photo-caption">Eat Your Heart Out.</div>
+    </div>
 
     <div class="dating-prompt">
       <p class="dating-prompt-q">On a typical Tuesday night, you'll find me...</p>
@@ -10333,6 +10346,7 @@ yeah. that's closer.</p>
     page.scrollTop = 0;
     document.body.style.overflow = 'hidden';
     startFx(page);
+    settle(page);
   }
   function close(id) {
     const page = document.getElementById(id + 'DatingPage');
@@ -10344,10 +10358,26 @@ yeah. that's closer.</p>
   // which is why its X button did nothing.)
   function closePage(page) {
     if (!page) return;
+    page.classList.remove('settled');
     page.classList.remove('active');
     page.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     stopFx(page);
+  }
+
+  // After the slide-up transition ends, clear the transform (via .settled)
+  // so position:fixed children (the animated background) pin to the viewport.
+  function settle(page) {
+    const onEnd = (e) => {
+      if (e.target !== page || e.propertyName !== 'transform') return;
+      page.removeEventListener('transitionend', onEnd);
+      if (page.classList.contains('active')) page.classList.add('settled');
+    };
+    page.addEventListener('transitionend', onEnd);
+    // Fallback in case transitionend doesn't fire.
+    setTimeout(() => {
+      if (page.classList.contains('active')) page.classList.add('settled');
+    }, 650);
   }
 
   /* ---------- AMBIENT BACKGROUND FX ----------
@@ -10373,22 +10403,28 @@ yeah. that's closer.</p>
   }
 
   /* Scroll-reveal: cards rise + fade as they enter the viewport. Tags the
-     main content blocks with .dating-reveal once, then observes them. */
+     main content blocks with .dating-reveal once, then observes them.
+     Built fail-safe: if anything goes wrong, content stays/ends up visible. */
   function setupReveals(page) {
     if (page._revealsDone) return;
     page._revealsDone = true;
     const wrap = page.querySelector('.dating-wrap, .dating-browse-wrap');
     if (!wrap) return;
     const sel = '.dating-tagline, .dating-card, .dating-prompt, .dating-photo, .dating-cta, .dating-preview-card';
-    const items = wrap.querySelectorAll(sel);
+    const items = Array.from(wrap.querySelectorAll(sel));
+    if (!items.length) return;
+
+    // No animation path: just make sure everything is visible.
     if (reduceMotion || !('IntersectionObserver' in window)) {
-      items.forEach(el => el.classList.add('dating-reveal', 'in-view'));
-      return;
+      items.forEach(el => el.classList.add('dating-reveal'));
+      return; // .dating-reveal alone (un-armed) is fully visible
     }
+
     items.forEach((el, i) => {
-      el.classList.add('dating-reveal');
+      el.classList.add('dating-reveal', 'reveal-armed');
       el.style.transitionDelay = Math.min(i * 40, 240) + 'ms';
     });
+
     const io = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -10396,8 +10432,19 @@ yeah. that's closer.</p>
           io.unobserve(entry.target);
         }
       });
-    }, { root: page, rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    items.forEach(el => io.observe(el));
+    }, { root: page, rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+
+    // Observe on the next frame, after the page is visible and laid out, so
+    // the observer reliably reports the initially-visible cards.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      items.forEach(el => io.observe(el));
+    }));
+
+    // SAFETY NET: no matter what, reveal everything after a short delay so a
+    // misfiring observer can never leave the profile blank.
+    page._revealSafety = setTimeout(() => {
+      items.forEach(el => el.classList.add('in-view'));
+    }, 1200);
   }
 
   function startFx(page) {
@@ -10469,6 +10516,7 @@ yeah. that's closer.</p>
     page.scrollTop = 0;
     document.body.style.overflow = 'hidden';
     startFx(page);
+    settle(page);
     // Focus the search input so users can start typing immediately
     requestAnimationFrame(() => document.getElementById('datingSearchInput')?.focus());
   });
