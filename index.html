@@ -6326,6 +6326,231 @@
   }
 
 
+  /* ============================================================
+     SCENE REQUEST — side tab on each character page + shared modal
+     The tab lives INSIDE each character page so it inherits the
+     character's --pp-* palette automatically. The modal sits in
+     the body and is shared across all characters; JS just swaps
+     the character name label when opening.
+     ============================================================ */
+  .scene-tab {
+    position: fixed;
+    right: 0;
+    top: 38%;
+    transform: translateY(-50%);
+    z-index: 50;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 1.3rem 0.55rem 1.3rem 0.7rem;
+    background: linear-gradient(180deg, var(--pp-accent) 0%, var(--pp-accent-2) 100%);
+    color: var(--pp-paper);
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    border: 2px solid var(--pp-ink);
+    border-right: none;
+    box-shadow: -4px 0 14px rgba(0,0,0,0.55), inset 0 0 12px rgba(0,0,0,0.35);
+    text-shadow: 0 1px 0 var(--pp-ink);
+    cursor: none;
+    transition: transform 0.2s ease, padding 0.2s ease, box-shadow 0.2s ease;
+  }
+  .scene-tab:hover {
+    transform: translateY(-50%) translateX(-5px);
+    padding-left: 0.95rem;
+    box-shadow: -7px 0 18px rgba(0,0,0,0.65), inset 0 0 14px rgba(0,0,0,0.4);
+  }
+  /* on mobile, anchor to bottom-right corner so it doesn't crowd content */
+  @media (max-width: 640px) {
+    .scene-tab {
+      top: auto;
+      bottom: 5rem;
+      transform: none;
+      padding: 0.9rem 0.45rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+    }
+    .scene-tab:hover { transform: translateX(-4px); }
+  }
+
+  /* ===== SHARED MODAL ===== */
+  .scene-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  .scene-modal.is-open {
+    display: flex;
+    animation: sceneModalFade 0.2s ease;
+  }
+  @keyframes sceneModalFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .scene-modal-panel {
+    background:
+      repeating-linear-gradient(90deg, transparent 0, transparent 26px, rgba(74,8,8,0.05) 26px, rgba(74,8,8,0.05) 27px),
+      linear-gradient(180deg, #f4e8c0 0%, #d4c098 100%);
+    color: #1a0606;
+    border: 3px solid #1a0606;
+    box-shadow:
+      0 0 0 1px #ff5a1f,
+      0 10px 0 #4a0808,
+      0 0 50px rgba(255,90,31,0.35),
+      0 18px 40px rgba(0,0,0,0.7);
+    padding: clamp(1.5rem, 4vw, 2.2rem);
+    max-width: 540px;
+    width: 100%;
+    position: relative;
+    transform: rotate(-0.4deg);
+    font-family: 'Special Elite', monospace;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: sceneModalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes sceneModalSlide {
+    from { transform: rotate(-0.4deg) translateY(40px); opacity: 0; }
+    to   { transform: rotate(-0.4deg) translateY(0); opacity: 1; }
+  }
+  /* tape strip at the top of the modal */
+  .scene-modal-panel::before {
+    content: '';
+    position: absolute;
+    top: -10px; left: 22%;
+    width: 110px; height: 22px;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0, rgba(255,255,255,0.18) 8px, transparent 8px, transparent 16px),
+      linear-gradient(180deg, #ffd86a, #d49a3a);
+    opacity: 0.85;
+    transform: rotate(-5deg);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+
+  .scene-modal-close {
+    position: absolute;
+    top: 0.6rem; right: 0.6rem;
+    width: 36px; height: 36px;
+    background: transparent;
+    border: 2px solid #1a0606;
+    color: #1a0606;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    z-index: 2;
+  }
+  .scene-modal-close:hover { background: #1a0606; color: #f4e8c0; }
+
+  .scene-modal-h {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    color: #c8281a;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0 0 0.4rem;
+    text-shadow: 2px 2px 0 #4a0808;
+  }
+  .scene-modal-sub {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.85rem;
+    color: #6a3408;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px dashed #4a0808;
+  }
+  .scene-modal-sub strong {
+    color: #1a0606;
+    font-size: 1.1em;
+    letter-spacing: 0.1em;
+  }
+
+  .scene-row { margin-bottom: 1rem; }
+  .scene-row label {
+    display: block;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.8rem;
+    color: #4a0808;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+    font-weight: bold;
+  }
+  .scene-row label span { font-weight: normal; text-transform: none; letter-spacing: normal; }
+  .scene-row input,
+  .scene-row textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    background: rgba(255,255,255,0.45);
+    border: 2px solid #1a0606;
+    color: #1a0606;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+  .scene-row textarea { min-height: 110px; resize: vertical; }
+  .scene-row input:focus,
+  .scene-row textarea:focus {
+    outline: none;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.3);
+  }
+  .scene-row input::placeholder,
+  .scene-row textarea::placeholder { color: rgba(74, 8, 8, 0.45); }
+
+  .scene-submit {
+    width: 100%;
+    padding: 0.95rem;
+    background: linear-gradient(180deg, #ff5a1f 0%, #c8281a 100%);
+    color: #f4e8c0;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 2px solid #1a0606;
+    box-shadow: 0 4px 0 #4a0808, 0 8px 16px rgba(0,0,0,0.5);
+    cursor: none;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    margin-top: 0.5rem;
+    text-shadow: 1px 1px 0 #4a0808;
+  }
+  .scene-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #4a0808, 0 10px 22px rgba(0,0,0,0.6);
+  }
+  .scene-submit:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 #4a0808, 0 4px 8px rgba(0,0,0,0.5);
+  }
+  .scene-submit:disabled { opacity: 0.6; cursor: wait; }
+
+  .scene-status {
+    margin-top: 1rem;
+    text-align: center;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9rem;
+    min-height: 1.2em;
+    letter-spacing: 0.05em;
+  }
+  .scene-status.success { color: #2a5a1a; font-weight: bold; }
+  .scene-status.error { color: #c8281a; }
+
 </style>
 </head>
 <body>
@@ -7871,6 +8096,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <!-- ====================== SCORCH CHARACTER PAGE ====================== -->
 <div class="character-page scorch-page" id="scorchPage" aria-hidden="true">
   <button class="char-close" id="scorchClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Scorch" type="button" aria-label="Open scene request">Scene Request?</button>
 
   <!-- ====== POSTER HERO ====== -->
   <section class="poster-hero">
@@ -8211,6 +8437,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <!-- ====================== SHANE CHARACTER PAGE ====================== -->
 <div class="character-page shane-page" id="shanePage" aria-hidden="true">
   <button class="char-close" id="shaneClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Shane" type="button" aria-label="Open scene request">Scene Request?</button>
 
   <!-- ====== POSTER HERO ====== -->
   <section class="poster-hero">
@@ -8553,6 +8780,7 @@ yeah. that's closer.</p>
 <!-- ====================== CODY CHARACTER PAGE ====================== -->
 <div class="character-page cody-page" id="codyPage" aria-hidden="true">
   <button class="char-close" id="codyClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Cody" type="button" aria-label="Open scene request">Scene Request?</button>
 
   <!-- ====== POSTER HERO ====== -->
   <section class="poster-hero">
@@ -8951,6 +9179,136 @@ yeah. that's closer.</p>
   </section>
 </div>
 <!-- ================== END CODY CHARACTER PAGE ===================== -->
+
+<!-- ============== SCENE REQUEST MODAL (shared by all character pages) ============== -->
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ---------- SCENE REQUEST MODAL ---------- */
+/* Wires every .scene-tab to open the shared modal, pre-filled with that
+   character's name. Submits to the same Discord webhook as the homepage
+   form. Closes on X / backdrop / Escape. */
+(function initSceneModal() {
+  const modal     = document.getElementById('sceneModal');
+  const closeBtn  = document.getElementById('sceneModalClose');
+  const charLabel = document.getElementById('sceneModalChar');
+  const form      = document.getElementById('sceneRequestForm');
+  const submitBtn = document.getElementById('sceneSubmit');
+  const status    = document.getElementById('sceneStatus');
+  if (!modal || !form) return;
+  let currentChar = '';
+
+  document.querySelectorAll('.scene-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentChar = tab.dataset.character || '';
+      charLabel.textContent = currentChar || '—';
+      openModal();
+    });
+  });
+
+  function openModal() {
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => document.getElementById('sceneIdea')?.focus());
+  }
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    status.className = 'scene-status';
+    status.textContent = '';
+  }
+
+  closeBtn?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (typeof DISCORD_WEBHOOK_URL === 'undefined' || !DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL.includes('PASTE_')) {
+      status.className = 'scene-status error';
+      status.textContent = '⚠ webhook not configured';
+      return;
+    }
+    const data = {
+      charName:  currentChar,
+      setting:   document.getElementById('sceneSetting').value.trim(),
+      idea:      document.getElementById('sceneIdea').value.trim(),
+      extra:     document.getElementById('sceneExtra').value.trim(),
+      requester: document.getElementById('sceneRequester').value.trim() || 'Anonymous',
+    };
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'sending...';
+    status.className = 'scene-status';
+    status.textContent = '';
+
+    const payload = {
+      username: 'DreamjourneyAI',
+      embeds: [{
+        title: '✦ Scene Request — ' + (data.charName || 'Character') + ' ✦',
+        color: 0xff5a1f,
+        fields: [
+          { name: 'Character',    value: data.charName || '—',  inline: true  },
+          { name: 'Requested by', value: data.requester,        inline: true  },
+          { name: 'Setting',      value: data.setting  || '—',  inline: false },
+          { name: 'Idea',         value: data.idea     || '—',  inline: false },
+          { name: 'Extra',        value: data.extra    || '—',  inline: false },
+        ],
+        timestamp: new Date().toISOString(),
+        footer: { text: 'From ' + (data.charName || 'character') + ' page tab' }
+      }]
+    };
+
+    try {
+      const res = await fetch(DISCORD_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Discord returned ' + res.status);
+      status.className = 'scene-status success';
+      status.textContent = '✦ your scene has been sent to Chunley ✦';
+      form.reset();
+      setTimeout(closeModal, 1600);
+    } catch (err) {
+      status.className = 'scene-status error';
+      status.textContent = 'could not send — try again';
+      console.error(err);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send to Chunley';
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
