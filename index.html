@@ -6564,8 +6564,19 @@
     z-index: 1000;
     overflow-y: auto;
     overflow-x: hidden;
-    background: linear-gradient(180deg, #f6efe2 0%, #e9dfc8 100%);
-    color: #2a1a14;
+    /* Dark, moody dating-app base tinted by each profile's accent colors.
+       The big radial washes give depth; the animated .dating-fx blobs on top
+       make it feel alive. Each profile sets --dp-accent / --dp-accent-2. */
+    --dp-accent: #ff5a1f;
+    --dp-accent-2: #c8281a;
+    --dp-ink: #f4ecff;
+    --dp-ink-dim: #b9a9d6;
+    background:
+      radial-gradient(135% 100% at 12% -10%, color-mix(in srgb, var(--dp-accent) 42%, transparent) 0%, transparent 48%),
+      radial-gradient(135% 110% at 105% 108%, color-mix(in srgb, var(--dp-accent-2) 44%, transparent) 0%, transparent 52%),
+      linear-gradient(165deg, #160a22 0%, #0c0716 55%, #07040f 100%);
+    background-attachment: scroll;
+    color: var(--dp-ink);
     font-family: 'Outfit', sans-serif;
     transform: translateY(100%);
     visibility: hidden;
@@ -6580,6 +6591,104 @@
   .dating-page[aria-hidden="true"] *,
   .dating-page[aria-hidden="true"] *::before,
   .dating-page[aria-hidden="true"] *::after { animation-play-state: paused !important; }
+
+  /* ---- Animated ambient background layer (sits behind the content) ----
+     Pure transform/opacity animations = GPU-friendly. pointer-events:none so
+     it never blocks taps. Lives inside each .dating-page, behind .dating-wrap. */
+  .dating-fx {
+    position: fixed; inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .dating-fx .blob {
+    position: absolute;
+    width: 50vmax; height: 50vmax;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.55;
+    mix-blend-mode: screen;
+    will-change: transform;
+  }
+  .dating-fx .blob-1 {
+    top: -16vmax; left: -12vmax;
+    background: radial-gradient(circle at 30% 30%, var(--dp-accent), transparent 70%);
+    animation: blobDrift1 26s ease-in-out infinite;
+  }
+  .dating-fx .blob-2 {
+    bottom: -18vmax; right: -14vmax;
+    background: radial-gradient(circle at 70% 70%, var(--dp-accent-2), transparent 70%);
+    animation: blobDrift2 32s ease-in-out infinite;
+  }
+  .dating-fx .blob-3 {
+    top: 35%; left: 40%;
+    width: 36vmax; height: 36vmax;
+    background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--dp-accent) 55%, #fff), transparent 70%);
+    opacity: 0.4;
+    animation: blobDrift3 38s ease-in-out infinite;
+  }
+  @keyframes blobDrift1 {
+    0%,100% { transform: translate3d(0,0,0) scale(1); }
+    33%     { transform: translate3d(8vmax,6vmax,0) scale(1.12); }
+    66%     { transform: translate3d(3vmax,12vmax,0) scale(0.95); }
+  }
+  @keyframes blobDrift2 {
+    0%,100% { transform: translate3d(0,0,0) scale(1); }
+    33%     { transform: translate3d(-9vmax,-5vmax,0) scale(1.1); }
+    66%     { transform: translate3d(-4vmax,-11vmax,0) scale(0.92); }
+  }
+  @keyframes blobDrift3 {
+    0%,100% { transform: translate3d(-50%,-50%,0) scale(1); }
+    50%     { transform: translate3d(-42%,-58%,0) scale(1.18); }
+  }
+
+  /* subtle starfield grain over the FX so dark areas aren't flat */
+  .dating-fx::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.06;
+  }
+
+  /* Floating sparkles/hearts drifting up the page */
+  .dating-fx .spark {
+    position: absolute;
+    bottom: -40px;
+    font-size: 18px;
+    opacity: 0;
+    color: color-mix(in srgb, var(--dp-accent) 60%, #fff);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--dp-accent) 70%, transparent);
+    will-change: transform, opacity;
+    animation: sparkRise linear infinite;
+  }
+  @keyframes sparkRise {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.8; }
+    100% { transform: translateY(-112vh) translateX(var(--spark-drift, 20px)) rotate(220deg); opacity: 0; }
+  }
+
+  /* Reactive parallax: JS sets --px / --py from pointer position. */
+  .dating-fx { transform: translate3d(calc(var(--px,0) * 1px), calc(var(--py,0) * 1px), 0); transition: transform 0.4s ease-out; }
+
+  /* Make sure the actual content sits above the FX layer */
+  .dating-wrap { position: relative; z-index: 1; }
+
+  /* Cards rise + fade in as they scroll into view (JS adds .in-view) */
+  .dating-reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .dating-reveal.in-view { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dating-fx .blob, .dating-fx .spark { animation: none !important; }
+    .dating-fx .spark { display: none; }
+    .dating-fx { transition: none; }
+    .dating-reveal { opacity: 1; transform: none; transition: none; }
+  }
 
   .dating-close {
     position: fixed;
@@ -6673,25 +6782,39 @@
 
   /* ===== TAGLINE ===== */
   .dating-tagline {
-    background: #fff;
+    background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border-radius: 20px;
     padding: 1.2rem 1.4rem;
     margin-top: 1rem;
     font-size: clamp(1.05rem, 2.5vw, 1.2rem);
     line-height: 1.4;
     font-style: italic;
-    color: #2a1a14;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    color: var(--dp-ink);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);
     border-left: 4px solid var(--dp-accent, #ff5a1f);
   }
 
   /* ===== ROMANCE TYPE TAGS ===== */
   .dating-card {
-    background: #fff;
+    position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border-radius: 20px;
     padding: 1.4rem;
     margin-top: 1rem;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  /* faint accent glow bleeding in from the top edge of each card */
+  .dating-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--dp-accent, #ff5a1f), transparent);
+    opacity: 0.7;
   }
   .dating-card-head {
     font-family: 'Outfit', sans-serif;
@@ -6699,7 +6822,7 @@
     font-size: 0.78rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #8a6a5a;
+    color: var(--dp-ink-dim);
     margin: 0 0 0.8rem;
     display: flex;
     align-items: center;
@@ -6710,6 +6833,7 @@
     display: inline-block;
     width: 18px; height: 2px;
     background: var(--dp-accent, #ff5a1f);
+    box-shadow: 0 0 8px var(--dp-accent, #ff5a1f);
   }
 
   .romance-tags {
@@ -6726,41 +6850,52 @@
     font-size: 0.85rem;
     font-weight: 600;
     border: 1.5px solid;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
-  /* tag color variants */
-  .rt-toxic    { border-color: #c8281a; color: #8a1610; background: rgba(200,40,26,0.08); }
-  .rt-angst    { border-color: #5a3a8a; color: #3a2660; background: rgba(90,58,138,0.08); }
-  .rt-baggage  { border-color: #6a3408; color: #4a2408; background: rgba(106,52,8,0.08); }
-  .rt-complicated { border-color: #c87a1a; color: #8a5410; background: rgba(200,122,26,0.08); }
-  .rt-soft     { border-color: #2a6a5a; color: #1a4a3a; background: rgba(42,106,90,0.08); }
-  .rt-worth    { border-color: #b88a2a; color: #8a6420; background: rgba(184,138,42,0.10); }
-  .rt-himbo    { border-color: #2a5aa8; color: #1a3a78; background: rgba(42,90,168,0.08); }
-  .rt-goodboy  { border-color: #4a8a4a; color: #2a5a2a; background: rgba(74,138,74,0.08); }
+  .romance-tag:hover { transform: translateY(-2px); }
+  /* tag color variants — brightened for dark glass */
+  .rt-toxic    { border-color: #ff6a52; color: #ffb5a8; background: rgba(255,90,40,0.14); }
+  .rt-angst    { border-color: #a886e0; color: #d7c4ff; background: rgba(140,100,220,0.16); }
+  .rt-baggage  { border-color: #d8924a; color: #f0c79a; background: rgba(216,146,74,0.14); }
+  .rt-complicated { border-color: #f0aa4a; color: #ffd79a; background: rgba(240,170,74,0.14); }
+  .rt-soft     { border-color: #4ad0aa; color: #a8f0dd; background: rgba(74,208,170,0.14); }
+  .rt-worth    { border-color: #f0c84a; color: #ffe79a; background: rgba(240,200,74,0.16); }
+  .rt-himbo    { border-color: #5a9aff; color: #aac8ff; background: rgba(90,154,255,0.14); }
+  .rt-goodboy  { border-color: #6ad06a; color: #b5f0b5; background: rgba(106,208,106,0.14); }
 
   /* ===== ABOUT ME — paragraph cards ===== */
   .dating-bio p {
     margin: 0 0 0.8rem;
     font-size: 1rem;
     line-height: 1.55;
-    color: #3a2a24;
+    color: #e6dcf5;
   }
   .dating-bio p:last-child { margin-bottom: 0; }
   .dating-bio p strong { color: var(--dp-accent, #ff5a1f); }
 
   /* ===== PROMPT CARDS (Hinge style) ===== */
   .dating-prompt {
-    background: #fff;
+    position: relative;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border-radius: 20px;
     padding: 1.4rem;
     margin-top: 1rem;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .dating-prompt:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 38px rgba(0,0,0,0.4), inset 0 0 0 1px color-mix(in srgb, var(--dp-accent) 40%, rgba(255,255,255,0.08));
   }
   .dating-prompt-q {
     font-family: 'Outfit', sans-serif;
     font-weight: 500;
     font-size: 0.95rem;
-    color: #8a6a5a;
+    color: var(--dp-ink-dim);
     margin: 0 0 0.5rem;
     line-height: 1.4;
   }
@@ -6768,13 +6903,14 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     font-size: clamp(1.1rem, 3vw, 1.35rem);
-    color: #2a1a14;
+    color: var(--dp-ink);
     line-height: 1.4;
     margin: 0;
   }
   .dating-prompt-a em {
     font-weight: 500;
     color: var(--dp-accent, #ff5a1f);
+    font-style: italic;
   }
 
   /* ===== INLINE PROFILE PHOTO (mid-scroll) ===== */
@@ -6810,16 +6946,16 @@
     grid-template-columns: 130px 1fr;
     gap: 1rem;
     padding: 0.5rem 0;
-    border-bottom: 1px dashed rgba(42, 26, 20, 0.15);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
     font-size: 0.95rem;
   }
   .dating-stat:last-child { border-bottom: none; }
   .dating-stat-key {
     font-weight: 600;
-    color: #8a6a5a;
+    color: var(--dp-ink-dim);
     letter-spacing: 0.04em;
   }
-  .dating-stat-val { color: #2a1a14; }
+  .dating-stat-val { color: var(--dp-ink); }
   @media (max-width: 440px) {
     .dating-stat { grid-template-columns: 110px 1fr; gap: 0.5rem; font-size: 0.88rem; }
   }
@@ -6836,18 +6972,24 @@
     border-radius: 14px;
     overflow: hidden;
     background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
     position: relative;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .dating-grid-item:hover {
+    transform: scale(1.04);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.45), 0 0 0 1px color-mix(in srgb, var(--dp-accent) 50%, transparent);
+    z-index: 2;
   }
   .dating-grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   /* ===== SWIPE RIGHT CTA ===== */
   .dating-cta {
+    position: relative;
     display: block;
     margin: 1.5rem auto 0;
     max-width: 360px;
     padding: 1.1rem 1.5rem;
-    background: var(--dp-accent, #ff5a1f);
     background-image: linear-gradient(135deg, var(--dp-accent, #ff5a1f), var(--dp-accent-2, #c8281a));
     color: #fff;
     border-radius: 999px;
@@ -6856,12 +6998,31 @@
     font-weight: 700;
     font-size: 1.05rem;
     letter-spacing: 0.04em;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+    overflow: hidden;
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--dp-accent) 45%, transparent), inset 0 0 0 1px rgba(255,255,255,0.12);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: ctaPulse 2.8s ease-in-out infinite;
+  }
+  /* moving sheen sweeping across the button */
+  .dating-cta::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 50%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-18deg);
+    animation: ctaSheen 3.4s ease-in-out infinite;
+  }
+  @keyframes ctaSheen {
+    0%, 100% { left: -60%; }
+    55%, 80% { left: 120%; }
+  }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 8px 28px color-mix(in srgb, var(--dp-accent) 45%, transparent), inset 0 0 0 1px rgba(255,255,255,0.12); }
+    50%      { box-shadow: 0 8px 38px color-mix(in srgb, var(--dp-accent) 70%, transparent), inset 0 0 0 1px rgba(255,255,255,0.12); }
   }
   .dating-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05);
+    transform: translateY(-2px) scale(1.015);
   }
   .dating-cta:active { transform: translateY(1px); }
 
@@ -6869,7 +7030,7 @@
     text-align: center;
     margin-top: 1.5rem;
     font-size: 0.82rem;
-    color: #8a6a5a;
+    color: var(--dp-ink-dim);
     letter-spacing: 0.05em;
   }
 
@@ -7119,16 +7280,21 @@
     font-family: 'Cinzel Decorative', serif;
     font-weight: 900;
     font-size: clamp(2rem, 6vw, 3.4rem);
-    color: #c83a8c;
-    text-shadow: 0 0 24px rgba(255, 90, 220, 0.4);
+    color: #ffd9f2;
+    text-shadow: 0 0 28px color-mix(in srgb, var(--dp-accent) 70%, transparent), 0 0 48px color-mix(in srgb, var(--dp-accent-2) 50%, transparent);
     letter-spacing: 0.08em;
     margin: 0;
     text-transform: uppercase;
+    animation: browseTitleGlow 4s ease-in-out infinite;
+  }
+  @keyframes browseTitleGlow {
+    0%,100% { text-shadow: 0 0 22px color-mix(in srgb, var(--dp-accent) 60%, transparent), 0 0 40px color-mix(in srgb, var(--dp-accent-2) 40%, transparent); }
+    50%     { text-shadow: 0 0 34px color-mix(in srgb, var(--dp-accent) 90%, transparent), 0 0 64px color-mix(in srgb, var(--dp-accent-2) 70%, transparent); }
   }
   .dating-browse-sub {
     text-align: center;
     margin: 0.6rem 0 2rem;
-    color: #8a5a7a;
+    color: rgba(244,236,255,0.7);
     font-family: 'Outfit', sans-serif;
     font-size: 1rem;
     letter-spacing: 0.05em;
@@ -7139,22 +7305,24 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: #fff;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     border-radius: 999px;
     padding: 0.6rem 1rem 0.6rem 1.2rem;
     max-width: 540px;
     margin: 0 auto 2.5rem;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12), 0 0 0 1px rgba(255, 154, 220, 0.3);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.12);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
   .dating-search:focus-within {
-    box-shadow: 0 8px 22px rgba(0,0,0,0.16), 0 0 0 3px rgba(255, 90, 138, 0.35);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.35), inset 0 0 0 2px color-mix(in srgb, var(--dp-accent) 60%, transparent);
     transform: translateY(-1px);
   }
   .dating-search-icon {
     width: 22px;
     height: 22px;
-    color: #c83a8c;
+    color: color-mix(in srgb, var(--dp-accent) 70%, #fff);
     flex-shrink: 0;
   }
   .dating-search input {
@@ -7164,12 +7332,12 @@
     background: transparent;
     font-family: 'Outfit', sans-serif;
     font-size: 1rem;
-    color: #2a1a14;
+    color: #f4ecff;
     padding: 0.5rem 0;
     min-width: 0;
   }
   .dating-search input::placeholder {
-    color: #b0a098;
+    color: rgba(244,236,255,0.45);
     font-style: italic;
   }
   /* hide native search clear button (we have our own) */
@@ -7178,8 +7346,8 @@
     width: 28px;
     height: 28px;
     border: none;
-    background: rgba(200, 58, 140, 0.08);
-    color: #c83a8c;
+    background: rgba(255,255,255,0.12);
+    color: #f4ecff;
     border-radius: 50%;
     font-size: 0.85rem;
     font-weight: bold;
@@ -7190,7 +7358,7 @@
     flex-shrink: 0;
     transition: background 0.15s ease;
   }
-  .dating-search-clear:hover { background: rgba(200, 58, 140, 0.18); }
+  .dating-search-clear:hover { background: rgba(255,255,255,0.22); }
   .dating-search.has-value .dating-search-clear { display: flex; }
 
   /* ===== BROWSE GRID ===== */
@@ -7199,28 +7367,27 @@
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
   }
-  /* Cards in browse overlay use lighter background since the overlay
-     itself is cream-toned (different from the dark homepage). */
+  /* Cards in browse overlay — dark frosted glass to match the new look. */
   .dating-browse-page .dating-preview-card {
-    background: #fff;
-    border: 1px solid rgba(200, 58, 140, 0.18);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.4);
   }
   .dating-browse-page .dating-preview-card:not(.locked):hover {
-    box-shadow: 0 18px 36px rgba(0,0,0,0.18), 0 0 30px rgba(255, 90, 220, 0.25);
-    border-color: rgba(200, 58, 140, 0.5);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 34px color-mix(in srgb, var(--dp-accent) 45%, transparent);
+    border-color: color-mix(in srgb, var(--dp-accent) 55%, transparent);
   }
   .dating-browse-page .dating-preview-name {
     color: #fff;
     text-shadow: 0 2px 8px rgba(0,0,0,0.6);
   }
   .dating-browse-page .dating-preview-tag {
-    color: #4a3a32;
+    color: rgba(255,255,255,0.78);
   }
   .dating-browse-page .dating-preview-types .romance-tag {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
   }
   /* search-hidden state */
   .dating-preview-card.search-hidden { display: none !important; }
@@ -7228,15 +7395,15 @@
     text-align: center;
     margin: 2rem auto 0;
     padding: 1.5rem;
-    color: #8a5a7a;
+    color: rgba(244,236,255,0.7);
     font-family: 'Outfit', sans-serif;
     font-style: italic;
     font-size: 1rem;
     display: none;
-    border: 1.5px dashed #c83a8c;
+    border: 1.5px dashed color-mix(in srgb, var(--dp-accent) 60%, transparent);
     border-radius: 20px;
     max-width: 480px;
-    background: rgba(255, 154, 220, 0.05);
+    background: rgba(255,255,255,0.04);
   }
   .dating-no-results.is-visible { display: block; }
 
@@ -9902,7 +10069,7 @@ yeah. that's closer.</p>
 
 
 <!-- ====================== DATING BROWSE OVERLAY (search + full grid) ====================== -->
-<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true">
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
   <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
 
   <div class="dating-browse-wrap">
@@ -10166,13 +10333,125 @@ yeah. that's closer.</p>
     page.setAttribute('aria-hidden', 'false');
     page.scrollTop = 0;
     document.body.style.overflow = 'hidden';
+    startFx(page);
   }
   function close(id) {
     const page = document.getElementById(id + 'DatingPage');
+    closePage(page);
+  }
+  // Close by element reference — robust regardless of the page's id naming.
+  // (The browse overlay is #datingBrowsePage, which does NOT end in
+  // "DatingPage", so the old string-rebuild approach silently failed on it,
+  // which is why its X button did nothing.)
+  function closePage(page) {
     if (!page) return;
     page.classList.remove('active');
     page.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    stopFx(page);
+  }
+
+  /* ---------- AMBIENT BACKGROUND FX ----------
+     Injects a decorative .dating-fx layer (drifting color blobs + rising
+     sparkles) into each overlay the first time it opens, themed by the
+     profile's --dp-accent colors. Sparks + pointer parallax only run while
+     a page is actually active, so closed pages cost nothing. Honors
+     prefers-reduced-motion. */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SPARK_CHARS = ['✦', '♡', '★', '✺', '✷'];
+
+  function ensureFx(page) {
+    let fx = page.querySelector(':scope > .dating-fx');
+    if (fx) { setupReveals(page); return fx; }
+    fx = document.createElement('div');
+    fx.className = 'dating-fx';
+    fx.setAttribute('aria-hidden', 'true');
+    fx.innerHTML = '<div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>';
+    // insert as the first child so it stays behind the content
+    page.insertBefore(fx, page.firstChild);
+    setupReveals(page);
+    return fx;
+  }
+
+  /* Scroll-reveal: cards rise + fade as they enter the viewport. Tags the
+     main content blocks with .dating-reveal once, then observes them. */
+  function setupReveals(page) {
+    if (page._revealsDone) return;
+    page._revealsDone = true;
+    const wrap = page.querySelector('.dating-wrap, .dating-browse-wrap');
+    if (!wrap) return;
+    const sel = '.dating-tagline, .dating-card, .dating-prompt, .dating-photo, .dating-cta, .dating-preview-card';
+    const items = wrap.querySelectorAll(sel);
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      items.forEach(el => el.classList.add('dating-reveal', 'in-view'));
+      return;
+    }
+    items.forEach((el, i) => {
+      el.classList.add('dating-reveal');
+      el.style.transitionDelay = Math.min(i * 40, 240) + 'ms';
+    });
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { root: page, rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    items.forEach(el => io.observe(el));
+  }
+
+  function startFx(page) {
+    const fx = ensureFx(page);
+    if (reduceMotion) return;
+    // Spawn a modest, capped set of sparks once (CSS animates them on a loop).
+    if (!fx.dataset.sparked) {
+      const count = 14; // capped for performance
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('span');
+        s.className = 'spark';
+        s.textContent = SPARK_CHARS[i % SPARK_CHARS.length];
+        s.style.left = Math.random() * 100 + '%';
+        s.style.fontSize = (12 + Math.random() * 16) + 'px';
+        s.style.setProperty('--spark-drift', (Math.random() * 80 - 40) + 'px');
+        const dur = 9 + Math.random() * 9;
+        s.style.animationDuration = dur + 's';
+        s.style.animationDelay = (-Math.random() * dur) + 's';
+        fx.appendChild(s);
+      }
+      fx.dataset.sparked = '1';
+    }
+    attachParallax(page, fx);
+  }
+
+  function stopFx(page) {
+    detachParallax(page);
+  }
+
+  // Pointer/tilt parallax — nudges the whole FX layer a few px. rAF-throttled.
+  function attachParallax(page, fx) {
+    if (reduceMotion || page._fxParallax) return;
+    let raf = 0, tx = 0, ty = 0;
+    const onMove = (e) => {
+      const pt = e.touches ? e.touches[0] : e;
+      const cx = (pt.clientX / window.innerWidth) - 0.5;
+      const cy = (pt.clientY / window.innerHeight) - 0.5;
+      tx = cx * 24; ty = cy * 24;
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    const apply = () => {
+      raf = 0;
+      fx.style.setProperty('--px', tx.toFixed(1));
+      fx.style.setProperty('--py', ty.toFixed(1));
+    };
+    page.addEventListener('pointermove', onMove, { passive: true });
+    page._fxParallax = { onMove, raf: () => raf };
+  }
+  function detachParallax(page) {
+    const p = page._fxParallax;
+    if (!p) return;
+    page.removeEventListener('pointermove', p.onMove);
+    page._fxParallax = null;
   }
 
   // Open from any [data-dating]
@@ -10190,6 +10469,7 @@ yeah. that's closer.</p>
     page.setAttribute('aria-hidden', 'false');
     page.scrollTop = 0;
     document.body.style.overflow = 'hidden';
+    startFx(page);
     // Focus the search input so users can start typing immediately
     requestAnimationFrame(() => document.getElementById('datingSearchInput')?.focus());
   });
@@ -10231,19 +10511,25 @@ yeah. that's closer.</p>
     searchInput.focus();
   });
 
-  // Close buttons — one per profile
+  // Close buttons — one per profile. Close the closest .dating-page by
+  // reference so it works for every overlay (profiles AND the browse page).
   document.querySelectorAll('.dating-close').forEach(btn => {
     btn.addEventListener('click', () => {
-      const page = btn.closest('.dating-page');
-      if (page) close(page.id.replace('DatingPage', ''));
+      closePage(btn.closest('.dating-page'));
+    });
+  });
+
+  // Backdrop click (clicking the page chrome outside the content) closes too.
+  document.querySelectorAll('.dating-page').forEach(page => {
+    page.addEventListener('click', (e) => {
+      if (e.target === page) closePage(page);
     });
   });
 
   // Escape closes the active one
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    const active = document.querySelector('.dating-page.active');
-    if (active) close(active.id.replace('DatingPage', ''));
+    closePage(document.querySelector('.dating-page.active'));
   });
 })();
 </script>
