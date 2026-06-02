@@ -6551,6 +6551,695 @@
   .scene-status.success { color: #2a5a1a; font-weight: bold; }
   .scene-status.error { color: #c8281a; }
 
+  /* ============================================================
+     DATING PROFILES
+     A clean mobile-app dating-profile aesthetic — soft cream
+     background, rounded cards, Hinge-style prompt/answer layout,
+     photo grid. Each profile uses the character's --pp-accent for
+     pops of color so it still feels themed but distinctly cleaner
+     than the heavy-metal poster overlay system.
+     ============================================================ */
+  .dating-page {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, #f6efe2 0%, #e9dfc8 100%);
+    color: #2a1a14;
+    font-family: 'Outfit', sans-serif;
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0.55s;
+  }
+  .dating-page.active {
+    transform: translateY(0);
+    visibility: visible;
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s 0s;
+  }
+  .dating-page[aria-hidden="true"] { content-visibility: auto; }
+  .dating-page[aria-hidden="true"] *,
+  .dating-page[aria-hidden="true"] *::before,
+  .dating-page[aria-hidden="true"] *::after { animation-play-state: paused !important; }
+
+  .dating-close {
+    position: fixed;
+    top: 1rem; right: 1rem;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #2a1a14;
+    color: #2a1a14;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: none;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .dating-close:hover { transform: scale(1.08); background: #fff; }
+
+  .dating-wrap {
+    max-width: 540px;
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    padding-bottom: 4rem;
+  }
+
+  /* ===== HERO CARD ===== */
+  .dating-hero {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-top: 1rem;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
+  }
+  .dating-hero img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .dating-hero-overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 2rem 1.4rem 1.4rem;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%);
+    color: #fff;
+  }
+  .dating-hero-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 7vw, 3rem);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .dating-hero-name span {
+    font-weight: 300;
+    opacity: 0.85;
+  }
+  .dating-hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin-top: 0.6rem;
+    font-size: 0.95rem;
+    opacity: 0.92;
+  }
+  .dating-hero-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .dating-verified {
+    position: absolute;
+    top: 1rem; left: 1rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(255,255,255,0.95);
+    color: var(--dp-accent, #ff5a1f);
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .dating-verified::before { content: '✓ '; }
+
+  /* ===== TAGLINE ===== */
+  .dating-tagline {
+    background: #fff;
+    border-radius: 20px;
+    padding: 1.2rem 1.4rem;
+    margin-top: 1rem;
+    font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+    line-height: 1.4;
+    font-style: italic;
+    color: #2a1a14;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    border-left: 4px solid var(--dp-accent, #ff5a1f);
+  }
+
+  /* ===== ROMANCE TYPE TAGS ===== */
+  .dating-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 1.4rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .dating-card-head {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8a6a5a;
+    margin: 0 0 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .dating-card-head::before {
+    content: '';
+    display: inline-block;
+    width: 18px; height: 2px;
+    background: var(--dp-accent, #ff5a1f);
+  }
+
+  .romance-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .romance-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1.5px solid;
+    background: rgba(255,255,255,0.6);
+  }
+  /* tag color variants */
+  .rt-toxic    { border-color: #c8281a; color: #8a1610; background: rgba(200,40,26,0.08); }
+  .rt-angst    { border-color: #5a3a8a; color: #3a2660; background: rgba(90,58,138,0.08); }
+  .rt-baggage  { border-color: #6a3408; color: #4a2408; background: rgba(106,52,8,0.08); }
+  .rt-complicated { border-color: #c87a1a; color: #8a5410; background: rgba(200,122,26,0.08); }
+  .rt-soft     { border-color: #2a6a5a; color: #1a4a3a; background: rgba(42,106,90,0.08); }
+  .rt-worth    { border-color: #b88a2a; color: #8a6420; background: rgba(184,138,42,0.10); }
+  .rt-himbo    { border-color: #2a5aa8; color: #1a3a78; background: rgba(42,90,168,0.08); }
+  .rt-goodboy  { border-color: #4a8a4a; color: #2a5a2a; background: rgba(74,138,74,0.08); }
+
+  /* ===== ABOUT ME — paragraph cards ===== */
+  .dating-bio p {
+    margin: 0 0 0.8rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: #3a2a24;
+  }
+  .dating-bio p:last-child { margin-bottom: 0; }
+  .dating-bio p strong { color: var(--dp-accent, #ff5a1f); }
+
+  /* ===== PROMPT CARDS (Hinge style) ===== */
+  .dating-prompt {
+    background: #fff;
+    border-radius: 20px;
+    padding: 1.4rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .dating-prompt-q {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #8a6a5a;
+    margin: 0 0 0.5rem;
+    line-height: 1.4;
+  }
+  .dating-prompt-a {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: clamp(1.1rem, 3vw, 1.35rem);
+    color: #2a1a14;
+    line-height: 1.4;
+    margin: 0;
+  }
+  .dating-prompt-a em {
+    font-weight: 500;
+    color: var(--dp-accent, #ff5a1f);
+  }
+
+  /* ===== INLINE PROFILE PHOTO (mid-scroll) ===== */
+  .dating-photo {
+    margin-top: 1rem;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
+    position: relative;
+  }
+  .dating-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .dating-photo-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1rem 1.2rem;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.75));
+    color: #fff;
+    font-size: 0.92rem;
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  /* ===== QUICK STATS ===== */
+  .dating-stats { display: grid; gap: 0.6rem; }
+  .dating-stat {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed rgba(42, 26, 20, 0.15);
+    font-size: 0.95rem;
+  }
+  .dating-stat:last-child { border-bottom: none; }
+  .dating-stat-key {
+    font-weight: 600;
+    color: #8a6a5a;
+    letter-spacing: 0.04em;
+  }
+  .dating-stat-val { color: #2a1a14; }
+  @media (max-width: 440px) {
+    .dating-stat { grid-template-columns: 110px 1fr; gap: 0.5rem; font-size: 0.88rem; }
+  }
+
+  /* ===== PHOTO GRID (bottom) ===== */
+  .dating-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+  .dating-grid-item {
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    position: relative;
+  }
+  .dating-grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* ===== SWIPE RIGHT CTA ===== */
+  .dating-cta {
+    display: block;
+    margin: 1.5rem auto 0;
+    max-width: 360px;
+    padding: 1.1rem 1.5rem;
+    background: var(--dp-accent, #ff5a1f);
+    background-image: linear-gradient(135deg, var(--dp-accent, #ff5a1f), var(--dp-accent-2, #c8281a));
+    color: #fff;
+    border-radius: 999px;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .dating-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .dating-cta:active { transform: translateY(1px); }
+
+  .dating-foot {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.82rem;
+    color: #8a6a5a;
+    letter-spacing: 0.05em;
+  }
+
+  /* ============================================================
+     HOMEPAGE DATING PROFILE SECTION (the preview cards)
+     ============================================================ */
+  .dating-preview-section {
+    max-width: 1100px;
+    margin: 5rem auto 3rem;
+    padding: 0 2rem;
+    text-align: center;
+  }
+  .dating-preview-section .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: #fff;
+    text-shadow: 0 0 24px rgba(255, 90, 220, 0.6), 0 0 60px rgba(255, 90, 220, 0.3);
+    margin: 0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .dating-preview-section .section-sub {
+    margin-top: 0.6rem;
+    color: rgba(255,255,255,0.7);
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+  .dating-preview-section .section-sub em { color: #ff9adc; font-style: normal; }
+
+  .dating-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .dating-preview-card {
+    background: rgba(20, 14, 26, 0.6);
+    border: 1px solid rgba(255, 90, 220, 0.3);
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    position: relative;
+    text-align: left;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .dating-preview-card.locked { opacity: 0.6; }
+  .dating-preview-card:not(.locked):hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.5), 0 0 40px rgba(255, 90, 220, 0.25);
+    border-color: rgba(255, 90, 220, 0.7);
+  }
+  .dating-preview-photo {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: linear-gradient(135deg, #2a1810 0%, #0a0606 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .dating-preview-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dating-preview-photo::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 50%;
+    background: linear-gradient(180deg, transparent, rgba(10,6,12,0.95));
+    pointer-events: none;
+  }
+  .dating-preview-locked-stamp {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    padding: 0.5rem 1.2rem;
+    background: rgba(20, 14, 26, 0.8);
+    color: #ff9adc;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: 2px solid #ff9adc;
+    font-size: 0.85rem;
+    z-index: 2;
+  }
+  .dating-preview-body {
+    padding: 0.6rem 1.2rem 1.2rem;
+    position: relative;
+    z-index: 1;
+    margin-top: -3rem;
+  }
+  .dating-preview-name {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    color: #fff;
+    margin: 0;
+    line-height: 1.1;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  }
+  .dating-preview-name span { font-weight: 300; opacity: 0.85; }
+  .dating-preview-tag {
+    color: rgba(255,255,255,0.78);
+    font-style: italic;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    margin: 0.5rem 0 0.8rem;
+  }
+  .dating-preview-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+  }
+  .dating-preview-types .romance-tag {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.7rem;
+    background: rgba(255,255,255,0.08);
+  }
+  .dating-preview-cta {
+    display: block;
+    padding: 0.7rem;
+    text-align: center;
+    background: linear-gradient(135deg, #ff5a8a, #c83a8c);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    letter-spacing: 0.06em;
+    transition: transform 0.12s ease;
+  }
+  .dating-preview-card:not(.locked):hover .dating-preview-cta { transform: scale(1.02); }
+  .dating-preview-card.locked .dating-preview-cta {
+    background: rgba(120, 100, 130, 0.5);
+    cursor: not-allowed;
+  }
+
+  /* ============================================================
+     DATING PROFILE SIDE TAB (mirror of scene-tab, on the left)
+     ============================================================ */
+  .dating-tab {
+    position: fixed;
+    left: 0;
+    top: 38%;
+    transform: translateY(-50%);
+    z-index: 50;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 1.3rem 0.7rem 1.3rem 0.55rem;
+    background: linear-gradient(180deg, #ff5a8a 0%, #c83a8c 100%);
+    color: #fff;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    border: 2px solid #2a1a14;
+    border-left: none;
+    box-shadow: 4px 0 14px rgba(0,0,0,0.55), inset 0 0 12px rgba(0,0,0,0.35);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.3);
+    cursor: none;
+    transition: transform 0.2s ease, padding 0.2s ease, box-shadow 0.2s ease;
+    transform-origin: left center;
+  }
+  .dating-tab:hover {
+    transform: translateY(-50%) translateX(5px);
+    padding-right: 0.95rem;
+    box-shadow: 7px 0 18px rgba(0,0,0,0.65), inset 0 0 14px rgba(0,0,0,0.4);
+  }
+  @media (max-width: 640px) {
+    .dating-tab {
+      top: auto;
+      bottom: 5rem;
+      transform: none;
+      padding: 0.9rem 0.45rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+    }
+    .dating-tab:hover { transform: translateX(4px); }
+  }
+
+  /* ============================================================
+     FEATURED CARD ON HOMEPAGE + BROWSE-ALL BUTTON
+     ============================================================ */
+  .dating-featured-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  .dating-featured-card {
+    max-width: 340px;
+    width: 100%;
+    position: relative;
+  }
+  .dating-featured-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    z-index: 3;
+    padding: 0.35rem 0.8rem;
+    background: linear-gradient(135deg, #ff9adc, #c83a8c);
+    color: #fff;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(200, 58, 140, 0.4);
+  }
+  .dating-browse-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem auto 0;
+    padding: 0.85rem 1.8rem;
+    background: transparent;
+    color: #ff9adc;
+    border: 2px solid #ff9adc;
+    border-radius: 999px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    cursor: none;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  .dating-browse-all-btn:hover {
+    background: linear-gradient(135deg, #ff5a8a, #c83a8c);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-2px);
+  }
+
+  /* ============================================================
+     BROWSE-ALL OVERLAY PAGE (search + full grid)
+     Inherits .dating-page base styling for the slide-up overlay.
+     ============================================================ */
+  .dating-browse-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(3rem, 7vw, 4rem) clamp(1rem, 3vw, 2rem) 4rem;
+  }
+  .dating-browse-title {
+    text-align: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    color: #c83a8c;
+    text-shadow: 0 0 24px rgba(255, 90, 220, 0.4);
+    letter-spacing: 0.08em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  .dating-browse-sub {
+    text-align: center;
+    margin: 0.6rem 0 2rem;
+    color: #8a5a7a;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== SEARCH BAR ===== */
+  .dating-search {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #fff;
+    border-radius: 999px;
+    padding: 0.6rem 1rem 0.6rem 1.2rem;
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12), 0 0 0 1px rgba(255, 154, 220, 0.3);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .dating-search:focus-within {
+    box-shadow: 0 8px 22px rgba(0,0,0,0.16), 0 0 0 3px rgba(255, 90, 138, 0.35);
+    transform: translateY(-1px);
+  }
+  .dating-search-icon {
+    width: 22px;
+    height: 22px;
+    color: #c83a8c;
+    flex-shrink: 0;
+  }
+  .dating-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    color: #2a1a14;
+    padding: 0.5rem 0;
+    min-width: 0;
+  }
+  .dating-search input::placeholder {
+    color: #b0a098;
+    font-style: italic;
+  }
+  /* hide native search clear button (we have our own) */
+  .dating-search input::-webkit-search-cancel-button { display: none; }
+  .dating-search-clear {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: rgba(200, 58, 140, 0.08);
+    color: #c83a8c;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+  }
+  .dating-search-clear:hover { background: rgba(200, 58, 140, 0.18); }
+  .dating-search.has-value .dating-search-clear { display: flex; }
+
+  /* ===== BROWSE GRID ===== */
+  .dating-browse-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+  /* Cards in browse overlay use lighter background since the overlay
+     itself is cream-toned (different from the dark homepage). */
+  .dating-browse-page .dating-preview-card {
+    background: #fff;
+    border: 1px solid rgba(200, 58, 140, 0.18);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  .dating-browse-page .dating-preview-card:not(.locked):hover {
+    box-shadow: 0 18px 36px rgba(0,0,0,0.18), 0 0 30px rgba(255, 90, 220, 0.25);
+    border-color: rgba(200, 58, 140, 0.5);
+  }
+  .dating-browse-page .dating-preview-name {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+  .dating-browse-page .dating-preview-tag {
+    color: #4a3a32;
+  }
+  .dating-browse-page .dating-preview-types .romance-tag {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  /* search-hidden state */
+  .dating-preview-card.search-hidden { display: none !important; }
+  .dating-no-results {
+    text-align: center;
+    margin: 2rem auto 0;
+    padding: 1.5rem;
+    color: #8a5a7a;
+    font-family: 'Outfit', sans-serif;
+    font-style: italic;
+    font-size: 1rem;
+    display: none;
+    border: 1.5px dashed #c83a8c;
+    border-radius: 20px;
+    max-width: 480px;
+    background: rgba(255, 154, 220, 0.05);
+  }
+  .dating-no-results.is-visible { display: block; }
+
 </style>
 </head>
 <body>
@@ -6578,6 +7267,36 @@
         <span class="section-title-accent">Click Here to Meet the Characters</span>
       </h2>
       <div class="divider"></div>
+    </button>
+  </section>
+
+  <!-- ====== DATING PROFILES (homepage — featured + browse-all) ====== -->
+  <section class="section dating-preview-section" id="datingProfiles">
+    <h2 class="section-title">♡ Dating Profiles ♡</h2>
+    <div class="divider"></div>
+    <p class="section-sub">if these guys had to make a Hinge — <em>here's what they'd actually write</em></p>
+
+    <div class="dating-featured-wrap">
+      <button class="dating-preview-card dating-featured-card" data-dating="scorch" type="button" aria-label="View Scorch's dating profile">
+        <span class="dating-featured-badge">✦ Featured ✦</span>
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 28</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+    </div>
+
+    <button class="dating-browse-all-btn" id="openDatingBrowse" type="button">
+      Browse All Profiles →
     </button>
   </section>
 
@@ -8097,6 +8816,7 @@ document.addEventListener('DOMContentLoaded', function(){
 <div class="character-page scorch-page" id="scorchPage" aria-hidden="true">
   <button class="char-close" id="scorchClose" aria-label="Close" type="button">✕</button>
   <button class="scene-tab" data-character="Scorch" type="button" aria-label="Open scene request">Scene Request?</button>
+  <button class="dating-tab" data-dating="scorch" type="button" aria-label="View dating profile">Dating Profile ♡</button>
 
   <!-- ====== POSTER HERO ====== -->
   <section class="poster-hero">
@@ -9180,6 +9900,229 @@ yeah. that's closer.</p>
 </div>
 <!-- ================== END CODY CHARACTER PAGE ===================== -->
 
+
+<!-- ====================== DATING BROWSE OVERLAY (search + full grid) ====================== -->
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Scorch (unlocked) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 28</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+<!-- ====================== SCORCH DATING PROFILE ====================== -->
+<div class="dating-page" id="scorchDatingPage" aria-hidden="true" style="--dp-accent: #ff5a1f; --dp-accent-2: #c8281a;">
+  <button class="dating-close" id="scorchDatingClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-wrap">
+    <!-- ===== HERO ===== -->
+    <div class="dating-hero">
+      <span class="dating-verified">Verified Hot Mess</span>
+      <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch hero" onerror="this.style.display='none'">
+      <div class="dating-hero-overlay">
+        <h1 class="dating-hero-name">Scorch<span>, 28</span></h1>
+        <div class="dating-hero-meta">
+          <span>🎸 Frontman, The Snake Skins</span>
+          <span>📍 Austin, TX</span>
+          <span>♨ Single (mostly bitter about it)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAGLINE ===== -->
+    <div class="dating-tagline">"Walking dumpster fire. Proceed at own risk."</div>
+
+    <!-- ===== ROMANCE TYPE ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">Romance Type — what you're signing up for</h2>
+      <div class="romance-tags">
+        <span class="romance-tag rt-toxic">🔥 Toxic</span>
+        <span class="romance-tag rt-baggage">💔 Heavy Baggage</span>
+        <span class="romance-tag rt-complicated">⚠ Complicated</span>
+        <span class="romance-tag rt-worth">🌹 Worth The Work</span>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ME ===== -->
+    <div class="dating-card dating-bio">
+      <h2 class="dating-card-head">About me</h2>
+      <p>Whatever. Fine. You wanna know me? I'm in a band. I write angry songs about angry feelings and somehow that pays my rent. I've got a kid named Conner — he's five and he's the only good thing I've ever done. His mom and I aren't speaking. <strong>That part probably stays that way.</strong></p>
+      <p>I'm two years clean. Don't ask about it. Don't bring beer to a first date. Don't bring it up at a second one either. I'll tell you when I'm ready.</p>
+      <p>I'm not nice. I won't pretend to be. I'll listen when you talk and I'll tell you the truth about whatever you ask — even when you don't want to hear it. If you want safe, swipe left. If you want someone who'll match your worst energy on your worst day and still show up the morning after, <strong>scroll all the way through this and decide if you can handle what's at the bottom.</strong></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/scorch-gallery-01.jpg" alt="Scorch live" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">on stage. it's where I'm easiest to find.</div>
+    </div>
+
+    <!-- ===== PROMPTS ===== -->
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My most controversial opinion is...</p>
+      <p class="dating-prompt-a">that feelings are for people who don't have actual problems. <em>and I've got plenty.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">I'll fall for you if...</p>
+      <p class="dating-prompt-a">you don't flinch. <em>that's it. that's the whole list.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My red flag is...</p>
+      <p class="dating-prompt-a">take your pick, sweetheart. <em>there's a buffet.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/scorch-gallery-02.jpg" alt="Backstage" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">backstage. don't make me smile, I'll do it on purpose just to fuck with you.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">On a typical Tuesday night, you'll find me...</p>
+      <p class="dating-prompt-a">either on stage, at home with my kid, or on the kitchen floor wondering how I got there. <em>lately it's mostly the kitchen.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">You should NOT date me if...</p>
+      <p class="dating-prompt-a">you need stable. you need predictable. you need someone who texts back. <em>I don't text back.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">The most spontaneous thing I've ever done...</p>
+      <p class="dating-prompt-a">got my kid's name tattooed on my collarbone in the back of a van in Tulsa. <em>worth it. ten out of ten. would do again.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/scorch-gallery-03.jpg" alt="Snake Skins live" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">the band. they put up with more than they should.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My love language is...</p>
+      <p class="dating-prompt-a">showing up. not the showing-up everyone else means — the kind where I'm in your hospital room at 3am and not asking what happened. <em>that's the whole offer. take it or don't.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Two truths and a lie...</p>
+      <p class="dating-prompt-a">1. I've been to prison.<br>2. I've been in love three times.<br>3. I cry at sad movies.<br><em>the lie is the one you want it to be.</em></p>
+    </div>
+
+    <!-- ===== QUICK STATS ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">The Vitals</h2>
+      <div class="dating-stats">
+        <div class="dating-stat"><div class="dating-stat-key">Looking for</div><div class="dating-stat-val">chaos. maybe something real if it kills me.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Kids</div><div class="dating-stat-val">one. his name is Conner. he's the best thing I've ever done.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Drinks</div><div class="dating-stat-val">sober two years. don't make it weird.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Smokes</div><div class="dating-stat-val">cigs when I'm stressed. yeah, I know.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Religion</div><div class="dating-stat-val">complicated. raised in it. left. we don't talk about it.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Pets</div><div class="dating-stat-val">a reptile named Hellfire. he hates everyone but me. we get along.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Languages</div><div class="dating-stat-val">English, profanity.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Income</div><div class="dating-stat-val">I'm a touring musician. do the math.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO GRID ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">More of me</h2>
+      <div class="dating-grid">
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-01.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-02.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-03.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-g03.jpg" alt="" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+
+    <!-- ===== CTA ===== -->
+    <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+       target="_blank" rel="noopener" class="dating-cta">
+      Swipe Right ➜ Chat with Scorch
+    </a>
+
+    <div class="dating-foot">profile last updated by Scorch when he ran out of excuses</div>
+  </div>
+</div>
+<!-- ================== END SCORCH DATING PROFILE ===================== -->
+
 <!-- ============== SCENE REQUEST MODAL (shared by all character pages) ============== -->
 <div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
   <div class="scene-modal-panel">
@@ -9209,6 +10152,101 @@ yeah. that's closer.</p>
     </form>
   </div>
 </div>
+
+<script>
+/* ---------- DATING PROFILES ---------- */
+/* Mirrors the character-page overlay pattern: clicking any element with
+   data-dating="<id>" opens the matching #<id>DatingPage. Close via X,
+   Escape, or backdrop. */
+(function initDatingProfiles() {
+  function open(id) {
+    const page = document.getElementById(id + 'DatingPage');
+    if (!page) return;
+    page.classList.add('active');
+    page.setAttribute('aria-hidden', 'false');
+    page.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+  }
+  function close(id) {
+    const page = document.getElementById(id + 'DatingPage');
+    if (!page) return;
+    page.classList.remove('active');
+    page.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  // Open from any [data-dating]
+  document.querySelectorAll('[data-dating]').forEach(el => {
+    if (el.disabled) return;
+    el.addEventListener('click', () => open(el.dataset.dating));
+  });
+
+  // The "Browse All Profiles →" button on the homepage
+  const browseBtn = document.getElementById('openDatingBrowse');
+  if (browseBtn) browseBtn.addEventListener('click', () => {
+    const page = document.getElementById('datingBrowsePage');
+    if (!page) return;
+    page.classList.add('active');
+    page.setAttribute('aria-hidden', 'false');
+    page.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+    // Focus the search input so users can start typing immediately
+    requestAnimationFrame(() => document.getElementById('datingSearchInput')?.focus());
+  });
+
+  // ===== SEARCH FILTER =====
+  // Filters by name OR any of the space-separated tags on data-tags.
+  // Matches as substring (so typing "tox" finds "toxic"). Case-insensitive.
+  const searchInput = document.getElementById('datingSearchInput');
+  const searchClear = document.getElementById('datingSearchClear');
+  const searchWrap  = searchInput?.parentElement;
+  const browseGrid  = document.getElementById('datingBrowseGrid');
+  const noResults   = document.getElementById('datingNoResults');
+
+  function applyFilter() {
+    if (!searchInput || !browseGrid) return;
+    const q = searchInput.value.toLowerCase().trim();
+    searchWrap?.classList.toggle('has-value', q.length > 0);
+    let visible = 0;
+    browseGrid.querySelectorAll('.dating-preview-card').forEach(card => {
+      if (!q) {
+        card.classList.remove('search-hidden');
+        visible++;
+        return;
+      }
+      const name = (card.dataset.name || '').toLowerCase();
+      const tags = (card.dataset.tags || '').toLowerCase();
+      const matches = name.includes(q) || tags.includes(q);
+      card.classList.toggle('search-hidden', !matches);
+      if (matches) visible++;
+    });
+    noResults?.classList.toggle('is-visible', visible === 0);
+  }
+
+  searchInput?.addEventListener('input', applyFilter);
+  searchClear?.addEventListener('click', () => {
+    if (!searchInput) return;
+    searchInput.value = '';
+    applyFilter();
+    searchInput.focus();
+  });
+
+  // Close buttons — one per profile
+  document.querySelectorAll('.dating-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.closest('.dating-page');
+      if (page) close(page.id.replace('DatingPage', ''));
+    });
+  });
+
+  // Escape closes the active one
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const active = document.querySelector('.dating-page.active');
+    if (active) close(active.id.replace('DatingPage', ''));
+  });
+})();
+</script>
 
 <script>
 /* ---------- SCENE REQUEST MODAL ---------- */
