@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css?v=sideview2" />
+<link rel="stylesheet" href="styles.css?v=tourbus3" />
 </head>
 <body data-standalone="shane">
 
@@ -257,10 +257,10 @@
     </details>
   </section>
 
-  <!-- ====== DON'T GET CAUGHT (side-view pixel stealth) ====== -->
+  <!-- ====== DON'T GET CAUGHT (tour-bus stealth, side-scroller) ====== -->
   <section class="char-section poster-section" id="shaneGameSection">
     <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Get Caught</h2>
-    <span class="poster-eyebrow reveal-up">Sneak Across His Room &middot; Reach the Journal</span>
+    <span class="poster-eyebrow reveal-up">Break Into the Tour Bus &middot; Reach His Bunk</span>
 
     <div class="sh-bi reveal-up" id="shBreakin">
 
@@ -273,42 +273,50 @@
           <span class="sh-bi-stat-label">Suspicion</span>
           <div class="sh-bi-bar"><div class="sh-bi-bar-fill susp" id="shSuspFill"></div></div>
         </div>
-        <div class="sh-bi-stat sh-bi-stat--narrow" id="shReadStat" hidden>
-          <span class="sh-bi-stat-label">Reading</span>
-          <div class="sh-bi-bar"><div class="sh-bi-bar-fill read" id="shReadFill"></div></div>
-        </div>
         <span class="sh-bi-count">Pages <b id="shCount">0</b></span>
-        <span class="sh-bi-count sh-bi-floor">Floor <b id="shFloor">1</b></span>
+        <span class="sh-bi-count sh-bi-floor">Level <b id="shFloor">1</b></span>
       </div>
 
-      <!-- the room -->
+      <!-- the bus -->
       <div class="sh-bi-stage" id="shStage">
-        <canvas id="shCanvas" width="320" height="180" aria-label="Shane's room — sneak to the journal"></canvas>
+        <canvas id="shCanvas" width="360" height="180" aria-label="Tour bus — sneak to Shane's bunk"></canvas>
 
-        <!-- reading panel (re-uses the journal entry system) -->
+        <!-- reading panel: unlocks, opens safely, X to continue -->
         <div class="sh-bi-read" id="shReadPanel" hidden>
+          <button type="button" class="sh-bi-read-x" id="shReadClose" aria-label="Close entry and continue">✕</button>
           <span class="sh-jr-tag" id="shTag">&mdash;</span>
           <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
           <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
-          <p class="sh-bi-read-hint" id="shReadHint"><b>Hold</b> anywhere to read while he looks away &middot; <b>let go</b> the instant he glances back</p>
+          <p class="sh-bi-read-hint">You read it. Tap <b>✕</b> to slip back out and ride on to the next stop.</p>
         </div>
 
-        <!-- overlay -->
+        <!-- intro / game-over overlay (scrolls if tall on mobile) -->
         <div class="sh-bi-overlay" id="shOverlay">
-          <p class="sh-bi-callout" id="shCallout">His Door's Unlocked.</p>
-          <p class="sh-bi-sub" id="shSub">He's sitting with his bass, not really looking. The journal's on the desk across the room. <b>Walk</b> with the on-screen buttons (or arrow keys / A&nbsp;D). <b>Crouch</b> behind furniture so he can't see you — and when he looks up, make sure something's between you and him. Reach the desk to read. Every page is different, and the deepest, rarest pages are things he buried a long time ago.</p>
-          <button type="button" class="sh-bi-btn" id="shStart">Break In</button>
+          <div class="sh-bi-overlay-inner">
+            <p class="sh-bi-callout" id="shCallout">Break Into the Bus.</p>
+            <p class="sh-bi-sub" id="shGameSub">Climb in the <b>front window</b> and sneak down the tour bus — past the amps, cases and kitchenette — to <b>Shane's bunk</b> at the back, where he keeps his journal. He <b>patrols the aisle</b>; stay out of his sightline and <b>crouch behind gear</b> when he looks your way. Reach the bunk and the page is yours to read. The deeper you get, the rarer the things you'll find — including pages he buried a long time ago.</p>
+
+            <div class="sh-bi-charsel" id="shCharSel" aria-label="Choose your character">
+              <span class="sh-bi-charsel-label">You're playing as:</span>
+              <div class="sh-bi-charsel-row">
+                <button type="button" class="sh-bi-charbtn sel" data-hero="girl">♀ Girl</button>
+                <button type="button" class="sh-bi-charbtn" data-hero="boy">♂ Boy</button>
+              </div>
+            </div>
+
+            <button type="button" class="sh-bi-btn" id="shStart">Break In</button>
+          </div>
         </div>
       </div>
 
-      <!-- controls: big hold buttons (mobile + mouse), arrow/AD keys also work -->
+      <!-- controls: big hold buttons (mobile + mouse); arrows / A,D / Down,S also work -->
       <div class="sh-bi-controls" aria-label="Game controls">
         <button type="button" class="sh-bi-cbtn move" id="shBtnLeft"  aria-label="Move left">◀</button>
         <button type="button" class="sh-bi-cbtn crouch" id="shBtnCrouch" aria-label="Crouch">⊽ Crouch</button>
         <button type="button" class="sh-bi-cbtn move" id="shBtnRight" aria-label="Move right">▶</button>
       </div>
 
-      <p class="sh-bi-line" id="shLine">The floor creaks. Pick your moment.</p>
+      <p class="sh-bi-line" id="shLine">The bus is quiet. Pick your moment.</p>
     </div>
   </section>
 
@@ -534,6 +542,6 @@ yeah. that's closer.</p>
   </div>
 </div>
 
-<script src="script.js?v=sideview2"></script>
+<script src="script.js?v=tourbus3"></script>
 </body>
 </html>
