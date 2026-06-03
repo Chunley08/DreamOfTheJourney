@@ -1874,3 +1874,323 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
 })();
+
+
+/* ============================================================
+   RORY — IRISH ATMOSPHERE (rising embers + drifting shamrocks)
+   Injects a small, capped set of particles into #roAtmos.
+   Only runs on Rory's page (element exists) and respects
+   prefers-reduced-motion. Pure CSS animation after injection.
+   ============================================================ */
+(function initRoryAtmosphere() {
+  function build() {
+    var atmos = document.getElementById('roAtmos');
+    if (!atmos || atmos._built) return;
+    atmos._built = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var frag = document.createDocumentFragment();
+    var EMBERS = 14, CLOVERS = 6;
+
+    for (var i = 0; i < EMBERS; i++) {
+      var e = document.createElement('span');
+      e.className = 'ro-ember';
+      var dur = 7 + Math.random() * 8;
+      var sz = 2 + Math.random() * 2.5;
+      e.style.left = (Math.random() * 100) + '%';
+      e.style.width = sz + 'px';
+      e.style.height = sz + 'px';
+      e.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+      e.style.animationDuration = dur + 's';
+      e.style.animationDelay = (-Math.random() * dur) + 's';
+      frag.appendChild(e);
+    }
+    for (var j = 0; j < CLOVERS; j++) {
+      var c = document.createElement('span');
+      c.className = 'ro-clover';
+      c.textContent = '\u2618'; /* ☘ shamrock */
+      var cd = 16 + Math.random() * 12;
+      c.style.left = (Math.random() * 100) + '%';
+      c.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+      c.style.setProperty('--sz', (11 + Math.random() * 10) + 'px');
+      c.style.animationDuration = cd + 's';
+      c.style.animationDelay = (-Math.random() * cd) + 's';
+      frag.appendChild(c);
+    }
+    atmos.appendChild(frag);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
+
+
+/* ============================================================
+   RORY — FIND THE LADY  (three-card monte mini-game)
+   Watch the Queen, follow the shuffle, pick her out. Rory
+   cheats sometimes (a quick palm) — unless you arm "Watch His
+   Hands". Difficulty + cheat odds scale with your win streak.
+   Self-contained; only initialises if #roryCardGame exists.
+   ============================================================ */
+(function initRoryFindTheLady() {
+  function build() {
+    var game = document.getElementById('roryCardGame');
+    if (!game || game._init) return;
+    game._init = true;
+
+    var table   = document.getElementById('roTable');
+    var dealer  = document.getElementById('roDealerLine');
+    var slateW  = document.getElementById('roWon');
+    var slateL  = document.getElementById('roLost');
+    var dealBtn = document.getElementById('roDealBtn');
+    var watchBtn= document.getElementById('roWatchBtn');
+    var hint    = document.getElementById('roHint');
+    var cards   = Array.prototype.slice.call(table.querySelectorAll('.ro-pcard'));
+    if (cards.length !== 3) return;
+
+    var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var T = REDUCE ? 0.16 : 1;  // time scale
+
+    // round + session state
+    var phase = 'idle';         // idle | watching | shuffling | pick | result
+    var gap = 116;
+    var armed = false;
+    var won = 0, lost = 0, winStreak = 0, lossStreak = 0;
+    var cheatedThisRound = false;
+
+    // card identities (set each round). Tie-in to his neck tattoo:
+    // the Lady (Queen ♥) + the Three (3♣) + the Ace (A♠).
+    var FACES = {
+      lady:  { cls: 'lady',  corner: 'Q<br>\u2665', pip: '\u2665', label: 'The Lady' },
+      three: { cls: 'three', corner: '3<br>\u2663', pip: '\u2663', label: 'The Three' },
+      ace:   { cls: 'ace',   corner: 'A<br>\u2660', pip: '\u2660', label: 'The Ace' }
+    };
+
+    /* ---------- banter ---------- */
+    function pick(arr) { return arr[(Math.random() * arr.length) | 0]; }
+    var LINES = {
+      watch:        "Here's the Lady — Queen o' Hearts. Watch her now\u2026",
+      shuffle:      "Round an' round she goes\u2026",
+      shuffleArmed: "Eyes on me hands, then. Round we go \u2014 quick now.",
+      pickPrompt:   "Right. Where's she hidin'? Take yer pick.",
+      win: [
+        "Ah, would ye look at that. Sharp eyes on ye. Don't get used to it.",
+        "Fair play \u2014 ye found her. I'll allow it the once.",
+        "Clean win, that. Me Da'd be appalled.",
+        "Ye picked her true. Beginner's luck, surely."
+      ],
+      winStreak: [
+        "On the bounce again? Are ye countin' cards in me own game, ye cheeky article?",
+        "Ye're robbin' me blind, so ye are. Respect it. Hate it. Both.",
+        "Right, that's enough o' that. Yer luck's gettin' personal."
+      ],
+      winArmed: [
+        "Played it dead straight an' ye STILL beat me. Mortifyin', that.",
+        "No tricks that round, an' ye found her. Don't tell Finn."
+      ],
+      loseHonest: [
+        "Wrong one, love. She was never there. Hard luck.",
+        "Ohh, so close. Well \u2014 no, not really. But it's polite to say.",
+        "That's the Ace. The Lady's gone walkin' wit'out ye.",
+        "Nope. Three o' clubs. Try keepin' up next time, aye?"
+      ],
+      loseStreak: [
+        "Down a fair few now, aren't ye. Buy us a drink an' I'll go easy. I won't, but buy it anyway.",
+        "Keep this up an' ye'll owe me yer coat. I've always fancied a new coat."
+      ],
+      loseCheat: [
+        "Ah\u2026 would ye look at that. Must've slipped. Hands o' their own, these.",
+        "Caught me, did ye? Took ye long enough. She was up me sleeve the whole time.",
+        "Did I move her? I'd never. \u2026I absolutely did. Again?",
+        "Sleight o' hand, love. It's not lyin' if ye're smilin' while ye do it."
+      ],
+      loseArmed: [
+        "Watched me hands the whole time an' STILL picked wrong? That's just sad, love.",
+        "No cheatin' that round, an' ye lost fair. Worse, somehow."
+      ]
+    };
+    function say(text, isTell) {
+      dealer.innerHTML = text;
+      dealer.classList.toggle('tell', !!isTell);
+    }
+
+    /* ---------- geometry ---------- */
+    function measure() {
+      var r = cards[0].getBoundingClientRect();
+      var w = r.width || 104;
+      gap = w + Math.max(10, w * 0.12);
+    }
+    function setX(card) {
+      card.style.setProperty('--x', ((card._lane - 1) * gap) + 'px');
+    }
+    window.addEventListener('resize', function () {
+      if (phase === 'idle' || phase === 'pick' || phase === 'result') {
+        measure(); cards.forEach(setX);
+      }
+    });
+
+    /* ---------- face rendering ---------- */
+    function renderFace(card, id) {
+      card._id = id;
+      var f = FACES[id];
+      var front = card.querySelector('.ro-pcard-front');
+      front.className = 'ro-pcard-face ro-pcard-front ' + f.cls;
+      front.innerHTML =
+        '<div class="pc-corner">' + f.corner + '</div>' +
+        '<div class="pc-pip">' + f.pip + '</div>' +
+        '<div class="pc-label">' + f.label + '</div>' +
+        '<div class="pc-corner br">' + f.corner + '</div>';
+    }
+    function faceUp(card, up) { card.classList.toggle('faceup', !!up); }
+
+    /* ---------- helpers ---------- */
+    function wait(ms) { return new Promise(function (res) { setTimeout(res, ms * T); }); }
+    function lock(state) {
+      dealBtn.disabled = state;
+      watchBtn.disabled = state;
+    }
+    function clearMarks() {
+      cards.forEach(function (c) {
+        c.classList.remove('win-glow', 'lose-dim', 'caught-slide', 'lift');
+        faceUp(c, false);
+      });
+    }
+
+    /* swap the cards currently in lane a and lane b */
+    function swapLanes(a, b, quiet) {
+      var ca = cards.find(function (c) { return c._lane === a; });
+      var cb = cards.find(function (c) { return c._lane === b; });
+      if (!ca || !cb) return;
+      ca._lane = b; cb._lane = a;
+      if (!quiet) { ca.classList.add('lift'); cb.classList.add('lift'); }
+      setX(ca); setX(cb);
+      setTimeout(function () { ca.classList.remove('lift'); cb.classList.remove('lift'); }, 480 * T);
+    }
+    function ladyCard() { return cards.find(function (c) { return c._id === 'lady'; }); }
+
+    /* ---------- the round ---------- */
+    async function deal() {
+      if (phase !== 'idle' && phase !== 'result') return;
+      phase = 'watching';
+      cheatedThisRound = false;
+      game.classList.remove('is-idle', 'is-pick');
+      lock(true);
+      clearMarks();
+      measure();
+
+      // reset lanes 0,1,2 and assign fresh identities
+      var ids = ['lady', 'three', 'ace'];
+      for (var k = ids.length - 1; k > 0; k--) { var m = (Math.random() * (k + 1)) | 0; var t = ids[k]; ids[k] = ids[m]; ids[m] = t; }
+      cards.forEach(function (c, i) { c._lane = i; setX(c); renderFace(c, ids[i]); });
+
+      await wait(120);
+      say(LINES.watch);
+      cards.forEach(function (c) { faceUp(c, true); });
+      await wait(1300);
+      cards.forEach(function (c) { faceUp(c, false); });
+      await wait(420);
+
+      // shuffle
+      phase = 'shuffling';
+      say(armed ? LINES.shuffleArmed : LINES.shuffle);
+      var swaps = 4 + Math.min(winStreak, 5) + (armed ? 2 : 0);   // armed = more swaps, but honest
+      var step = Math.max(REDUCE ? 60 : 230, 470 - winStreak * 22 - (armed ? 70 : 0));
+      var lanes = [0, 1, 2];
+      for (var s = 0; s < swaps; s++) {
+        var a = lanes[(Math.random() * 3) | 0];
+        var b; do { b = lanes[(Math.random() * 3) | 0]; } while (b === a);
+        swapLanes(a, b, false);
+        await wait(step);
+      }
+
+      // the palm — Rory cheats unless you're watching his hands
+      var cheatChance = Math.min(0.25 + winStreak * 0.14, 0.72);
+      if (!armed && Math.random() < cheatChance) {
+        var ld = ladyCard();
+        var here = ld._lane;
+        var there; do { there = (Math.random() * 3) | 0; } while (there === here);
+        swapLanes(here, there, true);   // quiet, quick, low-key palm
+        cheatedThisRound = true;
+        await wait(Math.max(REDUCE ? 50 : 180, 260));
+      }
+
+      // your move
+      phase = 'pick';
+      game.classList.add('is-pick');
+      say(LINES.pickPrompt);
+      lock(false);
+      dealBtn.textContent = 'Deal Again';
+    }
+
+    async function choose(card) {
+      if (phase !== 'pick') return;
+      phase = 'result';
+      game.classList.remove('is-pick');
+      lock(true);
+
+      var win = card._id === 'lady';
+      faceUp(card, true);
+      await wait(520);
+
+      var ld = ladyCard();
+      if (!win) {
+        // reveal the Lady too, dim the wrong pick
+        faceUp(ld, true);
+        card.classList.add('lose-dim');
+        cards.forEach(function (c) { if (c !== card && c !== ld) c.classList.add('lose-dim'); });
+      } else {
+        card.classList.add('win-glow');
+      }
+
+      if (win) {
+        won++; winStreak++; lossStreak = 0;
+        slateW.textContent = won;
+        if (armed)               say(pick(LINES.winArmed));
+        else if (winStreak >= 3) say(pick(LINES.winStreak));
+        else                     say(pick(LINES.win));
+      } else {
+        lost++; lossStreak++; winStreak = 0;
+        slateL.textContent = lost;
+        if (cheatedThisRound) {
+          // show the con: the Lady does a guilty extra slide
+          await wait(380);
+          ld.classList.add('caught-slide');
+          var dest; do { dest = (Math.random() * 3) | 0; } while (dest === ld._lane);
+          ld._lane = dest; setX(ld);
+          say(pick(LINES.loseCheat), true);
+        } else if (armed) {
+          say(pick(LINES.loseArmed));
+        } else if (lossStreak >= 3) {
+          say(pick(LINES.loseStreak));
+        } else {
+          say(pick(LINES.loseHonest));
+        }
+      }
+
+      phase = 'idle';
+      lock(false);
+    }
+
+    /* ---------- wiring ---------- */
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () { choose(card); });
+    });
+    dealBtn.addEventListener('click', function () { deal(); });
+    watchBtn.addEventListener('click', function () {
+      if (phase === 'watching' || phase === 'shuffling') return;
+      armed = !armed;
+      watchBtn.classList.toggle('armed', armed);
+      watchBtn.setAttribute('aria-pressed', armed ? 'true' : 'false');
+      watchBtn.textContent = armed ? "Eyes On Him \u2713" : 'Watch His Hands';
+      hint.innerHTML = armed
+        ? "// he'll play it straight this round \u2014 but watch the shuffle, it's quicker when he's cross."
+        : "// arm \"Watch His Hands\" an' he'll play it straight \u2014 but he'll shuffle faster to spite ye.";
+    });
+
+    // initial lane layout
+    measure();
+    cards.forEach(function (c, i) { c._lane = i; setX(c); renderFace(c, ['lady', 'three', 'ace'][i]); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
