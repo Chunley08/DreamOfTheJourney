@@ -115,8 +115,18 @@ const CHARACTERS = [
     pageId: "cody",
     href: "cody.html",
   },
-  { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
-  { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
+  // --- Two reserved slots: Max & Kayla (coming soon) ---
+  { name: "Max",   desc: "coming soon", portrait: "✦", placeholder: true },
+  { name: "Kayla", desc: "coming soon", portrait: "✦", placeholder: true },
+  // --- Rory: Irish, Peaky Blinders, 1920s Birmingham ---
+  {
+    name: "Rory",
+    desc: "Peaky Blinder · Tommy O'Malley's youngest",
+    nameStyle: "peaky",
+    portrait: "assets/Rory Pics/rory-portrait.jpg",
+    pageId: "rory",
+    href: "rory.html",
+  },
   { name: "Coming Soon", desc: "click to chat", portrait: "✦", placeholder: true },
 
   /* ---------- EXAMPLE of a real character once you're ready ----------
