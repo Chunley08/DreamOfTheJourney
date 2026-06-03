@@ -24,6 +24,7 @@
 <!-- ====================== RORY CHARACTER PAGE ====================== -->
 <div class="character-page rory-page" id="roryPage" aria-hidden="true">
   <span class="ro-smoke" aria-hidden="true"></span>
+  <div class="ro-atmos" id="roAtmos" aria-hidden="true"></div>
 
   <button class="char-close" id="roryClose" aria-label="Close" type="button">✕</button>
   <button class="scene-tab" data-character="Rory" type="button" aria-label="Open scene request">Scene Request?</button>
@@ -82,6 +83,51 @@
       <div class="ro-ink-item"><span class="ro-ink-glyph">🃏</span><span class="ro-ink-label">The Joker<br>up the neck</span></div>
       <div class="ro-ink-item"><span class="ro-ink-glyph">🂡</span><span class="ro-ink-label">Ace &middot; King &middot; Three<br>the dealt hand</span></div>
       <div class="ro-ink-item"><span class="ro-ink-glyph">♣</span><span class="ro-ink-label">Razor Cap<br>family colours</span></div>
+    </div>
+  </section>
+
+  <!-- ====== FIND THE LADY (three-card monte) ====== -->
+  <section class="ro-section" id="roryGameSection">
+    <span class="ro-eyebrow reveal-up">Pull Up a Chair</span>
+    <h2 class="ro-h2 reveal-up">Find the <span class="accent">Lady</span></h2>
+    <div class="ro-paper reveal-up" style="margin-bottom:1.4rem;">
+      <p>Three cards, darlin'. One's the Lady — the Queen o' Hearts. Watch where she lands, keep yer eye sharp, an' pick her out when I'm done. Win an' ye've bragging rights. Lose an'... well. <em>I'll not promise me hands stay honest. They never have before.</em></p>
+    </div>
+
+    <div class="ro-game is-idle reveal-up" id="roryCardGame">
+      <div class="ro-dealer">
+        <p class="ro-dealer-line" id="roDealerLine">Right then. Sit down, put yer money where yer mouth is, an' hit <b>Deal Me In</b>.</p>
+        <div class="ro-slate" id="roSlate">
+          WON <b class="won" id="roWon">0</b><span class="ro-slate-sep">·</span>LOST <b class="lost" id="roLost">0</b>
+        </div>
+      </div>
+
+      <div class="ro-table" id="roTable">
+        <div class="ro-pcard" data-slot="0">
+          <div class="ro-pcard-inner">
+            <div class="ro-pcard-face ro-pcard-back"></div>
+            <div class="ro-pcard-face ro-pcard-front"></div>
+          </div>
+        </div>
+        <div class="ro-pcard" data-slot="1">
+          <div class="ro-pcard-inner">
+            <div class="ro-pcard-face ro-pcard-back"></div>
+            <div class="ro-pcard-face ro-pcard-front"></div>
+          </div>
+        </div>
+        <div class="ro-pcard" data-slot="2">
+          <div class="ro-pcard-inner">
+            <div class="ro-pcard-face ro-pcard-back"></div>
+            <div class="ro-pcard-face ro-pcard-front"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ro-game-controls">
+        <button type="button" class="ro-game-btn" id="roDealBtn">Deal Me In</button>
+        <button type="button" class="ro-game-btn ghost" id="roWatchBtn" aria-pressed="false">Watch His Hands</button>
+      </div>
+      <p class="ro-game-hint" id="roHint">// arm "Watch His Hands" an' he'll play it straight — but he'll shuffle faster to spite ye.</p>
     </div>
   </section>
 
@@ -296,6 +342,7 @@
       <img src="assets/Rory Pics/rory-dating-hero.jpg" alt="Rory" onerror="this.style.display='none'">
       <div class="dating-hero-overlay">
         <h1 class="dating-hero-name">Rory<span>, 35</span></h1>
+        <div class="dating-tricolour-bar" aria-hidden="true"></div>
         <div class="dating-hero-meta">
           <span>🎩 Peaky Blinder · O'Malley</span>
           <span>📍 Small Heath, Birmingham</span>
