@@ -2379,47 +2379,42 @@ document.addEventListener('DOMContentLoaded', function(){
 
 
 /* ============================================================
-   SHANE — DON'T GET CAUGHT  (tour-bus stealth, side-scroller)
+   SHANE — DON'T WAKE HIM  (rummage through his bunk)
    ------------------------------------------------------------
-   Break in through the FRONT WINDOW of the band's tour bus, sneak
-   back through the lounge (amps, cases, kitchenette) and the bunk
-   hallway to SHANE'S BUNK, where his journal is kept. Shane PATROLS
-   the aisle. Stay out of his sightline / behind gear. Reach the
-   journal -> the entry unlocks and opens SAFELY; read it, hit X to
-   close -> advance to the next LEVEL (camera longer/harder, and
-   the deeper you go the better your odds at rare/buried/legendary
-   pages). Pick a girl or boy "you" first; Shane always looks like
-   Shane (brown ponytail). Cartoon/anime drawn style, scrolling
-   camera. Controls: big hold buttons + arrows/A,D/crouch keys.
-   Only initialises if #shBreakin exists.
+   Shane is asleep in his tour-bus bunk (Zzz). You rummage hiding
+   spots to find pages of his journal. HOLD a spot to rummage it —
+   a dial fills, but the noise raises his STIR meter. Let go the
+   instant he stirs; if the meter maxes, he wakes and you're caught.
+   Fill a spot's dial to reveal an entry (page-turn animation;
+   rare/buried/legendary get a sticker reveal). Some spots are
+   empty decoys. Find the level's quota of pages to move on. Each
+   level he stirs faster & wakes easier, more decoys appear, and
+   rarer pages get likelier. Clean flat-vector, cozy night.
+   Only initialises if #shBunk exists.
    ============================================================ */
-(function initShaneBreakin() {
+(function initShaneRummage() {
   function build() {
-    var root = document.getElementById('shBreakin');
+    var root = document.getElementById('shBunk');
     if (!root || root._init) return;
     root._init = true;
 
     var canvas   = document.getElementById('shCanvas');
-    var gaze     = document.getElementById('shGaze');
-    var gazeTxt  = document.getElementById('shGazeText');
-    var suspFill = document.getElementById('shSuspFill');
-    var countEl  = document.getElementById('shCount');
-    var floorEl  = document.getElementById('shFloor');
+    var stirFill = document.getElementById('shStirFill');
+    var zzzEl    = document.getElementById('shZzz');
+    var quotaEl  = document.getElementById('shQuota');
+    var levelEl  = document.getElementById('shLevel');
     var readPanel= document.getElementById('shReadPanel');
     var tagEl    = document.getElementById('shTag');
     var entryEl  = document.getElementById('shEntry');
     var dateEl   = document.getElementById('shDate');
+    var stickerEl= document.getElementById('shSticker');
     var readClose= document.getElementById('shReadClose');
     var readCont = document.getElementById('shReadContinue');
     var overlay  = document.getElementById('shOverlay');
     var callout  = document.getElementById('shCallout');
     var subEl    = document.getElementById('shGameSub');
     var startBtn = document.getElementById('shStart');
-    var charSel  = document.getElementById('shCharSel');
     var lineEl   = document.getElementById('shLine');
-    var btnLeft  = document.getElementById('shBtnLeft');
-    var btnRight = document.getElementById('shBtnRight');
-    var btnCrouch= document.getElementById('shBtnCrouch');
     if (!canvas || !startBtn) return;
     var ctx = canvas.getContext('2d');
 
@@ -2427,9 +2422,6 @@ document.addEventListener('DOMContentLoaded', function(){
     function pick(a) { return a[(Math.random() * a.length) | 0]; }
     function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
     function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
-
-    /* chosen player character: 'girl' | 'boy' */
-    var heroType = 'girl';
 
     var DATES = [
       "\u2014 late", "\u2014 couldn't sleep", "\u2014 3 a.m. again", "\u2014 tour bus, somewhere",
@@ -2590,16 +2582,14 @@ document.addEventListener('DOMContentLoaded', function(){
     function fresh(t) { return recent.indexOf(t) === -1; }
     function remember(t) { recent.push(t); if (recent.length > 9) recent.shift(); }
 
-    /* ---------- entry generator: deeper LEVEL => better rare odds ---------- */
+    /* ---------- entry generator: deeper level => better rare odds ---------- */
     function genEntry() {
-      var L = level;                         // 1,2,3...
-      // LEGENDARY — the white whale; unlocks deeper, climbs slightly with level
+      var L = level;
       var legChance = clamp(0.010 + L * 0.004, 0.010, 0.060);
       if (L >= 3 && !eurielleThisGame && Math.random() < legChance) {
         eurielleThisGame = true;
         return { tag: LEGENDARY.tag, text: LEGENDARY.t, date: LEGENDARY.date, rarity: 'legendary' };
       }
-      // BURIED — dark tier; odds and cap both grow with level
       var burChance = clamp(0.05 + L * 0.02, 0.05, 0.22);
       var burCap = 1 + Math.floor(L / 2);
       if (L >= 2 && buriedThisGame < burCap && Math.random() < burChance) {
@@ -2609,14 +2599,12 @@ document.addEventListener('DOMContentLoaded', function(){
         remember(b.t);
         return { tag: b.tag, text: b.t, date: pick(DATES), rarity: 'buried' };
       }
-      // common/uncommon/rare split shifts toward rare as level climbs
       var rareCut = clamp(0.13 + L * 0.03, 0.13, 0.42);
       var uncCut  = rareCut + clamp(0.30 + L * 0.01, 0.30, 0.42);
       var r = Math.random(), tier, pool, useTpl = false;
       if (r < rareCut) { tier = 'rare'; pool = RARE; }
       else if (r < uncCut) { tier = 'uncommon'; pool = UNCOMMON; useTpl = Math.random() < 0.4; }
       else { tier = 'common'; pool = COMMON; useTpl = Math.random() < 0.5; }
-
       var e, guard = 0;
       do {
         if (useTpl && tier === 'common')        e = pick([tplAnnoyed, tplLyric])();
@@ -2628,306 +2616,185 @@ document.addEventListener('DOMContentLoaded', function(){
       return { tag: e.tag, text: e.t, date: pick(DATES), rarity: tier };
     }
 
-    /* ---------- banter ---------- */
     var LINES = {
-      got:   ["Got that one.", "\u2026Noted.", "Still here."],
-      over:  ["He closes the book without a word. Worse than yelling.", "'\u2026Find what you were lookin' for?'", "Caught. He won't bring it up. He won't forget it either.", "He just looks at you. That's the whole punishment."],
-      spot:  ["He heard the floor. FREEZE.", "He's looking your way. Don't move.", "Did he just\u2014 get down.", "Cover. NOW."],
-      away:  ["He's down the aisle.", "He's rummaging in a case.", "He's staring out a window.", "His back's to you. Move.", "He's miles away.", "He's tuning, not looking."],
-      turn:  ["\u2026he stops.", "\u2026he's turning.", "\u2026he tilts his head."],
-      look:  ["He's scanning the bus. GET DOWN.", "Eyes sweeping. Cover NOW.", "He's looking. Don't be seen."],
-      reachDesk: ["Shane's bunk. The journal's right there.", "You made it to the bunk.", "There it is. His journal."]
+      stir:  ["He stirs\u2014 let go!", "Mmf\u2026 he's moving. Stop.", "He shifts. Freeze.", "\u2026he rolls over. Hold still."],
+      found: ["Got a page.", "\u2026Found one.", "Tucked away in there.", "There's one."],
+      empty: ["Nothing in there.", "Just socks. Gross.", "Empty.", "Picks and dust.", "A guitar string. Not it."],
+      wake:  ["His eyes open. Caught.", "'\u2026The hell are you doin'?'", "He's awake. You're done.", "Busted. He sits up slow."],
+      win:   ["You slip out with what you found.", "Pages pocketed. Gone before he turns.", "Out clean."],
+      idle:  ["He's out cold. Pick a spot.", "Zzz\u2026 go carefully.", "Quiet. Rummage when you dare."]
     };
-    function say(t, k) { lineEl.textContent = t; lineEl.className = 'sh-bi-line' + (k ? ' ' + k : ''); }
+    function say(t, k) { lineEl.textContent = t; lineEl.className = 'sh-rg-line' + (k ? ' ' + k : ''); }
 
     /* ===========================================================
        STATE
        =========================================================== */
-    var playing = false, rafId = null, lastT = 0, started = false;
-    var phase = 'sneak';            // 'sneak' | 'reading'
-    var gazeState = 'away', gazeTimer = 0;
-    var suspicion = 0, count = 0, best = 0, level = 1;
+    var playing = false, rafId = null, lastT = 0;
+    var phase = 'rummage';          // 'rummage' | 'reading'
+    var level = 1, found = 0, quota = 3, totalFound = 0, best = 0;
+    var stir = 0;                   // 0..100 — he wakes at 100
     var lastEntry = '', currentRarity = 'common';
     var foundEurielleEver = false, eurielleThisGame = false, buriedThisGame = 0, buriedFindsRun = 0, rareFinds = 0;
-    var keys = { left: false, right: false, crouch: false };
-    var animT = 0, cam = 0;
+    var animT = 0, sleepPhase = 0, pageAnim = 0;
+    // the spot currently being held/rummaged
+    var holding = null, holdProgress = 0, activePointer = null;
+    // breathing/stir scheduling
+    var stirTimer = 0, stirring = false;
 
-    /* ===========================================================
-       VIEWPORT + TOUR-BUS WORLD
-       Canvas is 360x180 (view). World is wider and scrolls (camera).
-       Side view: floor near the bottom; gear sits on it; bunks at back.
-       =========================================================== */
-    var VW = 360, VH = 180;
-    var FLOOR_Y = 150;
-    var worldW = 900;               // recomputed per level
-    var WINDOW = { x: 24, w: 30 };  // entry window (front, left)
-    var DESK = { x: 0, w: 44 };     // Shane's bunk w/ journal (back, right) — set per level
-    // furniture (cover) + decor (visual only). DECOR is drawn, not collidable.
-    var FURN = [];
-    var DECOR = [];
-    function buildLevel() {
-      // bus gets a touch longer & busier each level
-      worldW = 880 + (level - 1) * 130;
-      DESK.x = worldW - 78; DESK.w = 48;
-      WINDOW.x = 22; WINDOW.w = 32;
-      // ---- cover gear along the aisle (alternating tall/low) ----
-      FURN = [];
-      var gearDefs = [
-        { rx: 0.15, w: 42, h: 48, tall: true,  kind: 'cab' },        // big speaker cab (cover)
-        { rx: 0.27, w: 30, h: 24, tall: false, kind: 'gigcase' },    // road case (crouch cover)
-        { rx: 0.46, w: 70, h: 44, tall: true,  kind: 'drums' },      // DRUM KIT (cover, mid-bus)
-        { rx: 0.60, w: 26, h: 42, tall: true,  kind: 'guitar' },     // guitar on stand (cover)
-        { rx: 0.71, w: 34, h: 22, tall: false, kind: 'kitchen' },    // kitchenette (crouch cover)
-        { rx: 0.82, w: 30, h: 24, tall: false, kind: 'gigcase' }     // case near the back (crouch cover)
-      ];
-      for (var i = 0; i < gearDefs.length; i++) {
-        var g = gearDefs[i];
-        FURN.push({ x: Math.round(worldW * g.rx), w: g.w, h: g.h, tall: g.tall, kind: g.kind });
-      }
-      // ---- decor: visual flavor, not collidable ----
-      DECOR = [
-        { rx: 0.085, kind: 'lilith' },     // Lilith's glowing snake tank (front lounge)
-        { rx: 0.155, kind: 'couch' },      // lounge couch (Kayla lounges here)
-        { rx: 0.235, kind: 'poster', v: 0 },
-        { rx: 0.355, kind: 'lamp' },
-        { rx: 0.515, kind: 'poster', v: 1 },
-        { rx: 0.66,  kind: 'lamp' },
-        { rx: 0.78,  kind: 'poster', v: 2 },
-        { rx: 0.90,  kind: 'lamp' }
-      ];
-      for (var j = 0; j < DECOR.length; j++) DECOR[j].x = Math.round(worldW * DECOR[j].rx);
-
-      // ---- BAND: random subset present this level (scenery only) ----
-      buildBand();
-    }
-
-    // station x for each member, tied to features in the bus
-    function bandStations() {
-      var couch = null, drums = null, guitar = null, lilithX = Math.round(worldW * 0.085);
-      for (var i = 0; i < DECOR.length; i++) if (DECOR[i].kind === 'couch') couch = DECOR[i].x;
-      for (var k = 0; k < FURN.length; k++) { if (FURN[k].kind === 'drums') drums = FURN[k].x + FURN[k].w / 2; if (FURN[k].kind === 'guitar') guitar = FURN[k].x + FURN[k].w / 2; }
-      return {
-        cody:   { x: (drums || worldW * 0.46) , kind: 'cody' },
-        max:    { x: (guitar || worldW * 0.60) - 22, kind: 'max' },
-        kayla:  { x: (couch || worldW * 0.155), kind: 'kayla' },
-        scorch: { x: worldW * 0.30, home: worldW * 0.30, lilith: lilithX, kind: 'scorch' },
-        ricky:  { x: worldW * 0.68, home: worldW * 0.68, kind: 'ricky' }
-      };
-    }
-    var BAND = [];
-    function buildBand() {
-      var st = bandStations();
-      var roster = ['cody', 'max', 'kayla', 'scorch', 'ricky'];
-      BAND = [];
-      for (var i = 0; i < roster.length; i++) {
-        // each member independently ~55% to be present -> random 0..all
-        if (Math.random() < 0.55) {
-          var m = st[roster[i]];
-          m.t0 = Math.random() * 6.28;          // animation phase offset
-          m.state = 'idle'; m.timer = rand(2000, 5000); m.feedT = 0; m.dir = -1;
-          BAND.push(m);
-        }
-      }
-    }
-
-    // player
-    var P = { x: 0, w: 12, hStand: 24, hCrouch: 14, speed: 70, crouching: false, dir: 1, moving: false };
-    // patrolling Shane
-    var shane = { x: 0, dir: -1, speed: 26, faceDir: -1, walkPhase: 0, pauseT: 0, target: 0 };
-
-    function playerHeight() { return P.crouching ? P.hCrouch : P.hStand; }
-    function rangesOverlap(a0, a1, b0, b1) { return a0 < b1 && a1 > b0; }
-    function coverAtPlayer() {
-      var x0 = P.x - P.w / 2, x1 = P.x + P.w / 2;
-      for (var i = 0; i < FURN.length; i++) { var f = FURN[i]; if (rangesOverlap(x0, x1, f.x, f.x + f.w)) return f; }
-      return null;
-    }
-    function playerHidden() {
-      var f = coverAtPlayer();
-      if (!f) return false;
-      return f.tall ? true : P.crouching;
-    }
-    // sightline: player on the side Shane faces, within his look range, and not behind tall gear between them
-    function inSightline() {
-      var dx = P.x - shane.x;
-      if (shane.faceDir < 0 && dx > 0) return false;
-      if (shane.faceDir > 0 && dx < 0) return false;
-      if (Math.abs(dx) > 230) return false;
-      // tall gear standing between his eye and the player blocks the view
-      var lo = Math.min(shane.x, P.x), hi = Math.max(shane.x, P.x);
-      for (var i = 0; i < FURN.length; i++) {
-        var f = FURN[i]; if (!f.tall) continue;
-        var fc = f.x + f.w / 2;
-        if (fc > lo + 6 && fc < hi - 6) return false;
-      }
-      return true;
-    }
-
-    /* ---------- difficulty scales with level ---------- */
+    var VW = 360, VH = 230;
+    // hiding spots: each {x,y,r,label, looted:false, decoy:bool}
+    var SPOTS = [];
     function difficulty() {
       var L = level;
       return {
-        lookChance: clamp(0.46 + L * 0.04, 0.46, 0.82),
-        suspGain:   clamp(58 + L * 6, 58, 100),
-        suspLeak:   clamp(20 - L * 1.4, 9, 20),
-        awayMin:    clamp(1500 - L * 90, 700, 1500),
-        awayMax:    clamp(2500 - L * 130, 1100, 2500),
-        lookMin:    clamp(900 + L * 50, 900, 1700),
-        lookMax:    clamp(1500 + L * 80, 1500, 2400),
-        shaneSpeed: clamp(24 + L * 3, 24, 48)
+        quota:      Math.min(3 + Math.floor((L - 1) * 0.7), 7),   // pages needed
+        fillRate:   clamp(70 - L * 3, 42, 70),                    // dial fill / sec (≈1.4s at L1)
+        stirRate:   clamp(20 + L * 3, 20, 52),                    // stir gain / sec while rummaging
+        stirLeak:   clamp(38 - L * 1.5, 20, 38),                  // stir recovery / sec when idle
+        stirEvery:  clamp(3400 - L * 150, 1600, 3400),            // gap between stirs (longer = calmer)
+        decoys:     Math.min(1 + Math.floor(L / 2), 4)            // empty spots
       };
     }
 
-    function setGaze(state) {
+    // candidate spot positions around the bunk (flat-vector room)
+    var SPOT_DEFS = [
+      { x: 70,  y: 150, r: 24, label: 'pillow' },
+      { x: 150, y: 168, r: 24, label: 'blanket' },
+      { x: 250, y: 120, r: 22, label: 'shelf' },
+      { x: 305, y: 150, r: 22, label: 'amp' },
+      { x: 38,  y: 196, r: 20, label: 'boots' },
+      { x: 200, y: 196, r: 20, label: 'crate' },
+      { x: 320, y: 200, r: 20, label: 'bag' },
+      { x: 120, y: 110, r: 20, label: 'jacket' }
+    ];
+
+    function setupLevel() {
       var d = difficulty();
-      gazeState = state;
-      gaze.className = 'sh-bi-gaze ' + state;
-      gazeTxt.textContent = state === 'away' ? pick(LINES.away) : state === 'turning' ? pick(LINES.turn) : pick(LINES.look);
-      if (state === 'away')          gazeTimer = rand(d.awayMin, d.awayMax);
-      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(540 - level * 14, 300, 540);
-      else                           gazeTimer = rand(d.lookMin, d.lookMax);
-      if (state === 'turning' || state === 'looking') shane.faceDir = (P.x <= shane.x) ? -1 : 1;
+      quota = d.quota; found = 0;
+      quotaEl.textContent = '0 / ' + quota;
+      levelEl.textContent = level;
+      stir = 0; stirFill.style.width = '0%';
+      holding = null; holdProgress = 0;
+      // choose spots: quota real + d.decoys decoys, from the defs
+      var pool = SPOT_DEFS.slice();
+      // shuffle
+      for (var i = pool.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0; var t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+      var realCount = Math.min(quota + 1, pool.length);     // a couple extra real spots so it's not forced
+      var nReal = Math.min(pool.length, quota + 2);
+      var nDecoy = Math.min(d.decoys, pool.length - nReal);
+      SPOTS = [];
+      for (var k = 0; k < pool.length; k++) {
+        var s = pool[k];
+        SPOTS.push({ x: s.x, y: s.y, r: s.r, label: s.label, looted: false, decoy: (k >= nReal && k < nReal + nDecoy) });
+      }
+      scheduleStir();
     }
 
-    /* ---------- reading phase: unlock, read SAFELY, X to continue ---------- */
-    function enterReading() {
-      phase = 'reading';
-      readPanel.hidden = false;
-      loadEntry();
-      // fully reveal — reading is safe; no timing
-      entryEl.style.filter = 'none'; entryEl.style.opacity = '1';
-      say(pick(LINES.reachDesk), 'good');
+    function scheduleStir() { stirTimer = rand(difficulty().stirEvery * 0.6, difficulty().stirEvery * 1.4); stirring = false; }
+
+    /* ===========================================================
+       UPDATE
+       =========================================================== */
+    function update(dt) {
+      var d = difficulty();
+      sleepPhase += dt * 1.4;
+      // Shane's random stirring (independent of player) — a wave of risk
+      stirTimer -= dt * 1000;
+      if (stirTimer <= 0) { stirring = !stirring; stirTimer = stirring ? rand(700, 1500) : rand(d.stirEvery * 0.6, d.stirEvery * 1.4); }
+
+      if (phase === 'rummage') {
+        var rummaging = !!holding && !holding.looted;
+        if (rummaging) {
+          holdProgress += d.fillRate * dt;
+          stir = clamp(stir + d.stirRate * dt, 0, 100);
+          if (holdProgress >= 100) revealSpot(holding);
+        } else {
+          stir = clamp(stir - d.stirLeak * dt, 0, 100);
+        }
+        // while he's actively stirring, holding is extra risky (double stir)
+        if (rummaging && stirring) { stir = clamp(stir + d.stirRate * 0.9 * dt, 0, 100); if (Math.random() < 0.04) say(pick(LINES.stir), 'warn'); }
+        stirFill.style.width = stir + '%';
+        if (stir >= 100) { over(); return; }
+      }
+      if (pageAnim > 0) pageAnim = Math.max(0, pageAnim - dt * 2.2);
+      animT += dt * 2.0;
     }
-    function nextLevel() {
-      phase = 'sneak';
-      readPanel.hidden = true;
-      level++; floorEl.textContent = level;
-      buildLevel();
-      resetPositions();
-      say("Next stop. Deeper in. The good stuff's further back.", 'good');
-    }
-    function loadEntry() {
+
+    function revealSpot(spot) {
+      spot.looted = true;
+      holding = null; holdProgress = 0;
+      if (spot.decoy) {
+        say(pick(LINES.empty));
+        // small relief: decoys cost nothing extra
+        return;
+      }
+      // real spot -> entry + page turn into reading
       var e = genEntry();
       currentRarity = e.rarity || 'common';
       tagEl.textContent = e.tag;
       entryEl.textContent = e.text;
       dateEl.textContent = e.date;
       lastEntry = e.text.replace('\n', ' / ');
-      readPanel.classList.remove('rare', 'legend', 'buried');
-      if (currentRarity === 'rare') readPanel.classList.add('rare');
-      else if (currentRarity === 'buried') readPanel.classList.add('buried');
-      else if (currentRarity === 'legendary') readPanel.classList.add('legend');
-      count++; countEl.textContent = count;
-      if (currentRarity === 'legendary') foundEurielleEver = true;
-      else if (currentRarity === 'buried') buriedFindsRun++;
-      else if (currentRarity === 'rare') rareFinds++;
+      readPanel.classList.remove('rare','buried','legend');
+      stickerEl.className = 'sh-rg-sticker';
+      stickerEl.hidden = true;
+      if (currentRarity === 'rare') { readPanel.classList.add('rare'); stickerEl.hidden = false; stickerEl.classList.add('rare'); stickerEl.textContent = 'RARE FIND'; rareFinds++; }
+      else if (currentRarity === 'buried') { readPanel.classList.add('buried'); stickerEl.hidden = false; stickerEl.classList.add('buried'); stickerEl.textContent = '\u26A0 BURIED'; buriedFindsRun++; }
+      else if (currentRarity === 'legendary') { readPanel.classList.add('legend'); stickerEl.hidden = false; stickerEl.classList.add('legend'); stickerEl.textContent = '\u2606 ? ? ?'; foundEurielleEver = true; }
+      phase = 'reading';
+      pageAnim = 1;                 // triggers page-turn css
+      readPanel.hidden = false;
+      readPanel.classList.remove('turning'); void readPanel.offsetWidth; readPanel.classList.add('turning');
+      say(pick(LINES.found), 'good');
     }
 
-    function resetPositions() {
-      P.x = WINDOW.x + WINDOW.w / 2 + 6; P.crouching = false; P.dir = 1; P.moving = false;
-      shane.x = worldW * 0.55; shane.dir = -1; shane.faceDir = -1; shane.pauseT = 0; shane.target = worldW * 0.3;
-      keys.left = keys.right = keys.crouch = false;
-      cam = 0;
-      setGaze('away');
+    function closeReading() {
+      if (phase !== 'reading') return;
+      readPanel.hidden = true;
+      phase = 'rummage';
+      found++; totalFound++;
+      quotaEl.textContent = found + ' / ' + quota;
+      if (found >= quota) { winLevel(); return; }
+      say(pick(["Keep going.", "One more, carefully.", "Don't get greedy. Or do."]));
     }
 
-    /* ---------- patrol: Shane walks the aisle, pausing now and then ---------- */
-    function updateShane(dt) {
-      var d = difficulty();
-      shane.speed = d.shaneSpeed;
-      if (shane.pauseT > 0) { shane.pauseT -= dt * 1000; shane.walkPhase = 0; return; }
-      // walk toward target
-      var dir = shane.target > shane.x ? 1 : -1;
-      shane.x += dir * shane.speed * dt;
-      shane.dir = dir;
-      if (gazeState === 'away') shane.faceDir = dir;   // looks where he walks unless actively scanning
-      shane.walkPhase += dt * 8;
-      // reached target? pick a new one along the aisle, sometimes pause
-      if (Math.abs(shane.x - shane.target) < 4) {
-        if (Math.random() < 0.5) shane.pauseT = rand(500, 1400);
-        shane.target = rand(worldW * 0.22, worldW * 0.82);
-      }
-      // keep him in bus bounds
-      shane.x = clamp(shane.x, 60, worldW - 90);
+    function winLevel() {
+      level++;
+      say(pick(LINES.win), 'good');
+      // brief beat, then next level
+      setupLevel();
     }
 
-    /* ---------- sneak update ---------- */
-    function updateSneak(dt) {
-      var d = difficulty();
-      P.crouching = !!keys.crouch;
-      var vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-      P.moving = !!vx;
-      if (vx) {
-        P.dir = vx > 0 ? 1 : -1;
-        var sp = P.speed * (P.crouching ? 0.55 : 1);
-        P.x = clamp(P.x + vx * sp * dt, P.w / 2 + 2, worldW - P.w / 2 - 2);
-      }
-
-      updateShane(dt);
-
-      // gaze cycle
-      gazeTimer -= dt * 1000;
-      if (gazeTimer <= 0) {
-        if (gazeState === 'away') setGaze('turning');
-        else if (gazeState === 'turning') setGaze(Math.random() < d.lookChance ? 'looking' : 'away');
-        else setGaze('away');
-      }
-
-      var seen = (gazeState === 'looking') && inSightline() && !playerHidden();
-      if (seen) {
-        suspicion = clamp(suspicion + d.suspGain * dt, 0, 100);
-        if (suspicion < 45 && Math.random() < 0.05) say(pick(LINES.spot), 'bad');
-        if (suspicion >= 100) { over(); return; }
-      } else {
-        suspicion = clamp(suspicion - d.suspLeak * dt, 0, 100);
-      }
-      suspFill.style.width = suspicion + '%';
-
-      // reached the bunk/journal?
-      if (rangesOverlap(P.x - P.w / 2, P.x + P.w / 2, DESK.x, DESK.x + DESK.w)) { enterReading(); return; }
-
-      // camera follows player (clamped to world)
-      var targetCam = clamp(P.x - VW / 2, 0, worldW - VW);
-      cam += (targetCam - cam) * Math.min(1, dt * 8);
+    function start() {
+      playing = true; phase = 'rummage';
+      level = 1; totalFound = 0; stir = 0;
+      buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
+      readPanel.hidden = true;
+      overlay.classList.add('hidden');
+      setupLevel();
+      say(pick(LINES.idle));
+      startLoop();
     }
-
-    /* ---------- band ambient behavior (scenery only) ---------- */
-    function updateBand(dt) {
-      for (var i = 0; i < BAND.length; i++) {
-        var m = BAND[i];
-        if (m.kind === 'scorch') {
-          m.timer -= dt * 1000;
-          if (m.state === 'idle') {
-            m.dir = (m.lilith < m.x) ? -1 : 1;
-            if (m.timer <= 0) { m.state = 'toLilith'; }
-          } else if (m.state === 'toLilith') {
-            m.x += (m.lilith - m.x) * Math.min(1, dt * 1.6);
-            m.dir = (m.lilith < m.x) ? -1 : 1;
-            if (Math.abs(m.x - m.lilith) < 14) { m.state = 'feeding'; m.feedT = 1500; }
-          } else if (m.state === 'feeding') {
-            m.feedT -= dt * 1000; m.dir = -1;
-            if (m.feedT <= 0) { m.state = 'back'; }
-          } else if (m.state === 'back') {
-            m.x += (m.home - m.x) * Math.min(1, dt * 1.6);
-            m.dir = (m.home < m.x) ? -1 : 1;
-            if (Math.abs(m.x - m.home) < 6) { m.state = 'idle'; m.timer = rand(4000, 9000); }
-          }
-        } else if (m.kind === 'ricky') {
-          m.timer -= dt * 1000;
-          if (m.timer <= 0) { m.pace = -(m.pace || 1); m.timer = rand(1200, 2600); }
-          m.x = clamp(m.x + (m.pace || 1) * 8 * dt, m.home - 18, m.home + 18);
-          m.dir = (m.pace || 1) > 0 ? 1 : -1;
-        }
-        // cody/max/kayla stay put (animated in place)
-      }
+    function over() {
+      playing = false; pauseLoop();
+      if (totalFound > best) best = totalFound;
+      holding = null;
+      callout.textContent = 'He Woke Up.';
+      subEl.innerHTML = '<span class="sh-rg-final">Pages found <b>' + totalFound + '</b>' +
+        '<span class="best">Best: ' + best + '  \u00B7  reached level ' + level +
+          (rareFinds ? '  \u00B7  rare: ' + rareFinds : '') +
+          (buriedFindsRun ? '  \u00B7  buried: ' + buriedFindsRun : '') + '</span>' +
+        (foundEurielleEver ? '<span class="last gold">\u2606 You found the one he\u2019ll never say out loud.</span>' : '') +
+        (buriedFindsRun ? '<span class="last blood">\u26A0 You read what he buried.</span>' : '') +
+        (lastEntry ? '<span class="last">last thing you saw: \u201C' + lastEntry + '\u201D</span>' : '') + '</span>';
+      startBtn.textContent = 'Try Again';
+      readPanel.hidden = true;
+      overlay.classList.remove('hidden');
+      say(pick(LINES.wake), 'bad');
     }
 
     /* ===========================================================
-       RENDER — warm cozy night, anime tour bus. Curved ceiling,
-       real bus windows w/ scrolling night scenery, overhead bunk
-       berths, amber lamps, Snake Skins posters, full drum kit,
-       guitar stands, Lilith's glowing (animated) snake tank, and
-       cel-shaded little characters.
+       RENDER — clean flat-vector, cozy warm night
        =========================================================== */
     function rr(x, y, w, h, r, col) {
       ctx.beginPath();
@@ -2936,687 +2803,242 @@ document.addEventListener('DOMContentLoaded', function(){
       ctx.closePath(); ctx.fillStyle = col; ctx.fill();
     }
     function circle(x, y, r, col) { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = col; ctx.fill(); }
-    function softGlow(x, y, r, col) {
-      var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
-    }
+    function softGlow(x, y, r, col) { var g = ctx.createRadialGradient(x,y,0,x,y,r); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,6.2832); ctx.fill(); }
 
-    var CEIL = 30;                      // ceiling height (curved trim below this)
+    // flat palette
+    var C = {
+      wall1:'#2c2336', wall2:'#241d2e', floor:'#3a2e3e', floorHi:'#4a3a4e',
+      bunk:'#3b2f48', bunkIn:'#241c30', blanket:'#9a4a64', blanketHi:'#b85f7c',
+      pillow:'#e8dccb', amp:'#1f1a24', wood:'#5a4636', gold:'#e7c24a', cream:'#f3ecdb',
+      skin:'#f0cfae', hair:'#5a3a22', tee:'#3c3c46',
+      tank:'#2a4a44', glass:'rgba(150,210,200,0.3)', snake:'#f4efe6',
+      spot:'rgba(231,200,121,0.0)', spotEdge:'rgba(231,200,121,0.7)', spotGlow:'rgba(231,200,121,0.25)',
+      poster1:'#e85ee8', poster2:'#5fdcff'
+    };
 
     function draw() {
-      ctx.clearRect(0, 0, VW, VH);
-      // warm night interior wash
-      var g = ctx.createLinearGradient(0, 0, 0, VH);
-      g.addColorStop(0, '#241a22'); g.addColorStop(0.4, '#1b2230'); g.addColorStop(1, '#0e1622');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+      // warm wall wash
+      var g = ctx.createLinearGradient(0,0,0,VH);
+      g.addColorStop(0, C.wall1); g.addColorStop(1, C.wall2);
+      ctx.fillStyle = g; ctx.fillRect(0,0,VW,VH);
+      // soft amber ambient from a ceiling lamp
+      softGlow(VW*0.5, 16, 150, 'rgba(255,180,90,0.10)');
 
-      ctx.save();
-      ctx.translate(-Math.round(cam), 0);
+      // posters on the back wall
+      drawPoster(118, 28, 0);
+      drawPoster(232, 26, 1);
+      // string lights across the top
+      drawFairyLights();
 
-      drawBusShell();
-      drawWindows();
-      drawBunkBerths();          // overhead sleeping berths along the top
-      for (var d = 0; d < DECOR.length; d++) drawDecor(DECOR[d]);
-      drawFloor();
+      // floor
+      rr(0, VH-46, VW, 46, 0, C.floor);
+      ctx.fillStyle = C.floorHi; ctx.fillRect(0, VH-46, VW, 2);
 
-      // entry window marker (front)
-      drawEntryWindow();
+      // the bunk (cozy bed nook) on the left-center
+      drawBunkBed();
+      // amp + shelf on the right
+      drawAmp(292, VH-46);
+      // Lilith's tank, front-right low
+      drawTank(316, VH-40);
 
-      // sightline glow under sprites
-      if (gazeState !== 'away') {
-        var ex = shane.x, ey = FLOOR_Y - 34;
-        var beam = gazeState === 'looking' ? 'rgba(255,120,90,0.18)' : 'rgba(255,196,120,0.13)';
-        var endX = shane.faceDir < 0 ? shane.x - 230 : shane.x + 230;
-        ctx.fillStyle = beam;
-        ctx.beginPath(); ctx.moveTo(ex, ey - 4); ctx.lineTo(endX, FLOOR_Y - 48); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(ex, FLOOR_Y); ctx.closePath(); ctx.fill();
-      }
+      // sleeping Shane in the bunk
+      drawSleepingShane();
 
-      for (var i = 0; i < FURN.length; i++) drawGear(FURN[i]);
-      drawBunk();                // Shane's bunk + journal (goal)
-      drawBand();                // random bandmates (scenery)
-      drawShane();
-      drawYou();
+      // hiding spots (skip ones overlapping nothing) with hold dials
+      for (var i = 0; i < SPOTS.length; i++) drawSpot(SPOTS[i]);
 
-      ctx.restore();
-
-      // subtle warm vignette on top (screen space)
-      var vg = ctx.createRadialGradient(VW/2, VH/2, VH*0.4, VW/2, VH/2, VH*0.95);
-      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,6,12,0.45)');
-      ctx.fillStyle = vg; ctx.fillRect(0, 0, VW, VH);
+      // gentle vignette
+      var vg = ctx.createRadialGradient(VW/2, VH/2, VH*0.45, VW/2, VH/2, VH);
+      vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(8,4,10,0.4)');
+      ctx.fillStyle = vg; ctx.fillRect(0,0,VW,VH);
     }
 
-    function drawBusShell() {
-      // curved ceiling band
-      ctx.fillStyle = '#2a2030'; ctx.fillRect(0, 0, worldW, CEIL);
-      ctx.beginPath(); ctx.moveTo(0, CEIL);
-      for (var cx = 0; cx <= worldW; cx += 20) ctx.lineTo(cx, CEIL + Math.sin(cx * 0.02) * 0 + 0);
-      // warm ceiling highlight strip
-      ctx.fillStyle = 'rgba(231,170,90,0.18)'; ctx.fillRect(0, CEIL - 4, worldW, 2);
-      // ribbed ceiling supports
-      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1;
-      for (var rx = 24; rx < worldW; rx += 60) { ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx, CEIL); ctx.stroke(); }
-      // wall paneling below windows (warm wood-ish)
-      var wg = ctx.createLinearGradient(0, CEIL, 0, FLOOR_Y);
-      wg.addColorStop(0, '#2b2230'); wg.addColorStop(1, '#1d2330');
-      ctx.fillStyle = wg; ctx.fillRect(0, CEIL, worldW, FLOOR_Y - CEIL);
-    }
-
-    function drawWindows() {
-      // big bus side windows with scrolling night scenery
-      var top = CEIL + 8, h = 46, gap = 118, w = 84;
-      for (var wx = 40; wx < worldW - 60; wx += gap) {
-        // frame
-        rr(wx - 3, top - 3, w + 6, h + 6, 5, '#15101a');
-        // night sky gradient
-        var sg = ctx.createLinearGradient(0, top, 0, top + h);
-        sg.addColorStop(0, '#1b2c44'); sg.addColorStop(0.6, '#24304a'); sg.addColorStop(1, '#3a2740');
-        ctx.save();
-        ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(wx, top, w, h, 3); else ctx.rect(wx, top, w, h); ctx.clip();
-        ctx.fillStyle = sg; ctx.fillRect(wx, top, w, h);
-        // moon
-        circle(wx + w - 16, top + 12, 5, 'rgba(245,235,200,0.9)');
-        // distant rolling hills, parallax with camera
-        var off = (cam * 0.25 + wx) % (w + 40);
-        ctx.fillStyle = 'rgba(40,30,55,0.8)';
-        ctx.beginPath(); ctx.moveTo(wx - 20, top + h);
-        for (var hx = -20; hx <= w + 20; hx += 8) ctx.lineTo(wx + hx, top + h - 8 - Math.sin((hx + off) * 0.12) * 5);
-        ctx.lineTo(wx + w + 20, top + h); ctx.closePath(); ctx.fill();
-        // streaking road/utility lights (animated)
-        for (var s = 0; s < 4; s++) {
-          var lx = wx + ((animT * 70 + s * 34) % (w + 30)) - 12;
-          ctx.fillStyle = 'rgba(255,210,140,' + (0.5 - s * 0.08) + ')';
-          ctx.fillRect(lx, top + 10 + s * 7, 12, 1.5);
-        }
-        ctx.restore();
-        // glass sheen + mullion
-        ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(wx, top, w, 6);
-        ctx.strokeStyle = 'rgba(120,150,180,0.4)'; ctx.lineWidth = 1; ctx.strokeRect(wx + 0.5, top + 0.5, w - 1, h - 1);
-        ctx.beginPath(); ctx.moveTo(wx + w/2, top); ctx.lineTo(wx + w/2, top + h); ctx.stroke();
-        // little curtain tied at the top
-        ctx.fillStyle = 'rgba(150,40,60,0.55)'; rr(wx - 2, top - 2, 8, 12, 2, 'rgba(150,40,60,0.55)');
-        rr(wx + w - 6, top - 2, 8, 12, 2, 'rgba(150,40,60,0.55)');
-      }
-    }
-
-    function drawBunkBerths() {
-      // overhead sleeping berths along the upper wall (closed curtains, band's bunks)
-      var top = CEIL + 2, h = 18;
-      var cols = ['rgba(95,176,212,0.5)','rgba(232,94,232,0.5)','rgba(231,200,121,0.5)','rgba(127,176,95,0.5)'];
-      var k = 0;
-      for (var bx = 60; bx < worldW - 90; bx += 150) {
-        // we draw berths only where there isn't a window row conflict — offset them
-        rr(bx, top, 120, h, 3, 'rgba(20,16,24,0.0)');
-      }
-    }
-
-    function drawFloor() {
-      var fg = ctx.createLinearGradient(0, FLOOR_Y, 0, VH);
-      fg.addColorStop(0, '#241c20'); fg.addColorStop(1, '#140f16');
-      ctx.fillStyle = fg; ctx.fillRect(0, FLOOR_Y, worldW, VH - FLOOR_Y);
-      // warm aisle runner rug down the middle of the floor
-      ctx.fillStyle = 'rgba(150,50,60,0.35)'; ctx.fillRect(0, FLOOR_Y + 6, worldW, 10);
-      ctx.fillStyle = 'rgba(231,200,121,0.25)'; ctx.fillRect(0, FLOOR_Y + 6, worldW, 1); ctx.fillRect(0, FLOOR_Y + 15, worldW, 1);
-      // floor seam highlight
-      ctx.fillStyle = 'rgba(255,200,140,0.18)'; ctx.fillRect(0, FLOOR_Y, worldW, 2);
-      ctx.fillStyle = 'rgba(0,0,0,0.25)';
-      for (var fx = 0; fx < worldW; fx += 26) ctx.fillRect(fx, FLOOR_Y + 18, 1, VH - FLOOR_Y - 18);
-    }
-
-    function drawEntryWindow() {
-      var wy = FLOOR_Y - 52, x = WINDOW.x, w = WINDOW.w;
-      rr(x - 3, wy - 3, w + 6, 58, 5, '#15101a');
-      var sg = ctx.createLinearGradient(0, wy, 0, wy + 52);
-      sg.addColorStop(0, '#22344c'); sg.addColorStop(1, '#3a2740');
-      ctx.fillStyle = sg; ctx.fillRect(x, wy, w, 52);
-      // open sash + green "IN" glow
-      softGlow(x + w/2, wy + 26, 26, 'rgba(95,227,154,0.25)');
-      ctx.strokeStyle = '#5fe39a'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 0.5, wy + 0.5, w - 1, 51);
-      ctx.fillStyle = 'rgba(95,227,154,0.9)'; ctx.fillRect(x, wy + 14, w, 2);   // pried-open sash line
-      ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 8px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('CLIMB IN', x + w/2, wy - 6);
-    }
-
-    /* ---- decor: Lilith tank (animated), posters, lamps ---- */
-    function drawDecor(o) {
-      var x = o.x;
-      if (o.kind === 'lamp') {
-        // wall sconce, warm amber pool of light
-        var ly = CEIL + 18;
-        softGlow(x, ly + 10, 34, 'rgba(255,178,90,0.22)');
-        rr(x - 3, ly, 6, 8, 2, '#3a2a1a');
-        circle(x, ly + 2, 4, 'rgba(255,206,130,0.95)');
-      } else if (o.kind === 'poster') {
-        drawPoster(x, o.v || 0);
-      } else if (o.kind === 'lilith') {
-        drawLilith(x);
-      } else if (o.kind === 'couch') {
-        drawCouch(x);
-      }
-    }
-
-    function drawCouch(x) {
-      var cw = 56, ch = 18, cy = FLOOR_Y - ch;
-      // worn leather tour-bus couch
-      rr(x - cw/2, cy, cw, ch, 4, '#3a2630');
-      rr(x - cw/2, cy - 8, cw, 11, 5, '#4a3340');      // backrest
-      rr(x - cw/2, cy, 7, ch, 3, '#52384a');           // arm L
-      rr(x + cw/2 - 7, cy, 7, ch, 3, '#52384a');       // arm R
-      // seat cushions seam
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(x, cy + 2); ctx.lineTo(x, cy + ch - 2); ctx.stroke();
-      // a small throw pillow
-      rr(x - cw/2 + 9, cy - 4, 12, 9, 3, 'rgba(150,50,70,0.8)');
-    }
-
-    function drawPoster(x, v) {
-      var py = CEIL + 8, w = 40, h = 54;
-      // poster paper
-      var bg = v === 0 ? '#1a1020' : v === 1 ? '#201018' : '#101a20';
-      rr(x - w/2, py, w, h, 2, bg);
-      ctx.strokeStyle = 'rgba(231,200,121,0.4)'; ctx.lineWidth = 1; ctx.strokeRect(x - w/2 + 0.5, py + 0.5, w - 1, h - 1);
-      // tape corners
-      ctx.fillStyle = 'rgba(220,220,210,0.25)';
-      ctx.fillRect(x - w/2 - 2, py - 2, 8, 5); ctx.fillRect(x + w/2 - 6, py - 2, 8, 5);
-      // snake motif (a coiled S) + band name
-      ctx.strokeStyle = v === 2 ? '#5fdcff' : '#e85ee8'; ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x - 8, py + 16);
-      ctx.bezierCurveTo(x + 10, py + 12, x - 10, py + 26, x + 8, py + 26);
-      ctx.bezierCurveTo(x - 8, py + 30, x + 10, py + 38, x - 4, py + 40);
+    function drawFairyLights() {
+      ctx.strokeStyle = 'rgba(120,90,60,0.5)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, 10);
+      for (var x=0;x<=VW;x+=30) ctx.quadraticCurveTo(x+15, 18, x+30, 10);
       ctx.stroke();
-      circle(x - 8, py + 16, 1.5, v === 2 ? '#5fdcff' : '#e85ee8'); // snake head
-      // "SNAKE SKINS" text
-      ctx.fillStyle = '#e7c879'; ctx.font = 'bold 6px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('THE', x, py + h - 14);
-      ctx.fillStyle = '#fff'; ctx.font = 'bold 7px "Cinzel Decorative", serif';
-      ctx.fillText('SNAKE', x, py + h - 7);
-      ctx.fillText('SKINS', x, py + h - 1);
+      var cols = ['#ffd27a','#ff9ec4','#9ed8ff','#c4ff9e'];
+      for (var i=0;i<VW;i+=30) { var f = 0.6 + 0.4*Math.sin(animT*2 + i); ctx.globalAlpha = f; circle(i+15, 16, 2.2, cols[(i/30|0)%4]); ctx.globalAlpha = 1; }
     }
 
-    function drawLilith(x) {
-      // a glass terrarium on a stand in the front lounge — warm glow, white boa moving inside
-      var tw = 46, th = 30, ty = FLOOR_Y - th - 18;   // tank sits on a low stand
-      // stand
-      rr(x - tw/2 + 4, FLOOR_Y - 18, tw - 8, 18, 2, '#2a2018');
-      // warm heat-lamp glow from the tank
-      softGlow(x, ty + th/2, 40, 'rgba(255,170,80,0.22)');
-      // glass tank
-      var tg = ctx.createLinearGradient(0, ty, 0, ty + th);
-      tg.addColorStop(0, 'rgba(60,90,80,0.55)'); tg.addColorStop(1, 'rgba(30,50,45,0.65)');
-      rr(x - tw/2, ty, tw, th, 3, '#0e1a18');
-      ctx.fillStyle = tg; ctx.fillRect(x - tw/2 + 2, ty + 2, tw - 4, th - 4);
-      // substrate + a little branch
-      ctx.fillStyle = '#3a2c1c'; ctx.fillRect(x - tw/2 + 2, ty + th - 8, tw - 4, 6);
-      ctx.strokeStyle = '#5a4530'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 14, ty + th - 6); ctx.lineTo(x + 10, ty + 10); ctx.stroke();
-      // LILITH — white boa, slow sine-wave body, animated; occasionally lifts head
-      var t = animT;
-      var headLift = Math.sin(t * 0.6) * 3;
-      ctx.lineCap = 'round';
-      // body shadow
-      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 6;
+    function drawPoster(x, y, v) {
+      var w = 64, h = 84;
+      rr(x - w/2, y, w, h, 4, v===0 ? '#1a1020' : '#101a22');
+      ctx.strokeStyle = 'rgba(231,200,121,0.4)'; ctx.lineWidth = 1; ctx.strokeRect(x-w/2+0.5, y+0.5, w-1, h-1);
+      // coiled snake motif
+      ctx.strokeStyle = v===0 ? C.poster1 : C.poster2; ctx.lineWidth = 2.4;
       ctx.beginPath();
-      for (var i = 0; i <= 20; i++) {
-        var px = x - 16 + i * 1.7;
-        var py = ty + th - 7 + Math.sin(i * 0.7 + t * 1.2) * 3;
-        if (i === 0) ctx.moveTo(px, py + 1); else ctx.lineTo(px, py + 1);
-      }
+      ctx.moveTo(x-12, y+22);
+      ctx.bezierCurveTo(x+16, y+16, x-16, y+40, x+12, y+40);
+      ctx.bezierCurveTo(x-12, y+46, x+16, y+60, x-6, y+64);
       ctx.stroke();
-      // white body with a soft cream shade
-      var grd = ctx.createLinearGradient(x - 16, 0, x + 18, 0);
-      grd.addColorStop(0, '#f6f2ea'); grd.addColorStop(1, '#e6ddd0');
-      ctx.strokeStyle = grd; ctx.lineWidth = 5;
+      circle(x-12, y+22, 2.2, v===0 ? C.poster1 : C.poster2);
+      ctx.fillStyle = C.gold; ctx.font = 'bold 8px Oswald, sans-serif'; ctx.textAlign='center';
+      ctx.fillText('THE', x, y+h-22);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 11px "Cinzel Decorative", serif';
+      ctx.fillText('SNAKE', x, y+h-12); ctx.fillText('SKINS', x, y+h-2);
+    }
+
+    function drawBunkBed() {
+      var bx = 30, by = VH-92, bw = 200, bh = 70;
+      // frame
+      rr(bx-6, by-8, bw+12, bh+16, 8, C.bunk);
+      rr(bx, by, bw, bh, 6, C.bunkIn);
+      // warm interior glow
+      softGlow(bx+bw*0.5, by+bh*0.5, 80, 'rgba(255,170,90,0.10)');
+      // mattress + blanket
+      rr(bx+4, by+bh-30, bw-8, 30, 6, C.blanket);
+      rr(bx+4, by+bh-30, bw-8, 5, 4, C.blanketHi);
+      // pillow
+      rr(bx+10, by+10, 52, 26, 8, C.pillow);
+      ctx.fillStyle='rgba(0,0,0,0.06)'; ctx.fillRect(bx+34, by+12, 2, 22);
+    }
+
+    function drawSleepingShane() {
+      var hx = 96, hy = VH-72;          // head on the pillow
+      // body lump under blanket (rises/falls breathing)
+      var breath = Math.sin(sleepPhase) * 1.4;
+      ctx.fillStyle = C.blanket;
       ctx.beginPath();
-      for (var j = 0; j <= 20; j++) {
-        var qx = x - 16 + j * 1.7;
-        var qy = ty + th - 8 + Math.sin(j * 0.7 + t * 1.2) * 3;
-        if (j === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
-      }
-      ctx.stroke();
-      // faint scale flecks
-      ctx.fillStyle = 'rgba(210,190,170,0.5)';
-      for (var k = 2; k < 19; k += 3) { var sx = x - 16 + k * 1.7, sy = ty + th - 8 + Math.sin(k * 0.7 + t * 1.2) * 3; ctx.fillRect(sx, sy - 1, 1, 1); }
-      // head (lifts now and then) + tiny tongue flick
-      var hx = x + 18, hy = ty + th - 8 - 4 - Math.max(0, headLift);
-      circle(hx, hy, 3, '#f6f2ea');
-      circle(hx + 1, hy - 1, 0.7, '#b04a4a');   // ruby eye (white boa)
-      if (((t * 2) | 0) % 4 === 0) { ctx.strokeStyle = '#d0405a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(hx + 2, hy); ctx.lineTo(hx + 5, hy); ctx.stroke(); }
-      // glass sheen + frame
-      ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fillRect(x - tw/2 + 3, ty + 3, tw - 6, 5);
-      ctx.strokeStyle = 'rgba(150,200,200,0.45)'; ctx.lineWidth = 1; ctx.strokeRect(x - tw/2 + 0.5, ty + 0.5, tw - 1, th - 1);
-      // name plate
-      ctx.fillStyle = '#e7c879'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('LILITH', x, FLOOR_Y - 2);
-    }
-
-    function drawGear(f) {
-      var y = FLOOR_Y - f.h, active = (coverAtPlayer() === f) && playerHidden();
-      var edge = active ? '#5fe39a' : 'rgba(255,196,120,0.4)';
-      var hl = active ? '#274a3a' : null;
-      if (f.kind === 'cab') {
-        rr(f.x, y, f.w, f.h, 3, hl || '#241c24');
-        ctx.fillStyle = '#120e14'; ctx.fillRect(f.x + 4, y + 5, f.w - 8, f.h - 10);
-        ctx.strokeStyle = edge; ctx.lineWidth = 1;
-        for (var ax = f.x + 8; ax < f.x + f.w - 5; ax += 6) for (var ay = y + 9; ay < y + f.h - 6; ay += 6) circle(ax, ay, 1.4, 'rgba(255,196,120,0.25)');
-        rr(f.x + 5, y + 2, f.w - 10, 4, 1, '#3a2c1c');           // top handle bar
-        circle(f.x + f.w - 8, y + 8, 2, '#7fe39a');               // power LED
-      } else if (f.kind === 'drums') {
-        drawDrumKit(f, active);
-      } else if (f.kind === 'guitar') {
-        // guitar on an A-stand
-        ctx.strokeStyle = '#3a2c1c'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(f.x + 4, FLOOR_Y); ctx.lineTo(f.x + f.w/2, y + 6); ctx.lineTo(f.x + f.w - 4, FLOOR_Y); ctx.stroke();
-        // body
-        var bodyCol = active ? '#274a3a' : '#7a2f3a';
-        circle(f.x + f.w/2, y + f.h - 12, 9, bodyCol);
-        circle(f.x + f.w/2, y + f.h - 18, 6, bodyCol);
-        rr(f.x + f.w/2 - 1.5, y, 3, f.h - 16, 1, '#2a1c14');     // neck
-        circle(f.x + f.w/2, y + f.h - 12, 2.5, '#1a1014');       // sound hole
-        ctx.strokeStyle = edge; ctx.lineWidth = 1;
-      } else if (f.kind === 'kitchen') {
-        rr(f.x, y, f.w, f.h, 2, hl || '#2a2230');
-        ctx.fillStyle = '#3a4250'; ctx.fillRect(f.x, y, f.w, 4);  // counter top
-        ctx.fillStyle = '#120e14'; ctx.fillRect(f.x + 5, y + 8, 9, f.h - 12);  // mini fridge
-        circle(f.x + f.w - 9, y + 11, 2, '#7fe39a');             // kettle light
-        rr(f.x + f.w - 14, y - 5, 8, 6, 1, '#caa24a');           // a mug on the counter
-      } else {                                                    // gigcase (road case)
-        rr(f.x, y, f.w, f.h, 2, hl || '#1c1820');
-        ctx.strokeStyle = 'rgba(231,200,121,0.5)'; ctx.lineWidth = 1; ctx.strokeRect(f.x + 2.5, y + 2.5, f.w - 5, f.h - 5);
-        // corner brackets + latch
-        ctx.fillStyle = '#3a2c1c';
-        ctx.fillRect(f.x + 1, y + 1, 5, 5); ctx.fillRect(f.x + f.w - 6, y + 1, 5, 5);
-        ctx.fillRect(f.x + 1, y + f.h - 6, 5, 5); ctx.fillRect(f.x + f.w - 6, y + f.h - 6, 5, 5);
-        ctx.fillStyle = '#caa24a'; ctx.fillRect(f.x + f.w/2 - 3, y + f.h/2 - 2, 6, 4);
-        // stencil
-        ctx.fillStyle = 'rgba(231,200,121,0.6)'; ctx.font = 'bold 5px Oswald, sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('SNAKE SKINS', f.x + f.w/2, y + f.h - 4);
-      }
-      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('hidden', f.x + f.w/2, y - 4); }
-    }
-
-    function drawDrumKit(f, active) {
-      var cx = f.x + f.w/2, baseY = FLOOR_Y;
-      var shellCol = active ? '#274a3a' : '#6a1f2a';   // deep red kit
-      var rim = active ? '#5fe39a' : '#e7c879';
-      // kick drum (front center)
-      circle(cx, baseY - 16, 16, shellCol);
-      circle(cx, baseY - 16, 16, 'rgba(0,0,0,0)'); ctx.strokeStyle = rim; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, baseY - 16, 16, 0, 6.2832); ctx.stroke();
-      circle(cx, baseY - 16, 6, 'rgba(255,200,140,0.18)');      // ported head glow
-      // snare (left, on a stand)
-      ctx.strokeStyle = '#2a2230'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 24, baseY); ctx.lineTo(cx - 20, baseY - 16); ctx.stroke();
-      rr(cx - 28, baseY - 22, 16, 8, 3, '#d8d2c0'); ctx.strokeStyle = rim; ctx.lineWidth = 1; ctx.strokeRect(cx - 28.5, baseY - 22.5, 16, 8);
-      // two rack toms on top of the kick
-      rr(cx - 10, baseY - 40, 12, 9, 3, shellCol); ctx.strokeStyle = rim; ctx.strokeRect(cx - 10.5, baseY - 40.5, 12, 9);
-      rr(cx + 3, baseY - 40, 12, 9, 3, shellCol); ctx.strokeStyle = rim; ctx.strokeRect(cx + 2.5, baseY - 40.5, 12, 9);
-      // cymbals on stands (right + left), with a soft shimmer
-      ctx.strokeStyle = '#2a2230'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(cx + 22, baseY); ctx.lineTo(cx + 22, baseY - 34); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx - 22, baseY - 8); ctx.lineTo(cx - 22, baseY - 30); ctx.stroke();
-      ctx.fillStyle = 'rgba(231,200,121,0.9)';
-      ctx.save(); ctx.translate(cx + 22, baseY - 35); ctx.scale(1, 0.32); circle(0, 0, 9, '#e7c879'); ctx.restore();
-      ctx.save(); ctx.translate(cx - 22, baseY - 31); ctx.scale(1, 0.32); circle(0, 0, 7, '#caa24a'); ctx.restore();
-      // a tiny snake-skins logo on the kick head
-      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = 'bold 5px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('SS', cx, baseY - 14);
-      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.fillText('hidden', cx, baseY - 50); }
-    }
-
-    function drawBunk() {
-      var x = DESK.x, w = DESK.w, h = 74, y = FLOOR_Y - h;
-      // alcove with warm interior light
-      softGlow(x + w/2, y + h/2, 46, 'rgba(255,180,90,0.18)');
-      rr(x - 5, y, w + 10, h, 5, '#241a22');
-      var ig = ctx.createLinearGradient(0, y, 0, y + h);
-      ig.addColorStop(0, '#2a2030'); ig.addColorStop(1, '#15101a');
-      ctx.fillStyle = ig; ctx.fillRect(x, y + 4, w, h - 8);
-      // curtain rail + half-open curtain
-      ctx.fillStyle = '#3a2030'; ctx.fillRect(x, y + 2, w, 3);
-      ctx.fillStyle = 'rgba(120,30,45,0.7)'; rr(x, y + 5, 12, h - 10, 2, 'rgba(120,30,45,0.7)');
-      // pillow + folded blanket
-      rr(x + 5, y + h - 24, w - 10, 20, 4, '#34404f');
-      rr(x + 6, y + 9, 18, 11, 3, '#52607a');
-      // a string of warm fairy lights
-      ctx.fillStyle = 'rgba(255,200,120,0.9)';
-      for (var fl = x + 6; fl < x + w - 4; fl += 8) circle(fl, y + 6, 1.2, 'rgba(255,200,120,0.9)');
-      // the journal — glowing book
-      var bx = x + w/2 - 9, by = y + 20;
-      softGlow(bx + 8, by + 5, 16, 'rgba(231,200,121,0.35)');
-      rr(bx, by, 18, 12, 2, '#efe9da');
-      ctx.fillStyle = '#b44a4a'; ctx.fillRect(bx + 8, by, 2, 12);
-      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 17, 11);
-      if (((animT * 2) | 0) % 2 === 0) { ctx.fillStyle = '#fff2c0'; ctx.fillRect(bx + 4, by - 4, 2, 2); ctx.fillRect(bx + 13, by - 2, 1, 1); }
-      ctx.fillStyle = 'rgba(231,200,121,0.95)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText("SHANE'S BUNK", x + w/2, y - 5);
-    }
-
-    /* ---- cel-shaded little people ---- */
-    function limb(x, y, w, h, r, col, shade) { rr(x, y, w, h, r, col); ctx.globalAlpha = 0.25; rr(x, y, w * 0.45, h, r, shade); ctx.globalAlpha = 1; }
-
-    function drawShane() {
-      var x = shane.x, baseY = FLOOR_Y;
-      var walk = (shane.pauseT <= 0) ? Math.sin(shane.walkPhase) : 0;
-      var d = shane.faceDir;
-      // soft contact shadow
-      ctx.globalAlpha = 0.3; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, baseY + 1, 10, 3, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
-      // legs
-      limb(x - 5, baseY - 15, 4, 15 + walk * 1.5, 2, '#23232c', '#000');
-      limb(x + 1, baseY - 15, 4, 15 - walk * 1.5, 2, '#23232c', '#000');
-      // torso (dark band tee) + cel shade
-      rr(x - 7, baseY - 31, 14, 19, 4, '#3c3c46');
-      ctx.globalAlpha = 0.25; rr(x - 7, baseY - 31, 6, 19, 4, '#000'); ctx.globalAlpha = 1;
-      rr(x - 7, baseY - 31, 14, 3, 3, '#50505c');
-      // a faint snake logo on his shirt
-      ctx.strokeStyle = 'rgba(231,200,121,0.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 3, baseY - 26); ctx.quadraticCurveTo(x + 3, baseY - 23, x - 2, baseY - 20); ctx.stroke();
-      // arm
-      limb(x + (d > 0 ? 4 : -7), baseY - 29, 3, 13, 2, '#d8b48c', '#000');
-      // head + warm rim light
-      circle(x, baseY - 37, 7, '#e7c6a2');
-      ctx.globalAlpha = 0.3; circle(x - 2, baseY - 38, 5, '#fff'); ctx.globalAlpha = 1;
-      // brown hair + ponytail
-      ctx.fillStyle = '#5a3a22';
-      ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
-      rr(x - 8, baseY - 41, 16, 5, 2, '#5a3a22');
-      var pdx = d > 0 ? -1 : 1;
-      rr(x + pdx * 7, baseY - 39, 5, 15, 3, '#4a2f1b');
-      circle(x + pdx * 9, baseY - 24, 2.6, '#4a2f1b');
-      // tie band on the ponytail
-      ctx.fillStyle = '#2a1c14'; ctx.fillRect(x + pdx * 6, baseY - 38, 3, 2);
-      // face
-      ctx.fillStyle = '#0e0e12';
-      var ex = d < 0 ? x - 3 : x + 1;
-      if (gazeState === 'away') ctx.fillRect(x - 2, baseY - 35, 4, 1);
-      else ctx.fillRect(ex, baseY - 37, 2, 2);
-      // bass slung on back
-      ctx.save(); ctx.translate(x, baseY - 23); ctx.rotate(d > 0 ? 0.5 : -0.5);
-      rr(-2, -11, 4, 22, 2, '#caa24a'); rr(-4, 9, 9, 7, 3, '#b8902f'); ctx.restore();
-      if (gazeState === 'looking') { ctx.fillStyle = '#ff6a52'; ctx.font = 'bold 10px Oswald'; ctx.textAlign='center'; ctx.fillText('!', x, baseY - 50); }
-    }
-
-    function drawYou() {
-      var x = P.x, crouch = P.crouching, hidden = playerHidden(), d = P.dir, baseY = FLOOR_Y;
-      var bob = (P.moving && !crouch) ? Math.sin(animT) * 1.2 : 0;
-      var skin = '#f3d4b4';
-      var shirt = heroType === 'girl' ? '#e85ee8' : '#5fb0d4';
-      var shirtHi = heroType === 'girl' ? '#f6b0f6' : '#a8d4ec';
-      var hair = heroType === 'girl' ? '#5a3320' : '#2a2a30';
-      var pants = '#26384c';
-      var walk = P.moving ? Math.sin(animT) * 2 : 0;
-      // contact shadow
-      ctx.globalAlpha = hidden ? 0.18 : 0.3; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, baseY + 1, 8, 2.5, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
-      ctx.globalAlpha = hidden ? 0.55 : 1;
-      var legH = crouch ? 6 : 9;
-      limb(x - 4, baseY - legH, 3, legH + (P.moving ? walk : 0), 2, pants, '#000');
-      limb(x + 1, baseY - legH, 3, legH - (P.moving ? walk : 0), 2, pants, '#000');
-      var torsoTop = baseY - legH - (crouch ? 8 : 12);
-      rr(x - 5, torsoTop, 10, (crouch ? 8 : 12), 3, shirt);
-      ctx.globalAlpha = (hidden ? 0.55 : 1) * 0.3; rr(x - 5, torsoTop, 4, (crouch ? 8 : 12), 3, '#000'); ctx.globalAlpha = hidden ? 0.55 : 1;
-      rr(x - 5, torsoTop, 10, 3, 2, shirtHi);
-      limb(x + (d > 0 ? 3 : -6), torsoTop + 1, 3, crouch ? 6 : 9, 2, skin, '#000');
-      var hy = torsoTop - 7 + bob;
-      circle(x, hy, 6, skin);
-      ctx.globalAlpha = (hidden ? 0.55 : 1) * 0.3; circle(x - 2, hy - 1, 4, '#fff'); ctx.globalAlpha = hidden ? 0.55 : 1;
-      ctx.fillStyle = hair;
-      ctx.beginPath(); ctx.arc(x, hy - 1, 7, Math.PI, 0); ctx.fill();
-      if (heroType === 'girl') { var hd = d > 0 ? -1 : 1; rr(x + hd * 5, hy - 2, 4, 15, 2, hair); rr(x - 7, hy - 3, 14, 4, 2, hair); }
-      else { rr(x - 6, hy - 4, 12, 4, 2, hair); }
-      // big anime eyes
-      ctx.fillStyle = '#1a1a22';
-      ctx.fillRect(x + (d > 0 ? 1 : -3), hy, 2, 2);
-      ctx.fillRect(x + (d > 0 ? -3 : 1), hy, 1, 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(x + (d > 0 ? 1 : -3), hy, 1, 1);
-      ctx.globalAlpha = 1;
-      if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('hid', x, hy - 9); }
-    }
-
-    /* ===========================================================
-       BANDMATES — recognizable little anime characters (scenery)
-       =========================================================== */
-    function npcBase(x, baseY, opts) {
-      // shared body: legs, torso, head w/ eyes & hair. opts has colors + flags.
-      ctx.globalAlpha = 0.28; ctx.fillStyle = '#000';
-      ctx.beginPath(); ctx.ellipse(x, baseY + 1, 9, 2.6, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
-      var d = opts.dir || 1;
-      // legs
-      if (opts.prosthetic) {
-        // left normal, right prosthetic (metal pylon + foot)
-        rr(x - 5, baseY - 14, 4, 14, 2, opts.pants);
-        ctx.strokeStyle = '#9aa6b2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 3, baseY - 14); ctx.lineTo(x + 3, baseY - 2); ctx.stroke();
-        circle(x + 3, baseY - 14, 2, '#7a8694');           // knee joint
-        rr(x + 1, baseY - 3, 6, 3, 1, '#6a7682');          // foot
-      } else {
-        var sw = opts.walk ? Math.sin(animT * 1.6 + (opts.t0||0)) * 1.5 : 0;
-        rr(x - 5, baseY - 14, 4, 14 + sw, 2, opts.pants);
-        rr(x + 1, baseY - 14, 4, 14 - sw, 2, opts.pants);
-      }
-      // torso (shirt) + cel shade
-      rr(x - 7, baseY - 30, 14, 18, 4, opts.shirt);
-      ctx.globalAlpha = 0.22; rr(x - 7, baseY - 30, 6, 18, 4, '#000'); ctx.globalAlpha = 1;
-      rr(x - 7, baseY - 30, 14, 3, 3, opts.shirtHi || opts.shirt);
-      if (opts.shirtText) { ctx.fillStyle = opts.shirtTextCol || '#fff'; ctx.font = 'bold 6px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(opts.shirtText, x, baseY - 19); }
+      ctx.moveTo(hx+10, VH-34);
+      ctx.quadraticCurveTo(150, VH-58 - breath, 210, VH-36);
+      ctx.lineTo(210, VH-22); ctx.lineTo(hx+10, VH-22); ctx.closePath(); ctx.fill();
       // head
-      circle(x, baseY - 37, 7, opts.skin);
-      ctx.globalAlpha = 0.28; circle(x - 2, baseY - 38, 5, '#fff'); ctx.globalAlpha = 1;
-      // hair styles
-      ctx.fillStyle = opts.hair;
-      if (opts.hairStyle === 'spiky') {
-        ctx.beginPath();
-        for (var sx = -8; sx <= 8; sx += 3.2) { ctx.moveTo(x + sx, baseY - 40); ctx.lineTo(x + sx + 1.6, baseY - 48); ctx.lineTo(x + sx + 3.2, baseY - 40); }
-        ctx.fill();
-        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
-      } else if (opts.hairStyle === 'long') {
-        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
-        rr(x - 8, baseY - 41, 16, 6, 3, opts.hair);
-        rr(x - 9, baseY - 40, 5, 22, 3, opts.hair);        // long left
-        rr(x + 4, baseY - 40, 5, 22, 3, opts.hair);        // long right
-      } else if (opts.hairStyle === 'shoulder') {
-        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
-        rr(x - 9, baseY - 40, 4, 14, 2, opts.hair);
-        rr(x + 5, baseY - 40, 4, 14, 2, opts.hair);
-      } else if (opts.hairStyle === 'bald') {
-        ctx.beginPath(); ctx.arc(x, baseY - 40, 7, Math.PI, 0); ctx.fill();   // thin top
-      } else { // short
-        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
-        rr(x - 8, baseY - 41, 16, 5, 2, opts.hair);
-      }
-      // colored eyes
-      var ex = d < 0 ? x - 3 : x + 1;
-      circle(ex + 0.5, baseY - 37, 1.6, opts.eye);
-      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(ex, baseY - 38, 1, 1);
+      circle(hx, hy, 11, C.skin);
+      // hair + ponytail (brown), facing up asleep
+      ctx.fillStyle = C.hair;
+      ctx.beginPath(); ctx.arc(hx, hy-3, 12, Math.PI*1.05, Math.PI*2.05); ctx.fill();
+      rr(hx-13, hy-6, 9, 18, 4, C.hair);            // ponytail draping on pillow
+      // closed eye (peaceful line) + tiny mouth
+      ctx.strokeStyle='#3a2a22'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.arc(hx+3, hy, 3, 0.1, Math.PI-0.1); ctx.stroke();
+      // blush
+      ctx.globalAlpha=0.5; circle(hx+7, hy+3, 2.4, '#e89a9a'); ctx.globalAlpha=1;
+      // Zzz floating, bobbing — turns to '!' colors if stirring
+      var stirry = stirring || stir > 55;
+      ctx.fillStyle = stirry ? '#ff8a6a' : 'rgba(180,200,230,0.9)';
+      ctx.font = 'bold 11px Oswald, sans-serif'; ctx.textAlign='left';
+      var zb = Math.sin(animT*2)*2;
+      ctx.fillText('z',  hx+14, hy-10+zb);
+      ctx.fillText('Z',  hx+20, hy-18+zb*0.7);
+      ctx.fillText('Z',  hx+28, hy-28+zb*0.5);
+      if (stirry) { zzzEl.textContent = 'He\u2019s stirring\u2026'; zzzEl.className = 'sh-rg-zzz stir'; }
+      else { zzzEl.textContent = 'Fast asleep'; zzzEl.className = 'sh-rg-zzz'; }
     }
 
-    function drawBand() {
-      for (var i = 0; i < BAND.length; i++) {
-        var m = BAND[i], x = m.x, baseY = FLOOR_Y;
-        if (m.kind === 'cody') {
-          // seated at the drums, arms drumming — black hair, gold eyes, BET shirt, prosthetic leg
-          var hit = Math.sin(animT * 3 + m.t0) ;
-          npcBase(x, baseY, { dir: -1, pants: '#23232c', shirt: '#1c1c22', shirtHi:'#2a2a32', skin:'#e8c6a2', hair:'#15151a', hairStyle:'short', eye:'#e7c24a', shirtText:'BET', shirtTextCol:'#e7c24a', prosthetic:true });
-          // drumsticks tapping
-          ctx.strokeStyle = '#caa24a'; ctx.lineWidth = 1.5;
-          ctx.beginPath(); ctx.moveTo(x - 5, baseY - 24); ctx.lineTo(x - 12, baseY - 20 + hit * 3); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(x + 5, baseY - 24); ctx.lineTo(x + 12, baseY - 20 - hit * 3); ctx.stroke();
-          nameTag(x, baseY - 50, 'CODY');
-        } else if (m.kind === 'max') {
-          // playing guitar next to Cody — white shirt, shoulder blonde, blue eyes
-          npcBase(x, baseY, { dir: 1, walk:false, pants:'#2a3344', shirt:'#eef0f4', shirtHi:'#ffffff', skin:'#f0d2b0', hair:'#d9b96a', hairStyle:'shoulder', eye:'#3a7ad0', t0:m.t0 });
-          // slung guitar he's strumming
-          ctx.save(); ctx.translate(x + 4, baseY - 20); ctx.rotate(-0.25);
-          rr(-2, -2, 18, 4, 2, '#7a2f3a'); circle(15, 0, 6, '#7a2f3a'); circle(15, 0, 2, '#2a1014');
-          var strum = Math.sin(animT * 4 + m.t0) * 2;
-          ctx.strokeStyle='#e8c6a2'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(13, -6); ctx.lineTo(13, 4 + strum); ctx.stroke();
-          ctx.restore();
-          nameTag(x, baseY - 50, 'MAX');
-        } else if (m.kind === 'kayla') {
-          // lounging on the couch, on her phone — long black hair, blue eyes, goth
-          var cy = baseY - 16;
-          ctx.globalAlpha = 0.28; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(x, baseY, 18, 3, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha=1;
-          // reclined body
-          rr(x - 16, cy - 2, 30, 8, 4, '#1a1620');           // torso (black dress)
-          rr(x - 20, cy + 2, 12, 6, 3, '#23232c');           // legs over the arm
-          rr(x + 10, cy - 6, 9, 9, 4, '#e8c6a2');            // head resting up
-          ctx.fillStyle = '#0e0e14'; ctx.beginPath(); ctx.arc(x + 14, cy - 6, 7, Math.PI*1.1, 0.2); ctx.fill();  // long black hair
-          rr(x + 17, cy - 6, 4, 14, 2, '#0e0e14');
-          circle(x + 16, cy - 6, 1.4, '#3a7ad0');            // blue eye
-          // glowing phone
-          softGlow(x + 4, cy - 8, 8, 'rgba(150,200,255,0.4)');
-          rr(x + 2, cy - 10, 5, 7, 1, '#101820'); rr(x + 2.6, cy - 9.4, 3.8, 5.6, 1, 'rgba(150,200,255,0.8)');
-          // fishnet/boots accent
-          ctx.strokeStyle='rgba(180,40,80,0.5)'; ctx.lineWidth=1; ctx.strokeRect(x-16, cy-2, 30, 8);
-          nameTag(x, baseY - 34, 'KAYLA');
-        } else if (m.kind === 'scorch') {
-          // spiky black hair, red shirt + red eyes; walks to Lilith to feed a rat
-          var feeding = m.state === 'feeding';
-          npcBase(x, baseY, { dir: m.dir, walk: (m.state==='toLilith'||m.state==='back'), pants:'#241a1a', shirt:'#a8222a', shirtHi:'#c83a3a', skin:'#e8c6a2', hair:'#101015', hairStyle:'spiky', eye:'#ff3a3a', t0:m.t0 });
-          // holds a little rat by the tail (until fed)
-          if (m.state === 'toLilith' || m.state === 'idle') {
-            var rx = x + (m.dir<0?-9:9), ry = baseY - 18;
-            ctx.fillStyle = '#8a8f98'; rr(rx-3, ry, 6, 4, 2, '#8a8f98'); circle(rx + (m.dir<0?-3:3), ry+2, 2, '#8a8f98');
-            ctx.strokeStyle='#8a8f98'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(rx+(m.dir<0?3:-3), ry+2); ctx.lineTo(rx+(m.dir<0?7:-7), ry); ctx.stroke();
-          }
-          if (feeding) { ctx.fillStyle='rgba(255,200,120,0.9)'; ctx.font='bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('\u2022 here you go \u2022', x, baseY - 50); }
-          nameTag(x, baseY - 50, 'SCORCH');
-        } else if (m.kind === 'ricky') {
-          // slightly heavy manager, smoking, yelling on phone
-          npcBase(x, baseY, { dir: m.dir, walk:true, pants:'#2a2a30', shirt:'#3a4250', shirtHi:'#4a5260', skin:'#e6c2a0', hair:'#5a4a3a', hairStyle:'bald', eye:'#3a2a1a', t0:m.t0, belly:true });
-          // round belly overlay
-          circle(x, baseY - 18, 7, '#3a4250');
-          // phone to ear + shouting marks
-          rr(x + (m.dir<0?-9:7), baseY - 34, 3, 6, 1, '#101820');
-          ctx.fillStyle = 'rgba(255,120,90,0.9)'; ctx.font='bold 8px Oswald'; ctx.textAlign='center';
-          if (((animT)|0)%2===0) ctx.fillText('!?', x + (m.dir<0?-14:14), baseY - 40);
-          // cigarette + smoke
-          var cx2 = x + (m.dir<0? -8: 8);
-          ctx.strokeStyle='#e8e8e0'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx2, baseY-33); ctx.lineTo(cx2+(m.dir<0?-3:3), baseY-33); ctx.stroke();
-          circle(cx2+(m.dir<0?-3:3), baseY-33, 0.8, '#ff7a3a');
-          ctx.globalAlpha=0.4; for (var s=0;s<3;s++){ circle(cx2+(m.dir<0?-4:4), baseY-36-s*4 - (animT*4%6), 1+s*0.5, 'rgba(200,200,200,0.5)'); } ctx.globalAlpha=1;
-          nameTag(x, baseY - 50, 'RICKY');
-        }
-      }
-    }
-    function nameTag(x, y, label) {
-      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
-      var w = ctx.measureText(label).width + 6;
-      rr(x - w/2, y - 8, w, 10, 3, 'rgba(10,8,14,0.5)');
-      ctx.fillStyle = 'rgba(231,200,121,0.95)'; ctx.fillText(label, x, y);
+    function drawAmp(x, baseY) {
+      rr(x-22, baseY-54, 44, 54, 5, C.amp);
+      rr(x-16, baseY-48, 32, 22, 3, '#120e16');
+      ctx.fillStyle='rgba(255,196,120,0.25)';
+      for (var ax=x-12;ax<x+12;ax+=5) for (var ay=baseY-44;ay<baseY-28;ay+=5) circle(ax,ay,1.2,'rgba(255,196,120,0.22)');
+      circle(x+14, baseY-50, 2, '#7fe39a');                 // power led
+      rr(x-12, baseY-58, 24, 5, 2, C.wood);                 // a shelf board on top
+      // a coffee mug on the shelf
+      rr(x-6, baseY-66, 7, 8, 2, C.gold);
     }
 
+    function drawTank(x, baseY) {
+      var tw=54, th=34, ty=baseY-th;
+      rr(x-tw/2+3, baseY, tw-6, 14, 2, C.wood);            // stand
+      softGlow(x, ty+th/2, 40, 'rgba(255,170,80,0.20)');
+      rr(x-tw/2, ty, tw, th, 4, '#10201c');
+      ctx.fillStyle = C.tank; ctx.fillRect(x-tw/2+2, ty+2, tw-4, th-4);
+      ctx.fillStyle='#3a2c1c'; ctx.fillRect(x-tw/2+2, ty+th-8, tw-4, 6);
+      // Lilith — white boa, animated sine body, head lifts + tongue flick
+      var t = animT;
+      ctx.lineCap='round';
+      ctx.strokeStyle = C.snake; ctx.lineWidth = 5;
+      ctx.beginPath();
+      for (var i=0;i<=22;i++){ var px=x-18+i*1.7, py=ty+th-9+Math.sin(i*0.7+t*1.2)*3; if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+      ctx.stroke();
+      var hx2=x+19, hy2=ty+th-9-4-Math.max(0,Math.sin(t*0.6)*3);
+      circle(hx2,hy2,3,C.snake); circle(hx2+1,hy2-1,0.8,'#b04a4a');
+      if (((t*2)|0)%4===0){ ctx.strokeStyle='#d0405a'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(hx2+2,hy2); ctx.lineTo(hx2+5,hy2); ctx.stroke(); }
+      ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.fillRect(x-tw/2+3, ty+3, tw-6, 5);
+      ctx.strokeStyle='rgba(150,200,200,0.4)'; ctx.lineWidth=1; ctx.strokeRect(x-tw/2+0.5, ty+0.5, tw-1, th-1);
+      ctx.fillStyle=C.gold; ctx.font='bold 8px Oswald, sans-serif'; ctx.textAlign='center'; ctx.fillText('LILITH', x, baseY+12);
+    }
+
+    function drawSpot(s) {
+      if (s.looted) {
+        // looted marker (faded check)
+        ctx.globalAlpha = 0.4;
+        ctx.strokeStyle = s.decoy ? 'rgba(150,150,160,0.6)' : '#5fe39a'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r*0.5, 0, 6.2832); ctx.stroke();
+        ctx.globalAlpha = 1; return;
+      }
+      var held = (holding === s);
+      // glowing tappable ring
+      var pulse = 0.5 + 0.5*Math.sin(animT*3 + s.x);
+      softGlow(s.x, s.y, s.r+8, 'rgba(231,200,121,' + (held?0.34:0.14 + pulse*0.06) + ')');
+      ctx.strokeStyle = held ? '#fff2c0' : C.spotEdge; ctx.lineWidth = held ? 3 : 2;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.2832); ctx.stroke();
+      // magnifier-ish glyph
+      ctx.fillStyle = C.gold; ctx.font = 'bold 10px Oswald, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('?', s.x, s.y);
+      ctx.textBaseline='alphabetic';
+      // hold dial
+      if (held) {
+        ctx.strokeStyle = '#5fe39a'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r+5, -Math.PI/2, -Math.PI/2 + (holdProgress/100)*6.2832); ctx.stroke();
+      }
+    }
 
     /* ===========================================================
-       LOOP
+       LOOP + INPUT
        =========================================================== */
     function frame(t) {
       if (!playing) return;
-      var dt = (t - lastT) / 1000; lastT = t;
+      var dt = (t - lastT)/1000; lastT = t;
       if (dt > 0.05) dt = 0.05;
-      animT += dt * 2.2;              // steady clock for ambient animation (Lilith, band, sparkles)
-      updateBand(dt);
-      if (phase === 'sneak') updateSneak(dt);
-      // reading phase: safe, nothing to update (camera holds)
-      try { draw(); } catch (e) {}
+      update(dt);
+      try { draw(); } catch(e){}
       rafId = window.requestAnimationFrame(frame);
     }
-    function startLoop() { lastT = (window.performance && performance.now) ? performance.now() : Date.now(); rafId = window.requestAnimationFrame(frame); }
-    function pauseLoop() { if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; } }
+    function startLoop(){ lastT = (window.performance&&performance.now)?performance.now():Date.now(); rafId = window.requestAnimationFrame(frame); }
+    function pauseLoop(){ if (rafId){ window.cancelAnimationFrame(rafId); rafId=null; } }
 
-    function start() {
-      playing = true; started = true; phase = 'sneak';
-      suspicion = 0; count = 0; level = 1;
-      buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
-      countEl.textContent = '0'; floorEl.textContent = '1'; suspFill.style.width = '0%';
-      readPanel.hidden = true;
-      overlay.classList.add('hidden');
-      buildLevel(); resetPositions();
-      say(pick(["Window's open. Climb in quiet.", "You're on the bus. Don't blow it.", "Front window. In you go."]));
-      try { draw(); } catch (e) {}
-      startLoop();
+    // map a pointer event to canvas logical coords
+    function evToXY(e) {
+      var rect = canvas.getBoundingClientRect();
+      var cx = (e.clientX - rect.left) * (VW / rect.width);
+      var cy = (e.clientY - rect.top) * (VH / rect.height);
+      return { x: cx, y: cy };
     }
-    function over() {
-      playing = false; pauseLoop();
-      if (count > best) best = count;
-      callout.textContent = 'Caught.';
-      subEl.innerHTML = '<span class="sh-bi-final">Pages read <b>' + count + '</b>' +
-        '<span class="best">Best run: ' + best + '  \u00B7  level reached: ' + level +
-          (rareFinds ? '  \u00B7  rare: ' + rareFinds : '') +
-          (buriedFindsRun ? '  \u00B7  buried: ' + buriedFindsRun : '') + '</span>' +
-        (foundEurielleEver ? '<span class="last gold">\u2606 You found the one he\u2019ll never say out loud.</span>' : '') +
-        (buriedFindsRun ? '<span class="last blood">\u26A0 You read what he buried. He doesn\u2019t know. Yet.</span>' : '') +
-        (lastEntry ? '<span class="last">last thing you saw: \u201C' + lastEntry + '\u201D</span>' : '') + '</span>';
-      startBtn.textContent = 'Break In Again';
-      readPanel.hidden = true;
-      overlay.classList.remove('hidden');
-      say(pick(LINES.over), 'bad');
-      try { draw(); } catch (e) {}
+    function spotAt(x, y) {
+      for (var i = 0; i < SPOTS.length; i++) {
+        var s = SPOTS[i]; if (s.looted) continue;
+        var dx = x - s.x, dy = y - s.y;
+        if (dx*dx + dy*dy <= (s.r+6)*(s.r+6)) return s;
+      }
+      return null;
     }
-
-    /* ===========================================================
-       CONTROLS
-       =========================================================== */
-    var KEYMAP = { ArrowLeft:'left', ArrowRight:'right', ArrowDown:'crouch', a:'left', d:'right', s:'crouch', A:'left', D:'right', S:'crouch' };
-    document.addEventListener('keydown', function (e) {
-      if (!playing) return;
-      if (phase === 'reading') { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeReading(); } return; }
-      var k = KEYMAP[e.key];
-      if (k) { e.preventDefault(); keys[k] = true; }
+    canvas.addEventListener('pointerdown', function (e) {
+      if (!playing || phase !== 'rummage') return;
+      var p = evToXY(e); var s = spotAt(p.x, p.y);
+      if (s) { e.preventDefault(); holding = s; holdProgress = 0; activePointer = e.pointerId; if (canvas.setPointerCapture) try { canvas.setPointerCapture(e.pointerId); } catch(_){} }
     });
-    document.addEventListener('keyup', function (e) {
-      var k = KEYMAP[e.key];
-      if (k) keys[k] = false;
-    });
+    function release() { if (holding && holdProgress < 100) { holding = null; holdProgress = 0; } }
+    canvas.addEventListener('pointerup', release);
+    canvas.addEventListener('pointercancel', release);
+    canvas.addEventListener('pointerleave', release);
+    window.addEventListener('pointerup', release);
 
-    function holdBtn(el, dir) {
-      if (!el) return;
-      var on = function (e) { if (e && e.cancelable) e.preventDefault(); el.classList.add('held'); keys[dir] = true; };
-      var off = function () { el.classList.remove('held'); keys[dir] = false; };
-      el.addEventListener('pointerdown', on);
-      ['pointerup','pointercancel','pointerleave'].forEach(function (ev) { el.addEventListener(ev, off); });
-    }
-    holdBtn(btnLeft, 'left'); holdBtn(btnRight, 'right'); holdBtn(btnCrouch, 'crouch');
-
-    function closeReading(e) {
-      if (e && e.preventDefault) e.preventDefault();
-      if (phase !== 'reading') return;
-      nextLevel();
-    }
-    function bindClose(el) {
-      if (!el) return;
-      el.addEventListener('click', closeReading);
-      el.addEventListener('pointerup', closeReading);
-    }
-    bindClose(readClose);
-    bindClose(readCont);
-
-    // character select
-    if (charSel) {
-      charSel.querySelectorAll('[data-hero]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          heroType = b.getAttribute('data-hero');
-          charSel.querySelectorAll('[data-hero]').forEach(function (o) { o.classList.remove('sel'); });
-          b.classList.add('sel');
-        });
-      });
-    }
+    function bindClose(el){ if(!el) return; el.addEventListener('click', function(e){ if(e&&e.preventDefault)e.preventDefault(); closeReading(); }); el.addEventListener('pointerup', function(e){ if(e&&e.preventDefault)e.preventDefault(); closeReading(); }); }
+    bindClose(readClose); bindClose(readCont);
 
     startBtn.addEventListener('click', start);
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { keys.left = keys.right = keys.crouch = false; pauseLoop(); }
-      else if (playing && !rafId) startLoop();
-    });
+    document.addEventListener('visibilitychange', function(){ if(document.hidden){ holding=null; pauseLoop(); } else if(playing && !rafId) startLoop(); });
 
-    // first paint (room behind the intro overlay)
-    buildLevel(); resetPositions(); try { draw(); } catch (e) {}
+    // first paint behind the intro
+    setupLevel(); try { draw(); } catch(e){}
   }
 
-  function boot() {
+  function boot(){
     build();
-    var r0 = document.getElementById('shBreakin');
-    if (!r0 || !r0._init) {
-      var tries = 0;
-      var iv = setInterval(function () {
-        build();
-        var r = document.getElementById('shBreakin');
-        if ((r && r._init) || ++tries > 20) clearInterval(iv);
-      }, 150);
-    }
+    var r0 = document.getElementById('shBunk');
+    if (!r0 || !r0._init){ var n=0; var iv=setInterval(function(){ build(); var r=document.getElementById('shBunk'); if((r&&r._init)||++n>20) clearInterval(iv); }, 150); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
