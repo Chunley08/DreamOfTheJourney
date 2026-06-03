@@ -2377,212 +2377,715 @@ document.addEventListener('DOMContentLoaded', function(){
   else build();
 })();
 
+
 /* ============================================================
-   SHANE — THE LONG RIDE (motorcycle dodge mini-game)
-   Weave between 3 lanes of night traffic, grab fuel, rack up
-   distance + near-miss "style". Speed ramps; one crash ends it.
-   Controls: tap road halves, on-screen arrows, or A/D / arrows.
-   rAF loop runs ONLY while riding (paused when tab hidden).
-   Only initialises if #scShaneRide exists.
+   SHANE — DON'T GET CAUGHT  (top-down stealth break-in)
+   ------------------------------------------------------------
+   You play a little sprite sneaking into Shane's room. Move with
+   arrows / WASD / on-screen dpad. Shane sits/patrols and sweeps a
+   line-of-sight cone. Duck behind furniture (it blocks his view)
+   so he can't see you. If you're caught in his cone while he's
+   LOOKING and not hidden, suspicion spikes. Reach the desk to
+   trigger the READING phase — hold to read a journal page while
+   he looks away, release when he glances back (reuses the tiered
+   entry generator). Each page you steal scales the difficulty:
+   he looks more often, sweeps faster, suspicion bleaks slower.
+   The rarest pages are the dark ones he buried long ago.
+   Only initialises if #shBreakin exists.
    ============================================================ */
-(function initShaneRide() {
+(function initShaneBreakin() {
   function build() {
-    var root = document.getElementById('scShaneRide');
+    var root = document.getElementById('shBreakin');
     if (!root || root._init) return;
     root._init = true;
 
-    var road    = document.getElementById('shRoad');
-    var lines   = document.getElementById('shLines');
-    var bike    = document.getElementById('shBike');
-    var overlay = document.getElementById('shOverlay');
-    var callout = document.getElementById('shCallout');
-    var sub     = document.getElementById('shSub');
-    var startBtn= document.getElementById('shStart');
-    var speedEl = document.getElementById('shSpeed');
-    var distEl  = document.getElementById('shDist');
-    var styleEl = document.getElementById('shStyle');
-    var styleG  = document.getElementById('shStyleGauge');
-    var lineEl  = document.getElementById('shLine');
-    var steerL  = document.getElementById('shSteerL');
-    var steerR  = document.getElementById('shSteerR');
-    if (!road || !bike || !startBtn) return;
+    var canvas   = document.getElementById('shCanvas');
+    var gaze     = document.getElementById('shGaze');
+    var gazeTxt  = document.getElementById('shGazeText');
+    var suspFill = document.getElementById('shSuspFill');
+    var readFill = document.getElementById('shReadFill');
+    var readStat = document.getElementById('shReadStat');
+    var countEl  = document.getElementById('shCount');
+    var floorEl  = document.getElementById('shFloor');
+    var readPanel= document.getElementById('shReadPanel');
+    var tagEl    = document.getElementById('shTag');
+    var entryEl  = document.getElementById('shEntry');
+    var dateEl   = document.getElementById('shDate');
+    var overlay  = document.getElementById('shOverlay');
+    var callout  = document.getElementById('shCallout');
+    var subEl    = document.getElementById('shSub');
+    var startBtn = document.getElementById('shStart');
+    var lineEl   = document.getElementById('shLine');
+    var pad      = document.getElementById('shPad');
+    if (!canvas || !startBtn) return;
+    var ctx = canvas.getContext('2d');
 
     var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var CARS  = ['\uD83D\uDE97', '\uD83D\uDE99', '\uD83D\uDE95', '\uD83D\uDE9A', '\uD83D\uDEFB']; // car, SUV, taxi, truck, scooter
-    var FUEL  = '\u26FD';
-
-    var LINES = {
-      near:   ["\u2026Close.", "Didn't flinch.", "Still here.", "Hm.", "Cute."],
-      mile:   ["Quieter out here.", "Good road.", "This is the part I missed.", "Keep it between the lines."],
-      crash:  ["Huh. Road won.", "That'll buff out. It won't.", "Walked away from worse. Barely.", "\u2026Yeah. That tracks."],
-      best:   "\u2026Not bad."
-    };
     function pick(a) { return a[(Math.random() * a.length) | 0]; }
-    function say(txt) { lineEl.textContent = txt; }
+    function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
+    function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-    // state
-    var running = false, rafId = null, lastT = 0;
-    var bikeLane = 1, speed = 230, dist = 0, style = 0, best = 0;
-    var spawnAcc = 0, dashPos = 0, mileMark = 0, nearCooldown = 0;
-    var obstacles = [];
-    var laneGap = 0, roadH = 380, roadW = 600;
+    /* ===========================================================
+       ENTRY GENERATOR — a SHIT TON of lines, tiered by rarity.
+       chance per page (before deep-gating):
+         common ~52%  uncommon ~30%  rare ~13%  buried ~5%
+       BURIED = the dark gang/bodies confessions; gated behind
+       reading several pages, capped per run, deliberately scarce.
+       LEGENDARY ("I am in love with Eurielle.") is rarer still.
+       =========================================================== */
+    var DATES = [
+      "\u2014 late", "\u2014 couldn't sleep", "\u2014 3 a.m. again", "\u2014 tour bus, somewhere",
+      "\u2014 rained all day", "\u2014 day off. didn't leave.", "\u2014 after soundcheck",
+      "\u2014 she left a note", "\u2014 no idea what day it is", "\u2014 written in the dark",
+      "\u2014 gas station parking lot", "\u2014 motel off the interstate", "\u2014 back of the venue",
+      "\u2014 4 a.m., everyone asleep", "\u2014 the long drive north", "\u2014 nobody around",
+      "\u2014 hands not steady today", "\u2014 didn't date this one on purpose"
+    ];
 
-    function measure() {
-      roadW = road.clientWidth || 600;
-      roadH = road.clientHeight || 380;
-      laneGap = roadW / 3;
+    var COMMON = [
+      { tag: 'Annoyed', t: "Scorch used my amp again. Left it on 11. We've discussed this. We'll discuss it louder." },
+      { tag: 'Annoyed', t: "Cody apologized for breathing. Again. Kid's gonna apologize at his own funeral." },
+      { tag: 'Annoyed', t: "Somebody keeps retuning my E. I know who. I'm watching." },
+      { tag: 'Annoyed', t: "Ricky booked another 6 a.m. lobby call. Ricky has never met me." },
+      { tag: 'Annoyed', t: "Max changed the set mid-song. We do not improvise the SETLIST, Max." },
+      { tag: 'Annoyed', t: "Found glitter in my bass case. Kayla. It's in everything now. It's in my soul." },
+      { tag: 'Annoyed', t: "Scorch asked to 'borrow' my picks. There were twelve. There are now zero." },
+      { tag: 'Annoyed', t: "Whole green room out of coffee and three people LOOKED AT ME. I am not the coffee guy. I became the coffee guy." },
+      { tag: 'Annoyed', t: "The opener's bassist asked me for 'tips.' I told him to tune up. He thought I was joking." },
+      { tag: '3 A.M.',   t: "Coffee's cold. Third cup. Don't remember the first two." },
+      { tag: '3 A.M.',   t: "Rain on the glass sounds like brushes on a snare. Couldn't sleep. Wrote that instead." },
+      { tag: '3 A.M.',   t: "Two a.m. The bass is unplugged and I'm still hearing it." },
+      { tag: '3 A.M.',   t: "Hotel ceiling. Counted the cracks. Lost count. Started over." },
+      { tag: '3 A.M.',   t: "Can hear Cody snoring through the wall. Weirdly, it helps. Means he's still here." },
+      { tag: '3 A.M.',   t: "Insomnia again. Old friend. We don't talk, we just sit there." },
+      { tag: 'Mundane',  t: "Ate cereal over the sink for dinner. Living the dream, clearly." },
+      { tag: 'Mundane',  t: "New strings today. Smell like a fresh start. They're not. But they smell like one." },
+      { tag: 'Mundane',  t: "Did laundry in a gas station sink. Don't ask. It worked. Mostly." },
+      { tag: 'Mundane',  t: "Replaced the input jack myself. Took an hour. Could've been five minutes. Worth it." },
+      { tag: 'Mundane',  t: "Fixed the rattle in the van door. Nobody noticed. That's the job." },
+      { tag: 'Bike',     t: "Knucklehead idling rough again. Pulled the plugs. They're fine. SHE'S just dramatic." },
+      { tag: 'Bike',     t: "Rode two hours just to ride back. Didn't go anywhere. Went everywhere. You get it or you don't." },
+      { tag: 'Bike',     t: "Cleaned the chrome till I could see my own dumb face in it. Therapy, basically." },
+      { tag: '\u266A Lyric', t: "low note holds the room together\nnobody claps for the floor" },
+      { tag: '\u266A Lyric', t: "midnight hums in the key of leaving\nand I never learned the words" },
+      { tag: '\u266A Lyric', t: "the quiet ones keep the time\nso the loud ones can fall apart" },
+      { tag: '\u266A Lyric', t: "I carry the low end like a debt\nplay it slow, never paid it off yet" },
+      { tag: '\u266A Lyric', t: "four strings and a closed door\nthat's the whole song, there ain't more" }
+    ];
+
+    var UNCOMMON = [
+      { tag: 'About You', t: "She laughed at the dumb one. The joke I don't tell anyone. Filed that away." },
+      { tag: 'About You', t: "Caught myself saving the window seat. For nobody. For her. Same thing now, apparently." },
+      { tag: 'About You', t: "She hums our song wrong on purpose. I stopped correcting her. That's the tell, isn't it." },
+      { tag: 'About You', t: "Memorized how she takes her coffee before I memorized her last name. Backwards, as usual." },
+      { tag: 'About You', t: "She fell asleep on the drive. Took the long way so she'd sleep longer. Told no one." },
+      { tag: 'About You', t: "Wrote a bassline thinking about her walk. Nobody'll ever know that's what it is. She might." },
+      { tag: 'About You', t: "She borrowed my jacket and didn't give it back. I'm not asking for it back. Obviously." },
+      { tag: 'About You', t: "She remembered the name of my mom's favorite flower. I only said it once. Once." },
+      { tag: 'Embarrassing', t: "Practiced what I'd say to her in the mirror. Forgot all of it. Said 'sup.' SUP." },
+      { tag: 'Embarrassing', t: "Reread her one text fourteen times to 'make sure I understood it.' I understood it the first time." },
+      { tag: 'Embarrassing', t: "Almost signed a setlist 'love, Shane.' To the whole crowd. Caught it. Barely." },
+      { tag: 'Embarrassing', t: "Saved her as 'Do Not Text First' so I'd stop texting first. Texted first." },
+      { tag: 'Embarrassing', t: "Stood outside the green room rehearsing 'casual.' There is no casual. There is only me, sweating." },
+      { tag: 'Embarrassing', t: "Drew a little heart in the margin, scribbled it out so hard it tore the page. It's still under there. Like everything." },
+      { tag: 'Embarrassing', t: "Learned the song she likes. 'In case it comes up.' Practiced it 40 times. It will never 'come up.' I will make it come up." },
+      { tag: 'The Band', t: "Cody had a bad night. Sat with him on the curb till the shaking stopped. Didn't say much. Didn't have to." },
+      { tag: 'The Band', t: "Scorch is louder than his demons most days. Some days he isn't. Those days I stay close. He doesn't know I clock it." },
+      { tag: 'The Band', t: "Max thinks nobody sees how scared he is of all of this ending. I see it. I'd never say it. That's why he trusts me." },
+      { tag: 'The Band', t: "Kayla left a sticky note on my case: 'you're not as scary as you think.' Kept it. Won't tell her I kept it." },
+      { tag: 'Saw Scorch', t: "Watched Scorch practice his 'effortless' brooding stare in the bus mirror for ten minutes. The frontman mystique is a full-time job, apparently. Said nothing." },
+      { tag: 'Saw Scorch', t: "Scorch walked into the glass door at the venue. Hard. Then turned and glared at the door like IT started something. I was the only one who saw. He'll never know." },
+      { tag: 'Saw Scorch', t: "Caught Scorch crying to a dog food commercial. The one with the old dog. He blamed 'allergies.' We were in the desert. There was no pollen. There was a dog." },
+      { tag: 'Saw Scorch', t: "Scorch tucked his shirt into his underwear, walked half the meet-and-greet line like that. Forty fans. Nobody told him. I could have. I chose peace." },
+      { tag: 'Saw Scorch', t: "He rehearses what he'll say if he ever meets his idols. Out loud. In the shower. I know the whole speech now. It has a part where he 'plays it cool.' It does not play it cool." },
+      { tag: 'Saw Scorch', t: "Scorch tried to flirt with the merch girl, leaned on the table all smooth, table folded, he went down with it. Got up. Said 'anyway.' Left. I have never respected the word 'anyway' more." },
+      { tag: 'Saw Scorch', t: "Found Scorch asleep clutching a stuffed dragon Kayla won him at a fair. He'd kill to keep that secret. So I'll keep it. For leverage. And, fine, a little because it's sweet." },
+      { tag: 'Saw Scorch', t: "Scorch practiced signing autographs with a new 'signature flourish.' Forty attempts. It looks like a seismograph during an earthquake. He thinks it's iconic." },
+      { tag: 'Saw Scorch', t: "He spent a whole soundcheck convinced his in-ear was broken. It was off. He hadn't turned it on. I watched him 'troubleshoot' for twenty minutes. Said nothing. This is my life now." },
+      { tag: 'Saw Scorch', t: "Scorch screamed like a kettle at a spider the size of a freckle, then spent the rest of the night insisting he 'relocated it humanely.' He threw a boot. The boot is still out there." },
+      { tag: 'Saw Scorch', t: "Watched Scorch eat what he thought was a protein bar. It was a dog treat. Cody's dog's. He said it was 'kind of nutty.' I let him finish. Some lessons you earn." },
+      { tag: 'Saw Scorch', t: "Scorch hyped himself up in the mirror before the show — 'you're a god, you're a legend' — then knocked his own water bottle into the monitor. God tripped over the cable. I saw the whole arc." },
+      { tag: 'Saw Cody', t: "Cody apologized to a vending machine. It ate his dollar. He said 'no, that's okay, my fault.' It was not his fault. The machine has no feelings. Cody gave it the benefit of the doubt anyway." },
+      { tag: 'Saw Cody', t: "Watched Cody practice saying 'no' in the mirror so he could turn down an extra shift. He got through it twice. Then someone asked him for real and he said 'yeah, sure, happy to.' Filed it under things I'll fix for him quietly." },
+      { tag: 'Saw Cody', t: "Cody waved back at someone waving past him to another person. Then committed to it. Full conversation with a stranger out of pure politeness. He learned that guy's kids' names. Said nothing to me. I said nothing to him." },
+      { tag: 'Saw Cody', t: "Found Cody narrating drum fills under his breath in the grocery store — 'and the ghost note, and the\u2014' — boom-tssing down the cereal aisle. He didn't know I was behind him. Best thing I saw all week." },
+      { tag: 'Saw Cody', t: "Cody set six alarms to make a lobby call, woke up before all of them, lay there terrified he'd somehow still be late, then turned each one off as it rang so it 'wouldn't bother anyone.' He was the first one down. He apologized for being early." },
+      { tag: 'Saw Cody', t: "He cried at the end of a movie and tried to play it off as a yawn. A two-minute yawn. With tears. I handed him a napkin and looked back at the screen. We have never discussed it. We never will." },
+      { tag: 'Saw Max', t: "Max told a girl at the bar he was 'basically the lead guitarist of a touring band,' then got so nervous he knocked back what he thought was his beer. It was the candle. He drank candle. He said it was 'smoky.' I let him have that." },
+      { tag: 'Saw Max', t: "Watched Max try to look busy tuning when the cute photographer walked by. He wasn't plugged in. He soulfully adjusted pegs on a silent guitar for ninety seconds. The dedication to the bit was almost admirable." },
+      { tag: 'Saw Max', t: "Max has a 'cool guy' lean he does against the amp. The amp had wheels today. He's fine. The amp's fine. His pride is in the river bend with everyone else's." },
+      { tag: 'Saw Max', t: "Caught Max rehearsing a story to make it sound like he stayed calm during the thing where he absolutely did not stay calm. I was there for the original. The rehearsed version is better. I'll let the rehearsed version win." },
+      { tag: 'Saw Max', t: "Max practiced his stage banter in the bathroom — 'how we feelin' tonight' — twelve different inflections. Went with the first one. They were all the same one. I clocked every take through the wall." },
+      { tag: 'Saw Max', t: "Max bragged for an hour about never getting starstruck, then froze solid when a guy from a band he likes said 'good set.' Just stood there. I had to answer for him. Said 'he says thanks.' Max has not forgiven me for witnessing it." },
+      { tag: 'Saw Kayla', t: "Kayla argued with a parking meter for a full minute, lost, and walked away muttering. The meter was correct. She knows the meter was correct. That's what makes her mad." },
+      { tag: 'Saw Kayla', t: "Watched Kayla confidently lead the whole band the wrong way through an airport. Nobody questioned her because she walks like she knows. She did not know. We saw the same pretzel stand three times. I said nothing. The walk earned it." },
+      { tag: 'Saw Kayla', t: "Kayla 'casually' left her cello music open to a piece she'd been secretly perfecting for weeks, just hoping someone'd ask. I asked. She acted surprised. She'd been waiting four days. I let her have the surprise." },
+      { tag: 'Saw Kayla', t: "Caught Kayla hyping up a nervous Cody before a show with the exact pep talk she gives herself in the mirror. Word for word. She doesn't know I've heard the mirror version. Two for the price of one, that secret." },
+      { tag: 'Saw Kayla', t: "Kayla tripped on a perfectly flat stage, turned it into a little spin, and bowed. Crowd thought it was choreography. It was not choreography. The save was better than anything choreographed. I respect the save." },
+      { tag: 'Saw Kayla', t: "She talks to the merch plushies when she thinks the booth's empty. Gives them little voices. The dragon has a backstory now. It's a good backstory. I'm not telling her the booth wasn't empty." },
+      { tag: 'Saw Ricky', t: "Ricky gave a forty-minute speech about 'tightening the budget' wearing sunglasses he expensed to the band. Indoors. At night. I did the math on the sunglasses during the speech. The sunglasses lost the argument." },
+      { tag: 'Saw Ricky', t: "Watched Ricky take a 'very important call' the whole sidewalk could tell was the dial tone. He said 'mmhm, absolutely, let's circle back' to nobody. Hung up looking powerful. I have the timestamp." },
+      { tag: 'Saw Ricky', t: "Ricky booked us a 6 a.m. lobby call, then overslept it himself by two hours. Came down, saw us all waiting, said 'good, you're learning discipline.' The audacity is almost a renewable resource." },
+      { tag: 'Saw Ricky', t: "Caught Ricky practicing his signature in case he ever has to autograph something 'as the guy who discovered us.' He did not discover us. He answered an email. I watched him sign 'Ricky \u2014 the visionary' eleven times." },
+      { tag: 'Saw Ricky', t: "Ricky tried to look like he understood the contract he was nodding along to. Held it upside down for the first page. Realized it. Casually rotated it like that was a technique. I rotated my coffee to match. He didn't get the joke. Perfect." },
+      { tag: 'Saw Ricky', t: "Ricky told a promoter he 'handles all the band's complex logistics personally,' then asked me which city we were in. I told him. He said 'exactly' to the promoter. We are, against all odds, still touring." },
+      { tag: 'Mom', t: "Heard a woman laugh in a diner exactly like Mom used to. Sat in the parking lot a while after. Just sat." },
+      { tag: 'Mom', t: "Made her soup recipe from memory. Got it wrong. Ate it anyway. Wrong tastes better than nothing." },
+      { tag: 'Mom', t: "She used to say 'play it like you mean it, or don't play.' Still the only review that ever mattered." }
+    ];
+
+    var RARE = [
+      { tag: 'Confession', t: "I keep the seat warm and the bridge tuned and a list of her bad days so I can be quiet on the right ones. Most honest thing in this book." },
+      { tag: 'Confession', t: "If she asked me to set the bass down for good, I'd think about it. That should scare me more than it does." },
+      { tag: 'Confession', t: "Told the band the new song's 'about nothing.' It's about her. They know. Nobody's dumb enough to say so." },
+      { tag: 'Confession', t: "I have a whole life planned out that I'll never say out loud, because saying it makes it a thing that can be taken." },
+      { tag: 'Secret', t: "There's a song I'll never play live. Hers. Titled with a date she doesn't remember and I can't forget." },
+      { tag: 'Secret', t: "Went back to the home a second time. Told no one. Walter called me by my mother's name. Let him." },
+      { tag: 'Secret', t: "I still pay for Walter's room. Not for him. For her. She'd have wanted it. That's the only reason left, and it's enough." },
+      { tag: 'About You', t: "Caught myself arranging a whole future in the key of her. Didn't write it down. Wrote THIS down, which is worse." },
+      { tag: 'Embarrassing', t: "Bought two coffees out of habit. She wasn't there. Drank both. Deadpan the whole time. Pathetic, technically." },
+      { tag: 'Embarrassing', t: "Wrote her name in the dust on the amp, then played a two-hour set terrified someone'd see it. Wiped it off after. Missed it immediately." },
+      { tag: 'Weird', t: "Recurring dream: only the low E is left and it's enough. Woke up calm. Hate that." },
+      { tag: 'Weird', t: "Dreamed I told her everything. Woke up so relieved it took me a second to remember I never would." },
+      { tag: 'The Road Name', t: "Somebody from the old days said my road name in a bar last week. Whole room didn't notice. I noticed. Left before my drink came." }
+    ];
+
+    /* BURIED — the dark gang / bodies tier. Mix of specific and ominous.
+       Heavy. Gated. Rare. These are the ones he'd never let you see. */
+    var BURIED = [
+      { tag: '\u26A0 Buried', t: "The first one wasn't an accident and I knew it wasn't, even while I was telling myself it was. He had a name. I made myself forget it. It didn't take." },
+      { tag: '\u26A0 Buried', t: "There's a man under the new pour at a rest stop off the old county highway. They expanded the lot in '09. He's part of the foundation now. People park on him." },
+      { tag: '\u26A0 Buried', t: "Three of them are in the river bend past the dam, where the current digs deep and gives nothing back. We weighed them right. The water keeps its mouth shut better than men do." },
+      { tag: '\u26A0 Buried', t: "Counted once, in a motel, just to know. Stopped at the number I stopped at because past that it stops being a number and starts being a thing you carry." },
+      { tag: '\u26A0 Buried', t: "The club had a rule: you don't bury your own where they can be found, and you don't bury a debt where it can be paid. I was good at both. That's not a thing you put on a resume." },
+      { tag: '\u26A0 Buried', t: "There's a tree line behind a property nobody owns anymore. Two are there. I could walk to the spot in the dark. I have. I didn't bring a shovel. Just wanted to see if I still could." },
+      { tag: '\u26A0 Buried', t: "I keep the road name buried for the same reason I keep them buried — say it out loud and it walks back into the room with you." },
+      { tag: '\u26A0 Buried', t: "A guy begged. They mostly don't, in the movies, but they do. I let him finish the sentence. I don't know why. It didn't change anything. It changed me." },
+      { tag: '\u26A0 Buried', t: "Mom never knew. That's the only mercy in the whole thing. She died thinking I'd run off to be young and dumb. I let her keep that. Cheapest gift I ever gave anyone." },
+      { tag: '\u26A0 Buried', t: "The desert one was supposed to be a warning, not a body. I miscalculated the heat and the distance and the kind of man he was. He's still out there, technically. Under the technically." },
+      { tag: '\u26A0 Buried', t: "People think the worst part is doing it. It isn't. The worst part is how normal breakfast tastes the next morning. How the coffee's still good. How you're still you." },
+      { tag: '\u26A0 Buried', t: "I don't believe in ghosts. I believe in maps. I have a whole one in my head and I'd burn it if burning it worked." }
+    ];
+
+    var LEGENDARY = { tag: '\u2606 ? ? ?', t: "I am in love with Eurielle.", date: "\u2014 this page was stuck to the next one" };
+
+    /* templated combos for variety on the common/uncommon tiers */
+    function tplAnnoyed() {
+      return { tag: 'Annoyed', t: pick(["Scorch", "Cody", "Max", "Kayla", "Ricky", "Somebody"]) + " " +
+        pick(["used my amp", "moved my pick", "retuned my E", "left the door open", "ate the last of the cereal", "parked the van crooked", "touched the setlist", "borrowed my jacket", "hummed off-key for an hour", "used my towel", "rearranged my pedalboard"]) +
+        " again. " + pick(["We'll discuss it.", "Noted.", "I'm watching.", "It won't happen twice.", "Said nothing. Wrote this.", "Counting to ten. On string two now.", "There will be a reckoning. Quiet one."]) };
     }
-    function laneX(lane) { return (lane - 1) * laneGap; }
-    function setBike(tilt) {
-      bike.style.transform = 'translateX(' + laneX(bikeLane) + 'px)' + (tilt ? ' rotate(' + tilt + 'deg)' : '');
+    function tplLyric() {
+      return { tag: '\u266A Lyric', t: pick(["low note holds the line", "she walks in on the downbeat", "four strings, one truth", "the bass don't ask for credit", "midnight hums in E", "the quiet ones keep time", "I tune to the sound of leaving"]) +
+        "\n" + pick(["nobody claps for the floor", "and the whole room exhales", "the rest is just decoration", "somebody's gotta carry the weight", "she never even noticed", "and so do I", "and call it a melody"]) };
+    }
+    function tplYou() {
+      return { tag: 'About You', t: pick(["She took the window seat", "She remembered how I take my coffee", "She laughed at the dumb joke", "She fell asleep mid-sentence", "She didn't ask about the past", "She left a note on the case", "She stole my jacket again", "She said my name like it wasn't a warning"]) +
+        ". " + pick(["Filed that away.", "Didn't say anything. Meant to.", "Wrote it here instead.", "That's a problem for later.", "Coward's confession, this page.", "\u2026Yeah. That one's trouble.", "God help me."]) };
+    }
+    function tplEmbarrass() {
+      return { tag: 'Embarrassing', t: pick(["Rehearsed a wave so it'd look accidental", "Liked a two-year-old post then panicked", "Wore the shirt she once called 'fine'", "Walked past her door twice 'for the cardio'", "Laughed too hard at her joke and snorted", "Started a text, deleted it, retyped it word for word, deleted it", "Saved a voicemail just to hear how she says 'hey'"]) +
+        ". " + pick(["Smooth. Real smooth.", "Deadpan exterior. Dumpster interior.", "Nobody saw. I saw.", "This stays in the book.", "Mortifying. Noted. Doing it again tomorrow.", "I am a grown man."]) };
     }
 
-    function steer(dir) {
-      if (!running) return;
-      var n = Math.max(0, Math.min(2, bikeLane + dir));
-      if (n === bikeLane) return;
-      bikeLane = n;
-      setBike(dir * -9);
-      setTimeout(function () { if (running) setBike(0); }, 130);
+    var recent = [];
+    function fresh(t) { return recent.indexOf(t) === -1; }
+    function remember(t) { recent.push(t); if (recent.length > 9) recent.shift(); }
+
+    function genEntry() {
+      // LEGENDARY — the white whale, hardest thing in the book
+      if (count >= 8 && !eurielleThisGame && Math.random() < 0.014) {
+        eurielleThisGame = true;
+        return { tag: LEGENDARY.tag, text: LEGENDARY.t, date: LEGENDARY.date, rarity: 'legendary' };
+      }
+      // BURIED — gated behind a few pages, capped per run
+      if (count >= 3 && buriedThisGame < 2 && Math.random() < 0.05) {
+        buriedThisGame++;
+        var b, g = 0;
+        do { b = pick(BURIED); g++; } while (!fresh(b.t) && g < 20);
+        remember(b.t);
+        return { tag: b.tag, text: b.t, date: pick(DATES), rarity: 'buried' };
+      }
+      var r = Math.random(), tier, pool, useTpl = false;
+      if (r < 0.13) { tier = 'rare'; pool = RARE; }
+      else if (r < 0.43) { tier = 'uncommon'; pool = UNCOMMON; useTpl = Math.random() < 0.4; }
+      else { tier = 'common'; pool = COMMON; useTpl = Math.random() < 0.5; }
+
+      var e, guard = 0;
+      do {
+        if (useTpl && tier === 'common')        e = pick([tplAnnoyed, tplLyric])();
+        else if (useTpl && tier === 'uncommon') e = pick([tplYou, tplEmbarrass])();
+        else                                    e = pick(pool);
+        guard++;
+      } while (!fresh(e.t) && guard < 18);
+      remember(e.t);
+      return { tag: e.tag, text: e.t, date: pick(DATES), rarity: tier };
     }
 
-    function spawn() {
-      if (obstacles.length >= 6) return;
-      var lane = (Math.random() * 3) | 0;
-      var fuel = Math.random() < 0.16;
-      var el = document.createElement('div');
-      el.className = 'sh-ride-obs' + (fuel ? ' fuel' : '');
-      el.textContent = fuel ? FUEL : pick(CARS);
-      el.style.transform = 'translate(' + laneX(lane) + 'px,-60px)';
-      road.appendChild(el);
-      obstacles.push({ el: el, lane: lane, y: -60, h: 58, fuel: fuel, passed: false, dead: false });
+    /* ---------- banter ---------- */
+    var LINES = {
+      got:   ["Got that one.", "\u2026Noted.", "Keep going.", "Don't push it.", "Still here.", "One more. Maybe."],
+      catch: ["\u2026You readin' my journal?", "That's not yours.", "Eyes up.", "Bold.", "Hands off.", "I saw that."],
+      spot:  ["He saw something move. FREEZE.", "He's squinting at the corner. Don't.", "Did he just\u2014 don't move.", "He heard the floor. Hold still."],
+      over:  ["He closes the book without a word. Worse than yelling.", "'\u2026Find what you were lookin' for?'", "Caught. He won't bring it up. He won't forget it either.", "He just looks at you. That's the whole punishment."],
+      escaped: ["You slipped out. He never knew. Probably.", "Door clicks shut behind you. Clean.", "Gone before he turned around. This time."],
+      away:  ["He's tuning his bass.", "He's staring out the window.", "He's lighting a smoke.", "He's lost in the low end.", "He's miles away.", "His back's to you. Move."],
+      turn:  ["\u2026he shifts.", "\u2026he's stirring.", "\u2026he tilts his head."],
+      look:  ["He's scanning the room. GET DOWN.", "Eyes sweeping. Cover NOW.", "He's looking. Don't be seen."],
+      reachDesk: ["The journal. Right there.", "You made it. Now read fast.", "Desk. Go. Quiet."]
+    };
+    function say(t, k) { lineEl.textContent = t; lineEl.className = 'sh-bi-line' + (k ? ' ' + k : ''); }
+
+    /* ===========================================================
+       ROOM GEOMETRY  (logical coords on a 720x480 canvas)
+       =========================================================== */
+    var W = 720, H = 480;
+    // furniture = view-blocking + hideable cover. {x,y,w,h, hide:bool}
+    var FURN = [
+      { x: 90,  y: 110, w: 120, h: 46, hide: true,  label: 'couch' },
+      { x: 300, y: 70,  w: 60,  h: 60, hide: true,  label: 'crate' },
+      { x: 470, y: 120, w: 150, h: 40, hide: true,  label: 'amp stack' },
+      { x: 120, y: 250, w: 50,  h: 90, hide: true,  label: 'wardrobe' },
+      { x: 330, y: 250, w: 80,  h: 50, hide: true,  label: 'table' },
+      { x: 540, y: 280, w: 70,  h: 70, hide: true,  label: 'cab' },
+      { x: 250, y: 360, w: 110, h: 36, hide: true,  label: 'bench' }
+    ];
+    // desk (goal) — top-right corner
+    var DESK = { x: 596, y: 64, w: 96, h: 60 };
+    // door (start / escape) — bottom-left
+    var DOOR = { x: 24, y: 410, w: 56, h: 46 };
+    // Shane sits roughly center-top, sweeping a cone
+    var shane = { x: 360, y: 200, facing: 0 };
+    // player
+    var P = { x: DOOR.x + DOOR.w / 2, y: DOOR.y + DOOR.h / 2, r: 11, speed: 150 };
+
+    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+    function circleInRect(cx, cy, cr, rx, ry, rw, rh) {
+      var nx = clamp(cx, rx, rx + rw), ny = clamp(cy, ry, ry + rh);
+      var dx = cx - nx, dy = cy - ny;
+      return dx * dx + dy * dy <= cr * cr;
+    }
+    // is the player currently hidden? (overlapping any hide-furniture)
+    function playerHidden() {
+      for (var i = 0; i < FURN.length; i++) {
+        var f = FURN[i];
+        if (f.hide && circleInRect(P.x, P.y, P.r * 0.6, f.x, f.y, f.w, f.h)) return true;
+      }
+      return false;
+    }
+    // does a line from shane to player cross any furniture? (LOS blocked)
+    function losBlocked() {
+      for (var i = 0; i < FURN.length; i++) {
+        var f = FURN[i];
+        if (segIntersectsRect(shane.x, shane.y, P.x, P.y, f.x, f.y, f.w, f.h)) return true;
+      }
+      return false;
+    }
+    function segIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+      // quick: if either endpoint inside
+      if (x1 >= rx && x1 <= rx + rw && y1 >= ry && y1 <= ry + rh) return true;
+      if (x2 >= rx && x2 <= rx + rw && y2 >= ry && y2 <= ry + rh) return true;
+      return segSeg(x1, y1, x2, y2, rx, ry, rx + rw, ry) ||
+             segSeg(x1, y1, x2, y2, rx + rw, ry, rx + rw, ry + rh) ||
+             segSeg(x1, y1, x2, y2, rx + rw, ry + rh, rx, ry + rh) ||
+             segSeg(x1, y1, x2, y2, rx, ry + rh, rx, ry);
+    }
+    function segSeg(a, b, c, d, p, q, r2, s) {
+      var det = (c - a) * (s - q) - (r2 - p) * (d - b);
+      if (det === 0) return false;
+      var lambda = ((s - q) * (r2 - a) + (p - r2) * (s - b)) / det;
+      var gamma = ((b - d) * (r2 - a) + (c - a) * (s - b)) / det;
+      return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
     }
 
-    function clearObstacles() {
-      obstacles.forEach(function (o) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); });
-      obstacles = [];
+    // cone of vision params (scale with floor/difficulty)
+    function coneHalfAngle() { return 0.42; }                 // radians, each side
+    function coneRange()     { return 260; }
+    // is player inside Shane's vision cone right now?
+    function inCone() {
+      var dx = P.x - shane.x, dy = P.y - shane.y;
+      var dist = Math.hypot(dx, dy);
+      if (dist > coneRange()) return false;
+      var ang = Math.atan2(dy, dx);
+      var diff = Math.abs(normAngle(ang - shane.facing));
+      return diff <= coneHalfAngle();
+    }
+    function normAngle(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
+
+    /* ===========================================================
+       STATE
+       =========================================================== */
+    var playing = false, rafId = null, lastT = 0;
+    var phase = 'sneak';            // 'sneak' | 'reading'
+    var gazeState = 'away', gazeTimer = 0;
+    var suspicion = 0, count = 0, best = 0, floor = 1;
+    var lastEntry = '', currentRarity = 'common';
+    var foundEurielleEver = false, eurielleThisGame = false, buriedThisGame = 0, buriedFindsRun = 0, rareFinds = 0;
+    // reading sub-state
+    var reading = false, readMeter = 0, readLock = false, savoring = false, savorTimer = 0;
+    // input
+    var keys = { up: false, down: false, left: false, right: false };
+    // shane sweep
+    var sweepDir = 1, sweepBase = 0;
+
+    function difficulty() {
+      // scales with floor (pages stolen)
+      return {
+        lookChance: clamp(0.40 + floor * 0.05, 0.40, 0.78),  // prob a gaze ends in "looking"
+        sweepSpeed: clamp(0.9 + floor * 0.18, 0.9, 2.4),     // cone sweep speed
+        suspGain:   clamp(46 + floor * 5, 46, 80),           // per second when seen
+        suspLeak:   clamp(20 - floor * 1.6, 8, 20),          // per second recovery
+        awayMin:    clamp(2200 - floor * 120, 900, 2200),
+        awayMax:    clamp(3600 - floor * 160, 1500, 3600),
+        lookMin:    clamp(900 + floor * 60, 900, 1800),
+        lookMax:    clamp(1500 + floor * 90, 1500, 2600),
+        readSpeed:  clamp(46 - floor * 1.5, 30, 46)
+      };
     }
 
-    function bikeBand() { return { top: roadH - 78, bot: roadH - 14 }; }
+    function setGaze(state) {
+      var d = difficulty();
+      gazeState = state;
+      gaze.className = 'sh-bi-gaze ' + state;
+      gazeTxt.textContent = state === 'away' ? pick(LINES.away) : state === 'turning' ? pick(LINES.turn) : pick(LINES.look);
+      if (state === 'away')          gazeTimer = rand(d.awayMin, d.awayMax);
+      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(520 - floor * 14, 280, 520);
+      else                           gazeTimer = rand(d.lookMin, d.lookMax);
+    }
 
+    /* ---------- reading phase (reuses entry generator) ---------- */
+    function enterReading() {
+      phase = 'reading';
+      readPanel.hidden = false;
+      readStat.hidden = false;
+      reading = false; readMeter = 0; readLock = false; savoring = false;
+      loadEntry();
+      applyRead();
+      say(pick(LINES.reachDesk), 'good');
+    }
+    function exitReading() {
+      phase = 'sneak';
+      readPanel.hidden = true;
+      readStat.hidden = true;
+      reading = false; savoring = false;
+      // nudge the player off the desk so they don't instantly re-trigger
+      P.y = DESK.y + DESK.h + P.r + 6;
+      floor++; floorEl.textContent = floor;
+      say("Page in hand. Get back to the door — or push your luck.", 'good');
+    }
+    function loadEntry() {
+      var e = genEntry();
+      currentRarity = e.rarity || 'common';
+      tagEl.textContent = e.tag;
+      entryEl.textContent = e.text;
+      dateEl.textContent = e.date;
+      lastEntry = e.text.replace('\n', ' / ');
+      readPanel.classList.remove('rare', 'legend', 'buried');
+      if (currentRarity === 'rare') readPanel.classList.add('rare');
+      else if (currentRarity === 'buried') readPanel.classList.add('buried');
+      else if (currentRarity === 'legendary') readPanel.classList.add('legend');
+      readMeter = 0; applyRead();
+    }
+    function applyRead() {
+      var p = readMeter / 100;
+      entryEl.style.filter = 'blur(' + (7 * (1 - p)).toFixed(2) + 'px)';
+      entryEl.style.opacity = (0.32 + 0.68 * p).toFixed(2);
+      readFill.style.width = readMeter + '%';
+    }
+    function readingActive() { return playing && phase === 'reading' && reading && !readLock && !savoring; }
+    function completeRead() {
+      count++; countEl.textContent = count;
+      readMeter = 100; applyRead();
+      savoring = true; setGaze('away');
+      if (currentRarity === 'legendary') {
+        foundEurielleEver = true; savorTimer = 3600;
+        say("\u2026You weren't ever supposed to read that one.", 'gold');
+      } else if (currentRarity === 'buried') {
+        buriedFindsRun++; savorTimer = 3000;
+        say(pick(["He buried that for a reason. You dug it up anyway.", "Some pages aren't secrets. They're graves. You just read one.", "\u2026You can't un-know that."]), 'blood');
+      } else if (currentRarity === 'rare') {
+        rareFinds++; savorTimer = 2200;
+        say(pick(["A rare one. He'd kill you if he knew.", "That one he buried deep. You dug it up.", "Page he never meant for anyone."]), 'gold');
+      } else {
+        savorTimer = 1500;
+        if (Math.random() < 0.6) say(pick(LINES.got), 'good');
+      }
+    }
+    function bustedRead() {
+      suspicion = clamp(suspicion + 36, 0, 100);
+      suspFill.style.width = suspicion + '%';
+      readMeter = Math.max(0, readMeter - 28); applyRead();
+      reading = false; readLock = true;
+      say(pick(LINES.catch), 'bad');
+      flashCanvas();
+      if (suspicion >= 100) over(false);
+    }
+
+    /* ---------- sneak phase update ---------- */
+    function flashCanvas() {
+      root.classList.remove('sh-bi-flash'); void root.offsetWidth; root.classList.add('sh-bi-flash');
+      setTimeout(function () { root.classList.remove('sh-bi-flash'); }, 360);
+    }
+
+    function updateSneak(dt) {
+      var d = difficulty();
+      // move player
+      var vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+      var vy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+      if (vx || vy) {
+        var len = Math.hypot(vx, vy) || 1;
+        var ux = (vx / len) * P.speed * dt, uy = (vy / len) * P.speed * dt;
+        var minD = 26;
+        // try full move, then slide on each axis so you don't wedge on Shane
+        var tx = clamp(P.x + ux, P.r, W - P.r);
+        var ty = clamp(P.y + uy, P.r, H - P.r);
+        if (Math.hypot(tx - shane.x, ty - shane.y) > minD) { P.x = tx; P.y = ty; }
+        else {
+          var ax = clamp(P.x + ux, P.r, W - P.r);
+          if (Math.hypot(ax - shane.x, P.y - shane.y) > minD) P.x = ax;
+          var ay = clamp(P.y + uy, P.r, H - P.r);
+          if (Math.hypot(P.x - shane.x, ay - shane.y) > minD) P.y = ay;
+        }
+      }
+
+      // gaze cycle
+      gazeTimer -= dt * 1000;
+      if (gazeTimer <= 0) {
+        if (gazeState === 'away') setGaze('turning');
+        else if (gazeState === 'turning') setGaze(Math.random() < d.lookChance ? 'looking' : 'away');
+        else setGaze('away');
+      }
+
+      // shane sweeps his cone while looking/turning
+      if (gazeState === 'looking') {
+        sweepBase += sweepDir * d.sweepSpeed * dt;
+        if (sweepBase > 0.9) { sweepBase = 0.9; sweepDir = -1; }
+        if (sweepBase < -0.9) { sweepBase = -0.9; sweepDir = 1; }
+      }
+      // facing: aim generally toward the room, plus sweep
+      shane.facing = (Math.PI / 2) + sweepBase * 0.9; // mostly downward, sweeping L/R
+
+      // detection: seen only if LOOKING + in cone + not hidden + LOS not blocked
+      var seen = (gazeState === 'looking') && inCone() && !playerHidden() && !losBlocked();
+      var nearSeen = (gazeState === 'turning') && inCone() && !playerHidden() && !losBlocked();
+
+      if (seen) {
+        suspicion = clamp(suspicion + d.suspGain * dt, 0, 100);
+        if (suspicion < 40 && Math.random() < 0.04) say(pick(LINES.spot), 'bad');
+        if (suspicion >= 100) { over(false); return; }
+      } else {
+        suspicion = clamp(suspicion - d.suspLeak * dt, 0, 100);
+        if (nearSeen && Math.random() < 0.02) say(pick(LINES.spot), 'bad');
+      }
+      suspFill.style.width = suspicion + '%';
+
+      // reached desk?
+      if (rectsOverlap(P.x - P.r, P.y - P.r, P.r * 2, P.r * 2, DESK.x, DESK.y, DESK.w, DESK.h)) {
+        enterReading();
+        return;
+      }
+      // escaped through door (only counts as a win-ish if you've read at least one)
+      if (count > 0 && rectsOverlap(P.x - P.r, P.y - P.r, P.r * 2, P.r * 2, DOOR.x, DOOR.y, DOOR.w, DOOR.h)) {
+        over(true);
+        return;
+      }
+    }
+
+    function updateReading(dt) {
+      var d = difficulty();
+      if (savoring) {
+        savorTimer -= dt * 1000;
+        if (savorTimer <= 0) { savoring = false; exitReading(); }
+        return;
+      }
+      // gaze cycle continues during reading
+      gazeTimer -= dt * 1000;
+      if (gazeTimer <= 0) {
+        if (gazeState === 'away') setGaze('turning');
+        else if (gazeState === 'turning') setGaze(Math.random() < d.lookChance ? 'looking' : 'away');
+        else setGaze('away');
+      }
+      if (readingActive() && gazeState === 'looking') bustedRead();
+      else if (readingActive() && gazeState !== 'looking') {
+        readMeter += d.readSpeed * dt; applyRead();
+        if (readMeter >= 100) completeRead();
+      }
+      // slow leak during reading too
+      if (suspicion > 0) { suspicion = Math.max(0, suspicion - 10 * dt); suspFill.style.width = suspicion + '%'; }
+    }
+
+    /* ===========================================================
+       RENDER
+       =========================================================== */
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      // floor
+      var grd = ctx.createLinearGradient(0, 0, 0, H);
+      grd.addColorStop(0, '#0c1626'); grd.addColorStop(1, '#070d18');
+      ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+      // floor planks
+      ctx.strokeStyle = 'rgba(95,176,212,0.06)'; ctx.lineWidth = 1;
+      for (var gx = 0; gx < W; gx += 48) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+      for (var gy = 0; gy < H; gy += 48) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke(); }
+
+      // vision cone (drawn under furniture so cover reads correctly)
+      if (gazeState !== 'away') {
+        var range = coneRange(), ha = coneHalfAngle();
+        var a0 = shane.facing - ha, a1 = shane.facing + ha;
+        ctx.beginPath();
+        ctx.moveTo(shane.x, shane.y);
+        for (var a = a0; a <= a1; a += 0.05) ctx.lineTo(shane.x + Math.cos(a) * range, shane.y + Math.sin(a) * range);
+        ctx.closePath();
+        var coneCol = gazeState === 'looking' ? 'rgba(255,106,82,0.20)' : 'rgba(255,194,74,0.14)';
+        ctx.fillStyle = coneCol; ctx.fill();
+        ctx.strokeStyle = gazeState === 'looking' ? 'rgba(255,106,82,0.5)' : 'rgba(255,194,74,0.35)';
+        ctx.lineWidth = 1.5; ctx.stroke();
+      }
+
+      // door
+      drawRect(DOOR, '#1c3a2a', '#3fe39a', 'DOOR');
+      // desk (goal)
+      drawRect(DESK, '#2a2438', '#c8a24a', 'DESK');
+      // little journal book on desk
+      ctx.fillStyle = '#d8d2c0'; ctx.fillRect(DESK.x + DESK.w / 2 - 14, DESK.y + DESK.h / 2 - 9, 28, 18);
+      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(DESK.x + DESK.w / 2 - 14, DESK.y + DESK.h / 2 - 9, 28, 18);
+      ctx.beginPath(); ctx.moveTo(DESK.x + DESK.w / 2, DESK.y + DESK.h / 2 - 9); ctx.lineTo(DESK.x + DESK.w / 2, DESK.y + DESK.h / 2 + 9); ctx.stroke();
+
+      // furniture
+      for (var i = 0; i < FURN.length; i++) {
+        var f = FURN[i];
+        var over = circleInRect(P.x, P.y, P.r * 0.6, f.x, f.y, f.w, f.h);
+        ctx.fillStyle = over ? 'rgba(95,176,212,0.30)' : 'rgba(40,60,84,0.92)';
+        ctx.fillRect(f.x, f.y, f.w, f.h);
+        ctx.strokeStyle = over ? '#5fe39a' : 'rgba(95,176,212,0.5)';
+        ctx.lineWidth = over ? 2 : 1; ctx.strokeRect(f.x, f.y, f.w, f.h);
+      }
+
+      // shane
+      ctx.beginPath(); ctx.arc(shane.x, shane.y, 15, 0, Math.PI * 2);
+      ctx.fillStyle = gazeState === 'looking' ? '#ff6a52' : gazeState === 'turning' ? '#ffc24a' : '#5fb0d4';
+      ctx.fill();
+      ctx.fillStyle = '#06101a'; ctx.font = 'bold 13px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('S', shane.x, shane.y + 1);
+      // facing tick
+      ctx.strokeStyle = '#06101a'; ctx.lineWidth = 2; ctx.beginPath();
+      ctx.moveTo(shane.x, shane.y); ctx.lineTo(shane.x + Math.cos(shane.facing) * 18, shane.y + Math.sin(shane.facing) * 18); ctx.stroke();
+
+      // player
+      var hidden = playerHidden();
+      ctx.beginPath(); ctx.arc(P.x, P.y, P.r, 0, Math.PI * 2);
+      ctx.fillStyle = hidden ? 'rgba(168,200,224,0.55)' : '#e8eef4';
+      ctx.fill();
+      ctx.strokeStyle = hidden ? '#5fe39a' : '#5fb0d4'; ctx.lineWidth = 2; ctx.stroke();
+      if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 9px Oswald, sans-serif'; ctx.fillText('hid', P.x, P.y - P.r - 7); }
+    }
+    function drawRect(R, fill, stroke, label) {
+      ctx.fillStyle = fill; ctx.fillRect(R.x, R.y, R.w, R.h);
+      ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.strokeRect(R.x, R.y, R.w, R.h);
+      ctx.fillStyle = stroke; ctx.font = 'bold 9px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, R.x + R.w / 2, R.y + R.h / 2 + (label === 'DESK' ? -16 : 0));
+    }
+
+    /* ===========================================================
+       LOOP
+       =========================================================== */
     function frame(t) {
-      if (!running) return;
+      if (!playing) return;
       var dt = (t - lastT) / 1000; lastT = t;
-      if (dt > 0.05) dt = 0.05;            // clamp after a stutter / tab switch
-      if (nearCooldown > 0) nearCooldown -= dt;
-
-      // speed ramp + distance
-      speed = Math.min(600, speed + 7 * dt);
-      dist += speed * dt / 3200;
-      speedEl.textContent = Math.round(speed * 0.42);
-      distEl.textContent = dist.toFixed(1);
-      if (dist - mileMark >= 1) { mileMark = dist; say(pick(LINES.mile)); }
-
-      // moving lane dashes (illusion of motion)
-      dashPos = (dashPos + speed * dt) % 60;
-      lines.style.backgroundPosition = '33.33% ' + dashPos + 'px, 66.66% ' + dashPos + 'px';
-
-      // spawn
-      spawnAcc -= dt * 1000;
-      if (spawnAcc <= 0) {
-        spawn();
-        spawnAcc = Math.max(380, 950 - (speed - 230) * 1.0);
-      }
-
-      // move + collide
-      var band = bikeBand();
-      for (var i = obstacles.length - 1; i >= 0; i--) {
-        var o = obstacles[i];
-        o.y += speed * dt;
-        o.el.style.transform = 'translate(' + laneX(o.lane) + 'px,' + o.y + 'px)';
-
-        var overlapY = (o.y < band.bot) && (o.y + o.h > band.top);
-        if (!o.dead && overlapY && o.lane === bikeLane) {
-          if (o.fuel) {                    // grabbed fuel
-            o.dead = true; o.el.classList.add('gone');
-            style += 1; speed = Math.min(620, speed + 26);
-            bumpStyle(); say("Topped off.");
-          } else {                          // crash
-            return crash();
-          }
-        }
-        // near-miss: a car slips past in an adjacent lane
-        if (!o.passed && !o.fuel && o.y + o.h >= band.top && o.lane !== bikeLane) {
-          o.passed = true;
-          if (Math.abs(o.lane - bikeLane) === 1 && nearCooldown <= 0) {
-            style += 1; bumpStyle(); nearCooldown = 0.5;
-            if (Math.random() < 0.5) say(pick(LINES.near));
-          }
-        }
-        if (o.y > roadH + 70) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); obstacles.splice(i, 1); }
-      }
-      styleEl.textContent = style;
-
+      if (dt > 0.05) dt = 0.05;
+      if (phase === 'sneak') updateSneak(dt);
+      else updateReading(dt);
+      draw();
       rafId = window.requestAnimationFrame(frame);
     }
-
-    function bumpStyle() {
-      if (!styleG) return;
-      styleG.classList.add('bump');
-      setTimeout(function () { styleG.classList.remove('bump'); }, 130);
-    }
-
     function startLoop() { lastT = (window.performance && performance.now) ? performance.now() : Date.now(); rafId = window.requestAnimationFrame(frame); }
     function pauseLoop() { if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; } }
 
     function start() {
-      clearObstacles();
-      measure();
-      running = true;
-      bikeLane = 1; speed = 230; dist = 0; style = 0;
-      spawnAcc = 600; dashPos = 0; mileMark = 0; nearCooldown = 0;
-      setBike(0);
-      speedEl.textContent = Math.round(speed * 0.42); distEl.textContent = '0.0'; styleEl.textContent = '0';
+      playing = true; phase = 'sneak';
+      suspicion = 0; count = 0; floor = 1; buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
+      P.x = DOOR.x + DOOR.w / 2; P.y = DOOR.y + DOOR.h / 2;
+      keys.up = keys.down = keys.left = keys.right = false;
+      sweepBase = 0; sweepDir = 1;
+      countEl.textContent = '0'; floorEl.textContent = '1'; suspFill.style.width = '0%';
+      readPanel.hidden = true; readStat.hidden = true;
       overlay.classList.add('hidden');
-      say("Let's see if the road remembers me.");
+      setGaze('away');
+      say(pick(["Door's open. Go quiet.", "You're in. Don't blow it.", "The journal's on the desk. Get there."]));
+      draw();
       startLoop();
     }
-
-    function crash() {
-      running = false; pauseLoop();
-      if (!REDUCE) {
-        road.classList.remove('shake', 'crashflash'); void road.offsetWidth;
-        road.classList.add('shake', 'crashflash');
-        setTimeout(function () { road.classList.remove('shake', 'crashflash'); }, 450);
-      }
-      var newBest = dist > best;
-      if (newBest) best = dist;
-      callout.textContent = 'Wiped Out.';
-      sub.innerHTML = '<span class="sh-ride-final">Distance <b>' + dist.toFixed(1) + ' mi</b>' +
-        'Style ' + style + (style ? ' \u00B7 ' + style * 50 + ' pts' : '') +
-        '<span class="best">Best ride: ' + best.toFixed(1) + ' mi</span></span>';
-      startBtn.textContent = 'Ride Again';
+    function over(escaped) {
+      playing = false; pauseLoop();
+      if (count > best) best = count;
+      callout.textContent = escaped ? 'You Got Out.' : 'Caught.';
+      subEl.innerHTML = '<span class="sh-bi-final">Pages stolen <b>' + count + '</b>' +
+        '<span class="best">Best run: ' + best +
+          '  \u00B7  floor reached: ' + floor +
+          (rareFinds ? '  \u00B7  rare: ' + rareFinds : '') +
+          (buriedFindsRun ? '  \u00B7  buried: ' + buriedFindsRun : '') + '</span>' +
+        (foundEurielleEver ? '<span class="last gold">\u2606 You found the one he\u2019ll never say out loud.</span>' : '') +
+        (buriedFindsRun ? '<span class="last blood">\u26A0 You read what he buried. He doesn\u2019t know. Yet.</span>' : '') +
+        (lastEntry ? '<span class="last">last thing you saw: \u201C' + lastEntry + '\u201D</span>' : '') + '</span>';
+      startBtn.textContent = escaped ? 'Go Back In' : 'Try Again';
+      readPanel.hidden = true; readStat.hidden = true;
       overlay.classList.remove('hidden');
-      say(newBest ? LINES.best : pick(LINES.crash));
-      clearObstacles();
+      say(pick(escaped ? LINES.escaped : LINES.over), escaped ? 'good' : 'bad');
+      draw();
     }
 
-    // ---- controls ----
-    startBtn.addEventListener('click', start);
-    if (steerL) steerL.addEventListener('click', function () { steer(-1); });
-    if (steerR) steerR.addEventListener('click', function () { steer(1); });
-    road.addEventListener('click', function (e) {
-      if (!running) return;
-      var r = road.getBoundingClientRect();
-      steer((e.clientX - r.left) < r.width / 2 ? -1 : 1);
-    });
+    /* ===========================================================
+       INPUT
+       =========================================================== */
+    var KEYMAP = {
+      ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+      w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right'
+    };
     document.addEventListener('keydown', function (e) {
-      if (!running) return;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { steer(-1); e.preventDefault(); }
-      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { steer(1); e.preventDefault(); }
+      if (!playing) return;
+      // reading phase: space holds to read
+      if (phase === 'reading' && (e.key === ' ' || e.code === 'Space')) {
+        e.preventDefault(); if (!e.repeat) reading = true; return;
+      }
+      var dir = KEYMAP[e.key];
+      if (dir) { e.preventDefault(); keys[dir] = true; }
     });
-    window.addEventListener('resize', function () { measure(); setBike(0); });
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) pauseLoop();
-      else if (running && !rafId) startLoop();
+    document.addEventListener('keyup', function (e) {
+      if (e.key === ' ' || e.code === 'Space') { reading = false; readLock = false; return; }
+      var dir = KEYMAP[e.key];
+      if (dir) keys[dir] = false;
     });
 
-    measure(); setBike(0);
+    // touch dpad
+    if (pad) {
+      pad.querySelectorAll('.sh-bi-dir').forEach(function (btn) {
+        var dir = btn.getAttribute('data-dir');
+        var setOn = function (e) { if (e && e.cancelable) e.preventDefault(); keys[dir] = true; };
+        var setOff = function () { keys[dir] = false; };
+        btn.addEventListener('pointerdown', setOn);
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { btn.addEventListener(ev, setOff); });
+      });
+    }
+    // tap-and-hold on the canvas during reading phase = hold to read
+    canvas.addEventListener('pointerdown', function (e) {
+      if (!playing || phase !== 'reading') return;
+      if (e.cancelable) e.preventDefault(); reading = true;
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
+      canvas.addEventListener(ev, function () { if (phase === 'reading') { reading = false; readLock = false; } });
+    });
+    window.addEventListener('pointerup', function () { if (phase === 'reading') { reading = false; readLock = false; } });
+
+    startBtn.addEventListener('click', start);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { reading = false; pauseLoop(); }
+      else if (playing && !rafId) startLoop();
+    });
+
+    // first paint so the room is visible behind the overlay
+    draw();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
