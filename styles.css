@@ -8605,25 +8605,31 @@
 
 /* reading panel (paper) */
 .shane-page .sh-bi-read {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-0.6deg);
-  width: min(86%, 460px); z-index: 8;
-  padding: 1.3rem 1.3rem 1rem; border-radius: 3px; border: 1px solid #b4ad96;
+  position: absolute; inset: 0; z-index: 8;
+  display: block;
+  padding: 0; border: none; border-radius: 4px;
+  overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   background:
     repeating-linear-gradient(180deg, transparent 0 27px, rgba(40,70,95,0.18) 27px 28px),
     linear-gradient(180deg, #e7e2d4, #d8d2c0);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(80,60,30,0.12);
+  box-shadow: inset 0 0 40px rgba(80,60,30,0.12);
+}
+.shane-page .sh-bi-read-body {
+  min-height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 2.9rem 1.2rem 1.4rem;
 }
 .shane-page .sh-bi-read::before { content: ''; position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: rgba(200,80,80,0.35); }
-.shane-page .sh-bi-read.rare   { border-color: #c8a24a; box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(200,162,74,0.5), inset 0 0 50px rgba(200,162,74,0.16); }
-.shane-page .sh-bi-read.buried { border-color: #b44a4a; box-shadow: 0 18px 44px rgba(0,0,0,0.7), inset 0 0 0 2px rgba(180,74,74,0.55), inset 0 0 55px rgba(120,20,20,0.25); background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70,30,30,0.22) 27px 28px), linear-gradient(180deg, #ddd0c4, #cabcae); }
+.shane-page .sh-bi-read.rare   { box-shadow: inset 0 0 0 2px rgba(200,162,74,0.5), inset 0 0 50px rgba(200,162,74,0.16); }
+.shane-page .sh-bi-read.buried { box-shadow: inset 0 0 0 2px rgba(180,74,74,0.55), inset 0 0 55px rgba(120,20,20,0.25); background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70,30,30,0.22) 27px 28px), linear-gradient(180deg, #ddd0c4, #cabcae); }
 .shane-page .sh-bi-read.legend {
-  border-color: #e7c879;
-  box-shadow: 0 18px 44px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2);
+  box-shadow: inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2);
   animation: shBiLegend 1.8s ease-in-out infinite;
 }
 @keyframes shBiLegend {
-  0%,100% { box-shadow: 0 18px 44px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(231,200,121,0.55), inset 0 0 50px rgba(231,200,121,0.16); }
-  50%     { box-shadow: 0 18px 48px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(231,200,121,0.95), inset 0 0 70px rgba(231,200,121,0.3); }
+  0%,100% { box-shadow: inset 0 0 0 2px rgba(231,200,121,0.55), inset 0 0 50px rgba(231,200,121,0.16); }
+  50%     { box-shadow: inset 0 0 0 2px rgba(231,200,121,0.95), inset 0 0 70px rgba(231,200,121,0.3); }
 }
 /* reuse .sh-jr-tag / .sh-jr-entry / .sh-jr-date typography */
 .shane-page .sh-bi-read .sh-jr-tag {
@@ -8637,8 +8643,8 @@
 .shane-page .sh-bi-read.legend .sh-jr-tag { color: #6a4e08; border-color: rgba(231,200,121,0.85); background: rgba(231,200,121,0.22); letter-spacing: 0.28em; }
 .shane-page .sh-bi-read .sh-jr-entry {
   font-family: 'Special Elite', monospace; color: #1f2d3a;
-  font-size: 1rem; line-height: 1.7; white-space: pre-line;
-  min-height: 3.2em; transition: filter 0.05s linear, opacity 0.05s linear; filter: blur(7px); opacity: 0.32;
+  font-size: 1.02rem; line-height: 1.75; white-space: pre-line;
+  min-height: 2.4em; filter: none; opacity: 1;
 }
 .shane-page .sh-bi-read.buried .sh-jr-entry { color: #2a1414; }
 .shane-page .sh-bi-read.legend .sh-jr-entry { color: #4a370a; font-weight: 700; }
@@ -8646,15 +8652,28 @@
 .shane-page .sh-bi-read-hint { margin-top: 0.7rem; text-align: center; font-family: 'Oswald', sans-serif; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6a78; }
 .shane-page .sh-bi-read-hint b { color: #2a5a78; }
 .shane-page .sh-bi-read-x {
-  position: absolute; top: 6px; right: 6px; z-index: 3;
-  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
-  border: 1px solid rgba(40,90,120,0.5); background: rgba(231,226,212,0.9); color: #2a5a78;
-  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 0.95rem; line-height: 1;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.35); transition: transform 0.1s ease, background 0.1s ease;
+  position: sticky; float: right; top: 8px; right: 8px; margin: 8px 8px -40px 0; z-index: 5;
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  border: 2px solid rgba(40,90,120,0.6); background: rgba(231,226,212,0.96); color: #2a5a78;
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.2rem; line-height: 1;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4); transition: transform 0.1s ease, background 0.1s ease;
+  display: flex; align-items: center; justify-content: center;
 }
-.shane-page .sh-bi-read-x:hover { transform: scale(1.08); background: #fff; }
-.shane-page .sh-bi-read.buried .sh-bi-read-x { color: #8a1f1f; border-color: rgba(180,74,74,0.6); }
-.shane-page .sh-bi-read.legend .sh-bi-read-x { color: #6a4e08; border-color: rgba(231,200,121,0.7); }
+.shane-page .sh-bi-read-x:hover,
+.shane-page .sh-bi-read-x:active { transform: scale(1.08); background: #fff; }
+.shane-page .sh-bi-read.buried .sh-bi-read-x { color: #8a1f1f; border-color: rgba(180,74,74,0.7); }
+.shane-page .sh-bi-read.legend .sh-bi-read-x { color: #6a4e08; border-color: rgba(231,200,121,0.8); }
+.shane-page .sh-bi-read-continue {
+  align-self: center; margin-top: 0.7rem; flex: none;
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: 0.9rem; cursor: pointer;
+  padding: 0.65rem 1.6rem; border-radius: 6px; color: #051018; border: none;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
+  box-shadow: 0 6px 16px rgba(95,176,212,0.4);
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+.shane-page .sh-bi-read-continue:hover,
+.shane-page .sh-bi-read-continue:active { transform: translateY(-1px); filter: brightness(1.08); }
 
 /* character select */
 .shane-page .sh-bi-charsel { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; margin-top: 0.2rem; }
