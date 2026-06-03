@@ -8367,13 +8367,15 @@
   .scorch-page .sc-rat-pop { animation-duration: 0.001s; }
 }
 
+
 /* ============================================================
-   SHANE — THE LONG RIDE (motorcycle dodge mini-game)
-   Night highway, weave between traffic, ramping speed. Scoped
-   to .shane-page; chrome-blue / midnight palette to match.
+   SHANE — DON'T GET CAUGHT (read-the-journal stealth game)
+   Hold to read his journal while he's not looking; release the
+   instant he glances over. Entries are randomised every time.
+   Scoped to .shane-page; chrome-blue / midnight palette.
    ============================================================ */
-.shane-page .sh-ride {
-  max-width: 760px; margin: 0 auto;
+.shane-page .sh-jr {
+  max-width: 720px; margin: 0 auto;
   background:
     radial-gradient(120% 70% at 50% 0%, rgba(95,176,212,0.10), transparent 55%),
     linear-gradient(180deg, #0a1422, #060d18);
@@ -8383,137 +8385,325 @@
   position: relative;
 }
 
-/* HUD */
-.shane-page .sh-ride-hud { display: flex; align-items: stretch; gap: 0.7rem; margin-bottom: 0.7rem; flex-wrap: wrap; }
-.shane-page .sh-ride-gauge {
-  flex: 1 1 120px; text-align: center; padding: 0.4rem 0.6rem;
-  background: rgba(10,22,38,0.7); border: 1px solid rgba(95,176,212,0.25); border-radius: 4px;
+/* gaze indicator — is Shane looking? */
+.shane-page .sh-jr-gaze {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; font-size: 0.74rem;
+  padding: 0.5rem 0.8rem; border-radius: 4px; margin-bottom: 0.7rem;
+  border: 1px solid rgba(95,176,212,0.25); background: rgba(10,22,38,0.7);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.shane-page .sh-ride-gauge-label {
-  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.2em;
-  text-transform: uppercase; font-size: 0.56rem; color: #6a96b4; display: block;
-}
-.shane-page .sh-ride-gauge-val { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.3rem; color: #e8eef4; line-height: 1.1; }
-.shane-page .sh-ride-gauge-val small { font-size: 0.6rem; color: #88b8d4; font-weight: 400; }
-.shane-page .sh-ride-gauge.style .sh-ride-gauge-val { color: #5fb0d4; transition: transform 0.12s ease; }
-.shane-page .sh-ride-gauge.style.bump .sh-ride-gauge-val { transform: scale(1.35); }
+.shane-page .sh-jr-gaze .dot { width: 12px; height: 12px; border-radius: 50%; background: #6a96b4; box-shadow: 0 0 8px currentColor; flex: none; }
+.shane-page .sh-jr-gaze.away    { color: #5fe39a; border-color: rgba(95,227,154,0.5); }
+.shane-page .sh-jr-gaze.away .dot    { background: #5fe39a; }
+.shane-page .sh-jr-gaze.turning { color: #ffc24a; border-color: rgba(255,194,74,0.6); background: rgba(60,45,15,0.5); }
+.shane-page .sh-jr-gaze.turning .dot { background: #ffc24a; animation: shJrBlink 0.3s steps(2) infinite; }
+.shane-page .sh-jr-gaze.looking { color: #ff6a52; border-color: rgba(255,106,82,0.7); background: rgba(70,18,14,0.6); }
+.shane-page .sh-jr-gaze.looking .dot { background: #ff6a52; }
+@keyframes shJrBlink { 50% { opacity: 0.25; } }
 
-/* the road */
-.shane-page .sh-ride-road {
-  position: relative; height: 380px; border-radius: 5px; overflow: hidden;
+/* meters */
+.shane-page .sh-jr-meters { display: flex; gap: 0.7rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+.shane-page .sh-jr-meter { flex: 1 1 200px; }
+.shane-page .sh-jr-meter-label {
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; font-size: 0.56rem; color: #6a96b4; display: block; margin-bottom: 0.22rem;
+}
+.shane-page .sh-jr-bar { height: 12px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.55); border: 1px solid rgba(95,176,212,0.25); }
+.shane-page .sh-jr-bar-fill { height: 100%; width: 0%; transition: width 0.08s linear; }
+.shane-page .sh-jr-bar-fill.read { background: linear-gradient(90deg, #5fb0d4, #a8c8e0); }
+.shane-page .sh-jr-bar-fill.susp { background: linear-gradient(90deg, #ffc24a, #ff6a52); }
+.shane-page .sh-jr-count { font-family: 'Oswald', sans-serif; font-size: 0.72rem; color: #88b8d4; letter-spacing: 0.1em; white-space: nowrap; align-self: center; }
+.shane-page .sh-jr-count b { color: #e8eef4; font-size: 1.2rem; }
+
+/* the journal page (hold target) */
+.shane-page .sh-jr-page {
+  position: relative; min-height: 150px; border-radius: 3px;
+  padding: 1.5rem 1.4rem 1.2rem; cursor: none; user-select: none;
   background:
-    linear-gradient(90deg, rgba(95,176,212,0.10), transparent 14%, transparent 86%, rgba(95,176,212,0.10)),
-    linear-gradient(180deg, #0b1320 0%, #10202f 60%, #0b1320 100%);
-  border: 1px solid rgba(95,176,212,0.22);
-  box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
-  touch-action: manipulation; cursor: none;
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(40,70,95,0.18) 27px 28px),
+    linear-gradient(180deg, #e7e2d4, #d8d2c0);
+  border: 1px solid #b4ad96; transform: rotate(-0.6deg);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 0 40px rgba(80,60,30,0.12);
+  overflow: hidden;
 }
-/* moving lane dashes (center two lane dividers) + side rails */
-.shane-page .sh-ride-lines {
-  position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background-image:
-    repeating-linear-gradient(180deg, rgba(232,238,244,0.55) 0 26px, transparent 26px 60px),
-    repeating-linear-gradient(180deg, rgba(232,238,244,0.55) 0 26px, transparent 26px 60px);
-  background-size: 4px 60px, 4px 60px;
-  background-position: 33.33% 0, 66.66% 0;
-  background-repeat: repeat-y, repeat-y;
-  will-change: background-position;
+.shane-page .sh-jr-page::before {
+  content: ''; position: absolute; left: 30px; top: 0; bottom: 0; width: 2px;
+  background: rgba(200,80,80,0.35);
 }
-.shane-page .sh-ride-road::before {
-  /* headlight wash from the bike */
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 70%;
-  background: radial-gradient(60% 90% at 50% 100%, rgba(168,200,224,0.16), transparent 70%);
-  pointer-events: none; z-index: 1;
+.shane-page .sh-jr-page.reading { box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(95,176,212,0.5), inset 0 0 40px rgba(95,176,212,0.15); }
+.shane-page .sh-jr-page.busted { animation: shJrBust 0.4s ease; }
+@keyframes shJrBust { 0%,100% { transform: rotate(-0.6deg) translateX(0); } 25% { transform: rotate(-0.6deg) translateX(-9px); } 50% { transform: rotate(0.6deg) translateX(8px); } 75% { transform: rotate(-0.6deg) translateX(-5px); } }
+.shane-page .sh-jr-page.busted::after {
+  content: ''; position: absolute; inset: 0; background: rgba(220,60,50,0.35);
+  animation: shJrFlash 0.4s ease forwards; pointer-events: none;
 }
-.shane-page .sh-ride-road.shake { animation: shRideShake 0.4s ease; }
-@keyframes shRideShake {
-  0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px) rotate(-0.5deg); }
-  40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(4px); }
-}
-.shane-page .sh-ride-road.crashflash::after {
-  content: ''; position: absolute; inset: 0; background: rgba(220,60,50,0.45);
-  animation: shRideFlash 0.35s ease forwards; pointer-events: none; z-index: 8;
-}
-@keyframes shRideFlash { from { opacity: 1; } to { opacity: 0; } }
+@keyframes shJrFlash { from { opacity: 1; } to { opacity: 0; } }
 
-/* the bike */
-.shane-page .sh-ride-bike {
-  position: absolute; left: 50%; bottom: 14px; width: 56px; height: 64px;
-  margin-left: -28px; z-index: 4; font-size: 2.4rem; text-align: center; line-height: 64px;
-  transition: transform 0.13s cubic-bezier(.3,1.4,.4,1);
-  filter: drop-shadow(0 0 10px rgba(95,176,212,0.6));
-  will-change: transform;
+.shane-page .sh-jr-tag {
+  display: inline-block; font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #2a5a78; border: 1px solid rgba(42,90,120,0.5); border-radius: 3px;
+  padding: 1px 7px; margin-bottom: 0.7rem; background: rgba(42,90,120,0.08);
 }
-
-/* obstacles + pickups */
-.shane-page .sh-ride-obs {
-  position: absolute; left: 50%; top: 0; width: 54px; height: 58px;
-  margin-left: -27px; z-index: 3; font-size: 2.2rem; text-align: center; line-height: 58px;
-  will-change: transform;
+.shane-page .sh-jr-entry {
+  font-family: 'Special Elite', monospace; color: #1f2d3a;
+  font-size: 1.04rem; line-height: 1.7; white-space: pre-line;
+  min-height: 3.2em; transition: filter 0.05s linear, opacity 0.05s linear;
+  filter: blur(7px); opacity: 0.35;
 }
-.shane-page .sh-ride-obs.fuel { filter: drop-shadow(0 0 10px rgba(120,220,160,0.8)); }
-.shane-page .sh-ride-obs.gone { opacity: 0; }
-
-/* controls */
-.shane-page .sh-ride-controls { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
-.shane-page .sh-ride-steer {
-  flex: 1 1 0; max-width: 200px;
-  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem; cursor: none;
-  padding: 0.55rem 0; border-radius: 5px; color: #051018;
-  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
-  border: none; box-shadow: 0 6px 16px rgba(95,176,212,0.3);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+.shane-page .sh-jr-date {
+  margin-top: 0.9rem; text-align: right; font-family: 'Special Elite', monospace;
+  font-style: italic; font-size: 0.78rem; color: #5a6a78;
 }
-.shane-page .sh-ride-steer:hover { transform: translateY(-2px); }
-.shane-page .sh-ride-steer:active { transform: translateY(1px) scale(0.98); }
+.shane-page .sh-jr-savor { box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(95,227,154,0.5), inset 0 0 40px rgba(95,227,154,0.12); }
 
-/* overlay (start / end) */
-.shane-page .sh-ride-overlay {
+/* hold button + hint */
+.shane-page .sh-jr-hold {
+  display: block; width: 100%; margin-top: 0.9rem;
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; font-size: 1rem; cursor: none;
+  padding: 0.8rem 0; border-radius: 5px; color: #051018;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4); border: none;
+  box-shadow: 0 8px 22px rgba(95,176,212,0.35); touch-action: none;
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.1s ease;
+}
+.shane-page .sh-jr-hold:active,
+.shane-page .sh-jr-hold.holding { transform: translateY(2px) scale(0.99); box-shadow: 0 4px 12px rgba(95,176,212,0.4); filter: brightness(1.1); }
+.shane-page .sh-jr-hint {
+  text-align: center; margin-top: 0.5rem;
+  font-family: 'Oswald', sans-serif; font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #5a7a98;
+}
+.shane-page .sh-jr-line {
+  margin-top: 0.8rem; text-align: center; min-height: 1.4em;
+  font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.92rem;
+  color: #aebfce; text-shadow: 0 1px 0 #000;
+}
+.shane-page .sh-jr-line.bad  { color: #ff8a6a; }
+.shane-page .sh-jr-line.good { color: #5fe39a; }
+
+/* overlay */
+.shane-page .sh-jr-overlay {
   position: absolute; inset: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 0.7rem; text-align: center; padding: 1.2rem;
-  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.8), rgba(4,8,16,0.95));
-  backdrop-filter: blur(2px);
+  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.82), rgba(4,8,16,0.96));
+  backdrop-filter: blur(2px); border-radius: 4px;
 }
-.shane-page .sh-ride-overlay.hidden { display: none; }
-.shane-page .sh-ride-callout {
+.shane-page .sh-jr-overlay.hidden { display: none; }
+.shane-page .sh-jr-callout {
   font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.04em; font-size: clamp(1.2rem, 4vw, 1.7rem);
-  color: #e8eef4; text-shadow: 0 2px 0 #000, 0 0 18px rgba(95,176,212,0.55);
-  line-height: 1.1; max-width: 26ch;
+  color: #e8eef4; text-shadow: 0 2px 0 #000, 0 0 18px rgba(95,176,212,0.55); line-height: 1.1; max-width: 26ch;
 }
-.shane-page .sh-ride-sub { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: #aebfce; max-width: 34ch; line-height: 1.5; }
-.shane-page .sh-ride-sub b { color: #5fb0d4; }
-.shane-page .sh-ride-final { font-family: 'Oswald', sans-serif; color: #88b8d4; letter-spacing: 0.1em; font-size: 0.9rem; }
-.shane-page .sh-ride-final b { color: #e8eef4; font-size: 1.6rem; display: block; }
-.shane-page .sh-ride-final .best { color: #5fb0d4; font-size: 0.8rem; display: block; margin-top: 0.2rem; letter-spacing: 0.14em; }
-.shane-page .sh-ride-btn {
+.shane-page .sh-jr-sub { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: #aebfce; max-width: 36ch; line-height: 1.5; }
+.shane-page .sh-jr-sub b { color: #5fb0d4; }
+.shane-page .sh-jr-final { font-family: 'Oswald', sans-serif; color: #88b8d4; letter-spacing: 0.1em; font-size: 0.9rem; }
+.shane-page .sh-jr-final b { color: #e8eef4; font-size: 1.7rem; display: block; }
+.shane-page .sh-jr-final .best { color: #5fb0d4; font-size: 0.8rem; display: block; margin-top: 0.2rem; letter-spacing: 0.14em; }
+.shane-page .sh-jr-final .last { color: #c8d0dc; font-style: italic; font-family: 'Special Elite', monospace; font-size: 0.82rem; display: block; margin-top: 0.6rem; max-width: 30ch; }
+.shane-page .sh-jr-btn {
   font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.1em; font-size: 1rem; cursor: none;
   padding: 0.7rem 1.6rem; border-radius: 4px; color: #051018;
-  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
-  border: none; box-shadow: 0 8px 22px rgba(95,176,212,0.4);
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4); border: none;
+  box-shadow: 0 8px 22px rgba(95,176,212,0.4);
   transition: transform 0.14s ease, box-shadow 0.14s ease;
 }
-.shane-page .sh-ride-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 13px 28px rgba(95,176,212,0.55); }
+.shane-page .sh-jr-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 13px 28px rgba(95,176,212,0.55); }
 
-.shane-page .sh-ride-line {
-  margin-top: 0.9rem; text-align: center; min-height: 1.4em;
-  font-family: 'Special Elite', monospace; font-style: italic;
-  font-size: 0.92rem; color: #aebfce; text-shadow: 0 1px 0 #000;
-}
-.shane-page .sh-ride-hint {
-  text-align: center; margin-top: 0.5rem;
-  font-family: 'Oswald', sans-serif; font-size: 0.62rem; letter-spacing: 0.16em;
-  text-transform: uppercase; color: #5a7a98;
-}
-
-@media (max-width: 520px) {
-  .shane-page .sh-ride-road { height: 340px; }
-  .shane-page .sh-ride-bike { font-size: 2.1rem; }
-  .shane-page .sh-ride-obs { font-size: 1.95rem; }
-}
 @media (prefers-reduced-motion: reduce) {
-  .shane-page .sh-ride-road.shake { animation: none; }
-  .shane-page .sh-ride-road.crashflash::after { animation-duration: 0.001s; }
+  .shane-page .sh-jr-page.busted,
+  .shane-page .sh-jr-gaze.turning .dot { animation: none; }
+  .shane-page .sh-jr-page.busted::after { animation-duration: 0.001s; }
+}
+
+/* ---- Shane journal: rare + legendary entry styling ---- */
+.shane-page .sh-jr-page.rare { border-color: #c8a24a; box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(200,162,74,0.5), inset 0 0 50px rgba(200,162,74,0.14); }
+.shane-page .sh-jr-page.rare .sh-jr-tag { color: #8a6d1f; border-color: rgba(200,162,74,0.6); background: rgba(200,162,74,0.12); }
+.shane-page .sh-jr-page.legend {
+  border-color: #e7c879;
+  box-shadow: 0 12px 34px rgba(0,0,0,0.55), inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2);
+  animation: shJrLegend 1.8s ease-in-out infinite;
+}
+@keyframes shJrLegend {
+  0%,100% { box-shadow: 0 12px 34px rgba(0,0,0,0.55), inset 0 0 0 2px rgba(231,200,121,0.55), inset 0 0 50px rgba(231,200,121,0.16); }
+  50%     { box-shadow: 0 12px 40px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(231,200,121,0.95), inset 0 0 70px rgba(231,200,121,0.3); }
+}
+.shane-page .sh-jr-page.legend .sh-jr-tag {
+  color: #6a4e08; border-color: rgba(231,200,121,0.85);
+  background: rgba(231,200,121,0.22); letter-spacing: 0.28em;
+}
+.shane-page .sh-jr-page.legend .sh-jr-entry { color: #4a370a; font-weight: 700; }
+.shane-page .sh-jr-line.gold { color: #e7c879; }
+.shane-page .sh-jr-final .last.gold {
+  color: #e7c879; font-style: normal; font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.08em; text-shadow: 0 0 12px rgba(231,200,121,0.5);
+}
+@media (prefers-reduced-motion: reduce) { .shane-page .sh-jr-page.legend { animation: none; } }
+
+/* ============================================================
+   SHANE — DON'T GET CAUGHT (top-down stealth break-in)
+   ============================================================ */
+.shane-page .sh-bi {
+  max-width: 760px; margin: 0 auto;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(95,176,212,0.10), transparent 55%),
+    linear-gradient(180deg, #0a1422, #060d18);
+  border: 2px solid #5fb0d4; border-radius: 6px;
+  padding: 1.1rem 1.1rem 1.3rem;
+  box-shadow: 0 20px 48px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(95,176,212,0.18);
+  position: relative;
+}
+.shane-page .sh-bi.sh-bi-flash::after {
+  content: ''; position: absolute; inset: 0; border-radius: 6px; pointer-events: none;
+  background: rgba(220,60,50,0.30); animation: shBiFlash 0.36s ease forwards;
+}
+@keyframes shBiFlash { from { opacity: 1; } to { opacity: 0; } }
+
+/* HUD */
+.shane-page .sh-bi-hud { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+.shane-page .sh-bi-gaze {
+  display: flex; align-items: center; gap: 0.55rem;
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; font-size: 0.72rem;
+  padding: 0.5rem 0.8rem; border-radius: 4px;
+  border: 1px solid rgba(95,176,212,0.25); background: rgba(10,22,38,0.7);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; flex: 1 1 220px;
+}
+.shane-page .sh-bi-gaze .dot { width: 12px; height: 12px; border-radius: 50%; background: #6a96b4; box-shadow: 0 0 8px currentColor; flex: none; }
+.shane-page .sh-bi-gaze.away    { color: #5fe39a; border-color: rgba(95,227,154,0.5); }
+.shane-page .sh-bi-gaze.away .dot    { background: #5fe39a; }
+.shane-page .sh-bi-gaze.turning { color: #ffc24a; border-color: rgba(255,194,74,0.6); background: rgba(60,45,15,0.5); }
+.shane-page .sh-bi-gaze.turning .dot { background: #ffc24a; animation: shBiBlink 0.3s steps(2) infinite; }
+.shane-page .sh-bi-gaze.looking { color: #ff6a52; border-color: rgba(255,106,82,0.7); background: rgba(70,18,14,0.6); }
+.shane-page .sh-bi-gaze.looking .dot { background: #ff6a52; }
+@keyframes shBiBlink { 50% { opacity: 0.25; } }
+
+.shane-page .sh-bi-stat { flex: 1 1 150px; }
+.shane-page .sh-bi-stat--narrow { flex: 1 1 120px; }
+.shane-page .sh-bi-stat-label {
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.18em;
+  text-transform: uppercase; font-size: 0.54rem; color: #6a96b4; display: block; margin-bottom: 0.22rem;
+}
+.shane-page .sh-bi-bar { height: 12px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.55); border: 1px solid rgba(95,176,212,0.25); }
+.shane-page .sh-bi-bar-fill { height: 100%; width: 0%; transition: width 0.08s linear; }
+.shane-page .sh-bi-bar-fill.read { background: linear-gradient(90deg, #5fb0d4, #a8c8e0); }
+.shane-page .sh-bi-bar-fill.susp { background: linear-gradient(90deg, #ffc24a, #ff6a52); }
+.shane-page .sh-bi-count { font-family: 'Oswald', sans-serif; font-size: 0.7rem; color: #88b8d4; letter-spacing: 0.1em; white-space: nowrap; align-self: center; }
+.shane-page .sh-bi-count b { color: #e8eef4; font-size: 1.15rem; }
+.shane-page .sh-bi-floor b { color: #c8a24a; }
+
+/* stage / canvas */
+.shane-page .sh-bi-stage { position: relative; border-radius: 4px; overflow: hidden; border: 1px solid rgba(95,176,212,0.3); background: #060d18; }
+.shane-page #shCanvas { display: block; width: 100%; height: auto; touch-action: none; cursor: none; }
+
+/* reading panel (paper) */
+.shane-page .sh-bi-read {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-0.6deg);
+  width: min(86%, 460px); z-index: 8;
+  padding: 1.3rem 1.3rem 1rem; border-radius: 3px; border: 1px solid #b4ad96;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(40,70,95,0.18) 27px 28px),
+    linear-gradient(180deg, #e7e2d4, #d8d2c0);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 0 40px rgba(80,60,30,0.12);
+}
+.shane-page .sh-bi-read::before { content: ''; position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: rgba(200,80,80,0.35); }
+.shane-page .sh-bi-read.rare   { border-color: #c8a24a; box-shadow: 0 18px 40px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(200,162,74,0.5), inset 0 0 50px rgba(200,162,74,0.16); }
+.shane-page .sh-bi-read.buried { border-color: #b44a4a; box-shadow: 0 18px 44px rgba(0,0,0,0.7), inset 0 0 0 2px rgba(180,74,74,0.55), inset 0 0 55px rgba(120,20,20,0.25); background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70,30,30,0.22) 27px 28px), linear-gradient(180deg, #ddd0c4, #cabcae); }
+.shane-page .sh-bi-read.legend {
+  border-color: #e7c879;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2);
+  animation: shBiLegend 1.8s ease-in-out infinite;
+}
+@keyframes shBiLegend {
+  0%,100% { box-shadow: 0 18px 44px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(231,200,121,0.55), inset 0 0 50px rgba(231,200,121,0.16); }
+  50%     { box-shadow: 0 18px 48px rgba(0,0,0,0.65), inset 0 0 0 2px rgba(231,200,121,0.95), inset 0 0 70px rgba(231,200,121,0.3); }
+}
+/* reuse .sh-jr-tag / .sh-jr-entry / .sh-jr-date typography */
+.shane-page .sh-bi-read .sh-jr-tag {
+  display: inline-block; font-family: 'Oswald', sans-serif; font-weight: 700;
+  font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #2a5a78; border: 1px solid rgba(42,90,120,0.5); border-radius: 3px;
+  padding: 1px 7px; margin-bottom: 0.6rem; background: rgba(42,90,120,0.08);
+}
+.shane-page .sh-bi-read.rare .sh-jr-tag   { color: #8a6d1f; border-color: rgba(200,162,74,0.6); background: rgba(200,162,74,0.12); }
+.shane-page .sh-bi-read.buried .sh-jr-tag { color: #8a1f1f; border-color: rgba(180,74,74,0.7); background: rgba(180,74,74,0.14); letter-spacing: 0.22em; }
+.shane-page .sh-bi-read.legend .sh-jr-tag { color: #6a4e08; border-color: rgba(231,200,121,0.85); background: rgba(231,200,121,0.22); letter-spacing: 0.28em; }
+.shane-page .sh-bi-read .sh-jr-entry {
+  font-family: 'Special Elite', monospace; color: #1f2d3a;
+  font-size: 1rem; line-height: 1.7; white-space: pre-line;
+  min-height: 3.2em; transition: filter 0.05s linear, opacity 0.05s linear; filter: blur(7px); opacity: 0.32;
+}
+.shane-page .sh-bi-read.buried .sh-jr-entry { color: #2a1414; }
+.shane-page .sh-bi-read.legend .sh-jr-entry { color: #4a370a; font-weight: 700; }
+.shane-page .sh-bi-read .sh-jr-date { margin-top: 0.8rem; text-align: right; font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.76rem; color: #5a6a78; }
+.shane-page .sh-bi-read-hint { margin-top: 0.7rem; text-align: center; font-family: 'Oswald', sans-serif; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6a78; }
+.shane-page .sh-bi-read-hint b { color: #2a5a78; }
+
+/* overlay */
+.shane-page .sh-bi-overlay {
+  position: absolute; inset: 0; z-index: 12;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.7rem; text-align: center; padding: 1.4rem;
+  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.86), rgba(4,8,16,0.97));
+  backdrop-filter: blur(2px);
+}
+.shane-page .sh-bi-overlay.hidden { display: none; }
+.shane-page .sh-bi-callout {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; font-size: clamp(1.2rem, 4vw, 1.7rem);
+  color: #e8eef4; text-shadow: 0 2px 0 #000, 0 0 18px rgba(95,176,212,0.55); line-height: 1.1; max-width: 26ch;
+}
+.shane-page .sh-bi-sub { font-family: 'Outfit', sans-serif; font-size: 0.84rem; color: #aebfce; max-width: 44ch; line-height: 1.55; }
+.shane-page .sh-bi-sub b { color: #5fb0d4; }
+.shane-page .sh-bi-final { font-family: 'Oswald', sans-serif; color: #88b8d4; letter-spacing: 0.1em; font-size: 0.9rem; }
+.shane-page .sh-bi-final b { color: #e8eef4; font-size: 1.7rem; display: block; }
+.shane-page .sh-bi-final .best { color: #5fb0d4; font-size: 0.74rem; display: block; margin-top: 0.2rem; letter-spacing: 0.12em; }
+.shane-page .sh-bi-final .last { color: #c8d0dc; font-style: italic; font-family: 'Special Elite', monospace; font-size: 0.8rem; display: block; margin-top: 0.55rem; max-width: 34ch; }
+.shane-page .sh-bi-final .last.gold { color: #e7c879; font-style: normal; font-family: 'Oswald', sans-serif; letter-spacing: 0.08em; text-shadow: 0 0 12px rgba(231,200,121,0.5); }
+.shane-page .sh-bi-final .last.blood { color: #ff7a6a; font-style: normal; font-family: 'Oswald', sans-serif; letter-spacing: 0.08em; text-shadow: 0 0 12px rgba(200,40,40,0.5); }
+.shane-page .sh-bi-btn {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: 1rem; cursor: none;
+  padding: 0.7rem 1.6rem; border-radius: 4px; color: #051018;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4); border: none;
+  box-shadow: 0 8px 22px rgba(95,176,212,0.4);
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.shane-page .sh-bi-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 13px 28px rgba(95,176,212,0.55); }
+
+/* touch dpad */
+.shane-page .sh-bi-pad {
+  display: none; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px);
+  gap: 6px; justify-content: center; margin: 0.9rem auto 0;
+}
+.shane-page .sh-bi-dir {
+  width: 56px; height: 56px; border-radius: 8px; cursor: none;
+  font-size: 1.2rem; color: #051018; border: none; touch-action: none;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4); box-shadow: 0 5px 14px rgba(95,176,212,0.35);
+}
+.shane-page .sh-bi-dir:active { transform: translateY(2px); filter: brightness(1.1); }
+.shane-page .sh-bi-dir.up    { grid-column: 2; grid-row: 1; }
+.shane-page .sh-bi-dir.left  { grid-column: 1; grid-row: 2; }
+.shane-page .sh-bi-dir.down  { grid-column: 2; grid-row: 2; }
+.shane-page .sh-bi-dir.right { grid-column: 3; grid-row: 2; }
+body.touch-device .shane-page .sh-bi-pad { display: grid; }
+
+.shane-page .sh-bi-line {
+  margin-top: 0.8rem; text-align: center; min-height: 1.4em;
+  font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.92rem;
+  color: #aebfce; text-shadow: 0 1px 0 #000;
+}
+.shane-page .sh-bi-line.bad   { color: #ff8a6a; }
+.shane-page .sh-bi-line.good  { color: #5fe39a; }
+.shane-page .sh-bi-line.gold  { color: #e7c879; }
+.shane-page .sh-bi-line.blood { color: #ff7a6a; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shane-page .sh-bi-gaze.turning .dot,
+  .shane-page .sh-bi-read.legend { animation: none; }
+  .shane-page .sh-bi.sh-bi-flash::after { animation-duration: 0.001s; }
 }
