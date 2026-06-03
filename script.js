@@ -2376,3 +2376,215 @@ document.addEventListener('DOMContentLoaded', function(){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
 })();
+
+/* ============================================================
+   SHANE — THE LONG RIDE (motorcycle dodge mini-game)
+   Weave between 3 lanes of night traffic, grab fuel, rack up
+   distance + near-miss "style". Speed ramps; one crash ends it.
+   Controls: tap road halves, on-screen arrows, or A/D / arrows.
+   rAF loop runs ONLY while riding (paused when tab hidden).
+   Only initialises if #scShaneRide exists.
+   ============================================================ */
+(function initShaneRide() {
+  function build() {
+    var root = document.getElementById('scShaneRide');
+    if (!root || root._init) return;
+    root._init = true;
+
+    var road    = document.getElementById('shRoad');
+    var lines   = document.getElementById('shLines');
+    var bike    = document.getElementById('shBike');
+    var overlay = document.getElementById('shOverlay');
+    var callout = document.getElementById('shCallout');
+    var sub     = document.getElementById('shSub');
+    var startBtn= document.getElementById('shStart');
+    var speedEl = document.getElementById('shSpeed');
+    var distEl  = document.getElementById('shDist');
+    var styleEl = document.getElementById('shStyle');
+    var styleG  = document.getElementById('shStyleGauge');
+    var lineEl  = document.getElementById('shLine');
+    var steerL  = document.getElementById('shSteerL');
+    var steerR  = document.getElementById('shSteerR');
+    if (!road || !bike || !startBtn) return;
+
+    var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var CARS  = ['\uD83D\uDE97', '\uD83D\uDE99', '\uD83D\uDE95', '\uD83D\uDE9A', '\uD83D\uDEFB']; // car, SUV, taxi, truck, scooter
+    var FUEL  = '\u26FD';
+
+    var LINES = {
+      near:   ["\u2026Close.", "Didn't flinch.", "Still here.", "Hm.", "Cute."],
+      mile:   ["Quieter out here.", "Good road.", "This is the part I missed.", "Keep it between the lines."],
+      crash:  ["Huh. Road won.", "That'll buff out. It won't.", "Walked away from worse. Barely.", "\u2026Yeah. That tracks."],
+      best:   "\u2026Not bad."
+    };
+    function pick(a) { return a[(Math.random() * a.length) | 0]; }
+    function say(txt) { lineEl.textContent = txt; }
+
+    // state
+    var running = false, rafId = null, lastT = 0;
+    var bikeLane = 1, speed = 230, dist = 0, style = 0, best = 0;
+    var spawnAcc = 0, dashPos = 0, mileMark = 0, nearCooldown = 0;
+    var obstacles = [];
+    var laneGap = 0, roadH = 380, roadW = 600;
+
+    function measure() {
+      roadW = road.clientWidth || 600;
+      roadH = road.clientHeight || 380;
+      laneGap = roadW / 3;
+    }
+    function laneX(lane) { return (lane - 1) * laneGap; }
+    function setBike(tilt) {
+      bike.style.transform = 'translateX(' + laneX(bikeLane) + 'px)' + (tilt ? ' rotate(' + tilt + 'deg)' : '');
+    }
+
+    function steer(dir) {
+      if (!running) return;
+      var n = Math.max(0, Math.min(2, bikeLane + dir));
+      if (n === bikeLane) return;
+      bikeLane = n;
+      setBike(dir * -9);
+      setTimeout(function () { if (running) setBike(0); }, 130);
+    }
+
+    function spawn() {
+      if (obstacles.length >= 6) return;
+      var lane = (Math.random() * 3) | 0;
+      var fuel = Math.random() < 0.16;
+      var el = document.createElement('div');
+      el.className = 'sh-ride-obs' + (fuel ? ' fuel' : '');
+      el.textContent = fuel ? FUEL : pick(CARS);
+      el.style.transform = 'translate(' + laneX(lane) + 'px,-60px)';
+      road.appendChild(el);
+      obstacles.push({ el: el, lane: lane, y: -60, h: 58, fuel: fuel, passed: false, dead: false });
+    }
+
+    function clearObstacles() {
+      obstacles.forEach(function (o) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); });
+      obstacles = [];
+    }
+
+    function bikeBand() { return { top: roadH - 78, bot: roadH - 14 }; }
+
+    function frame(t) {
+      if (!running) return;
+      var dt = (t - lastT) / 1000; lastT = t;
+      if (dt > 0.05) dt = 0.05;            // clamp after a stutter / tab switch
+      if (nearCooldown > 0) nearCooldown -= dt;
+
+      // speed ramp + distance
+      speed = Math.min(600, speed + 7 * dt);
+      dist += speed * dt / 3200;
+      speedEl.textContent = Math.round(speed * 0.42);
+      distEl.textContent = dist.toFixed(1);
+      if (dist - mileMark >= 1) { mileMark = dist; say(pick(LINES.mile)); }
+
+      // moving lane dashes (illusion of motion)
+      dashPos = (dashPos + speed * dt) % 60;
+      lines.style.backgroundPosition = '33.33% ' + dashPos + 'px, 66.66% ' + dashPos + 'px';
+
+      // spawn
+      spawnAcc -= dt * 1000;
+      if (spawnAcc <= 0) {
+        spawn();
+        spawnAcc = Math.max(380, 950 - (speed - 230) * 1.0);
+      }
+
+      // move + collide
+      var band = bikeBand();
+      for (var i = obstacles.length - 1; i >= 0; i--) {
+        var o = obstacles[i];
+        o.y += speed * dt;
+        o.el.style.transform = 'translate(' + laneX(o.lane) + 'px,' + o.y + 'px)';
+
+        var overlapY = (o.y < band.bot) && (o.y + o.h > band.top);
+        if (!o.dead && overlapY && o.lane === bikeLane) {
+          if (o.fuel) {                    // grabbed fuel
+            o.dead = true; o.el.classList.add('gone');
+            style += 1; speed = Math.min(620, speed + 26);
+            bumpStyle(); say("Topped off.");
+          } else {                          // crash
+            return crash();
+          }
+        }
+        // near-miss: a car slips past in an adjacent lane
+        if (!o.passed && !o.fuel && o.y + o.h >= band.top && o.lane !== bikeLane) {
+          o.passed = true;
+          if (Math.abs(o.lane - bikeLane) === 1 && nearCooldown <= 0) {
+            style += 1; bumpStyle(); nearCooldown = 0.5;
+            if (Math.random() < 0.5) say(pick(LINES.near));
+          }
+        }
+        if (o.y > roadH + 70) { if (o.el.parentNode) o.el.parentNode.removeChild(o.el); obstacles.splice(i, 1); }
+      }
+      styleEl.textContent = style;
+
+      rafId = window.requestAnimationFrame(frame);
+    }
+
+    function bumpStyle() {
+      if (!styleG) return;
+      styleG.classList.add('bump');
+      setTimeout(function () { styleG.classList.remove('bump'); }, 130);
+    }
+
+    function startLoop() { lastT = (window.performance && performance.now) ? performance.now() : Date.now(); rafId = window.requestAnimationFrame(frame); }
+    function pauseLoop() { if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; } }
+
+    function start() {
+      clearObstacles();
+      measure();
+      running = true;
+      bikeLane = 1; speed = 230; dist = 0; style = 0;
+      spawnAcc = 600; dashPos = 0; mileMark = 0; nearCooldown = 0;
+      setBike(0);
+      speedEl.textContent = Math.round(speed * 0.42); distEl.textContent = '0.0'; styleEl.textContent = '0';
+      overlay.classList.add('hidden');
+      say("Let's see if the road remembers me.");
+      startLoop();
+    }
+
+    function crash() {
+      running = false; pauseLoop();
+      if (!REDUCE) {
+        road.classList.remove('shake', 'crashflash'); void road.offsetWidth;
+        road.classList.add('shake', 'crashflash');
+        setTimeout(function () { road.classList.remove('shake', 'crashflash'); }, 450);
+      }
+      var newBest = dist > best;
+      if (newBest) best = dist;
+      callout.textContent = 'Wiped Out.';
+      sub.innerHTML = '<span class="sh-ride-final">Distance <b>' + dist.toFixed(1) + ' mi</b>' +
+        'Style ' + style + (style ? ' \u00B7 ' + style * 50 + ' pts' : '') +
+        '<span class="best">Best ride: ' + best.toFixed(1) + ' mi</span></span>';
+      startBtn.textContent = 'Ride Again';
+      overlay.classList.remove('hidden');
+      say(newBest ? LINES.best : pick(LINES.crash));
+      clearObstacles();
+    }
+
+    // ---- controls ----
+    startBtn.addEventListener('click', start);
+    if (steerL) steerL.addEventListener('click', function () { steer(-1); });
+    if (steerR) steerR.addEventListener('click', function () { steer(1); });
+    road.addEventListener('click', function (e) {
+      if (!running) return;
+      var r = road.getBoundingClientRect();
+      steer((e.clientX - r.left) < r.width / 2 ? -1 : 1);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!running) return;
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { steer(-1); e.preventDefault(); }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { steer(1); e.preventDefault(); }
+    });
+    window.addEventListener('resize', function () { measure(); setBike(0); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) pauseLoop();
+      else if (running && !rafId) startLoop();
+    });
+
+    measure(); setBike(0);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
