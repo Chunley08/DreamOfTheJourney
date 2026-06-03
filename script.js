@@ -3074,9 +3074,23 @@ document.addEventListener('DOMContentLoaded', function(){
       else if (playing && !rafId) startLoop();
     });
 
-    draw();   // first paint so the room shows behind the overlay
+    try { draw(); } catch (err) { /* first paint is cosmetic; never let it block Start */ }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
-  else build();
+  function boot() {
+    build();
+    // if the section wasn't ready yet, retry briefly (covers dynamic reveal / late layout)
+    var r0 = document.getElementById('shBreakin');
+    if (!r0 || !r0._init) {
+      var tries = 0;
+      var iv = setInterval(function () {
+        build();
+        var r = document.getElementById('shBreakin');
+        if ((r && r._init) || ++tries > 20) clearInterval(iv);
+      }, 150);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
 })();
