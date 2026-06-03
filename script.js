@@ -2196,106 +2196,103 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 
 
+
 /* ============================================================
-   SCORCH — MOSH PIT SURVIVAL (reaction mini-game)
-   Tap threats (bottles, hecklers, crashers, phones, horns)
-   before they expire; DON'T tap Hellfire the lizard. Misses &
-   wrong taps drain Composure. Survive the full set to win.
-   Difficulty (spawn rate + speed) ramps across the set. Only
-   initialises if #scorchMosh exists; all timers cleaned on stop.
+   SCORCH — RAT HUNT (reaction mini-game)
+   Stomp the Street Rats (Sin / Mason / Ash, and Skye for DOUBLE
+   points) before they scatter; do NOT hit the Snakes (his band:
+   Shane / Kayla / Cody / Max / Ricky). Misses & wrong hits drain
+   Patience; survive the whole hunt to win. Difficulty ramps.
+   Only initialises if #scorchRat exists; timers cleaned on stop.
    ============================================================ */
-(function initScorchMosh() {
+(function initScorchRatHunt() {
   function build() {
-    var root = document.getElementById('scorchMosh');
+    var root = document.getElementById('scorchRat');
     if (!root || root._init) return;
     root._init = true;
 
-    var pit       = document.getElementById('scMoshPit');
-    var overlay   = document.getElementById('scMoshOverlay');
-    var callout   = document.getElementById('scMoshCallout');
-    var rules     = document.getElementById('scMoshRules');
-    var startBtn  = document.getElementById('scMoshStart');
-    var coolFill  = document.getElementById('scCoolFill');
-    var setFill   = document.getElementById('scSetFill');
-    var scoreEl   = document.getElementById('scScore');
-    var comboEl   = document.getElementById('scCombo');
-    var lineEl    = document.getElementById('scMoshLine');
+    var pit      = document.getElementById('scRatPit');
+    var overlay  = document.getElementById('scRatOverlay');
+    var callout  = document.getElementById('scRatCallout');
+    var rules    = document.getElementById('scRatRules');
+    var startBtn = document.getElementById('scRatStart');
+    var patFill  = document.getElementById('scRatPatience');
+    var setFill  = document.getElementById('scRatSet');
+    var scoreEl  = document.getElementById('scRatScore');
+    var comboEl  = document.getElementById('scRatCombo');
+    var lineEl   = document.getElementById('scRatLine');
     if (!pit || !startBtn) return;
 
     var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var DURATION = 48000;          // full set length (ms)
-    var MAX_ON   = 5;              // max concurrent targets
-    var THREATS = [
-      { e: '\uD83C\uDF7A', tag: 'bottle' },
-      { e: '\uD83E\uDD2C', tag: 'heckler' },
-      { e: '\uD83C\uDFC3', tag: 'crasher' },
-      { e: '\uD83E\uDD33', tag: 'filming' },
-      { e: '\uD83E\uDD18', tag: 'hype \u2018em' }
-    ];
-    var HELLFIRE = { e: '\uD83E\uDD8E', tag: 'HELLFIRE \u2014 NO', avoid: true };
+    var DURATION = 45000;
+    var MAX_ON   = 5;
+    var RATS   = ['Sin', 'Mason', 'Ash'];
+    var SNAKES = ['Shane', 'Kayla', 'Cody', 'Max', 'Ricky'];
 
     var LINES = {
-      combo: ["Yeah! That's it!", "Now we're fuckin' cookin'.", "Keep it comin'!", "Hell yeah \u2014 don't stop."],
-      miss:  ["The hell was that?", "Wake up back there!", "You blind? Tap it!", "Sloppy. Tighten up."],
-      lizard:["NOT the lizard, dipshit!", "Touch Hellfire again an' I END you.", "That's my GIRL \u2014 hands OFF."],
-      low:   ["I'm losin' it up here\u2026", "Hold it together, damn it."],
-      win:   ["Set's done. You didn't completely suck. High praise from me.", "We survived. Barely. I'll allow it.", "Not bad. Don't let it go to your head."],
-      lose:  ["And\u2026 you walked us off stage. Refunds for everybody.", "Cool's gone, show's over. Nice work, genius.", "Straight into the drum kit. Idiot."]
+      ratKill: ["Got one.", "Stay down.", "Vermin. Next.", "That's for nothin'."],
+      combo:   ["Now we're talkin'.", "Keep 'em comin'.", "Pile 'em up.", "Don't slow down."],
+      skye:    ["SKYE. Double. That one's personal.", "Two years, Skye \u2014 worth every point.", "There he is. Hit him twice as hard."],
+      snake:   ["{n}'s with ME \u2014 watch it!", "That's my BAND, dipshit!", "Don't touch the Snakes!", "{n}? That's a bandmate, asshole."],
+      miss:    ["It got away\u2014!", "Quit lettin' 'em scatter.", "Faster, damn it."],
+      low:     ["They're swarmin'\u2026", "Losin' the alley\u2026"],
+      win:     ["Alley's clean. Good.", "That's pest control. Don't quit your day job.", "Rats handled. For now."],
+      lose:    ["They overran us. Pathetic.", "Rats win. Love that for me.", "You let the alley go. Out."]
     };
     function pick(a) { return a[(Math.random() * a.length) | 0]; }
-    function say(txt, kind) {
-      lineEl.textContent = txt;
-      lineEl.className = 'sc-mosh-line' + (kind ? ' ' + kind : '');
-    }
+    function say(txt, kind) { lineEl.textContent = txt; lineEl.className = 'sc-rat-line' + (kind ? ' ' + kind : ''); }
 
-    // state
     var running = false;
-    var score = 0, combo = 0, maxCombo = 0, cool = 100, elapsed = 0;
+    var score = 0, combo = 0, maxCombo = 0, pat = 100, elapsed = 0;
     var spawnTimer = null, tickTimer = null;
-    var live = new Set();           // active target elements
+    var live = new Set();
     var lowWarned = false;
 
     function mult() { return Math.min(1 + Math.floor(combo / 5), 5); }
-    function progress() { return elapsed / DURATION; }   // 0..1
+    function progress() { return elapsed / DURATION; }
 
     function updateHUD() {
       scoreEl.textContent = score;
       comboEl.textContent = 'x' + mult();
-      coolFill.style.width = Math.max(0, cool) + '%';
-      coolFill.className = 'sc-mosh-bar-fill' + (cool < 25 ? ' crit' : cool < 50 ? ' warn' : '');
+      patFill.style.width = Math.max(0, pat) + '%';
+      patFill.className = 'sc-rat-bar-fill' + (pat < 25 ? ' crit' : pat < 50 ? ' warn' : '');
       setFill.style.width = Math.min(100, progress() * 100) + '%';
     }
-    function bumpCombo() {
-      comboEl.classList.add('bump');
-      setTimeout(function () { comboEl.classList.remove('bump'); }, 130);
-    }
+    function bumpCombo() { comboEl.classList.add('bump'); setTimeout(function () { comboEl.classList.remove('bump'); }, 130); }
     function flashBad() {
       if (REDUCE) return;
-      pit.classList.remove('shake', 'flash-bad');
-      void pit.offsetWidth;          // reflow to restart animation
+      pit.classList.remove('shake', 'flash-bad'); void pit.offsetWidth;
       pit.classList.add('shake', 'flash-bad');
       setTimeout(function () { pit.classList.remove('shake', 'flash-bad'); }, 400);
     }
+    function popup(el, txt, kind) {
+      var p = document.createElement('span');
+      p.className = 'sc-rat-pop ' + (kind || 'good');
+      p.textContent = txt;
+      p.style.left = el.style.left; p.style.top = el.style.top;
+      pit.appendChild(p);
+      setTimeout(function () { if (p.parentNode) p.parentNode.removeChild(p); }, REDUCE ? 0 : 700);
+    }
 
-    function curInterval() { return Math.max(430, 1050 - progress() * 560); }
-    function curLifetime() { return Math.max(780, 1550 - progress() * 720); }
+    function curInterval() { return Math.max(420, 1000 - progress() * 540); }
+    function curLifetime() { return Math.max(760, 1500 - progress() * 700); }
 
     function spawn() {
       if (!running) return;
       if (live.size < MAX_ON) {
-        var avoid = Math.random() < 0.16;
-        var def = avoid ? HELLFIRE : pick(THREATS);
+        var isSnake = Math.random() < 0.20;
+        var isSkye  = !isSnake && Math.random() < 0.18;
+        var name = isSnake ? pick(SNAKES) : (isSkye ? 'Skye' : pick(RATS));
         var el = document.createElement('div');
-        el.className = 'sc-mosh-target' + (avoid ? ' avoid' : '');
-        el.innerHTML = def.e + '<span class="sc-tg-tag">' + def.tag + '</span>';
-        el._avoid = !!avoid; el._done = false;
-        // position within the pit, padded from edges + below the stage strip
+        el.className = 'sc-rat-target' + (isSnake ? ' snake' : isSkye ? ' skye' : '');
+        el.innerHTML = (isSnake ? '\uD83D\uDC0D' : '\uD83D\uDC00') +
+          '<span class="sc-rat-tag">' + name + '</span>' +
+          (isSkye ? '<span class="sc-rat-x2">\u00D72</span>' : '');
+        el._snake = isSnake; el._skye = isSkye; el._name = name; el._done = false;
         el.style.left = (10 + Math.random() * 80) + '%';
         el.style.top  = (18 + Math.random() * 70) + '%';
         var life = curLifetime();
-        // The shrinking ring (::after) reads its duration from the --life
-        // custom property, so it always matches the expire timeout exactly.
         el.style.setProperty('--life', life + 'ms');
         el.addEventListener('click', function () { tap(el); });
         el._expTimer = setTimeout(function () { expire(el); }, life);
@@ -2305,88 +2302,69 @@ document.addEventListener('DOMContentLoaded', function(){
       spawnTimer = setTimeout(spawn, curInterval());
     }
 
-    function removeTarget(el) {
-      clearTimeout(el._expTimer);
-      live.delete(el);
-      if (el.parentNode) el.parentNode.removeChild(el);
-    }
-    function popOut(el) {
-      el.classList.add('hit');
-      setTimeout(function () { removeTarget(el); }, REDUCE ? 0 : 200);
-    }
+    function removeTarget(el) { clearTimeout(el._expTimer); live.delete(el); if (el.parentNode) el.parentNode.removeChild(el); }
+    function squish(el) { el.classList.add('hit'); setTimeout(function () { removeTarget(el); }, REDUCE ? 0 : 230); }
 
     function tap(el) {
       if (!running || el._done) return;
-      el._done = true;
-      clearTimeout(el._expTimer);
-      if (el._avoid) {
-        cool -= 20; combo = 0;
-        say(pick(LINES.lizard), 'bad'); flashBad();
+      el._done = true; clearTimeout(el._expTimer);
+      if (el._snake) {
+        pat -= 20; combo = 0;
+        say(pick(LINES.snake).replace('{n}', el._name), 'bad');
+        flashBad(); popup(el, '\u2212' + 20, 'bad');
         removeTarget(el);
       } else {
         combo++; maxCombo = Math.max(maxCombo, combo);
-        score += 10 * mult();
-        cool = Math.min(100, cool + 1);
-        if (combo % 5 === 0) { say(pick(LINES.combo), 'good'); }
-        bumpCombo();
-        popOut(el);
+        var pts = (el._skye ? 20 : 10) * mult();
+        score += pts; pat = Math.min(100, pat + 1);
+        popup(el, '+' + pts, el._skye ? 'big' : 'good');
+        if (el._skye) say(pick(LINES.skye), 'big');
+        else if (combo % 5 === 0) say(pick(LINES.combo), 'good');
+        else say(pick(LINES.ratKill));
+        bumpCombo(); squish(el);
       }
-      updateHUD();
-      checkLow();
+      updateHUD(); checkLow();
     }
     function expire(el) {
-      if (el._done) return;
-      el._done = true;
-      if (el._avoid) {
-        score += 5;                 // correctly ignored Hellfire
-      } else {
-        cool -= 12; combo = 0;
-        say(pick(LINES.miss), 'bad'); flashBad();
-      }
-      removeTarget(el);
-      updateHUD();
-      checkLow();
-      if (cool <= 0) end('lose');
+      if (el._done) return; el._done = true;
+      if (el._snake) { score += 5; }            // correctly spared a bandmate
+      else { pat -= 8; combo = 0; say(pick(LINES.miss), 'bad'); }
+      removeTarget(el); updateHUD(); checkLow();
+      if (pat <= 0) end('lose');
     }
     function checkLow() {
-      if (cool <= 0) { end('lose'); return; }
-      if (cool < 25 && !lowWarned) { lowWarned = true; say(pick(LINES.low), 'bad'); }
-      if (cool >= 25) lowWarned = false;
+      if (pat <= 0) { end('lose'); return; }
+      if (pat < 25 && !lowWarned) { lowWarned = true; say(pick(LINES.low), 'bad'); }
+      if (pat >= 25) lowWarned = false;
     }
-
     function tick() {
       if (!running) return;
-      elapsed += 100;
-      updateHUD();
-      if (cool <= 0) { end('lose'); return; }
+      elapsed += 100; updateHUD();
+      if (pat <= 0) { end('lose'); return; }
       if (elapsed >= DURATION) { end('win'); return; }
     }
-
     function clearAll() {
       clearTimeout(spawnTimer); spawnTimer = null;
       clearInterval(tickTimer); tickTimer = null;
       live.forEach(function (el) { clearTimeout(el._expTimer); if (el.parentNode) el.parentNode.removeChild(el); });
       live.clear();
+      Array.prototype.slice.call(pit.querySelectorAll('.sc-rat-pop')).forEach(function (p) { if (p.parentNode) p.parentNode.removeChild(p); });
     }
-
     function start() {
       clearAll();
       running = true;
-      score = 0; combo = 0; maxCombo = 0; cool = 100; elapsed = 0; lowWarned = false;
+      score = 0; combo = 0; maxCombo = 0; pat = 100; elapsed = 0; lowWarned = false;
       overlay.classList.add('hidden');
-      say("Tap the trouble. Don't touch the lizard. Go.");
-      updateHUD();
-      spawn();
+      say("Stomp the rats. Spare the Snakes. Go.");
+      updateHUD(); spawn();
       tickTimer = setInterval(tick, 100);
     }
-
     function end(result) {
-      running = false;
-      clearAll();
+      running = false; clearAll();
       var won = result === 'win';
-      callout.textContent = won ? 'Set Survived.' : 'Show\u2019s Over.';
-      rules.innerHTML = '<span class="sc-mosh-finalscore">Final Score <b>' + score + '</b>Best combo x' + Math.min(1 + Math.floor(maxCombo / 5), 5) + '</span>';
-      startBtn.textContent = 'Run It Back';
+      callout.textContent = won ? 'Alley Cleared.' : 'They Overran You.';
+      rules.innerHTML = '<span class="sc-rat-finalscore">Final Score <b>' + score + '</b>Best combo x' + Math.min(1 + Math.floor(maxCombo / 5), 5) + '</span>';
+      startBtn.textContent = 'Hunt Again';
       overlay.classList.remove('hidden');
       say(pick(won ? LINES.win : LINES.lose), won ? 'good' : 'bad');
     }
