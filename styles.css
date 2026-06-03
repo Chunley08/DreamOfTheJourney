@@ -8604,6 +8604,7 @@
 }
 
 /* reading panel (paper) */
+.shane-page .sh-bi-read[hidden] { display: none !important; }
 .shane-page .sh-bi-read {
   position: absolute; inset: 0; z-index: 8;
   display: flex; flex-direction: column;
