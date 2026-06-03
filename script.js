@@ -123,7 +123,7 @@ const CHARACTERS = [
     name: "Rory",
     desc: "Peaky Blinder · Tommy O'Malley's youngest",
     nameStyle: "peaky",
-    portrait: "assets/Rory Pics/rory-portrait.jpg",
+    portrait: "assets/Rory Pics/RoryMainPfp.webp",
     pageId: "rory",
     href: "rory.html",
   },
