@@ -2687,6 +2687,7 @@ document.addEventListener('DOMContentLoaded', function(){
       // ---- decor: visual flavor, not collidable ----
       DECOR = [
         { rx: 0.085, kind: 'lilith' },     // Lilith's glowing snake tank (front lounge)
+        { rx: 0.155, kind: 'couch' },      // lounge couch (Kayla lounges here)
         { rx: 0.235, kind: 'poster', v: 0 },
         { rx: 0.355, kind: 'lamp' },
         { rx: 0.515, kind: 'poster', v: 1 },
@@ -2695,6 +2696,38 @@ document.addEventListener('DOMContentLoaded', function(){
         { rx: 0.90,  kind: 'lamp' }
       ];
       for (var j = 0; j < DECOR.length; j++) DECOR[j].x = Math.round(worldW * DECOR[j].rx);
+
+      // ---- BAND: random subset present this level (scenery only) ----
+      buildBand();
+    }
+
+    // station x for each member, tied to features in the bus
+    function bandStations() {
+      var couch = null, drums = null, guitar = null, lilithX = Math.round(worldW * 0.085);
+      for (var i = 0; i < DECOR.length; i++) if (DECOR[i].kind === 'couch') couch = DECOR[i].x;
+      for (var k = 0; k < FURN.length; k++) { if (FURN[k].kind === 'drums') drums = FURN[k].x + FURN[k].w / 2; if (FURN[k].kind === 'guitar') guitar = FURN[k].x + FURN[k].w / 2; }
+      return {
+        cody:   { x: (drums || worldW * 0.46) , kind: 'cody' },
+        max:    { x: (guitar || worldW * 0.60) - 22, kind: 'max' },
+        kayla:  { x: (couch || worldW * 0.155), kind: 'kayla' },
+        scorch: { x: worldW * 0.30, home: worldW * 0.30, lilith: lilithX, kind: 'scorch' },
+        ricky:  { x: worldW * 0.68, home: worldW * 0.68, kind: 'ricky' }
+      };
+    }
+    var BAND = [];
+    function buildBand() {
+      var st = bandStations();
+      var roster = ['cody', 'max', 'kayla', 'scorch', 'ricky'];
+      BAND = [];
+      for (var i = 0; i < roster.length; i++) {
+        // each member independently ~55% to be present -> random 0..all
+        if (Math.random() < 0.55) {
+          var m = st[roster[i]];
+          m.t0 = Math.random() * 6.28;          // animation phase offset
+          m.state = 'idle'; m.timer = rand(2000, 5000); m.feedT = 0; m.dir = -1;
+          BAND.push(m);
+        }
+      }
     }
 
     // player
@@ -2828,7 +2861,6 @@ document.addEventListener('DOMContentLoaded', function(){
         P.dir = vx > 0 ? 1 : -1;
         var sp = P.speed * (P.crouching ? 0.55 : 1);
         P.x = clamp(P.x + vx * sp * dt, P.w / 2 + 2, worldW - P.w / 2 - 2);
-        animT += dt * (P.crouching ? 6 : 11);
       }
 
       updateShane(dt);
@@ -2857,6 +2889,37 @@ document.addEventListener('DOMContentLoaded', function(){
       // camera follows player (clamped to world)
       var targetCam = clamp(P.x - VW / 2, 0, worldW - VW);
       cam += (targetCam - cam) * Math.min(1, dt * 8);
+    }
+
+    /* ---------- band ambient behavior (scenery only) ---------- */
+    function updateBand(dt) {
+      for (var i = 0; i < BAND.length; i++) {
+        var m = BAND[i];
+        if (m.kind === 'scorch') {
+          m.timer -= dt * 1000;
+          if (m.state === 'idle') {
+            m.dir = (m.lilith < m.x) ? -1 : 1;
+            if (m.timer <= 0) { m.state = 'toLilith'; }
+          } else if (m.state === 'toLilith') {
+            m.x += (m.lilith - m.x) * Math.min(1, dt * 1.6);
+            m.dir = (m.lilith < m.x) ? -1 : 1;
+            if (Math.abs(m.x - m.lilith) < 14) { m.state = 'feeding'; m.feedT = 1500; }
+          } else if (m.state === 'feeding') {
+            m.feedT -= dt * 1000; m.dir = -1;
+            if (m.feedT <= 0) { m.state = 'back'; }
+          } else if (m.state === 'back') {
+            m.x += (m.home - m.x) * Math.min(1, dt * 1.6);
+            m.dir = (m.home < m.x) ? -1 : 1;
+            if (Math.abs(m.x - m.home) < 6) { m.state = 'idle'; m.timer = rand(4000, 9000); }
+          }
+        } else if (m.kind === 'ricky') {
+          m.timer -= dt * 1000;
+          if (m.timer <= 0) { m.pace = -(m.pace || 1); m.timer = rand(1200, 2600); }
+          m.x = clamp(m.x + (m.pace || 1) * 8 * dt, m.home - 18, m.home + 18);
+          m.dir = (m.pace || 1) > 0 ? 1 : -1;
+        }
+        // cody/max/kayla stay put (animated in place)
+      }
     }
 
     /* ===========================================================
@@ -2911,6 +2974,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
       for (var i = 0; i < FURN.length; i++) drawGear(FURN[i]);
       drawBunk();                // Shane's bunk + journal (goal)
+      drawBand();                // random bandmates (scenery)
       drawShane();
       drawYou();
 
@@ -3026,7 +3090,23 @@ document.addEventListener('DOMContentLoaded', function(){
         drawPoster(x, o.v || 0);
       } else if (o.kind === 'lilith') {
         drawLilith(x);
+      } else if (o.kind === 'couch') {
+        drawCouch(x);
       }
+    }
+
+    function drawCouch(x) {
+      var cw = 56, ch = 18, cy = FLOOR_Y - ch;
+      // worn leather tour-bus couch
+      rr(x - cw/2, cy, cw, ch, 4, '#3a2630');
+      rr(x - cw/2, cy - 8, cw, 11, 5, '#4a3340');      // backrest
+      rr(x - cw/2, cy, 7, ch, 3, '#52384a');           // arm L
+      rr(x + cw/2 - 7, cy, 7, ch, 3, '#52384a');       // arm R
+      // seat cushions seam
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, cy + 2); ctx.lineTo(x, cy + ch - 2); ctx.stroke();
+      // a small throw pillow
+      rr(x - cw/2 + 9, cy - 4, 12, 9, 3, 'rgba(150,50,70,0.8)');
     }
 
     function drawPoster(x, v) {
@@ -3288,6 +3368,138 @@ document.addEventListener('DOMContentLoaded', function(){
       if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('hid', x, hy - 9); }
     }
 
+    /* ===========================================================
+       BANDMATES — recognizable little anime characters (scenery)
+       =========================================================== */
+    function npcBase(x, baseY, opts) {
+      // shared body: legs, torso, head w/ eyes & hair. opts has colors + flags.
+      ctx.globalAlpha = 0.28; ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.ellipse(x, baseY + 1, 9, 2.6, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
+      var d = opts.dir || 1;
+      // legs
+      if (opts.prosthetic) {
+        // left normal, right prosthetic (metal pylon + foot)
+        rr(x - 5, baseY - 14, 4, 14, 2, opts.pants);
+        ctx.strokeStyle = '#9aa6b2'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 3, baseY - 14); ctx.lineTo(x + 3, baseY - 2); ctx.stroke();
+        circle(x + 3, baseY - 14, 2, '#7a8694');           // knee joint
+        rr(x + 1, baseY - 3, 6, 3, 1, '#6a7682');          // foot
+      } else {
+        var sw = opts.walk ? Math.sin(animT * 1.6 + (opts.t0||0)) * 1.5 : 0;
+        rr(x - 5, baseY - 14, 4, 14 + sw, 2, opts.pants);
+        rr(x + 1, baseY - 14, 4, 14 - sw, 2, opts.pants);
+      }
+      // torso (shirt) + cel shade
+      rr(x - 7, baseY - 30, 14, 18, 4, opts.shirt);
+      ctx.globalAlpha = 0.22; rr(x - 7, baseY - 30, 6, 18, 4, '#000'); ctx.globalAlpha = 1;
+      rr(x - 7, baseY - 30, 14, 3, 3, opts.shirtHi || opts.shirt);
+      if (opts.shirtText) { ctx.fillStyle = opts.shirtTextCol || '#fff'; ctx.font = 'bold 6px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(opts.shirtText, x, baseY - 19); }
+      // head
+      circle(x, baseY - 37, 7, opts.skin);
+      ctx.globalAlpha = 0.28; circle(x - 2, baseY - 38, 5, '#fff'); ctx.globalAlpha = 1;
+      // hair styles
+      ctx.fillStyle = opts.hair;
+      if (opts.hairStyle === 'spiky') {
+        ctx.beginPath();
+        for (var sx = -8; sx <= 8; sx += 3.2) { ctx.moveTo(x + sx, baseY - 40); ctx.lineTo(x + sx + 1.6, baseY - 48); ctx.lineTo(x + sx + 3.2, baseY - 40); }
+        ctx.fill();
+        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
+      } else if (opts.hairStyle === 'long') {
+        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
+        rr(x - 8, baseY - 41, 16, 6, 3, opts.hair);
+        rr(x - 9, baseY - 40, 5, 22, 3, opts.hair);        // long left
+        rr(x + 4, baseY - 40, 5, 22, 3, opts.hair);        // long right
+      } else if (opts.hairStyle === 'shoulder') {
+        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
+        rr(x - 9, baseY - 40, 4, 14, 2, opts.hair);
+        rr(x + 5, baseY - 40, 4, 14, 2, opts.hair);
+      } else if (opts.hairStyle === 'bald') {
+        ctx.beginPath(); ctx.arc(x, baseY - 40, 7, Math.PI, 0); ctx.fill();   // thin top
+      } else { // short
+        ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
+        rr(x - 8, baseY - 41, 16, 5, 2, opts.hair);
+      }
+      // colored eyes
+      var ex = d < 0 ? x - 3 : x + 1;
+      circle(ex + 0.5, baseY - 37, 1.6, opts.eye);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.fillRect(ex, baseY - 38, 1, 1);
+    }
+
+    function drawBand() {
+      for (var i = 0; i < BAND.length; i++) {
+        var m = BAND[i], x = m.x, baseY = FLOOR_Y;
+        if (m.kind === 'cody') {
+          // seated at the drums, arms drumming — black hair, gold eyes, BET shirt, prosthetic leg
+          var hit = Math.sin(animT * 3 + m.t0) ;
+          npcBase(x, baseY, { dir: -1, pants: '#23232c', shirt: '#1c1c22', shirtHi:'#2a2a32', skin:'#e8c6a2', hair:'#15151a', hairStyle:'short', eye:'#e7c24a', shirtText:'BET', shirtTextCol:'#e7c24a', prosthetic:true });
+          // drumsticks tapping
+          ctx.strokeStyle = '#caa24a'; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(x - 5, baseY - 24); ctx.lineTo(x - 12, baseY - 20 + hit * 3); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x + 5, baseY - 24); ctx.lineTo(x + 12, baseY - 20 - hit * 3); ctx.stroke();
+          nameTag(x, baseY - 50, 'CODY');
+        } else if (m.kind === 'max') {
+          // playing guitar next to Cody — white shirt, shoulder blonde, blue eyes
+          npcBase(x, baseY, { dir: 1, walk:false, pants:'#2a3344', shirt:'#eef0f4', shirtHi:'#ffffff', skin:'#f0d2b0', hair:'#d9b96a', hairStyle:'shoulder', eye:'#3a7ad0', t0:m.t0 });
+          // slung guitar he's strumming
+          ctx.save(); ctx.translate(x + 4, baseY - 20); ctx.rotate(-0.25);
+          rr(-2, -2, 18, 4, 2, '#7a2f3a'); circle(15, 0, 6, '#7a2f3a'); circle(15, 0, 2, '#2a1014');
+          var strum = Math.sin(animT * 4 + m.t0) * 2;
+          ctx.strokeStyle='#e8c6a2'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(13, -6); ctx.lineTo(13, 4 + strum); ctx.stroke();
+          ctx.restore();
+          nameTag(x, baseY - 50, 'MAX');
+        } else if (m.kind === 'kayla') {
+          // lounging on the couch, on her phone — long black hair, blue eyes, goth
+          var cy = baseY - 16;
+          ctx.globalAlpha = 0.28; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(x, baseY, 18, 3, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha=1;
+          // reclined body
+          rr(x - 16, cy - 2, 30, 8, 4, '#1a1620');           // torso (black dress)
+          rr(x - 20, cy + 2, 12, 6, 3, '#23232c');           // legs over the arm
+          rr(x + 10, cy - 6, 9, 9, 4, '#e8c6a2');            // head resting up
+          ctx.fillStyle = '#0e0e14'; ctx.beginPath(); ctx.arc(x + 14, cy - 6, 7, Math.PI*1.1, 0.2); ctx.fill();  // long black hair
+          rr(x + 17, cy - 6, 4, 14, 2, '#0e0e14');
+          circle(x + 16, cy - 6, 1.4, '#3a7ad0');            // blue eye
+          // glowing phone
+          softGlow(x + 4, cy - 8, 8, 'rgba(150,200,255,0.4)');
+          rr(x + 2, cy - 10, 5, 7, 1, '#101820'); rr(x + 2.6, cy - 9.4, 3.8, 5.6, 1, 'rgba(150,200,255,0.8)');
+          // fishnet/boots accent
+          ctx.strokeStyle='rgba(180,40,80,0.5)'; ctx.lineWidth=1; ctx.strokeRect(x-16, cy-2, 30, 8);
+          nameTag(x, baseY - 34, 'KAYLA');
+        } else if (m.kind === 'scorch') {
+          // spiky black hair, red shirt + red eyes; walks to Lilith to feed a rat
+          var feeding = m.state === 'feeding';
+          npcBase(x, baseY, { dir: m.dir, walk: (m.state==='toLilith'||m.state==='back'), pants:'#241a1a', shirt:'#a8222a', shirtHi:'#c83a3a', skin:'#e8c6a2', hair:'#101015', hairStyle:'spiky', eye:'#ff3a3a', t0:m.t0 });
+          // holds a little rat by the tail (until fed)
+          if (m.state === 'toLilith' || m.state === 'idle') {
+            var rx = x + (m.dir<0?-9:9), ry = baseY - 18;
+            ctx.fillStyle = '#8a8f98'; rr(rx-3, ry, 6, 4, 2, '#8a8f98'); circle(rx + (m.dir<0?-3:3), ry+2, 2, '#8a8f98');
+            ctx.strokeStyle='#8a8f98'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(rx+(m.dir<0?3:-3), ry+2); ctx.lineTo(rx+(m.dir<0?7:-7), ry); ctx.stroke();
+          }
+          if (feeding) { ctx.fillStyle='rgba(255,200,120,0.9)'; ctx.font='bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('\u2022 here you go \u2022', x, baseY - 50); }
+          nameTag(x, baseY - 50, 'SCORCH');
+        } else if (m.kind === 'ricky') {
+          // slightly heavy manager, smoking, yelling on phone
+          npcBase(x, baseY, { dir: m.dir, walk:true, pants:'#2a2a30', shirt:'#3a4250', shirtHi:'#4a5260', skin:'#e6c2a0', hair:'#5a4a3a', hairStyle:'bald', eye:'#3a2a1a', t0:m.t0, belly:true });
+          // round belly overlay
+          circle(x, baseY - 18, 7, '#3a4250');
+          // phone to ear + shouting marks
+          rr(x + (m.dir<0?-9:7), baseY - 34, 3, 6, 1, '#101820');
+          ctx.fillStyle = 'rgba(255,120,90,0.9)'; ctx.font='bold 8px Oswald'; ctx.textAlign='center';
+          if (((animT)|0)%2===0) ctx.fillText('!?', x + (m.dir<0?-14:14), baseY - 40);
+          // cigarette + smoke
+          var cx2 = x + (m.dir<0? -8: 8);
+          ctx.strokeStyle='#e8e8e0'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(cx2, baseY-33); ctx.lineTo(cx2+(m.dir<0?-3:3), baseY-33); ctx.stroke();
+          circle(cx2+(m.dir<0?-3:3), baseY-33, 0.8, '#ff7a3a');
+          ctx.globalAlpha=0.4; for (var s=0;s<3;s++){ circle(cx2+(m.dir<0?-4:4), baseY-36-s*4 - (animT*4%6), 1+s*0.5, 'rgba(200,200,200,0.5)'); } ctx.globalAlpha=1;
+          nameTag(x, baseY - 50, 'RICKY');
+        }
+      }
+    }
+    function nameTag(x, y, label) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
+      var w = ctx.measureText(label).width + 6;
+      rr(x - w/2, y - 8, w, 10, 3, 'rgba(10,8,14,0.5)');
+      ctx.fillStyle = 'rgba(231,200,121,0.95)'; ctx.fillText(label, x, y);
+    }
+
 
     /* ===========================================================
        LOOP
@@ -3296,6 +3508,8 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!playing) return;
       var dt = (t - lastT) / 1000; lastT = t;
       if (dt > 0.05) dt = 0.05;
+      animT += dt * 2.2;              // steady clock for ambient animation (Lilith, band, sparkles)
+      updateBand(dt);
       if (phase === 'sneak') updateSneak(dt);
       // reading phase: safe, nothing to update (camera holds)
       try { draw(); } catch (e) {}
@@ -3358,12 +3572,18 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     holdBtn(btnLeft, 'left'); holdBtn(btnRight, 'right'); holdBtn(btnCrouch, 'crouch');
 
-    function closeReading() {
+    function closeReading(e) {
+      if (e && e.preventDefault) e.preventDefault();
       if (phase !== 'reading') return;
       nextLevel();
     }
-    if (readClose) readClose.addEventListener('click', closeReading);
-    if (readCont) readCont.addEventListener('click', closeReading);
+    function bindClose(el) {
+      if (!el) return;
+      el.addEventListener('click', closeReading);
+      el.addEventListener('pointerup', closeReading);
+    }
+    bindClose(readClose);
+    bindClose(readCont);
 
     // character select
     if (charSel) {
