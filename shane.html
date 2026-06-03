@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css?v=tourbus7" />
+<link rel="stylesheet" href="styles.css?v=rummage1" />
 </head>
 <body data-standalone="shane">
 
@@ -257,73 +257,55 @@
     </details>
   </section>
 
-  <!-- ====== DON'T GET CAUGHT (tour-bus stealth, side-scroller) ====== -->
+  <!-- ====== DON'T WAKE HIM (rummage through his bunk) ====== -->
   <section class="char-section poster-section" id="shaneGameSection">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Get Caught</h2>
-    <span class="poster-eyebrow reveal-up">Break Into the Tour Bus &middot; Reach His Bunk</span>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Wake Him</h2>
+    <span class="poster-eyebrow reveal-up">He's Asleep &middot; Rummage for His Journal Pages</span>
 
-    <div class="sh-bi reveal-up" id="shBreakin">
+    <div class="sh-rg reveal-up" id="shBunk">
 
       <!-- HUD -->
-      <div class="sh-bi-hud">
-        <div class="sh-bi-gaze away" id="shGaze">
-          <span class="dot"></span><span id="shGazeText">He's not looking.</span>
+      <div class="sh-rg-hud">
+        <div class="sh-rg-zzz" id="shZzz">Fast asleep</div>
+        <div class="sh-rg-stat">
+          <span class="sh-rg-stat-label">Don't wake him</span>
+          <div class="sh-rg-bar"><div class="sh-rg-bar-fill" id="shStirFill"></div></div>
         </div>
-        <div class="sh-bi-stat">
-          <span class="sh-bi-stat-label">Suspicion</span>
-          <div class="sh-bi-bar"><div class="sh-bi-bar-fill susp" id="shSuspFill"></div></div>
-        </div>
-        <span class="sh-bi-count">Pages <b id="shCount">0</b></span>
-        <span class="sh-bi-count sh-bi-floor">Level <b id="shFloor">1</b></span>
+        <span class="sh-rg-count">Pages <b id="shQuota">0 / 3</b></span>
+        <span class="sh-rg-count sh-rg-level">Level <b id="shLevel">1</b></span>
       </div>
 
-      <!-- the bus -->
-      <div class="sh-bi-stage" id="shStage">
-        <canvas id="shCanvas" width="360" height="180" aria-label="Tour bus — sneak to Shane's bunk"></canvas>
+      <!-- the bunk room -->
+      <div class="sh-rg-stage" id="shStage">
+        <canvas id="shCanvas" width="360" height="230" aria-label="Shane's bunk — rummage while he sleeps"></canvas>
 
-        <!-- reading panel: header (tag + X) / scrollable entry / footer (Continue) -->
-        <div class="sh-bi-read" id="shReadPanel" hidden>
-          <div class="sh-bi-read-head">
+        <!-- reading panel (page-turn) -->
+        <div class="sh-rg-read" id="shReadPanel" hidden>
+          <div class="sh-rg-read-head">
             <span class="sh-jr-tag" id="shTag">&mdash;</span>
-            <button type="button" class="sh-bi-read-x" id="shReadClose" aria-label="Close entry and continue">✕</button>
+            <span class="sh-rg-sticker" id="shSticker" hidden></span>
+            <button type="button" class="sh-rg-read-x" id="shReadClose" aria-label="Close entry">✕</button>
           </div>
-          <div class="sh-bi-read-body">
+          <div class="sh-rg-read-body">
             <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
             <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
-            <p class="sh-bi-read-hint">You read it &mdash; tap <b>Continue</b> or <b>✕</b> to ride on to the next stop.</p>
           </div>
-          <div class="sh-bi-read-foot">
-            <button type="button" class="sh-bi-read-continue" id="shReadContinue">Continue to Next Level ▸</button>
+          <div class="sh-rg-read-foot">
+            <button type="button" class="sh-rg-read-continue" id="shReadContinue">Pocket It ▸</button>
           </div>
         </div>
 
-        <!-- intro / game-over overlay (scrolls if tall on mobile) -->
-        <div class="sh-bi-overlay" id="shOverlay">
-          <div class="sh-bi-overlay-inner">
-            <p class="sh-bi-callout" id="shCallout">Break Into the Bus.</p>
-            <p class="sh-bi-sub" id="shGameSub">Climb in the <b>front window</b> and sneak down the tour bus — past the amps, cases and kitchenette — to <b>Shane's bunk</b> at the back, where he keeps his journal. He <b>patrols the aisle</b>; stay out of his sightline and <b>crouch behind gear</b> when he looks your way. Reach the bunk and the page is yours to read. The deeper you get, the rarer the things you'll find — including pages he buried a long time ago.</p>
-
-            <div class="sh-bi-charsel" id="shCharSel" aria-label="Choose your character">
-              <span class="sh-bi-charsel-label">You're playing as:</span>
-              <div class="sh-bi-charsel-row">
-                <button type="button" class="sh-bi-charbtn sel" data-hero="girl">♀ Girl</button>
-                <button type="button" class="sh-bi-charbtn" data-hero="boy">♂ Boy</button>
-              </div>
-            </div>
-
-            <button type="button" class="sh-bi-btn" id="shStart">Break In</button>
+        <!-- intro / game-over overlay -->
+        <div class="sh-rg-overlay" id="shOverlay">
+          <div class="sh-rg-overlay-inner">
+            <p class="sh-rg-callout" id="shCallout">He's Asleep.</p>
+            <p class="sh-rg-sub" id="shGameSub">Shane's passed out in his bunk. His journal pages are stashed all over the nook &mdash; under the pillow, in the amp, his boots, that bag. <b>Press and hold</b> a glowing spot to rummage it; the ring fills as you dig. But rummaging is noisy &mdash; the <b>Don't wake him</b> meter climbs while you hold, and faster when he stirs. <b>Let go</b> the moment he shifts. Fill a spot to pull out a page (some are empty). Find enough pages to slip out &mdash; and the deeper you go, the rarer the secrets, including ones he buried a long time ago.</p>
+            <button type="button" class="sh-rg-btn" id="shStart">Start Rummaging</button>
           </div>
         </div>
       </div>
 
-      <!-- controls: big hold buttons (mobile + mouse); arrows / A,D / Down,S also work -->
-      <div class="sh-bi-controls" aria-label="Game controls">
-        <button type="button" class="sh-bi-cbtn move" id="shBtnLeft"  aria-label="Move left">◀</button>
-        <button type="button" class="sh-bi-cbtn crouch" id="shBtnCrouch" aria-label="Crouch">⊽ Crouch</button>
-        <button type="button" class="sh-bi-cbtn move" id="shBtnRight" aria-label="Move right">▶</button>
-      </div>
-
-      <p class="sh-bi-line" id="shLine">The bus is quiet. Pick your moment.</p>
+      <p class="sh-rg-line" id="shLine">He's out cold. Pick a spot.</p>
     </div>
   </section>
 
@@ -549,6 +531,6 @@ yeah. that's closer.</p>
   </div>
 </div>
 
-<script src="script.js?v=tourbus7"></script>
+<script src="script.js?v=rummage1"></script>
 </body>
 </html>
