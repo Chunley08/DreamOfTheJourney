@@ -123,7 +123,7 @@ const CHARACTERS = [
     name: "Rory",
     desc: "Peaky Blinder · Tommy O'Malley's youngest",
     nameStyle: "peaky",
-    portrait: "assets/Rory Pics/RoryMainPfp.webp",
+    portrait: "assets/Rory Pics/rory-portrait.jpg",
     pageId: "rory",
     href: "rory.html",
   },
@@ -2189,6 +2189,210 @@ document.addEventListener('DOMContentLoaded', function(){
     // initial lane layout
     measure();
     cards.forEach(function (c, i) { c._lane = i; setX(c); renderFace(c, ['lady', 'three', 'ace'][i]); });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
+})();
+
+
+/* ============================================================
+   SCORCH — MOSH PIT SURVIVAL (reaction mini-game)
+   Tap threats (bottles, hecklers, crashers, phones, horns)
+   before they expire; DON'T tap Hellfire the lizard. Misses &
+   wrong taps drain Composure. Survive the full set to win.
+   Difficulty (spawn rate + speed) ramps across the set. Only
+   initialises if #scorchMosh exists; all timers cleaned on stop.
+   ============================================================ */
+(function initScorchMosh() {
+  function build() {
+    var root = document.getElementById('scorchMosh');
+    if (!root || root._init) return;
+    root._init = true;
+
+    var pit       = document.getElementById('scMoshPit');
+    var overlay   = document.getElementById('scMoshOverlay');
+    var callout   = document.getElementById('scMoshCallout');
+    var rules     = document.getElementById('scMoshRules');
+    var startBtn  = document.getElementById('scMoshStart');
+    var coolFill  = document.getElementById('scCoolFill');
+    var setFill   = document.getElementById('scSetFill');
+    var scoreEl   = document.getElementById('scScore');
+    var comboEl   = document.getElementById('scCombo');
+    var lineEl    = document.getElementById('scMoshLine');
+    if (!pit || !startBtn) return;
+
+    var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var DURATION = 48000;          // full set length (ms)
+    var MAX_ON   = 5;              // max concurrent targets
+    var THREATS = [
+      { e: '\uD83C\uDF7A', tag: 'bottle' },
+      { e: '\uD83E\uDD2C', tag: 'heckler' },
+      { e: '\uD83C\uDFC3', tag: 'crasher' },
+      { e: '\uD83E\uDD33', tag: 'filming' },
+      { e: '\uD83E\uDD18', tag: 'hype \u2018em' }
+    ];
+    var HELLFIRE = { e: '\uD83E\uDD8E', tag: 'HELLFIRE \u2014 NO', avoid: true };
+
+    var LINES = {
+      combo: ["Yeah! That's it!", "Now we're fuckin' cookin'.", "Keep it comin'!", "Hell yeah \u2014 don't stop."],
+      miss:  ["The hell was that?", "Wake up back there!", "You blind? Tap it!", "Sloppy. Tighten up."],
+      lizard:["NOT the lizard, dipshit!", "Touch Hellfire again an' I END you.", "That's my GIRL \u2014 hands OFF."],
+      low:   ["I'm losin' it up here\u2026", "Hold it together, damn it."],
+      win:   ["Set's done. You didn't completely suck. High praise from me.", "We survived. Barely. I'll allow it.", "Not bad. Don't let it go to your head."],
+      lose:  ["And\u2026 you walked us off stage. Refunds for everybody.", "Cool's gone, show's over. Nice work, genius.", "Straight into the drum kit. Idiot."]
+    };
+    function pick(a) { return a[(Math.random() * a.length) | 0]; }
+    function say(txt, kind) {
+      lineEl.textContent = txt;
+      lineEl.className = 'sc-mosh-line' + (kind ? ' ' + kind : '');
+    }
+
+    // state
+    var running = false;
+    var score = 0, combo = 0, maxCombo = 0, cool = 100, elapsed = 0;
+    var spawnTimer = null, tickTimer = null;
+    var live = new Set();           // active target elements
+    var lowWarned = false;
+
+    function mult() { return Math.min(1 + Math.floor(combo / 5), 5); }
+    function progress() { return elapsed / DURATION; }   // 0..1
+
+    function updateHUD() {
+      scoreEl.textContent = score;
+      comboEl.textContent = 'x' + mult();
+      coolFill.style.width = Math.max(0, cool) + '%';
+      coolFill.className = 'sc-mosh-bar-fill' + (cool < 25 ? ' crit' : cool < 50 ? ' warn' : '');
+      setFill.style.width = Math.min(100, progress() * 100) + '%';
+    }
+    function bumpCombo() {
+      comboEl.classList.add('bump');
+      setTimeout(function () { comboEl.classList.remove('bump'); }, 130);
+    }
+    function flashBad() {
+      if (REDUCE) return;
+      pit.classList.remove('shake', 'flash-bad');
+      void pit.offsetWidth;          // reflow to restart animation
+      pit.classList.add('shake', 'flash-bad');
+      setTimeout(function () { pit.classList.remove('shake', 'flash-bad'); }, 400);
+    }
+
+    function curInterval() { return Math.max(430, 1050 - progress() * 560); }
+    function curLifetime() { return Math.max(780, 1550 - progress() * 720); }
+
+    function spawn() {
+      if (!running) return;
+      if (live.size < MAX_ON) {
+        var avoid = Math.random() < 0.16;
+        var def = avoid ? HELLFIRE : pick(THREATS);
+        var el = document.createElement('div');
+        el.className = 'sc-mosh-target' + (avoid ? ' avoid' : '');
+        el.innerHTML = def.e + '<span class="sc-tg-tag">' + def.tag + '</span>';
+        el._avoid = !!avoid; el._done = false;
+        // position within the pit, padded from edges + below the stage strip
+        el.style.left = (10 + Math.random() * 80) + '%';
+        el.style.top  = (18 + Math.random() * 70) + '%';
+        var life = curLifetime();
+        // The shrinking ring (::after) reads its duration from the --life
+        // custom property, so it always matches the expire timeout exactly.
+        el.style.setProperty('--life', life + 'ms');
+        el.addEventListener('click', function () { tap(el); });
+        el._expTimer = setTimeout(function () { expire(el); }, life);
+        pit.appendChild(el);
+        live.add(el);
+      }
+      spawnTimer = setTimeout(spawn, curInterval());
+    }
+
+    function removeTarget(el) {
+      clearTimeout(el._expTimer);
+      live.delete(el);
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }
+    function popOut(el) {
+      el.classList.add('hit');
+      setTimeout(function () { removeTarget(el); }, REDUCE ? 0 : 200);
+    }
+
+    function tap(el) {
+      if (!running || el._done) return;
+      el._done = true;
+      clearTimeout(el._expTimer);
+      if (el._avoid) {
+        cool -= 20; combo = 0;
+        say(pick(LINES.lizard), 'bad'); flashBad();
+        removeTarget(el);
+      } else {
+        combo++; maxCombo = Math.max(maxCombo, combo);
+        score += 10 * mult();
+        cool = Math.min(100, cool + 1);
+        if (combo % 5 === 0) { say(pick(LINES.combo), 'good'); }
+        bumpCombo();
+        popOut(el);
+      }
+      updateHUD();
+      checkLow();
+    }
+    function expire(el) {
+      if (el._done) return;
+      el._done = true;
+      if (el._avoid) {
+        score += 5;                 // correctly ignored Hellfire
+      } else {
+        cool -= 12; combo = 0;
+        say(pick(LINES.miss), 'bad'); flashBad();
+      }
+      removeTarget(el);
+      updateHUD();
+      checkLow();
+      if (cool <= 0) end('lose');
+    }
+    function checkLow() {
+      if (cool <= 0) { end('lose'); return; }
+      if (cool < 25 && !lowWarned) { lowWarned = true; say(pick(LINES.low), 'bad'); }
+      if (cool >= 25) lowWarned = false;
+    }
+
+    function tick() {
+      if (!running) return;
+      elapsed += 100;
+      updateHUD();
+      if (cool <= 0) { end('lose'); return; }
+      if (elapsed >= DURATION) { end('win'); return; }
+    }
+
+    function clearAll() {
+      clearTimeout(spawnTimer); spawnTimer = null;
+      clearInterval(tickTimer); tickTimer = null;
+      live.forEach(function (el) { clearTimeout(el._expTimer); if (el.parentNode) el.parentNode.removeChild(el); });
+      live.clear();
+    }
+
+    function start() {
+      clearAll();
+      running = true;
+      score = 0; combo = 0; maxCombo = 0; cool = 100; elapsed = 0; lowWarned = false;
+      overlay.classList.add('hidden');
+      say("Tap the trouble. Don't touch the lizard. Go.");
+      updateHUD();
+      spawn();
+      tickTimer = setInterval(tick, 100);
+    }
+
+    function end(result) {
+      running = false;
+      clearAll();
+      var won = result === 'win';
+      callout.textContent = won ? 'Set Survived.' : 'Show\u2019s Over.';
+      rules.innerHTML = '<span class="sc-mosh-finalscore">Final Score <b>' + score + '</b>Best combo x' + Math.min(1 + Math.floor(maxCombo / 5), 5) + '</span>';
+      startBtn.textContent = 'Run It Back';
+      overlay.classList.remove('hidden');
+      say(pick(won ? LINES.win : LINES.lose), won ? 'good' : 'bad');
+    }
+
+    startBtn.addEventListener('click', start);
+    updateHUD();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
