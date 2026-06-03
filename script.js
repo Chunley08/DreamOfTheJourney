@@ -2378,19 +2378,22 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 
 
+
 /* ============================================================
-   SHANE — DON'T GET CAUGHT  (top-down stealth break-in)
+   SHANE — DON'T GET CAUGHT  (side-view pixel stealth)
    ------------------------------------------------------------
-   You play a little sprite sneaking into Shane's room. Move with
-   arrows / WASD / on-screen dpad. Shane sits/patrols and sweeps a
-   line-of-sight cone. Duck behind furniture (it blocks his view)
-   so he can't see you. If you're caught in his cone while he's
-   LOOKING and not hidden, suspicion spikes. Reach the desk to
-   trigger the READING phase — hold to read a journal page while
-   he looks away, release when he glances back (reuses the tiered
-   entry generator). Each page you steal scales the difficulty:
-   he looks more often, sweeps faster, suspicion bleaks slower.
-   The rarest pages are the dark ones he buried long ago.
+   A little pixel YOU sneaks across Shane's room to the pixel
+   journal on his desk. Side view. Walk left/right, CROUCH behind
+   furniture to break his sightline. Shane sits with his bass and
+   periodically looks up and scans the room. You're only safe when
+   you're OUT OF HIS SIGHTLINE — behind a piece of furniture, or
+   crouched below low cover. Caught in his gaze with no cover =
+   suspicion climbs; max it and he closes the book.
+   Reach the desk -> READING phase (hold to read while he looks
+   away, release when he glances back; reuses the tiered entry
+   generator with all the lines). Each page scales difficulty.
+   Controls: big on-screen <  >  CROUCH buttons (hold, multitouch)
+   AND arrows / A,D / Down,S on keyboard. Same engine drives both.
    Only initialises if #shBreakin exists.
    ============================================================ */
 (function initShaneBreakin() {
@@ -2416,23 +2419,18 @@ document.addEventListener('DOMContentLoaded', function(){
     var subEl    = document.getElementById('shSub');
     var startBtn = document.getElementById('shStart');
     var lineEl   = document.getElementById('shLine');
-    var pad      = document.getElementById('shPad');
+    var btnLeft  = document.getElementById('shBtnLeft');
+    var btnRight = document.getElementById('shBtnRight');
+    var btnCrouch= document.getElementById('shBtnCrouch');
     if (!canvas || !startBtn) return;
     var ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
 
     var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function pick(a) { return a[(Math.random() * a.length) | 0]; }
     function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
     function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-    /* ===========================================================
-       ENTRY GENERATOR — a SHIT TON of lines, tiered by rarity.
-       chance per page (before deep-gating):
-         common ~52%  uncommon ~30%  rare ~13%  buried ~5%
-       BURIED = the dark gang/bodies confessions; gated behind
-       reading several pages, capped per run, deliberately scarce.
-       LEGENDARY ("I am in love with Eurielle.") is rarer still.
-       =========================================================== */
     var DATES = [
       "\u2014 late", "\u2014 couldn't sleep", "\u2014 3 a.m. again", "\u2014 tour bus, somewhere",
       "\u2014 rained all day", "\u2014 day off. didn't leave.", "\u2014 after soundcheck",
@@ -2621,7 +2619,6 @@ document.addEventListener('DOMContentLoaded', function(){
       remember(e.t);
       return { tag: e.tag, text: e.t, date: pick(DATES), rarity: tier };
     }
-
     /* ---------- banter ---------- */
     var LINES = {
       got:   ["Got that one.", "\u2026Noted.", "Keep going.", "Don't push it.", "Still here.", "One more. Maybe."],
@@ -2637,84 +2634,6 @@ document.addEventListener('DOMContentLoaded', function(){
     function say(t, k) { lineEl.textContent = t; lineEl.className = 'sh-bi-line' + (k ? ' ' + k : ''); }
 
     /* ===========================================================
-       ROOM GEOMETRY  (logical coords on a 720x480 canvas)
-       =========================================================== */
-    var W = 720, H = 480;
-    // furniture = view-blocking + hideable cover. {x,y,w,h, hide:bool}
-    var FURN = [
-      { x: 90,  y: 110, w: 120, h: 46, hide: true,  label: 'couch' },
-      { x: 300, y: 70,  w: 60,  h: 60, hide: true,  label: 'crate' },
-      { x: 470, y: 120, w: 150, h: 40, hide: true,  label: 'amp stack' },
-      { x: 120, y: 250, w: 50,  h: 90, hide: true,  label: 'wardrobe' },
-      { x: 330, y: 250, w: 80,  h: 50, hide: true,  label: 'table' },
-      { x: 540, y: 280, w: 70,  h: 70, hide: true,  label: 'cab' },
-      { x: 250, y: 360, w: 110, h: 36, hide: true,  label: 'bench' }
-    ];
-    // desk (goal) — top-right corner
-    var DESK = { x: 596, y: 64, w: 96, h: 60 };
-    // door (start / escape) — bottom-left
-    var DOOR = { x: 24, y: 410, w: 56, h: 46 };
-    // Shane sits roughly center-top, sweeping a cone
-    var shane = { x: 360, y: 200, facing: 0 };
-    // player
-    var P = { x: DOOR.x + DOOR.w / 2, y: DOOR.y + DOOR.h / 2, r: 11, speed: 150 };
-
-    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
-      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-    }
-    function circleInRect(cx, cy, cr, rx, ry, rw, rh) {
-      var nx = clamp(cx, rx, rx + rw), ny = clamp(cy, ry, ry + rh);
-      var dx = cx - nx, dy = cy - ny;
-      return dx * dx + dy * dy <= cr * cr;
-    }
-    // is the player currently hidden? (overlapping any hide-furniture)
-    function playerHidden() {
-      for (var i = 0; i < FURN.length; i++) {
-        var f = FURN[i];
-        if (f.hide && circleInRect(P.x, P.y, P.r * 0.6, f.x, f.y, f.w, f.h)) return true;
-      }
-      return false;
-    }
-    // does a line from shane to player cross any furniture? (LOS blocked)
-    function losBlocked() {
-      for (var i = 0; i < FURN.length; i++) {
-        var f = FURN[i];
-        if (segIntersectsRect(shane.x, shane.y, P.x, P.y, f.x, f.y, f.w, f.h)) return true;
-      }
-      return false;
-    }
-    function segIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
-      // quick: if either endpoint inside
-      if (x1 >= rx && x1 <= rx + rw && y1 >= ry && y1 <= ry + rh) return true;
-      if (x2 >= rx && x2 <= rx + rw && y2 >= ry && y2 <= ry + rh) return true;
-      return segSeg(x1, y1, x2, y2, rx, ry, rx + rw, ry) ||
-             segSeg(x1, y1, x2, y2, rx + rw, ry, rx + rw, ry + rh) ||
-             segSeg(x1, y1, x2, y2, rx + rw, ry + rh, rx, ry + rh) ||
-             segSeg(x1, y1, x2, y2, rx, ry + rh, rx, ry);
-    }
-    function segSeg(a, b, c, d, p, q, r2, s) {
-      var det = (c - a) * (s - q) - (r2 - p) * (d - b);
-      if (det === 0) return false;
-      var lambda = ((s - q) * (r2 - a) + (p - r2) * (s - b)) / det;
-      var gamma = ((b - d) * (r2 - a) + (c - a) * (s - b)) / det;
-      return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
-    }
-
-    // cone of vision params (scale with floor/difficulty)
-    function coneHalfAngle() { return 0.42; }                 // radians, each side
-    function coneRange()     { return 260; }
-    // is player inside Shane's vision cone right now?
-    function inCone() {
-      var dx = P.x - shane.x, dy = P.y - shane.y;
-      var dist = Math.hypot(dx, dy);
-      if (dist > coneRange()) return false;
-      var ang = Math.atan2(dy, dx);
-      var diff = Math.abs(normAngle(ang - shane.facing));
-      return diff <= coneHalfAngle();
-    }
-    function normAngle(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
-
-    /* ===========================================================
        STATE
        =========================================================== */
     var playing = false, rafId = null, lastT = 0;
@@ -2723,25 +2642,71 @@ document.addEventListener('DOMContentLoaded', function(){
     var suspicion = 0, count = 0, best = 0, floor = 1;
     var lastEntry = '', currentRarity = 'common';
     var foundEurielleEver = false, eurielleThisGame = false, buriedThisGame = 0, buriedFindsRun = 0, rareFinds = 0;
-    // reading sub-state
     var reading = false, readMeter = 0, readLock = false, savoring = false, savorTimer = 0;
-    // input
-    var keys = { up: false, down: false, left: false, right: false };
-    // shane sweep
-    var sweepDir = 1, sweepBase = 0;
+    var keys = { left: false, right: false, crouch: false };
+    var animT = 0;                  // walk-cycle clock
 
+    /* ===========================================================
+       ROOM GEOMETRY  (logical 320x180 pixel-art canvas, scaled up)
+       Side view: floor along the bottom; furniture sits on it.
+       =========================================================== */
+    var W = 320, H = 180;
+    var FLOOR_Y = 150;              // top of the floor band (feet rest here)
+    // furniture: x,w along floor; h = height; tall = full sightline block, low = crouch-only cover
+    var FURN = [
+      { x: 40,  w: 34, h: 30, tall: false, label: 'crate' },   // low — crouch to hide
+      { x: 104, w: 40, h: 46, tall: true,  label: 'amp'   },   // tall — full cover standing
+      { x: 170, w: 30, h: 26, tall: false, label: 'stool' },   // low
+      { x: 214, w: 38, h: 44, tall: true,  label: 'cab'   }    // tall
+    ];
+    // desk + journal (goal), far right
+    var DESK = { x: 272, w: 40, h: 26 };
+    // door (start / escape), far left
+    var DOOR = { x: 6, w: 22, h: 44 };
+    // Shane sits roughly center-right with his bass, facing variable
+    var shane = { x: 250, faceDir: -1 };   // faceDir: -1 looks left (toward door), +1 right
+    // player
+    var P = { x: DOOR.x + DOOR.w / 2, w: 12, hStand: 22, hCrouch: 13, speed: 64, crouching: false, dir: 1, moving: false };
+
+    function playerHeight() { return P.crouching ? P.hCrouch : P.hStand; }
+    function playerTop() { return FLOOR_Y - playerHeight(); }
+
+    function rangesOverlap(a0, a1, b0, b1) { return a0 < b1 && a1 > b0; }
+    // which furniture is the player horizontally within?
+    function coverAtPlayer() {
+      var px0 = P.x - P.w / 2, px1 = P.x + P.w / 2;
+      for (var i = 0; i < FURN.length; i++) {
+        var f = FURN[i];
+        if (rangesOverlap(px0, px1, f.x, f.x + f.w)) return f;
+      }
+      return null;
+    }
+    // hidden = behind cover that's tall enough for your current pose
+    function playerHidden() {
+      var f = coverAtPlayer();
+      if (!f) return false;
+      if (f.tall) return true;               // tall furniture hides you standing or crouched
+      return P.crouching;                    // low furniture only hides you crouched
+    }
+    // Shane's eye position
+    function eye() { return { x: shane.x, y: FLOOR_Y - 30 }; }
+    // is the player on the side Shane is currently facing? (cover is handled by playerHidden)
+    function inSightline() {
+      if (shane.faceDir < 0) return P.x <= shane.x;
+      return P.x >= shane.x;
+    }
+
+    /* ---------- difficulty scales with pages stolen (floor) ---------- */
     function difficulty() {
-      // scales with floor (pages stolen)
       return {
-        lookChance: clamp(0.40 + floor * 0.05, 0.40, 0.78),  // prob a gaze ends in "looking"
-        sweepSpeed: clamp(0.9 + floor * 0.18, 0.9, 2.4),     // cone sweep speed
-        suspGain:   clamp(46 + floor * 5, 46, 80),           // per second when seen
-        suspLeak:   clamp(20 - floor * 1.6, 8, 20),          // per second recovery
-        awayMin:    clamp(2200 - floor * 120, 900, 2200),
-        awayMax:    clamp(3600 - floor * 160, 1500, 3600),
-        lookMin:    clamp(900 + floor * 60, 900, 1800),
-        lookMax:    clamp(1500 + floor * 90, 1500, 2600),
-        readSpeed:  clamp(46 - floor * 1.5, 30, 46)
+        lookChance: clamp(0.52 + floor * 0.05, 0.52, 0.86),
+        suspGain:   clamp(64 + floor * 6, 64, 104),
+        suspLeak:   clamp(20 - floor * 1.6, 8, 20),
+        awayMin:    clamp(1500 - floor * 110, 650, 1500),
+        awayMax:    clamp(2600 - floor * 150, 1100, 2600),
+        lookMin:    clamp(950 + floor * 60, 950, 1800),
+        lookMax:    clamp(1600 + floor * 90, 1600, 2600),
+        readSpeed:  clamp(44 - floor * 1.5, 28, 44)
       };
     }
 
@@ -2751,29 +2716,27 @@ document.addEventListener('DOMContentLoaded', function(){
       gaze.className = 'sh-bi-gaze ' + state;
       gazeTxt.textContent = state === 'away' ? pick(LINES.away) : state === 'turning' ? pick(LINES.turn) : pick(LINES.look);
       if (state === 'away')          gazeTimer = rand(d.awayMin, d.awayMax);
-      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(520 - floor * 14, 280, 520);
+      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(560 - floor * 14, 300, 560);
       else                           gazeTimer = rand(d.lookMin, d.lookMax);
+      // when he looks, he faces toward wherever the player is (makes cover matter)
+      if (state === 'turning' || state === 'looking') shane.faceDir = (P.x <= shane.x) ? -1 : 1;
     }
 
-    /* ---------- reading phase (reuses entry generator) ---------- */
+    /* ---------- reading phase ---------- */
     function enterReading() {
       phase = 'reading';
-      readPanel.hidden = false;
-      readStat.hidden = false;
+      readPanel.hidden = false; readStat.hidden = false;
       reading = false; readMeter = 0; readLock = false; savoring = false;
-      loadEntry();
-      applyRead();
+      loadEntry(); applyRead();
       say(pick(LINES.reachDesk), 'good');
     }
     function exitReading() {
       phase = 'sneak';
-      readPanel.hidden = true;
-      readStat.hidden = true;
+      readPanel.hidden = true; readStat.hidden = true;
       reading = false; savoring = false;
-      // nudge the player off the desk so they don't instantly re-trigger
-      P.y = DESK.y + DESK.h + P.r + 6;
+      P.x = DESK.x - 16;                 // step back from the desk
       floor++; floorEl.textContent = floor;
-      say("Page in hand. Get back to the door — or push your luck.", 'good');
+      say("Page in hand. Back to the door — or push your luck.", 'good');
     }
     function loadEntry() {
       var e = genEntry();
@@ -2822,33 +2785,23 @@ document.addEventListener('DOMContentLoaded', function(){
       flashCanvas();
       if (suspicion >= 100) over(false);
     }
-
-    /* ---------- sneak phase update ---------- */
     function flashCanvas() {
       root.classList.remove('sh-bi-flash'); void root.offsetWidth; root.classList.add('sh-bi-flash');
       setTimeout(function () { root.classList.remove('sh-bi-flash'); }, 360);
     }
 
+    /* ---------- sneak update ---------- */
     function updateSneak(dt) {
       var d = difficulty();
-      // move player
+      P.crouching = !!keys.crouch;
       var vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-      var vy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
-      if (vx || vy) {
-        var len = Math.hypot(vx, vy) || 1;
-        var ux = (vx / len) * P.speed * dt, uy = (vy / len) * P.speed * dt;
-        var minD = 26;
-        // try full move, then slide on each axis so you don't wedge on Shane
-        var tx = clamp(P.x + ux, P.r, W - P.r);
-        var ty = clamp(P.y + uy, P.r, H - P.r);
-        if (Math.hypot(tx - shane.x, ty - shane.y) > minD) { P.x = tx; P.y = ty; }
-        else {
-          var ax = clamp(P.x + ux, P.r, W - P.r);
-          if (Math.hypot(ax - shane.x, P.y - shane.y) > minD) P.x = ax;
-          var ay = clamp(P.y + uy, P.r, H - P.r);
-          if (Math.hypot(P.x - shane.x, ay - shane.y) > minD) P.y = ay;
-        }
-      }
+      P.moving = !!vx && !P.crouching ? true : (!!vx);
+      if (vx) {
+        P.dir = vx > 0 ? 1 : -1;
+        var sp = P.speed * (P.crouching ? 0.55 : 1);
+        P.x = clamp(P.x + vx * sp * dt, P.w / 2 + 2, W - P.w / 2 - 2);
+        animT += dt * (P.crouching ? 6 : 10);
+      } else { P.moving = false; }
 
       // gaze cycle
       gazeTimer -= dt * 1000;
@@ -2858,39 +2811,21 @@ document.addEventListener('DOMContentLoaded', function(){
         else setGaze('away');
       }
 
-      // shane sweeps his cone while looking/turning
-      if (gazeState === 'looking') {
-        sweepBase += sweepDir * d.sweepSpeed * dt;
-        if (sweepBase > 0.9) { sweepBase = 0.9; sweepDir = -1; }
-        if (sweepBase < -0.9) { sweepBase = -0.9; sweepDir = 1; }
-      }
-      // facing: aim generally toward the room, plus sweep
-      shane.facing = (Math.PI / 2) + sweepBase * 0.9; // mostly downward, sweeping L/R
-
-      // detection: seen only if LOOKING + in cone + not hidden + LOS not blocked
-      var seen = (gazeState === 'looking') && inCone() && !playerHidden() && !losBlocked();
-      var nearSeen = (gazeState === 'turning') && inCone() && !playerHidden() && !losBlocked();
-
+      // detection: seen only if LOOKING + in sightline + not hidden
+      var seen = (gazeState === 'looking') && inSightline() && !playerHidden();
       if (seen) {
         suspicion = clamp(suspicion + d.suspGain * dt, 0, 100);
-        if (suspicion < 40 && Math.random() < 0.04) say(pick(LINES.spot), 'bad');
+        if (suspicion < 45 && Math.random() < 0.05) say(pick(LINES.spot), 'bad');
         if (suspicion >= 100) { over(false); return; }
       } else {
         suspicion = clamp(suspicion - d.suspLeak * dt, 0, 100);
-        if (nearSeen && Math.random() < 0.02) say(pick(LINES.spot), 'bad');
       }
       suspFill.style.width = suspicion + '%';
 
       // reached desk?
-      if (rectsOverlap(P.x - P.r, P.y - P.r, P.r * 2, P.r * 2, DESK.x, DESK.y, DESK.w, DESK.h)) {
-        enterReading();
-        return;
-      }
-      // escaped through door (only counts as a win-ish if you've read at least one)
-      if (count > 0 && rectsOverlap(P.x - P.r, P.y - P.r, P.r * 2, P.r * 2, DOOR.x, DOOR.y, DOOR.w, DOOR.h)) {
-        over(true);
-        return;
-      }
+      if (rangesOverlap(P.x - P.w / 2, P.x + P.w / 2, DESK.x, DESK.x + DESK.w)) { enterReading(); return; }
+      // escaped through the door (only meaningful once you've read something)
+      if (count > 0 && rangesOverlap(P.x - P.w / 2, P.x + P.w / 2, DOOR.x, DOOR.x + DOOR.w)) { over(true); return; }
     }
 
     function updateReading(dt) {
@@ -2900,7 +2835,6 @@ document.addEventListener('DOMContentLoaded', function(){
         if (savorTimer <= 0) { savoring = false; exitReading(); }
         return;
       }
-      // gaze cycle continues during reading
       gazeTimer -= dt * 1000;
       if (gazeTimer <= 0) {
         if (gazeState === 'away') setGaze('turning');
@@ -2912,80 +2846,141 @@ document.addEventListener('DOMContentLoaded', function(){
         readMeter += d.readSpeed * dt; applyRead();
         if (readMeter >= 100) completeRead();
       }
-      // slow leak during reading too
       if (suspicion > 0) { suspicion = Math.max(0, suspicion - 10 * dt); suspFill.style.width = suspicion + '%'; }
     }
 
     /* ===========================================================
-       RENDER
+       PIXEL RENDER  — chunky, readable, matches the page palette
        =========================================================== */
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      // floor
-      var grd = ctx.createLinearGradient(0, 0, 0, H);
-      grd.addColorStop(0, '#0c1626'); grd.addColorStop(1, '#070d18');
-      ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-      // floor planks
-      ctx.strokeStyle = 'rgba(95,176,212,0.06)'; ctx.lineWidth = 1;
-      for (var gx = 0; gx < W; gx += 48) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
-      for (var gy = 0; gy < H; gy += 48) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke(); }
+    var C = {
+      floor:  '#0e1b2c', floorHi: '#15293f', wall: '#091420', wallHi: 'rgba(95,176,212,0.05)',
+      door:   '#1c3a2a', doorFrame: '#3fe39a',
+      desk:   '#3a2e22', deskTop: '#5a4632', book: '#d8d2c0', bookEdge: '#8a6d1f', bookSpine: '#b44a4a',
+      furnA:  '#2a3c50', furnB: '#22323f', furnEdge: 'rgba(95,176,212,0.45)',
+      youSkin:'#e9c9a8', youHair: '#3a2a22', youShirt: '#5fb0d4', youPants: '#243447', youHi:'#a8d4ec',
+      shSkin: '#d8b48c', shHair: '#1c1c22', shShirt: '#4a4a55', shBass: '#caa24a', shPants:'#20202a',
+      seenBeam: 'rgba(255,106,82,0.16)', warnBeam: 'rgba(255,194,74,0.13)', hideTag:'#5fe39a'
+    };
+    function px(x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(x | 0, y | 0, w | 0, h | 0); }
 
-      // vision cone (drawn under furniture so cover reads correctly)
+    function draw() {
+      // wall
+      px(0, 0, W, H, C.wall);
+      ctx.strokeStyle = C.wallHi; ctx.lineWidth = 1;
+      for (var gx = 0; gx < W; gx += 16) { ctx.beginPath(); ctx.moveTo(gx + 0.5, 0); ctx.lineTo(gx + 0.5, FLOOR_Y); ctx.stroke(); }
+      // floor band
+      px(0, FLOOR_Y, W, H - FLOOR_Y, C.floor);
+      px(0, FLOOR_Y, W, 2, C.floorHi);
+      for (var fx = 0; fx < W; fx += 20) px(fx, FLOOR_Y + 4, 1, H - FLOOR_Y - 4, C.floorHi);
+
+      // sightline beam (drawn low, behind sprites) when he looks/turns
       if (gazeState !== 'away') {
-        var range = coneRange(), ha = coneHalfAngle();
-        var a0 = shane.facing - ha, a1 = shane.facing + ha;
+        var e = eye();
+        var beamCol = gazeState === 'looking' ? C.seenBeam : C.warnBeam;
+        var endX = shane.faceDir < 0 ? 0 : W;
+        ctx.fillStyle = beamCol;
         ctx.beginPath();
-        ctx.moveTo(shane.x, shane.y);
-        for (var a = a0; a <= a1; a += 0.05) ctx.lineTo(shane.x + Math.cos(a) * range, shane.y + Math.sin(a) * range);
-        ctx.closePath();
-        var coneCol = gazeState === 'looking' ? 'rgba(255,106,82,0.20)' : 'rgba(255,194,74,0.14)';
-        ctx.fillStyle = coneCol; ctx.fill();
-        ctx.strokeStyle = gazeState === 'looking' ? 'rgba(255,106,82,0.5)' : 'rgba(255,194,74,0.35)';
-        ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.moveTo(e.x, e.y - 6); ctx.lineTo(endX, FLOOR_Y - 40); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(e.x, FLOOR_Y);
+        ctx.closePath(); ctx.fill();
       }
 
-      // door
-      drawRect(DOOR, '#1c3a2a', '#3fe39a', 'DOOR');
-      // desk (goal)
-      drawRect(DESK, '#2a2438', '#c8a24a', 'DESK');
-      // little journal book on desk
-      ctx.fillStyle = '#d8d2c0'; ctx.fillRect(DESK.x + DESK.w / 2 - 14, DESK.y + DESK.h / 2 - 9, 28, 18);
-      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(DESK.x + DESK.w / 2 - 14, DESK.y + DESK.h / 2 - 9, 28, 18);
-      ctx.beginPath(); ctx.moveTo(DESK.x + DESK.w / 2, DESK.y + DESK.h / 2 - 9); ctx.lineTo(DESK.x + DESK.w / 2, DESK.y + DESK.h / 2 + 9); ctx.stroke();
+      // door (left)
+      px(DOOR.x, FLOOR_Y - DOOR.h, DOOR.w, DOOR.h, C.door);
+      ctx.strokeStyle = C.doorFrame; ctx.lineWidth = 1;
+      ctx.strokeRect(DOOR.x + 0.5, FLOOR_Y - DOOR.h + 0.5, DOOR.w - 1, DOOR.h - 1);
+      px(DOOR.x + DOOR.w - 6, FLOOR_Y - DOOR.h / 2, 3, 3, C.doorFrame); // knob
+
+      // desk + journal (right)
+      var dTopY = FLOOR_Y - DESK.h;
+      px(DESK.x, dTopY, DESK.w, DESK.h, C.desk);
+      px(DESK.x, dTopY, DESK.w, 4, C.deskTop);
+      px(DESK.x + 4, FLOOR_Y - 14, 4, 14, C.desk);
+      px(DESK.x + DESK.w - 8, FLOOR_Y - 14, 4, 14, C.desk);
+      // little book on the desk
+      var bx = DESK.x + DESK.w / 2 - 7, by = dTopY - 8;
+      px(bx, by, 14, 8, C.book);
+      px(bx + 6, by, 2, 8, C.bookSpine);
+      ctx.strokeStyle = C.bookEdge; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 13, 7);
+      if (((animT * 2) | 0) % 2 === 0) px(bx + 3, by - 3, 2, 2, '#e7c879'); // sparkle
 
       // furniture
       for (var i = 0; i < FURN.length; i++) {
         var f = FURN[i];
-        var over = circleInRect(P.x, P.y, P.r * 0.6, f.x, f.y, f.w, f.h);
-        ctx.fillStyle = over ? 'rgba(95,176,212,0.30)' : 'rgba(40,60,84,0.92)';
-        ctx.fillRect(f.x, f.y, f.w, f.h);
-        ctx.strokeStyle = over ? '#5fe39a' : 'rgba(95,176,212,0.5)';
-        ctx.lineWidth = over ? 2 : 1; ctx.strokeRect(f.x, f.y, f.w, f.h);
+        var fy = FLOOR_Y - f.h;
+        var pc = coverAtPlayer();
+        var active = pc === f && playerHidden();
+        px(f.x, fy, f.w, f.h, active ? '#274a3a' : C.furnA);
+        px(f.x, fy, f.w, 3, active ? '#3fe39a' : C.furnB);
+        ctx.strokeStyle = active ? C.hideTag : C.furnEdge; ctx.lineWidth = 1;
+        ctx.strokeRect(f.x + 0.5, fy + 0.5, f.w - 1, f.h - 1);
+        // amp = grille dots; cab = speaker circle; crate/stool = slats
+        if (f.label === 'amp') { for (var ax = f.x + 4; ax < f.x + f.w - 3; ax += 4) for (var ay = fy + 6; ay < fy + f.h - 3; ay += 4) px(ax, ay, 1, 1, C.furnEdge); }
+        else if (f.label === 'cab') { ctx.strokeStyle = C.furnEdge; ctx.beginPath(); ctx.arc(f.x + f.w / 2, fy + f.h / 2, f.h / 3, 0, 6.283); ctx.stroke(); }
+        else { for (var sy = fy + 5; sy < fy + f.h - 2; sy += 6) px(f.x + 3, sy, f.w - 6, 1, C.furnEdge); }
       }
 
-      // shane
-      ctx.beginPath(); ctx.arc(shane.x, shane.y, 15, 0, Math.PI * 2);
-      ctx.fillStyle = gazeState === 'looking' ? '#ff6a52' : gazeState === 'turning' ? '#ffc24a' : '#5fb0d4';
-      ctx.fill();
-      ctx.fillStyle = '#06101a'; ctx.font = 'bold 13px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('S', shane.x, shane.y + 1);
-      // facing tick
-      ctx.strokeStyle = '#06101a'; ctx.lineWidth = 2; ctx.beginPath();
-      ctx.moveTo(shane.x, shane.y); ctx.lineTo(shane.x + Math.cos(shane.facing) * 18, shane.y + Math.sin(shane.facing) * 18); ctx.stroke();
+      // SHANE — sitting with his bass, center-right
+      drawShane();
 
-      // player
-      var hidden = playerHidden();
-      ctx.beginPath(); ctx.arc(P.x, P.y, P.r, 0, Math.PI * 2);
-      ctx.fillStyle = hidden ? 'rgba(168,200,224,0.55)' : '#e8eef4';
-      ctx.fill();
-      ctx.strokeStyle = hidden ? '#5fe39a' : '#5fb0d4'; ctx.lineWidth = 2; ctx.stroke();
-      if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 9px Oswald, sans-serif'; ctx.fillText('hid', P.x, P.y - P.r - 7); }
+      // YOU — little pixel person
+      drawYou();
     }
-    function drawRect(R, fill, stroke, label) {
-      ctx.fillStyle = fill; ctx.fillRect(R.x, R.y, R.w, R.h);
-      ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.strokeRect(R.x, R.y, R.w, R.h);
-      ctx.fillStyle = stroke; ctx.font = 'bold 9px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(label, R.x + R.w / 2, R.y + R.h / 2 + (label === 'DESK' ? -16 : 0));
+
+    function drawShane() {
+      var x = shane.x, baseY = FLOOR_Y;
+      var sit = 10;                          // sits a bit lower
+      // legs (seated)
+      px(x - 6, baseY - 8, 5, 8, C.shPants);
+      px(x + 1, baseY - 8, 5, 8, C.shPants);
+      // torso
+      px(x - 6, baseY - 22, 12, 15, C.shShirt);
+      // head
+      px(x - 4, baseY - 32, 8, 9, C.shSkin);
+      px(x - 5, baseY - 34, 10, 4, C.shHair);   // hair top
+      px(x - 5, baseY - 32, 1, 4, C.shHair);
+      px(x + 4, baseY - 32, 1, 4, C.shHair);
+      // eyes — direction shows where he looks
+      var ex = shane.faceDir < 0 ? x - 3 : x + 2;
+      if (gazeState === 'away') px(x - 2, baseY - 28, 4, 1, '#0a0a0a');   // looking down at bass (closed-ish)
+      else { px(ex, baseY - 29, 2, 2, '#0a0a0a'); }
+      // bass across his lap (a gold slash)
+      ctx.save();
+      ctx.translate(x, baseY - 12); ctx.rotate(-0.35);
+      px(-2, -2, 22, 4, C.shBass);
+      px(16, -4, 7, 8, C.shBass);            // body of the bass
+      ctx.restore();
+      // a tiny "S" tag above when looking, for clarity
+      if (gazeState === 'looking') px(x - 1, baseY - 40, 2, 2, '#ff6a52');
+    }
+
+    function drawYou() {
+      var x = P.x, h = playerHeight(), topY = FLOOR_Y - h;
+      var crouch = P.crouching;
+      var hidden = playerHidden();
+      var d = P.dir;
+      var bob = (P.moving && !crouch) ? (Math.sin(animT) * 1.2) : 0;
+      var ty = topY + bob;
+      ctx.globalAlpha = hidden ? 0.55 : 1;
+      // legs / walk cycle
+      var legSwing = P.moving ? Math.sin(animT) * 2 : 0;
+      var legY = FLOOR_Y - (crouch ? 5 : 7);
+      px(x - 4, legY, 3, crouch ? 5 : 7, C.youPants);
+      px(x + 1, legY - (P.moving ? legSwing : 0), 3, crouch ? 5 : 7, C.youPants);
+      // torso (shorter when crouching)
+      var torsoH = crouch ? 7 : 11;
+      px(x - 5, FLOOR_Y - (crouch ? 5 : 7) - torsoH, 10, torsoH, C.youShirt);
+      px(x - 5, FLOOR_Y - (crouch ? 5 : 7) - torsoH, 10, 2, C.youHi);
+      // head
+      var headY = ty;
+      px(x - 4, headY, 8, 8, C.youSkin);
+      px(x - 5, headY - 2, 10, 4, C.youHair);
+      px(x - 5, headY, 1, 4, C.youHair);
+      px(x + 4, headY, 1, 4, C.youHair);
+      // eye (facing dir)
+      px(x + (d > 0 ? 1 : -2), headY + 3, 2, 2, '#1a1a22');
+      ctx.globalAlpha = 1;
+      // "hid" tag
+      if (hidden) px(x - 1, headY - 7, 2, 2, C.hideTag);
     }
 
     /* ===========================================================
@@ -3006,24 +3001,21 @@ document.addEventListener('DOMContentLoaded', function(){
     function start() {
       playing = true; phase = 'sneak';
       suspicion = 0; count = 0; floor = 1; buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
-      P.x = DOOR.x + DOOR.w / 2; P.y = DOOR.y + DOOR.h / 2;
-      keys.up = keys.down = keys.left = keys.right = false;
-      sweepBase = 0; sweepDir = 1;
+      P.x = DOOR.x + DOOR.w / 2; P.crouching = false; P.dir = 1; P.moving = false;
+      keys.left = keys.right = keys.crouch = false;
       countEl.textContent = '0'; floorEl.textContent = '1'; suspFill.style.width = '0%';
       readPanel.hidden = true; readStat.hidden = true;
       overlay.classList.add('hidden');
       setGaze('away');
-      say(pick(["Door's open. Go quiet.", "You're in. Don't blow it.", "The journal's on the desk. Get there."]));
-      draw();
-      startLoop();
+      say(pick(["Door's open. Go quiet.", "You're in. Don't blow it.", "Journal's on the desk. Get there."]));
+      draw(); startLoop();
     }
     function over(escaped) {
       playing = false; pauseLoop();
       if (count > best) best = count;
       callout.textContent = escaped ? 'You Got Out.' : 'Caught.';
       subEl.innerHTML = '<span class="sh-bi-final">Pages stolen <b>' + count + '</b>' +
-        '<span class="best">Best run: ' + best +
-          '  \u00B7  floor reached: ' + floor +
+        '<span class="best">Best run: ' + best + '  \u00B7  floor reached: ' + floor +
           (rareFinds ? '  \u00B7  rare: ' + rareFinds : '') +
           (buriedFindsRun ? '  \u00B7  buried: ' + buriedFindsRun : '') + '</span>' +
         (foundEurielleEver ? '<span class="last gold">\u2606 You found the one he\u2019ll never say out loud.</span>' : '') +
@@ -3037,38 +3029,36 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     /* ===========================================================
-       INPUT
+       CONTROLS — keyboard + hold buttons (multitouch, pointer)
        =========================================================== */
     var KEYMAP = {
-      ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-      w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right'
+      ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'crouch',
+      a: 'left', d: 'right', s: 'crouch', A: 'left', D: 'right', S: 'crouch'
     };
     document.addEventListener('keydown', function (e) {
       if (!playing) return;
-      // reading phase: space holds to read
-      if (phase === 'reading' && (e.key === ' ' || e.code === 'Space')) {
-        e.preventDefault(); if (!e.repeat) reading = true; return;
-      }
-      var dir = KEYMAP[e.key];
-      if (dir) { e.preventDefault(); keys[dir] = true; }
+      if (phase === 'reading' && (e.key === ' ' || e.code === 'Space')) { e.preventDefault(); if (!e.repeat) reading = true; return; }
+      var k = KEYMAP[e.key];
+      if (k) { e.preventDefault(); keys[k] = true; }
     });
     document.addEventListener('keyup', function (e) {
       if (e.key === ' ' || e.code === 'Space') { reading = false; readLock = false; return; }
-      var dir = KEYMAP[e.key];
-      if (dir) keys[dir] = false;
+      var k = KEYMAP[e.key];
+      if (k) keys[k] = false;
     });
 
-    // touch dpad
-    if (pad) {
-      pad.querySelectorAll('.sh-bi-dir').forEach(function (btn) {
-        var dir = btn.getAttribute('data-dir');
-        var setOn = function (e) { if (e && e.cancelable) e.preventDefault(); keys[dir] = true; };
-        var setOff = function () { keys[dir] = false; };
-        btn.addEventListener('pointerdown', setOn);
-        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { btn.addEventListener(ev, setOff); });
-      });
+    function holdBtn(el, onDown, onUp) {
+      if (!el) return;
+      var press = function (e) { if (e && e.cancelable) e.preventDefault(); el.classList.add('held'); onDown(); };
+      var release = function () { el.classList.remove('held'); onUp(); };
+      el.addEventListener('pointerdown', press);
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { el.addEventListener(ev, release); });
     }
-    // tap-and-hold on the canvas during reading phase = hold to read
+    holdBtn(btnLeft,  function () { keys.left = true; },  function () { keys.left = false; });
+    holdBtn(btnRight, function () { keys.right = true; }, function () { keys.right = false; });
+    holdBtn(btnCrouch,function () { keys.crouch = true; },function () { keys.crouch = false; });
+
+    // during READING, hold anywhere on the canvas to read
     canvas.addEventListener('pointerdown', function (e) {
       if (!playing || phase !== 'reading') return;
       if (e.cancelable) e.preventDefault(); reading = true;
@@ -3080,12 +3070,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
     startBtn.addEventListener('click', start);
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { reading = false; pauseLoop(); }
+      if (document.hidden) { keys.left = keys.right = keys.crouch = false; reading = false; pauseLoop(); }
       else if (playing && !rafId) startLoop();
     });
 
-    // first paint so the room is visible behind the overlay
-    draw();
+    draw();   // first paint so the room shows behind the overlay
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
