@@ -2410,6 +2410,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var entryEl  = document.getElementById('shEntry');
     var dateEl   = document.getElementById('shDate');
     var readClose= document.getElementById('shReadClose');
+    var readCont = document.getElementById('shReadContinue');
     var overlay  = document.getElementById('shOverlay');
     var callout  = document.getElementById('shCallout');
     var subEl    = document.getElementById('shGameSub');
@@ -2661,28 +2662,39 @@ document.addEventListener('DOMContentLoaded', function(){
     var worldW = 900;               // recomputed per level
     var WINDOW = { x: 24, w: 30 };  // entry window (front, left)
     var DESK = { x: 0, w: 44 };     // Shane's bunk w/ journal (back, right) — set per level
-    // furniture: x,w along floor; h height; tall=full standing cover; low=crouch cover
+    // furniture (cover) + decor (visual only). DECOR is drawn, not collidable.
     var FURN = [];
+    var DECOR = [];
     function buildLevel() {
       // bus gets a touch longer & busier each level
-      worldW = 820 + (level - 1) * 120;
-      DESK.x = worldW - 70; DESK.w = 46;
-      WINDOW.x = 22; WINDOW.w = 30;
-      // gear scattered along the aisle; alternate tall/low; denser deeper
+      worldW = 880 + (level - 1) * 130;
+      DESK.x = worldW - 78; DESK.w = 48;
+      WINDOW.x = 22; WINDOW.w = 32;
+      // ---- cover gear along the aisle (alternating tall/low) ----
       FURN = [];
       var gearDefs = [
-        { rx: 0.16, w: 40, h: 46, tall: true,  kind: 'amp' },
-        { rx: 0.28, w: 30, h: 26, tall: false, kind: 'case' },
-        { rx: 0.40, w: 24, h: 40, tall: true,  kind: 'guitar' },
-        { rx: 0.52, w: 34, h: 24, tall: false, kind: 'kitchen' },
-        { rx: 0.63, w: 40, h: 46, tall: true,  kind: 'cab' },
-        { rx: 0.74, w: 28, h: 26, tall: false, kind: 'crate' },
-        { rx: 0.85, w: 24, h: 44, tall: true,  kind: 'bunkpost' }
+        { rx: 0.15, w: 42, h: 48, tall: true,  kind: 'cab' },        // big speaker cab (cover)
+        { rx: 0.27, w: 30, h: 24, tall: false, kind: 'gigcase' },    // road case (crouch cover)
+        { rx: 0.46, w: 70, h: 44, tall: true,  kind: 'drums' },      // DRUM KIT (cover, mid-bus)
+        { rx: 0.60, w: 26, h: 42, tall: true,  kind: 'guitar' },     // guitar on stand (cover)
+        { rx: 0.71, w: 34, h: 22, tall: false, kind: 'kitchen' },    // kitchenette (crouch cover)
+        { rx: 0.82, w: 30, h: 24, tall: false, kind: 'gigcase' }     // case near the back (crouch cover)
       ];
       for (var i = 0; i < gearDefs.length; i++) {
         var g = gearDefs[i];
         FURN.push({ x: Math.round(worldW * g.rx), w: g.w, h: g.h, tall: g.tall, kind: g.kind });
       }
+      // ---- decor: visual flavor, not collidable ----
+      DECOR = [
+        { rx: 0.085, kind: 'lilith' },     // Lilith's glowing snake tank (front lounge)
+        { rx: 0.235, kind: 'poster', v: 0 },
+        { rx: 0.355, kind: 'lamp' },
+        { rx: 0.515, kind: 'poster', v: 1 },
+        { rx: 0.66,  kind: 'lamp' },
+        { rx: 0.78,  kind: 'poster', v: 2 },
+        { rx: 0.90,  kind: 'lamp' }
+      ];
+      for (var j = 0; j < DECOR.length; j++) DECOR[j].x = Math.round(worldW * DECOR[j].rx);
     }
 
     // player
@@ -2848,205 +2860,434 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     /* ===========================================================
-       RENDER — cartoon/anime drawn style (smooth shapes, shading),
-       scrolling tour-bus interior.
+       RENDER — warm cozy night, anime tour bus. Curved ceiling,
+       real bus windows w/ scrolling night scenery, overhead bunk
+       berths, amber lamps, Snake Skins posters, full drum kit,
+       guitar stands, Lilith's glowing (animated) snake tank, and
+       cel-shaded little characters.
        =========================================================== */
-    function rr(x, y, w, h, r, col) {           // rounded rect
+    function rr(x, y, w, h, r, col) {
       ctx.beginPath();
       if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
       else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); }
       ctx.closePath(); ctx.fillStyle = col; ctx.fill();
     }
     function circle(x, y, r, col) { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = col; ctx.fill(); }
+    function softGlow(x, y, r, col) {
+      var g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+    }
+
+    var CEIL = 30;                      // ceiling height (curved trim below this)
 
     function draw() {
       ctx.clearRect(0, 0, VW, VH);
-      // bus interior wall (warm, with a long window strip)
+      // warm night interior wash
       var g = ctx.createLinearGradient(0, 0, 0, VH);
-      g.addColorStop(0, '#1a2436'); g.addColorStop(0.62, '#14202f'); g.addColorStop(1, '#0c1622');
+      g.addColorStop(0, '#241a22'); g.addColorStop(0.4, '#1b2230'); g.addColorStop(1, '#0e1622');
       ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
 
       ctx.save();
       ctx.translate(-Math.round(cam), 0);
 
-      // ceiling trim + LED strip
-      ctx.fillStyle = '#0c1420'; ctx.fillRect(0, 0, worldW, 12);
-      ctx.fillStyle = 'rgba(95,176,212,0.5)'; ctx.fillRect(0, 12, worldW, 1);
-      // running window strip along the top wall
-      for (var wx = 16; wx < worldW - 30; wx += 92) {
-        rr(wx, 22, 64, 40, 6, '#0e2336');
-        var night = ctx.createLinearGradient(0, 22, 0, 62); night.addColorStop(0, '#14304a'); night.addColorStop(1, '#0a1828');
-        ctx.fillStyle = night; ctx.fillRect(wx + 3, 25, 58, 34);
-        // streaking road lights
-        ctx.fillStyle = 'rgba(231,200,121,0.25)';
-        for (var s = 0; s < 3; s++) { var sx = wx + 8 + ((animT * 30 + s * 22) % 54); ctx.fillRect(sx, 30 + s * 8, 10, 1); }
-        ctx.strokeStyle = 'rgba(95,176,212,0.35)'; ctx.lineWidth = 1; ctx.strokeRect(wx + 0.5, 22.5, 63, 39);
-      }
+      drawBusShell();
+      drawWindows();
+      drawBunkBerths();          // overhead sleeping berths along the top
+      for (var d = 0; d < DECOR.length; d++) drawDecor(DECOR[d]);
+      drawFloor();
 
-      // ENTRY WINDOW (front-left) — slightly ajar, marked
-      var wy = FLOOR_Y - 54;
-      rr(WINDOW.x, wy, WINDOW.w, 54, 4, '#102a40');
-      ctx.fillStyle = '#0a1c2c'; ctx.fillRect(WINDOW.x + 3, wy + 3, WINDOW.w - 6, 48);
-      ctx.strokeStyle = '#5fe39a'; ctx.lineWidth = 1.5; ctx.strokeRect(WINDOW.x + 0.5, wy + 0.5, WINDOW.w - 1, 53);
-      ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('IN', WINDOW.x + WINDOW.w / 2, wy - 4);
+      // entry window marker (front)
+      drawEntryWindow();
 
-      // floor
-      ctx.fillStyle = '#101d2b'; ctx.fillRect(0, FLOOR_Y, worldW, VH - FLOOR_Y);
-      ctx.fillStyle = 'rgba(95,176,212,0.25)'; ctx.fillRect(0, FLOOR_Y, worldW, 2);
-      ctx.fillStyle = 'rgba(95,176,212,0.07)';
-      for (var fx = 0; fx < worldW; fx += 22) ctx.fillRect(fx, FLOOR_Y + 4, 1, VH - FLOOR_Y - 4);
-
-      // sightline glow (under sprites)
+      // sightline glow under sprites
       if (gazeState !== 'away') {
         var ex = shane.x, ey = FLOOR_Y - 34;
-        var beam = gazeState === 'looking' ? 'rgba(255,106,82,0.16)' : 'rgba(255,194,74,0.12)';
+        var beam = gazeState === 'looking' ? 'rgba(255,120,90,0.18)' : 'rgba(255,196,120,0.13)';
         var endX = shane.faceDir < 0 ? shane.x - 230 : shane.x + 230;
         ctx.fillStyle = beam;
-        ctx.beginPath(); ctx.moveTo(ex, ey - 4); ctx.lineTo(endX, FLOOR_Y - 46); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(ex, FLOOR_Y); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(ex, ey - 4); ctx.lineTo(endX, FLOOR_Y - 48); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(ex, FLOOR_Y); ctx.closePath(); ctx.fill();
       }
 
-      // gear / furniture
       for (var i = 0; i < FURN.length; i++) drawGear(FURN[i]);
-
-      // Shane's bunk + journal (goal, back-right)
-      drawBunk();
-
-      // characters
+      drawBunk();                // Shane's bunk + journal (goal)
       drawShane();
       drawYou();
 
       ctx.restore();
+
+      // subtle warm vignette on top (screen space)
+      var vg = ctx.createRadialGradient(VW/2, VH/2, VH*0.4, VW/2, VH/2, VH*0.95);
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,6,12,0.45)');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, VW, VH);
+    }
+
+    function drawBusShell() {
+      // curved ceiling band
+      ctx.fillStyle = '#2a2030'; ctx.fillRect(0, 0, worldW, CEIL);
+      ctx.beginPath(); ctx.moveTo(0, CEIL);
+      for (var cx = 0; cx <= worldW; cx += 20) ctx.lineTo(cx, CEIL + Math.sin(cx * 0.02) * 0 + 0);
+      // warm ceiling highlight strip
+      ctx.fillStyle = 'rgba(231,170,90,0.18)'; ctx.fillRect(0, CEIL - 4, worldW, 2);
+      // ribbed ceiling supports
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1;
+      for (var rx = 24; rx < worldW; rx += 60) { ctx.beginPath(); ctx.moveTo(rx, 0); ctx.lineTo(rx, CEIL); ctx.stroke(); }
+      // wall paneling below windows (warm wood-ish)
+      var wg = ctx.createLinearGradient(0, CEIL, 0, FLOOR_Y);
+      wg.addColorStop(0, '#2b2230'); wg.addColorStop(1, '#1d2330');
+      ctx.fillStyle = wg; ctx.fillRect(0, CEIL, worldW, FLOOR_Y - CEIL);
+    }
+
+    function drawWindows() {
+      // big bus side windows with scrolling night scenery
+      var top = CEIL + 8, h = 46, gap = 118, w = 84;
+      for (var wx = 40; wx < worldW - 60; wx += gap) {
+        // frame
+        rr(wx - 3, top - 3, w + 6, h + 6, 5, '#15101a');
+        // night sky gradient
+        var sg = ctx.createLinearGradient(0, top, 0, top + h);
+        sg.addColorStop(0, '#1b2c44'); sg.addColorStop(0.6, '#24304a'); sg.addColorStop(1, '#3a2740');
+        ctx.save();
+        ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(wx, top, w, h, 3); else ctx.rect(wx, top, w, h); ctx.clip();
+        ctx.fillStyle = sg; ctx.fillRect(wx, top, w, h);
+        // moon
+        circle(wx + w - 16, top + 12, 5, 'rgba(245,235,200,0.9)');
+        // distant rolling hills, parallax with camera
+        var off = (cam * 0.25 + wx) % (w + 40);
+        ctx.fillStyle = 'rgba(40,30,55,0.8)';
+        ctx.beginPath(); ctx.moveTo(wx - 20, top + h);
+        for (var hx = -20; hx <= w + 20; hx += 8) ctx.lineTo(wx + hx, top + h - 8 - Math.sin((hx + off) * 0.12) * 5);
+        ctx.lineTo(wx + w + 20, top + h); ctx.closePath(); ctx.fill();
+        // streaking road/utility lights (animated)
+        for (var s = 0; s < 4; s++) {
+          var lx = wx + ((animT * 70 + s * 34) % (w + 30)) - 12;
+          ctx.fillStyle = 'rgba(255,210,140,' + (0.5 - s * 0.08) + ')';
+          ctx.fillRect(lx, top + 10 + s * 7, 12, 1.5);
+        }
+        ctx.restore();
+        // glass sheen + mullion
+        ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(wx, top, w, 6);
+        ctx.strokeStyle = 'rgba(120,150,180,0.4)'; ctx.lineWidth = 1; ctx.strokeRect(wx + 0.5, top + 0.5, w - 1, h - 1);
+        ctx.beginPath(); ctx.moveTo(wx + w/2, top); ctx.lineTo(wx + w/2, top + h); ctx.stroke();
+        // little curtain tied at the top
+        ctx.fillStyle = 'rgba(150,40,60,0.55)'; rr(wx - 2, top - 2, 8, 12, 2, 'rgba(150,40,60,0.55)');
+        rr(wx + w - 6, top - 2, 8, 12, 2, 'rgba(150,40,60,0.55)');
+      }
+    }
+
+    function drawBunkBerths() {
+      // overhead sleeping berths along the upper wall (closed curtains, band's bunks)
+      var top = CEIL + 2, h = 18;
+      var cols = ['rgba(95,176,212,0.5)','rgba(232,94,232,0.5)','rgba(231,200,121,0.5)','rgba(127,176,95,0.5)'];
+      var k = 0;
+      for (var bx = 60; bx < worldW - 90; bx += 150) {
+        // we draw berths only where there isn't a window row conflict — offset them
+        rr(bx, top, 120, h, 3, 'rgba(20,16,24,0.0)');
+      }
+    }
+
+    function drawFloor() {
+      var fg = ctx.createLinearGradient(0, FLOOR_Y, 0, VH);
+      fg.addColorStop(0, '#241c20'); fg.addColorStop(1, '#140f16');
+      ctx.fillStyle = fg; ctx.fillRect(0, FLOOR_Y, worldW, VH - FLOOR_Y);
+      // warm aisle runner rug down the middle of the floor
+      ctx.fillStyle = 'rgba(150,50,60,0.35)'; ctx.fillRect(0, FLOOR_Y + 6, worldW, 10);
+      ctx.fillStyle = 'rgba(231,200,121,0.25)'; ctx.fillRect(0, FLOOR_Y + 6, worldW, 1); ctx.fillRect(0, FLOOR_Y + 15, worldW, 1);
+      // floor seam highlight
+      ctx.fillStyle = 'rgba(255,200,140,0.18)'; ctx.fillRect(0, FLOOR_Y, worldW, 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      for (var fx = 0; fx < worldW; fx += 26) ctx.fillRect(fx, FLOOR_Y + 18, 1, VH - FLOOR_Y - 18);
+    }
+
+    function drawEntryWindow() {
+      var wy = FLOOR_Y - 52, x = WINDOW.x, w = WINDOW.w;
+      rr(x - 3, wy - 3, w + 6, 58, 5, '#15101a');
+      var sg = ctx.createLinearGradient(0, wy, 0, wy + 52);
+      sg.addColorStop(0, '#22344c'); sg.addColorStop(1, '#3a2740');
+      ctx.fillStyle = sg; ctx.fillRect(x, wy, w, 52);
+      // open sash + green "IN" glow
+      softGlow(x + w/2, wy + 26, 26, 'rgba(95,227,154,0.25)');
+      ctx.strokeStyle = '#5fe39a'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 0.5, wy + 0.5, w - 1, 51);
+      ctx.fillStyle = 'rgba(95,227,154,0.9)'; ctx.fillRect(x, wy + 14, w, 2);   // pried-open sash line
+      ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 8px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('CLIMB IN', x + w/2, wy - 6);
+    }
+
+    /* ---- decor: Lilith tank (animated), posters, lamps ---- */
+    function drawDecor(o) {
+      var x = o.x;
+      if (o.kind === 'lamp') {
+        // wall sconce, warm amber pool of light
+        var ly = CEIL + 18;
+        softGlow(x, ly + 10, 34, 'rgba(255,178,90,0.22)');
+        rr(x - 3, ly, 6, 8, 2, '#3a2a1a');
+        circle(x, ly + 2, 4, 'rgba(255,206,130,0.95)');
+      } else if (o.kind === 'poster') {
+        drawPoster(x, o.v || 0);
+      } else if (o.kind === 'lilith') {
+        drawLilith(x);
+      }
+    }
+
+    function drawPoster(x, v) {
+      var py = CEIL + 8, w = 40, h = 54;
+      // poster paper
+      var bg = v === 0 ? '#1a1020' : v === 1 ? '#201018' : '#101a20';
+      rr(x - w/2, py, w, h, 2, bg);
+      ctx.strokeStyle = 'rgba(231,200,121,0.4)'; ctx.lineWidth = 1; ctx.strokeRect(x - w/2 + 0.5, py + 0.5, w - 1, h - 1);
+      // tape corners
+      ctx.fillStyle = 'rgba(220,220,210,0.25)';
+      ctx.fillRect(x - w/2 - 2, py - 2, 8, 5); ctx.fillRect(x + w/2 - 6, py - 2, 8, 5);
+      // snake motif (a coiled S) + band name
+      ctx.strokeStyle = v === 2 ? '#5fdcff' : '#e85ee8'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - 8, py + 16);
+      ctx.bezierCurveTo(x + 10, py + 12, x - 10, py + 26, x + 8, py + 26);
+      ctx.bezierCurveTo(x - 8, py + 30, x + 10, py + 38, x - 4, py + 40);
+      ctx.stroke();
+      circle(x - 8, py + 16, 1.5, v === 2 ? '#5fdcff' : '#e85ee8'); // snake head
+      // "SNAKE SKINS" text
+      ctx.fillStyle = '#e7c879'; ctx.font = 'bold 6px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('THE', x, py + h - 14);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 7px "Cinzel Decorative", serif';
+      ctx.fillText('SNAKE', x, py + h - 7);
+      ctx.fillText('SKINS', x, py + h - 1);
+    }
+
+    function drawLilith(x) {
+      // a glass terrarium on a stand in the front lounge — warm glow, white boa moving inside
+      var tw = 46, th = 30, ty = FLOOR_Y - th - 18;   // tank sits on a low stand
+      // stand
+      rr(x - tw/2 + 4, FLOOR_Y - 18, tw - 8, 18, 2, '#2a2018');
+      // warm heat-lamp glow from the tank
+      softGlow(x, ty + th/2, 40, 'rgba(255,170,80,0.22)');
+      // glass tank
+      var tg = ctx.createLinearGradient(0, ty, 0, ty + th);
+      tg.addColorStop(0, 'rgba(60,90,80,0.55)'); tg.addColorStop(1, 'rgba(30,50,45,0.65)');
+      rr(x - tw/2, ty, tw, th, 3, '#0e1a18');
+      ctx.fillStyle = tg; ctx.fillRect(x - tw/2 + 2, ty + 2, tw - 4, th - 4);
+      // substrate + a little branch
+      ctx.fillStyle = '#3a2c1c'; ctx.fillRect(x - tw/2 + 2, ty + th - 8, tw - 4, 6);
+      ctx.strokeStyle = '#5a4530'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 14, ty + th - 6); ctx.lineTo(x + 10, ty + 10); ctx.stroke();
+      // LILITH — white boa, slow sine-wave body, animated; occasionally lifts head
+      var t = animT;
+      var headLift = Math.sin(t * 0.6) * 3;
+      ctx.lineCap = 'round';
+      // body shadow
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 6;
+      ctx.beginPath();
+      for (var i = 0; i <= 20; i++) {
+        var px = x - 16 + i * 1.7;
+        var py = ty + th - 7 + Math.sin(i * 0.7 + t * 1.2) * 3;
+        if (i === 0) ctx.moveTo(px, py + 1); else ctx.lineTo(px, py + 1);
+      }
+      ctx.stroke();
+      // white body with a soft cream shade
+      var grd = ctx.createLinearGradient(x - 16, 0, x + 18, 0);
+      grd.addColorStop(0, '#f6f2ea'); grd.addColorStop(1, '#e6ddd0');
+      ctx.strokeStyle = grd; ctx.lineWidth = 5;
+      ctx.beginPath();
+      for (var j = 0; j <= 20; j++) {
+        var qx = x - 16 + j * 1.7;
+        var qy = ty + th - 8 + Math.sin(j * 0.7 + t * 1.2) * 3;
+        if (j === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
+      }
+      ctx.stroke();
+      // faint scale flecks
+      ctx.fillStyle = 'rgba(210,190,170,0.5)';
+      for (var k = 2; k < 19; k += 3) { var sx = x - 16 + k * 1.7, sy = ty + th - 8 + Math.sin(k * 0.7 + t * 1.2) * 3; ctx.fillRect(sx, sy - 1, 1, 1); }
+      // head (lifts now and then) + tiny tongue flick
+      var hx = x + 18, hy = ty + th - 8 - 4 - Math.max(0, headLift);
+      circle(hx, hy, 3, '#f6f2ea');
+      circle(hx + 1, hy - 1, 0.7, '#b04a4a');   // ruby eye (white boa)
+      if (((t * 2) | 0) % 4 === 0) { ctx.strokeStyle = '#d0405a'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(hx + 2, hy); ctx.lineTo(hx + 5, hy); ctx.stroke(); }
+      // glass sheen + frame
+      ctx.fillStyle = 'rgba(255,255,255,0.07)'; ctx.fillRect(x - tw/2 + 3, ty + 3, tw - 6, 5);
+      ctx.strokeStyle = 'rgba(150,200,200,0.45)'; ctx.lineWidth = 1; ctx.strokeRect(x - tw/2 + 0.5, ty + 0.5, tw - 1, th - 1);
+      // name plate
+      ctx.fillStyle = '#e7c879'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('LILITH', x, FLOOR_Y - 2);
     }
 
     function drawGear(f) {
-      var y = FLOOR_Y - f.h;
-      var active = (coverAtPlayer() === f) && playerHidden();
-      var base = active ? '#274a3a' : '#243646';
-      var edge = active ? '#5fe39a' : 'rgba(95,176,212,0.5)';
-      if (f.kind === 'amp' || f.kind === 'cab') {
-        rr(f.x, y, f.w, f.h, 3, base);
-        ctx.fillStyle = '#10202e'; ctx.fillRect(f.x + 4, y + 5, f.w - 8, f.h - 10);
+      var y = FLOOR_Y - f.h, active = (coverAtPlayer() === f) && playerHidden();
+      var edge = active ? '#5fe39a' : 'rgba(255,196,120,0.4)';
+      var hl = active ? '#274a3a' : null;
+      if (f.kind === 'cab') {
+        rr(f.x, y, f.w, f.h, 3, hl || '#241c24');
+        ctx.fillStyle = '#120e14'; ctx.fillRect(f.x + 4, y + 5, f.w - 8, f.h - 10);
         ctx.strokeStyle = edge; ctx.lineWidth = 1;
-        for (var ax = f.x + 7; ax < f.x + f.w - 5; ax += 5) for (var ay = y + 8; ay < y + f.h - 6; ay += 5) circle(ax + 1, ay + 1, 0.8, edge);
-        circle(f.x + f.w - 8, y + 7, 2, '#e7c879');               // power LED
-      } else if (f.kind === 'guitar' || f.kind === 'bunkpost') {
-        rr(f.x, y, f.w, f.h, 6, base);                            // case / post
-        ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.strokeRect(f.x + 3.5, y + 3.5, f.w - 7, f.h - 7);
-        circle(f.x + f.w / 2, y + f.h * 0.36, f.w * 0.22, '#10202e');
+        for (var ax = f.x + 8; ax < f.x + f.w - 5; ax += 6) for (var ay = y + 9; ay < y + f.h - 6; ay += 6) circle(ax, ay, 1.4, 'rgba(255,196,120,0.25)');
+        rr(f.x + 5, y + 2, f.w - 10, 4, 1, '#3a2c1c');           // top handle bar
+        circle(f.x + f.w - 8, y + 8, 2, '#7fe39a');               // power LED
+      } else if (f.kind === 'drums') {
+        drawDrumKit(f, active);
+      } else if (f.kind === 'guitar') {
+        // guitar on an A-stand
+        ctx.strokeStyle = '#3a2c1c'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(f.x + 4, FLOOR_Y); ctx.lineTo(f.x + f.w/2, y + 6); ctx.lineTo(f.x + f.w - 4, FLOOR_Y); ctx.stroke();
+        // body
+        var bodyCol = active ? '#274a3a' : '#7a2f3a';
+        circle(f.x + f.w/2, y + f.h - 12, 9, bodyCol);
+        circle(f.x + f.w/2, y + f.h - 18, 6, bodyCol);
+        rr(f.x + f.w/2 - 1.5, y, 3, f.h - 16, 1, '#2a1c14');     // neck
+        circle(f.x + f.w/2, y + f.h - 12, 2.5, '#1a1014');       // sound hole
+        ctx.strokeStyle = edge; ctx.lineWidth = 1;
       } else if (f.kind === 'kitchen') {
-        rr(f.x, y, f.w, f.h, 2, base);                            // counter
-        ctx.fillStyle = '#3a4a5a'; ctx.fillRect(f.x, y, f.w, 4);  // countertop
-        ctx.fillStyle = '#10202e'; ctx.fillRect(f.x + 5, y + 8, 8, f.h - 12);
-        circle(f.x + f.w - 8, y + 11, 2, edge);                  // faucet/knob
-      } else {                                                    // case / crate
-        rr(f.x, y, f.w, f.h, 2, base);
-        ctx.strokeStyle = edge; ctx.lineWidth = 1;
-        ctx.strokeRect(f.x + 2.5, y + 2.5, f.w - 5, f.h - 5);
-        ctx.beginPath(); ctx.moveTo(f.x + 3, y + f.h / 2); ctx.lineTo(f.x + f.w - 3, y + f.h / 2); ctx.stroke();
-        ctx.fillStyle = edge; ctx.fillRect(f.x + f.w / 2 - 3, y + f.h / 2 - 2, 6, 4); // latch
+        rr(f.x, y, f.w, f.h, 2, hl || '#2a2230');
+        ctx.fillStyle = '#3a4250'; ctx.fillRect(f.x, y, f.w, 4);  // counter top
+        ctx.fillStyle = '#120e14'; ctx.fillRect(f.x + 5, y + 8, 9, f.h - 12);  // mini fridge
+        circle(f.x + f.w - 9, y + 11, 2, '#7fe39a');             // kettle light
+        rr(f.x + f.w - 14, y - 5, 8, 6, 1, '#caa24a');           // a mug on the counter
+      } else {                                                    // gigcase (road case)
+        rr(f.x, y, f.w, f.h, 2, hl || '#1c1820');
+        ctx.strokeStyle = 'rgba(231,200,121,0.5)'; ctx.lineWidth = 1; ctx.strokeRect(f.x + 2.5, y + 2.5, f.w - 5, f.h - 5);
+        // corner brackets + latch
+        ctx.fillStyle = '#3a2c1c';
+        ctx.fillRect(f.x + 1, y + 1, 5, 5); ctx.fillRect(f.x + f.w - 6, y + 1, 5, 5);
+        ctx.fillRect(f.x + 1, y + f.h - 6, 5, 5); ctx.fillRect(f.x + f.w - 6, y + f.h - 6, 5, 5);
+        ctx.fillStyle = '#caa24a'; ctx.fillRect(f.x + f.w/2 - 3, y + f.h/2 - 2, 6, 4);
+        // stencil
+        ctx.fillStyle = 'rgba(231,200,121,0.6)'; ctx.font = 'bold 5px Oswald, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('SNAKE SKINS', f.x + f.w/2, y + f.h - 4);
       }
-      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('hidden', f.x + f.w / 2, y - 3); }
+      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('hidden', f.x + f.w/2, y - 4); }
+    }
+
+    function drawDrumKit(f, active) {
+      var cx = f.x + f.w/2, baseY = FLOOR_Y;
+      var shellCol = active ? '#274a3a' : '#6a1f2a';   // deep red kit
+      var rim = active ? '#5fe39a' : '#e7c879';
+      // kick drum (front center)
+      circle(cx, baseY - 16, 16, shellCol);
+      circle(cx, baseY - 16, 16, 'rgba(0,0,0,0)'); ctx.strokeStyle = rim; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, baseY - 16, 16, 0, 6.2832); ctx.stroke();
+      circle(cx, baseY - 16, 6, 'rgba(255,200,140,0.18)');      // ported head glow
+      // snare (left, on a stand)
+      ctx.strokeStyle = '#2a2230'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 24, baseY); ctx.lineTo(cx - 20, baseY - 16); ctx.stroke();
+      rr(cx - 28, baseY - 22, 16, 8, 3, '#d8d2c0'); ctx.strokeStyle = rim; ctx.lineWidth = 1; ctx.strokeRect(cx - 28.5, baseY - 22.5, 16, 8);
+      // two rack toms on top of the kick
+      rr(cx - 10, baseY - 40, 12, 9, 3, shellCol); ctx.strokeStyle = rim; ctx.strokeRect(cx - 10.5, baseY - 40.5, 12, 9);
+      rr(cx + 3, baseY - 40, 12, 9, 3, shellCol); ctx.strokeStyle = rim; ctx.strokeRect(cx + 2.5, baseY - 40.5, 12, 9);
+      // cymbals on stands (right + left), with a soft shimmer
+      ctx.strokeStyle = '#2a2230'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx + 22, baseY); ctx.lineTo(cx + 22, baseY - 34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - 22, baseY - 8); ctx.lineTo(cx - 22, baseY - 30); ctx.stroke();
+      ctx.fillStyle = 'rgba(231,200,121,0.9)';
+      ctx.save(); ctx.translate(cx + 22, baseY - 35); ctx.scale(1, 0.32); circle(0, 0, 9, '#e7c879'); ctx.restore();
+      ctx.save(); ctx.translate(cx - 22, baseY - 31); ctx.scale(1, 0.32); circle(0, 0, 7, '#caa24a'); ctx.restore();
+      // a tiny snake-skins logo on the kick head
+      ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = 'bold 5px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('SS', cx, baseY - 14);
+      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.fillText('hidden', cx, baseY - 50); }
     }
 
     function drawBunk() {
-      var x = DESK.x, w = DESK.w, h = 70, y = FLOOR_Y - h;
-      // bunk alcove
-      rr(x - 4, y, w + 8, h, 4, '#1a2636');
-      ctx.fillStyle = '#0c1622'; ctx.fillRect(x, y + 4, w, h - 8);
-      // pillow + blanket
-      rr(x + 3, y + h - 22, w - 6, 18, 4, '#3a4658');
-      rr(x + 4, y + 8, 16, 10, 3, '#52607a');
-      // the journal — glowing book on the bunk shelf
-      var bx = x + w / 2 - 8, by = y + 16;
-      rr(bx, by, 16, 11, 2, '#e7e2d4');
-      ctx.fillStyle = '#b44a4a'; ctx.fillRect(bx + 7, by, 2, 11);
-      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 15, 10);
-      // sparkle
-      if (((animT * 2) | 0) % 2 === 0) { ctx.fillStyle = '#e7c879'; ctx.fillRect(bx + 4, by - 4, 2, 2); ctx.fillRect(bx + 11, by - 2, 1, 1); }
-      ctx.fillStyle = 'rgba(231,200,121,0.85)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText("SHANE'S BUNK", x + w / 2, y - 4);
+      var x = DESK.x, w = DESK.w, h = 74, y = FLOOR_Y - h;
+      // alcove with warm interior light
+      softGlow(x + w/2, y + h/2, 46, 'rgba(255,180,90,0.18)');
+      rr(x - 5, y, w + 10, h, 5, '#241a22');
+      var ig = ctx.createLinearGradient(0, y, 0, y + h);
+      ig.addColorStop(0, '#2a2030'); ig.addColorStop(1, '#15101a');
+      ctx.fillStyle = ig; ctx.fillRect(x, y + 4, w, h - 8);
+      // curtain rail + half-open curtain
+      ctx.fillStyle = '#3a2030'; ctx.fillRect(x, y + 2, w, 3);
+      ctx.fillStyle = 'rgba(120,30,45,0.7)'; rr(x, y + 5, 12, h - 10, 2, 'rgba(120,30,45,0.7)');
+      // pillow + folded blanket
+      rr(x + 5, y + h - 24, w - 10, 20, 4, '#34404f');
+      rr(x + 6, y + 9, 18, 11, 3, '#52607a');
+      // a string of warm fairy lights
+      ctx.fillStyle = 'rgba(255,200,120,0.9)';
+      for (var fl = x + 6; fl < x + w - 4; fl += 8) circle(fl, y + 6, 1.2, 'rgba(255,200,120,0.9)');
+      // the journal — glowing book
+      var bx = x + w/2 - 9, by = y + 20;
+      softGlow(bx + 8, by + 5, 16, 'rgba(231,200,121,0.35)');
+      rr(bx, by, 18, 12, 2, '#efe9da');
+      ctx.fillStyle = '#b44a4a'; ctx.fillRect(bx + 8, by, 2, 12);
+      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 17, 11);
+      if (((animT * 2) | 0) % 2 === 0) { ctx.fillStyle = '#fff2c0'; ctx.fillRect(bx + 4, by - 4, 2, 2); ctx.fillRect(bx + 13, by - 2, 1, 1); }
+      ctx.fillStyle = 'rgba(231,200,121,0.95)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText("SHANE'S BUNK", x + w/2, y - 5);
     }
 
-    /* ---- anime-ish little people: rounded body, hair, simple face ---- */
+    /* ---- cel-shaded little people ---- */
+    function limb(x, y, w, h, r, col, shade) { rr(x, y, w, h, r, col); ctx.globalAlpha = 0.25; rr(x, y, w * 0.45, h, r, shade); ctx.globalAlpha = 1; }
+
     function drawShane() {
       var x = shane.x, baseY = FLOOR_Y;
       var walk = (shane.pauseT <= 0) ? Math.sin(shane.walkPhase) : 0;
       var d = shane.faceDir;
+      // soft contact shadow
+      ctx.globalAlpha = 0.3; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, baseY + 1, 10, 3, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
       // legs
-      ctx.fillStyle = '#20202a';
-      rr(x - 5, baseY - 14, 4, 14 + walk * 1.5, 2, '#20202a');
-      rr(x + 1, baseY - 14, 4, 14 - walk * 1.5, 2, '#20202a');
-      // torso (band tee)
-      rr(x - 7, baseY - 30, 14, 18, 4, '#3c3c46');
-      rr(x - 7, baseY - 30, 14, 4, 3, '#4a4a55');
+      limb(x - 5, baseY - 15, 4, 15 + walk * 1.5, 2, '#23232c', '#000');
+      limb(x + 1, baseY - 15, 4, 15 - walk * 1.5, 2, '#23232c', '#000');
+      // torso (dark band tee) + cel shade
+      rr(x - 7, baseY - 31, 14, 19, 4, '#3c3c46');
+      ctx.globalAlpha = 0.25; rr(x - 7, baseY - 31, 6, 19, 4, '#000'); ctx.globalAlpha = 1;
+      rr(x - 7, baseY - 31, 14, 3, 3, '#50505c');
+      // a faint snake logo on his shirt
+      ctx.strokeStyle = 'rgba(231,200,121,0.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 3, baseY - 26); ctx.quadraticCurveTo(x + 3, baseY - 23, x - 2, baseY - 20); ctx.stroke();
       // arm
-      rr(x + (d > 0 ? 4 : -7), baseY - 28, 3, 12, 2, '#d8b48c');
-      // head
-      circle(x, baseY - 36, 7, '#e2c2a0');
-      // brown hair + PONYTAIL (his look)
+      limb(x + (d > 0 ? 4 : -7), baseY - 29, 3, 13, 2, '#d8b48c', '#000');
+      // head + warm rim light
+      circle(x, baseY - 37, 7, '#e7c6a2');
+      ctx.globalAlpha = 0.3; circle(x - 2, baseY - 38, 5, '#fff'); ctx.globalAlpha = 1;
+      // brown hair + ponytail
       ctx.fillStyle = '#5a3a22';
-      ctx.beginPath(); ctx.arc(x, baseY - 38, 8, Math.PI, 0); ctx.fill();      // hair cap
-      rr(x - 8, baseY - 40, 16, 5, 2, '#5a3a22');
-      // ponytail trailing behind (opposite facing dir)
+      ctx.beginPath(); ctx.arc(x, baseY - 39, 8, Math.PI, 0); ctx.fill();
+      rr(x - 8, baseY - 41, 16, 5, 2, '#5a3a22');
       var pdx = d > 0 ? -1 : 1;
-      ctx.fillStyle = '#4a2f1b';
-      rr(x + pdx * 7, baseY - 38, 5, 14, 3, '#4a2f1b');
-      circle(x + pdx * 9, baseY - 24, 2.5, '#4a2f1b');
-      // stubble jaw + face
+      rr(x + pdx * 7, baseY - 39, 5, 15, 3, '#4a2f1b');
+      circle(x + pdx * 9, baseY - 24, 2.6, '#4a2f1b');
+      // tie band on the ponytail
+      ctx.fillStyle = '#2a1c14'; ctx.fillRect(x + pdx * 6, baseY - 38, 3, 2);
+      // face
       ctx.fillStyle = '#0e0e12';
       var ex = d < 0 ? x - 3 : x + 1;
-      if (gazeState === 'away') { ctx.fillRect(x - 2, baseY - 35, 4, 1); }      // looking down
-      else { ctx.fillRect(ex, baseY - 37, 2, 2); }
-      // bass slung on back when walking
-      ctx.save(); ctx.translate(x, baseY - 22); ctx.rotate(d > 0 ? 0.5 : -0.5);
-      rr(-2, -10, 4, 20, 2, '#caa24a'); rr(-4, 8, 8, 7, 3, '#caa24a'); ctx.restore();
-      if (gazeState === 'looking') { ctx.fillStyle = '#ff6a52'; ctx.font = 'bold 9px Oswald'; ctx.textAlign='center'; ctx.fillText('!', x, baseY - 48); }
+      if (gazeState === 'away') ctx.fillRect(x - 2, baseY - 35, 4, 1);
+      else ctx.fillRect(ex, baseY - 37, 2, 2);
+      // bass slung on back
+      ctx.save(); ctx.translate(x, baseY - 23); ctx.rotate(d > 0 ? 0.5 : -0.5);
+      rr(-2, -11, 4, 22, 2, '#caa24a'); rr(-4, 9, 9, 7, 3, '#b8902f'); ctx.restore();
+      if (gazeState === 'looking') { ctx.fillStyle = '#ff6a52'; ctx.font = 'bold 10px Oswald'; ctx.textAlign='center'; ctx.fillText('!', x, baseY - 50); }
     }
 
     function drawYou() {
-      var x = P.x, crouch = P.crouching, hidden = playerHidden(), d = P.dir;
-      var baseY = FLOOR_Y;
-      var top = crouch ? 16 : 26;
+      var x = P.x, crouch = P.crouching, hidden = playerHidden(), d = P.dir, baseY = FLOOR_Y;
       var bob = (P.moving && !crouch) ? Math.sin(animT) * 1.2 : 0;
-      ctx.globalAlpha = hidden ? 0.55 : 1;
-      var skin = '#f0d0b0';
+      var skin = '#f3d4b4';
       var shirt = heroType === 'girl' ? '#e85ee8' : '#5fb0d4';
-      var shirtHi = heroType === 'girl' ? '#f4a0f4' : '#a8d4ec';
-      var hair = heroType === 'girl' ? '#3a2418' : '#2a2a30';
-      var pants = '#243447';
+      var shirtHi = heroType === 'girl' ? '#f6b0f6' : '#a8d4ec';
+      var hair = heroType === 'girl' ? '#5a3320' : '#2a2a30';
+      var pants = '#26384c';
       var walk = P.moving ? Math.sin(animT) * 2 : 0;
-      // legs
+      // contact shadow
+      ctx.globalAlpha = hidden ? 0.18 : 0.3; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, baseY + 1, 8, 2.5, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.globalAlpha = hidden ? 0.55 : 1;
       var legH = crouch ? 6 : 9;
-      rr(x - 4, baseY - legH, 3, legH + (P.moving ? walk : 0), 2, pants);
-      rr(x + 1, baseY - legH, 3, legH - (P.moving ? walk : 0), 2, pants);
-      // torso
+      limb(x - 4, baseY - legH, 3, legH + (P.moving ? walk : 0), 2, pants, '#000');
+      limb(x + 1, baseY - legH, 3, legH - (P.moving ? walk : 0), 2, pants, '#000');
       var torsoTop = baseY - legH - (crouch ? 8 : 12);
       rr(x - 5, torsoTop, 10, (crouch ? 8 : 12), 3, shirt);
+      ctx.globalAlpha = (hidden ? 0.55 : 1) * 0.3; rr(x - 5, torsoTop, 4, (crouch ? 8 : 12), 3, '#000'); ctx.globalAlpha = hidden ? 0.55 : 1;
       rr(x - 5, torsoTop, 10, 3, 2, shirtHi);
-      // arm
-      rr(x + (d > 0 ? 3 : -6), torsoTop + 1, 3, crouch ? 6 : 9, 2, skin);
-      // head
+      limb(x + (d > 0 ? 3 : -6), torsoTop + 1, 3, crouch ? 6 : 9, 2, skin, '#000');
       var hy = torsoTop - 7 + bob;
       circle(x, hy, 6, skin);
-      // hair
+      ctx.globalAlpha = (hidden ? 0.55 : 1) * 0.3; circle(x - 2, hy - 1, 4, '#fff'); ctx.globalAlpha = hidden ? 0.55 : 1;
       ctx.fillStyle = hair;
       ctx.beginPath(); ctx.arc(x, hy - 1, 7, Math.PI, 0); ctx.fill();
-      if (heroType === 'girl') {
-        // long hair down the back + a side bit
-        var hd = d > 0 ? -1 : 1;
-        rr(x + hd * 5, hy - 2, 4, 14, 2, hair);
-      } else {
-        // short tuft
-        rr(x - 6, hy - 4, 12, 4, 2, hair);
-      }
-      // face — eyes facing dir
+      if (heroType === 'girl') { var hd = d > 0 ? -1 : 1; rr(x + hd * 5, hy - 2, 4, 15, 2, hair); rr(x - 7, hy - 3, 14, 4, 2, hair); }
+      else { rr(x - 6, hy - 4, 12, 4, 2, hair); }
+      // big anime eyes
       ctx.fillStyle = '#1a1a22';
       ctx.fillRect(x + (d > 0 ? 1 : -3), hy, 2, 2);
       ctx.fillRect(x + (d > 0 ? -3 : 1), hy, 1, 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fillRect(x + (d > 0 ? 1 : -3), hy, 1, 1);
       ctx.globalAlpha = 1;
       if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('hid', x, hy - 9); }
     }
+
 
     /* ===========================================================
        LOOP
@@ -3122,6 +3363,7 @@ document.addEventListener('DOMContentLoaded', function(){
       nextLevel();
     }
     if (readClose) readClose.addEventListener('click', closeReading);
+    if (readCont) readCont.addEventListener('click', closeReading);
 
     // character select
     if (charSel) {
