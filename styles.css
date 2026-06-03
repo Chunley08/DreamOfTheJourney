@@ -8366,3 +8366,154 @@
   .scorch-page .sc-rat-pit.flash-bad::after,
   .scorch-page .sc-rat-pop { animation-duration: 0.001s; }
 }
+
+/* ============================================================
+   SHANE — THE LONG RIDE (motorcycle dodge mini-game)
+   Night highway, weave between traffic, ramping speed. Scoped
+   to .shane-page; chrome-blue / midnight palette to match.
+   ============================================================ */
+.shane-page .sh-ride {
+  max-width: 760px; margin: 0 auto;
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(95,176,212,0.10), transparent 55%),
+    linear-gradient(180deg, #0a1422, #060d18);
+  border: 2px solid #5fb0d4; border-radius: 6px;
+  padding: 1.1rem 1.1rem 1.3rem;
+  box-shadow: 0 20px 48px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(95,176,212,0.18);
+  position: relative;
+}
+
+/* HUD */
+.shane-page .sh-ride-hud { display: flex; align-items: stretch; gap: 0.7rem; margin-bottom: 0.7rem; flex-wrap: wrap; }
+.shane-page .sh-ride-gauge {
+  flex: 1 1 120px; text-align: center; padding: 0.4rem 0.6rem;
+  background: rgba(10,22,38,0.7); border: 1px solid rgba(95,176,212,0.25); border-radius: 4px;
+}
+.shane-page .sh-ride-gauge-label {
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; font-size: 0.56rem; color: #6a96b4; display: block;
+}
+.shane-page .sh-ride-gauge-val { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.3rem; color: #e8eef4; line-height: 1.1; }
+.shane-page .sh-ride-gauge-val small { font-size: 0.6rem; color: #88b8d4; font-weight: 400; }
+.shane-page .sh-ride-gauge.style .sh-ride-gauge-val { color: #5fb0d4; transition: transform 0.12s ease; }
+.shane-page .sh-ride-gauge.style.bump .sh-ride-gauge-val { transform: scale(1.35); }
+
+/* the road */
+.shane-page .sh-ride-road {
+  position: relative; height: 380px; border-radius: 5px; overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(95,176,212,0.10), transparent 14%, transparent 86%, rgba(95,176,212,0.10)),
+    linear-gradient(180deg, #0b1320 0%, #10202f 60%, #0b1320 100%);
+  border: 1px solid rgba(95,176,212,0.22);
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+  touch-action: manipulation; cursor: none;
+}
+/* moving lane dashes (center two lane dividers) + side rails */
+.shane-page .sh-ride-lines {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background-image:
+    repeating-linear-gradient(180deg, rgba(232,238,244,0.55) 0 26px, transparent 26px 60px),
+    repeating-linear-gradient(180deg, rgba(232,238,244,0.55) 0 26px, transparent 26px 60px);
+  background-size: 4px 60px, 4px 60px;
+  background-position: 33.33% 0, 66.66% 0;
+  background-repeat: repeat-y, repeat-y;
+  will-change: background-position;
+}
+.shane-page .sh-ride-road::before {
+  /* headlight wash from the bike */
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 70%;
+  background: radial-gradient(60% 90% at 50% 100%, rgba(168,200,224,0.16), transparent 70%);
+  pointer-events: none; z-index: 1;
+}
+.shane-page .sh-ride-road.shake { animation: shRideShake 0.4s ease; }
+@keyframes shRideShake {
+  0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px) rotate(-0.5deg); }
+  40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(4px); }
+}
+.shane-page .sh-ride-road.crashflash::after {
+  content: ''; position: absolute; inset: 0; background: rgba(220,60,50,0.45);
+  animation: shRideFlash 0.35s ease forwards; pointer-events: none; z-index: 8;
+}
+@keyframes shRideFlash { from { opacity: 1; } to { opacity: 0; } }
+
+/* the bike */
+.shane-page .sh-ride-bike {
+  position: absolute; left: 50%; bottom: 14px; width: 56px; height: 64px;
+  margin-left: -28px; z-index: 4; font-size: 2.4rem; text-align: center; line-height: 64px;
+  transition: transform 0.13s cubic-bezier(.3,1.4,.4,1);
+  filter: drop-shadow(0 0 10px rgba(95,176,212,0.6));
+  will-change: transform;
+}
+
+/* obstacles + pickups */
+.shane-page .sh-ride-obs {
+  position: absolute; left: 50%; top: 0; width: 54px; height: 58px;
+  margin-left: -27px; z-index: 3; font-size: 2.2rem; text-align: center; line-height: 58px;
+  will-change: transform;
+}
+.shane-page .sh-ride-obs.fuel { filter: drop-shadow(0 0 10px rgba(120,220,160,0.8)); }
+.shane-page .sh-ride-obs.gone { opacity: 0; }
+
+/* controls */
+.shane-page .sh-ride-controls { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
+.shane-page .sh-ride-steer {
+  flex: 1 1 0; max-width: 200px;
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem; cursor: none;
+  padding: 0.55rem 0; border-radius: 5px; color: #051018;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
+  border: none; box-shadow: 0 6px 16px rgba(95,176,212,0.3);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.shane-page .sh-ride-steer:hover { transform: translateY(-2px); }
+.shane-page .sh-ride-steer:active { transform: translateY(1px) scale(0.98); }
+
+/* overlay (start / end) */
+.shane-page .sh-ride-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.7rem; text-align: center; padding: 1.2rem;
+  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.8), rgba(4,8,16,0.95));
+  backdrop-filter: blur(2px);
+}
+.shane-page .sh-ride-overlay.hidden { display: none; }
+.shane-page .sh-ride-callout {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; font-size: clamp(1.2rem, 4vw, 1.7rem);
+  color: #e8eef4; text-shadow: 0 2px 0 #000, 0 0 18px rgba(95,176,212,0.55);
+  line-height: 1.1; max-width: 26ch;
+}
+.shane-page .sh-ride-sub { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: #aebfce; max-width: 34ch; line-height: 1.5; }
+.shane-page .sh-ride-sub b { color: #5fb0d4; }
+.shane-page .sh-ride-final { font-family: 'Oswald', sans-serif; color: #88b8d4; letter-spacing: 0.1em; font-size: 0.9rem; }
+.shane-page .sh-ride-final b { color: #e8eef4; font-size: 1.6rem; display: block; }
+.shane-page .sh-ride-final .best { color: #5fb0d4; font-size: 0.8rem; display: block; margin-top: 0.2rem; letter-spacing: 0.14em; }
+.shane-page .sh-ride-btn {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: 1rem; cursor: none;
+  padding: 0.7rem 1.6rem; border-radius: 4px; color: #051018;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
+  border: none; box-shadow: 0 8px 22px rgba(95,176,212,0.4);
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+.shane-page .sh-ride-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 13px 28px rgba(95,176,212,0.55); }
+
+.shane-page .sh-ride-line {
+  margin-top: 0.9rem; text-align: center; min-height: 1.4em;
+  font-family: 'Special Elite', monospace; font-style: italic;
+  font-size: 0.92rem; color: #aebfce; text-shadow: 0 1px 0 #000;
+}
+.shane-page .sh-ride-hint {
+  text-align: center; margin-top: 0.5rem;
+  font-family: 'Oswald', sans-serif; font-size: 0.62rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #5a7a98;
+}
+
+@media (max-width: 520px) {
+  .shane-page .sh-ride-road { height: 340px; }
+  .shane-page .sh-ride-bike { font-size: 2.1rem; }
+  .shane-page .sh-ride-obs { font-size: 1.95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shane-page .sh-ride-road.shake { animation: none; }
+  .shane-page .sh-ride-road.crashflash::after { animation-duration: 0.001s; }
+}
