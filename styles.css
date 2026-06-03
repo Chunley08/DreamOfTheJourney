@@ -8598,7 +8598,11 @@
 
 /* stage / canvas */
 .shane-page .sh-bi-stage { position: relative; border-radius: 4px; overflow: hidden; border: 1px solid rgba(95,176,212,0.3); background: #060d18; }
-.shane-page #shCanvas { display: block; width: 100%; height: auto; touch-action: none; cursor: none; }
+.shane-page #shCanvas {
+  display: block; width: 100%; height: auto; aspect-ratio: 320 / 180;
+  touch-action: none; cursor: pointer;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+}
 
 /* reading panel (paper) */
 .shane-page .sh-bi-read {
@@ -8667,7 +8671,7 @@
 .shane-page .sh-bi-final .last.blood { color: #ff7a6a; font-style: normal; font-family: 'Oswald', sans-serif; letter-spacing: 0.08em; text-shadow: 0 0 12px rgba(200,40,40,0.5); }
 .shane-page .sh-bi-btn {
   font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; font-size: 1rem; cursor: none;
+  letter-spacing: 0.1em; font-size: 1rem; cursor: pointer;
   padding: 0.7rem 1.6rem; border-radius: 4px; color: #051018;
   background: linear-gradient(135deg, #a8c8e0, #5fb0d4); border: none;
   box-shadow: 0 8px 22px rgba(95,176,212,0.4);
@@ -8675,22 +8679,27 @@
 }
 .shane-page .sh-bi-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 13px 28px rgba(95,176,212,0.55); }
 
-/* touch dpad */
-.shane-page .sh-bi-pad {
-  display: none; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px);
-  gap: 6px; justify-content: center; margin: 0.9rem auto 0;
+/* control bar — big hold buttons, shown on every device */
+.shane-page .sh-bi-controls {
+  display: flex; gap: 0.6rem; justify-content: center; align-items: stretch;
+  margin: 0.9rem auto 0; max-width: 520px;
 }
-.shane-page .sh-bi-dir {
-  width: 56px; height: 56px; border-radius: 8px; cursor: none;
-  font-size: 1.2rem; color: #051018; border: none; touch-action: none;
-  background: linear-gradient(135deg, #a8c8e0, #5fb0d4); box-shadow: 0 5px 14px rgba(95,176,212,0.35);
+.shane-page .sh-bi-cbtn {
+  font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: #051018; border: none; border-radius: 10px;
+  background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
+  box-shadow: 0 6px 16px rgba(95,176,212,0.35);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  cursor: pointer; transition: transform 0.06s ease, filter 0.08s ease;
 }
-.shane-page .sh-bi-dir:active { transform: translateY(2px); filter: brightness(1.1); }
-.shane-page .sh-bi-dir.up    { grid-column: 2; grid-row: 1; }
-.shane-page .sh-bi-dir.left  { grid-column: 1; grid-row: 2; }
-.shane-page .sh-bi-dir.down  { grid-column: 2; grid-row: 2; }
-.shane-page .sh-bi-dir.right { grid-column: 3; grid-row: 2; }
-body.touch-device .shane-page .sh-bi-pad { display: grid; }
+.shane-page .sh-bi-cbtn.move   { flex: 1 1 0; font-size: 1.5rem; padding: 0.9rem 0; min-height: 60px; }
+.shane-page .sh-bi-cbtn.crouch { flex: 1.4 1 0; font-size: 0.95rem; padding: 0.9rem 0; min-height: 60px; background: linear-gradient(135deg, #c8e0a8, #7fb05f); }
+.shane-page .sh-bi-cbtn:active,
+.shane-page .sh-bi-cbtn.held { transform: translateY(3px) scale(0.98); filter: brightness(1.12); box-shadow: 0 2px 8px rgba(95,176,212,0.4); }
+@media (max-width: 420px) {
+  .shane-page .sh-bi-cbtn.move   { font-size: 1.7rem; min-height: 66px; }
+  .shane-page .sh-bi-cbtn.crouch { font-size: 0.9rem; min-height: 66px; }
+}
 
 .shane-page .sh-bi-line {
   margin-top: 0.8rem; text-align: center; min-height: 1.4em;
