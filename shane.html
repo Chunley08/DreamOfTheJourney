@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css?v=rummage1" />
+<link rel="stylesheet" href="styles.css?v=cozy1" />
 </head>
 <body data-standalone="shane">
 
@@ -257,55 +257,51 @@
     </details>
   </section>
 
-  <!-- ====== DON'T WAKE HIM (rummage through his bunk) ====== -->
+  <!-- ====== READING HIS JOURNAL (cozy pixel game) ====== -->
   <section class="char-section poster-section" id="shaneGameSection">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Wake Him</h2>
-    <span class="poster-eyebrow reveal-up">He's Asleep &middot; Rummage for His Journal Pages</span>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Read His Journal</h2>
+    <span class="poster-eyebrow reveal-up">He's right there. Turn the pages while he's not looking.</span>
 
-    <div class="sh-rg reveal-up" id="shBunk">
+    <div class="sj reveal-up" id="sjGame">
 
       <!-- HUD -->
-      <div class="sh-rg-hud">
-        <div class="sh-rg-zzz" id="shZzz">Fast asleep</div>
-        <div class="sh-rg-stat">
-          <span class="sh-rg-stat-label">Don't wake him</span>
-          <div class="sh-rg-bar"><div class="sh-rg-bar-fill" id="shStirFill"></div></div>
-        </div>
-        <span class="sh-rg-count">Pages <b id="shQuota">0 / 3</b></span>
-        <span class="sh-rg-count sh-rg-level">Level <b id="shLevel">1</b></span>
+      <div class="sj-hud">
+        <div class="sj-gaze away" id="sjGaze"><span class="dot"></span><span id="sjGazeText">He's not looking.</span></div>
+        <span class="sj-count">Read <b id="sjReadCount">0</b></span>
+        <span class="sj-count sj-rare">Rare <b id="sjRareCount">0</b></span>
       </div>
 
-      <!-- the bunk room -->
-      <div class="sh-rg-stage" id="shStage">
-        <canvas id="shCanvas" width="360" height="230" aria-label="Shane's bunk — rummage while he sleeps"></canvas>
-
-        <!-- reading panel (page-turn) -->
-        <div class="sh-rg-read" id="shReadPanel" hidden>
-          <div class="sh-rg-read-head">
-            <span class="sh-jr-tag" id="shTag">&mdash;</span>
-            <span class="sh-rg-sticker" id="shSticker" hidden></span>
-            <button type="button" class="sh-rg-read-x" id="shReadClose" aria-label="Close entry">✕</button>
-          </div>
-          <div class="sh-rg-read-body">
-            <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
-            <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
-          </div>
-          <div class="sh-rg-read-foot">
-            <button type="button" class="sh-rg-read-continue" id="shReadContinue">Pocket It ▸</button>
-          </div>
-        </div>
+      <!-- the room -->
+      <div class="sj-stage">
+        <canvas id="sjCanvas" width="320" height="200" aria-label="Shane's room — read his journal"></canvas>
 
         <!-- intro / game-over overlay -->
-        <div class="sh-rg-overlay" id="shOverlay">
-          <div class="sh-rg-overlay-inner">
-            <p class="sh-rg-callout" id="shCallout">He's Asleep.</p>
-            <p class="sh-rg-sub" id="shGameSub">Shane's passed out in his bunk. His journal pages are stashed all over the nook &mdash; under the pillow, in the amp, his boots, that bag. <b>Press and hold</b> a glowing spot to rummage it; the ring fills as you dig. But rummaging is noisy &mdash; the <b>Don't wake him</b> meter climbs while you hold, and faster when he stirs. <b>Let go</b> the moment he shifts. Fill a spot to pull out a page (some are empty). Find enough pages to slip out &mdash; and the deeper you go, the rarer the secrets, including ones he buried a long time ago.</p>
-            <button type="button" class="sh-rg-btn" id="shStart">Start Rummaging</button>
+        <div class="sj-overlay" id="sjOverlay">
+          <div class="sj-overlay-inner">
+            <p class="sj-callout" id="sjCallout">His Journal Is Open.</p>
+            <p class="sj-sub" id="sjSub">He left it open on the desk and he's right there tuning his bass. <b>Turn Page</b> to read an entry. Every so often he'll <b>stir, then glance over</b> &mdash; tap <b>Shut it!</b> before he sees, or he catches you. The more you read, the better your odds of stumbling on the rare stuff: band secrets, things he buried a long time ago&hellip; and one page he never meant for anyone.</p>
+            <button type="button" class="sj-btn" id="sjStart">Sneak a Look</button>
           </div>
         </div>
       </div>
 
-      <p class="sh-rg-line" id="shLine">He's out cold. Pick a spot.</p>
+      <!-- the page being read -->
+      <div class="sj-page" id="sjPage">
+        <div class="sj-page-head">
+          <span class="sj-tag" id="sjTag">&mdash;</span>
+          <span class="sj-sticker" id="sjSticker" hidden></span>
+        </div>
+        <div class="sj-entry" id="sjEntry">(his journal, open on the desk)</div>
+        <div class="sj-date" id="sjDate">&mdash; private. obviously.</div>
+      </div>
+
+      <!-- controls -->
+      <div class="sj-controls">
+        <button type="button" class="sj-cbtn turn" id="sjTurn">Turn Page ▸</button>
+        <button type="button" class="sj-cbtn shut" id="sjShut">✕ Shut it!</button>
+      </div>
+
+      <p class="sj-line" id="sjLine">It's open. You shouldn't. You're going to.</p>
     </div>
   </section>
 
@@ -531,6 +527,6 @@ yeah. that's closer.</p>
   </div>
 </div>
 
-<script src="script.js?v=rummage1"></script>
+<script src="script.js?v=cozy1"></script>
 </body>
 </html>
