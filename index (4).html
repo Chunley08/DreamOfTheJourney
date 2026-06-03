@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DreamjourneyAI — by Chunley</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
+
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
+  </div>
+</div>
+
+<div class="site">
+
+  <header>
+    <h1 class="brand">DreamjourneyAI</h1>
+    <div class="tagline">characters born of starlight</div>
+    <div class="creator">made by the insanity of Chunley's Brain</div>
+  </header>
+
+  <section class="section" id="characters">
+    <button type="button" class="section-title-link" id="meetCharactersLink" aria-label="Open characters page">
+      <h2 class="section-title">
+        <span class="section-title-accent">Click Here to Meet the Characters</span>
+      </h2>
+      <div class="divider"></div>
+    </button>
+  </section>
+
+  <!-- ====== DATING PROFILES (homepage — featured + browse-all) ====== -->
+  <section class="section dating-preview-section" id="datingProfiles">
+    <h2 class="section-title">♡ Dating Profiles ♡</h2>
+    <div class="divider"></div>
+    <p class="section-sub">if these guys had to make a Hinge — <em>here's what they'd actually write</em></p>
+
+    <div class="dating-featured-wrap">
+      <button class="dating-preview-card dating-featured-card" data-dating="scorch" data-dating-href="scorch.html#dating" type="button" aria-label="View Scorch's dating profile">
+        <span class="dating-featured-badge">✦ Featured ✦</span>
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+    </div>
+
+    <button class="dating-browse-all-btn" id="openDatingBrowse" type="button">
+      Browse All Profiles →
+    </button>
+  </section>
+
+  <section class="section" id="request">
+    <h2 class="section-title"><span class="section-title-accent">Request a Scene</span></h2>
+    <div class="divider"></div>
+    <p class="section-sub">share your idea — it'll travel to Chunley's discord</p>
+
+    <form class="request-form" id="requestForm" autocomplete="off">
+      <div class="form-row">
+        <label class="form-label" for="charName">Character Name</label>
+        <input class="form-input" type="text" id="charName" name="charName" required placeholder="e.g. Lyra of the Silver Tide" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="setting">Setting / World</label>
+        <input class="form-input" type="text" id="setting" name="setting" placeholder="e.g. a ruined sky-city above the clouds" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="idea">Scene Idea</label>
+        <textarea class="form-textarea" id="idea" name="idea" required placeholder="describe the mood, the moment, the magic..."></textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="extra">Extra Details <span style="opacity:.5">— optional</span></label>
+        <input class="form-input" type="text" id="extra" name="extra" placeholder="tone, length, anything specific" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="requester">Your Name / Discord <span style="opacity:.5">— optional</span></label>
+        <input class="form-input" type="text" id="requester" name="requester" placeholder="so Chunley can credit you" />
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">Send to Chunley</button>
+      <div class="form-status" id="formStatus"></div>
+    </form>
+  </section>
+
+  <footer>
+    <p>✦ DreamjourneyAI ✦ made with <span class="heart">♥</span> by Chunley ✦</p>
+  </footer>
+
+</div>
+
+
+
+<!-- ====================== ALL CHARACTERS OVERLAY ====================== -->
+<div class="character-page all-characters-page" id="charactersPage" aria-hidden="true">
+  <button class="char-close" id="charactersClose" aria-label="Close" type="button">✕</button>
+  <section class="all-characters-section">
+    <h1 class="all-characters-title">All Characters</h1>
+    <p class="all-characters-sub">every dream Chunley's brain has dragged into the light</p>
+    <div class="search-wrap overlay-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Search for a character, a world, a dream..." />
+    </div>
+    <div class="character-grid" id="allCharactersGrid"></div>
+  </section>
+</div>
+<!-- ================== END ALL CHARACTERS OVERLAY ===================== -->
+
+
+
+
+
+
+
+
+
+
+
+<!-- ====================== DATING BROWSE OVERLAY (search + full grid) ====================== -->
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Scorch (unlocked) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-dating-href="scorch.html#dating"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+
+
+<!-- ============== SCENE REQUEST MODAL (shared by all character pages) ============== -->
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+
+
+<script src="script.js"></script>
+</body>
+</html>

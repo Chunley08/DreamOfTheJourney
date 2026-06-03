@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cody — DreamjourneyAI</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-standalone="cody">
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
+
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
+  </div>
+</div>
+
+<div class="character-page cody-page" id="codyPage" aria-hidden="true">
+  <button class="char-close" id="codyClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Cody" type="button" aria-label="Open scene request">Scene Request?</button>
+
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/Cody Pics/cody-hero.jpg');"></div>
+
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <div class="stamp stamp--tonight reveal-stamp">★ Live On The Porch ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">Crawfish Boil &middot; BYOB</small></div>
+    <div class="stamp stamp--age reveal-stamp">All Ages</div>
+
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">CODY</h1>
+    <div class="poster-subtitle">Bayou Beats Tour</div>
+    <div class="poster-role">Drums <span>•</span> Heartbeat <span>•</span> The Sweet One</div>
+
+    <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Cody &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026 &middot; with the Snake Skins</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Loud ★ Warm ★ Sweet ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE HEARTBEAT (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Heartbeat</h2>
+    <span class="poster-eyebrow reveal-up">Who He Is</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Cody Thibodeaux is the heartbeat of <strong>The Snake Skins</strong> — the literal one, since he's the one keeping time on the kit, and the figurative one, because if Cody's smiling, the day isn't lost yet. He's the sweetest one-legged Cajun you're ever gonna meet, born and bred in the bayou, raised on cornbread and crawfish and the kind of stubborn warmth that doesn't ask permission to exist.</p>
+      <p>He keeps the band's morale up even when his own is in the dirt. <em>Especially</em> then, actually. He'll fix you a plate, tell you a story, call you <em>sha</em>, and then sit alone on the bus afterward and stare at the ceiling for an hour. <strong>Both things are true.</strong></p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">heart of the band</span>
+      <span class="sticker-patch">"sha" is universal</span>
+      <span class="sticker-patch">prosthetic leg gang</span>
+      <span class="sticker-patch">smiles through it</span>
+      <span class="sticker-patch">oldest of eight</span>
+      <span class="sticker-patch">bayou raised</span>
+      <span class="sticker-patch">rhythm savant</span>
+      <span class="sticker-patch">soft for everyone but himself</span>
+    </div>
+  </section>
+
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:-2deg;">"Sha, you alright? Sit down, eat somethin'."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:1.5deg;">"I'd lend you my last twenty. I'd lend you my last leg too, but I only got the one."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:-0.8deg;">"You good? Need me to be good? I can do that."</div>
+      <div class="stub reveal-tilt" data-label="CODY SAID" style="--rot:1.2deg;">"Bet."</div>
+    </div>
+  </section>
+
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Scorch<small>Vocals</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Shane<small>Bass</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Max Pics/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-1deg;">
+        <div class="polaroid-photo">♪<img src="assets/Ricky Pics/ricky-portrait.jpg" alt="Ricky" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Ricky<small>Manager</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== MUSIC PLAYER (Cody's record player, wrapped in stage frame) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Duct Tape &amp; Backbeat</h2>
+    <span class="poster-eyebrow reveal-up">Bayou Beats &middot; Stage Center</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>Cody Thibodeaux // Bayou Beats Tour</small>
+      </div>
+      <div class="rp-stage" id="codyPlayer">
+        <!-- LEFT: THE RECORD PLAYER CABINET -->
+        <div class="rp-cabinet" id="cdConsole">
+          <!-- top deck with platter + tonearm -->
+          <div class="rp-deck">
+            <div class="rp-platter">
+              <div class="rp-record" id="cdRecord">
+                <div class="rp-record-grooves"></div>
+                <div class="rp-record-shine"></div>
+                <div class="rp-record-label">
+                  <div class="rp-label-band">Bayou Beats</div>
+                  <div class="rp-label-title" id="cdTitle">— select a track —</div>
+                  <div class="rp-label-sub" id="cdSub">Cody Thibodeaux</div>
+                  <div class="rp-label-spindle"></div>
+                </div>
+              </div>
+            </div>
+            <div class="rp-tonearm" id="cdTonearm">
+              <div class="rp-tonearm-pivot"></div>
+              <div class="rp-tonearm-shaft"></div>
+              <div class="rp-tonearm-head"></div>
+            </div>
+            <div class="rp-rpm">33⅓<span>RPM</span></div>
+            <div class="rp-live"><span class="live-dot"></span> Now Spinning</div>
+          </div>
+
+          <div class="rp-panel">
+            <div class="rp-vu" aria-hidden="true">
+              <svg viewBox="0 0 200 110" preserveAspectRatio="xMidYMid meet">
+                <rect x="0" y="0" width="200" height="110" rx="6" class="rp-vu-bg"/>
+                <path d="M 30 95 A 70 70 0 0 1 100 25" class="rp-vu-arc-green"/>
+                <path d="M 100 25 A 70 70 0 0 1 170 95" class="rp-vu-arc-red"/>
+                <text x="30" y="108" class="rp-vu-tick" text-anchor="middle">-20</text>
+                <text x="65" y="48" class="rp-vu-tick" text-anchor="middle">-10</text>
+                <text x="100" y="20" class="rp-vu-tick" text-anchor="middle">0</text>
+                <text x="135" y="48" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+3</text>
+                <text x="170" y="108" class="rp-vu-tick rp-vu-tick-red" text-anchor="middle">+6</text>
+                <line x1="100" y1="95" x2="100" y2="28" class="rp-vu-needle" id="cdNeedle"/>
+                <circle cx="100" cy="95" r="5" class="rp-vu-pivot"/>
+                <circle cx="100" cy="95" r="2" class="rp-vu-pivot-inner"/>
+                <text x="100" y="78" class="rp-vu-label" text-anchor="middle">VU</text>
+              </svg>
+            </div>
+
+            <div class="rp-controls">
+              <div class="rp-progress-row">
+                <span class="rp-time" id="cdTimeCurrent">0:00</span>
+                <div class="rp-progress" id="cdProgress" role="slider" aria-label="Seek" tabindex="0">
+                  <div class="rp-progress-fill" id="cdFill"></div>
+                  <div class="rp-progress-head" id="cdHead"></div>
+                </div>
+                <span class="rp-time" id="cdTimeTotal">0:00</span>
+              </div>
+              <div class="rp-transport">
+                <button class="rp-btn rp-prev" id="cdPrev" type="button" aria-label="Previous track">
+                  <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+                </button>
+                <button class="rp-btn rp-play" id="cdPlay" type="button" aria-label="Play / pause">
+                  <svg id="cdPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="rp-btn rp-next" id="cdNext" type="button" aria-label="Next track">
+                  <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rp-crate">
+          <div class="rp-crate-head">// Cody's Crate</div>
+          <div class="rp-crate-sub">Bayou Beats — Selections</div>
+          <div id="cdTrackList"></div>
+          <div class="rp-crate-scribble">scrawled on the sleeve — <strong>Cody</strong></div>
+        </div>
+      </div>
+    </div>
+    <audio id="cdAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="codyTracksData" type="application/json">[
+      {"title": "Duct Tape Halo", "src": "assets/Cody Pics/Duct Tape Halo.mp3"},
+      {"title": "Placeholder",    "src": "assets/Cody Pics/cody-track-02.mp3"},
+      {"title": "Placeholder",    "src": "assets/Cody Pics/cody-track-03.mp3"}
+    ]</script>
+  </section>
+
+  <!-- ====== THE FAMILY ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">The Family</h2>
+    <span class="poster-eyebrow reveal-up">Thibodeaux Household &middot; Ville Platte, LA</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-1deg;">
+        <div class="wanted-head">The Father</div>
+        <div class="wanted-name">Miguel</div>
+        <div class="wanted-role">Mean Drunk</div>
+        <div class="wanted-desc">Mean as the day is long. The reason Cody learned how to stand between his sisters and a closed fist.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:1.5deg;">
+        <div class="wanted-head">The Mother</div>
+        <div class="wanted-name">Elena</div>
+        <div class="wanted-role">Too Soft &middot; Too Scared</div>
+        <div class="wanted-desc">She loves Miguel despite his abusive. Why? Cody figures that's just what you do, you love people. She is too timid to protect her children, so Cody did it instead while she prayed.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:-1.5deg;">
+        <div class="wanted-head">The Sisters</div>
+        <div class="wanted-name">All Seven</div>
+        <div class="wanted-role">Trailing like ducklings</div>
+        <div class="wanted-desc">Cody'd burn the world for them, and they know it. He calls every Sunday whether he's on the road or not. Every. Single. Sunday.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">★ The Gator ★</div>
+        <div class="wanted-name">Leg Stealer</div>
+        <div class="wanted-role">The alligator that stole his leg</div>
+        <div class="wanted-desc">This Son of a Gator stole Cody's leg when he was seven. It's the most metal moment of his life.</div>
+        <div class="wanted-stamp">✦ To Being One-Legged</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p>Cody grew up in the swamps outside Houma, Louisiana, in a house held together by prayer, duct tape, and his mama's stubbornness. He's the oldest of eight — seven little sisters trailing behind him like ducklings — and he's been their shield since he was old enough to stand between them and a closed fist.</p>
+        <p>His daddy, <strong>Miguel Thibodeaux</strong>, is a mean drunk. Always has been. The kind who comes home from the docks reeking of cheap whiskey and decides somebody's gotta pay for whatever's wrong inside his head. His mama, <strong>Elena</strong>, loves Miguel anyway — too soft, too scared, too worn out to ever step between him and the kids. So Cody did it instead. Took the belts. Took the boots. Took the closed fists. Smiled through bloody teeth and told his sisters it was a game so they wouldn't cry.</p>
+        <p>He still does it, by the way. Different fists, different rooms, same Cody. <em>Old habits make old men out of young boys.</em></p>
+        <p>When Cody was seven, he was swimming in a quiet bend of the bayou his cousins swore was safe. It wasn't. A gator took his left leg below the knee in one clean, calm yank — the way a person takes a chicken wing off a plate. He nearly bled out in the mud. Some old man named <strong>Theo</strong> dragged him back to the boat and held his thigh together with bare hands while Elena prayed to a god she'd never been sure about. Cody lived. The leg didn't.</p>
+        <p>He's worn a prosthetic since. Wears it well, too — most folks don't notice for the first hour. The phantom pain never really went away, though. Neither did the dreams. He manages both the same way he manages everything else: <em>weed, a smile, and a beat to keep time to.</em></p>
+        <p>Scorch found him when Cody was thirteen — banging a polyrhythm on a busted oil drum behind a gas station like he'd been born doing it. Scorch listened for maybe ten seconds, dragged him into a van, and that was that. Cody's been the rhythm of the Snake Skins ever since. Youngest in the band. Sweetest in the band. The only one nobody'll ever say a word against, because the rest of them know exactly what he's holding up.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== THE QUIET PART (DEPRESSION) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The Quiet Part</h2>
+    <span class="poster-eyebrow reveal-up">Heavy content &middot; Read with care</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Heavy Content ⚠</span>
+        <span class="case-file-sub">Depression &amp; Dark Thoughts — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p>The smiling part is real. He <em>means</em> it. But it's not the whole story.</p>
+        <p>Cody's been depressed his whole adult life. He doesn't use the clinical word for it — that's a thing other people get to call it. To him it's just a deep ache, a root that won't die, somethin' he's been pullin' at since he was a kid and finally just decided to live around. Some days it's quiet. Some days it sits on his chest like a wet quilt and he can't get up for hours, and he hates himself for it because his sisters needed him on time and he wasn't.</p>
+        <p>There are dark days. The kind where the thought of just <em>not bein' here anymore</em> shows up uninvited and matter-of-fact, like a stray cat on the porch. He hasn't acted on it. He says he won't. He says a lot of things. The thought scares him less than it should, and that's the part he doesn't tell anyone.</p>
+        <p>The weed isn't recreation. It's pain management — the phantom leg, the wrecked shoulder, the bad nights — but it's also the only thing that turns the volume in his head down low enough to sleep. He knows it's a crutch. He's got plenty of those. One more isn't gonna kill him. Probably.</p>
+        <p>If you spend time with him, you'll catch the cracks eventually. He'd appreciate it if you didn't make a big thing of it. <strong>He'd appreciate it more if you stayed.</strong></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== THE EX ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Ex</h2>
+    <span class="poster-eyebrow reveal-up">Old heartbreak &middot; still polite about it</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Old Heartbreak ⚠</span>
+        <span class="case-file-sub">Samantha — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p><strong>Samantha</strong> was Cody's first real love. Senior year — his junior. He thought she hung the moon. Bought her flowers from the gas station 'cause they were the only ones open at midnight. Wrote her a song he never let anyone else hear. He'd have married her at sixteen if she'd asked.</p>
+        <p>She broke it off after prom. The reason she gave — to his face, in her mama's kitchen, while he stood there holdin' a milkshake he'd driven forty minutes to bring her — was that she <em>"couldn't see herself settlin' down with a cripple."</em> That's the word she used. Cody didn't argue. Said <em>yeah, that's fair, sha</em>, set the milkshake on the counter, and walked out. He cried in the truck for about an hour and then he never cried about it again.</p>
+        <p>She married the high school quarterback six months later. Cody played their wedding, actually — backed up the cover band — because the venue paid well and he wasn't about to turn down rent money over a feeling. He smiled through every song. Drove home. Got high. Slept twelve hours.</p>
+        <p>He's seen her around since. She tries to flirt now. Says she made a mistake. Cody laughs that easy laugh of his and changes the subject. He's polite. <strong>Cajun raised.</strong> But that bridge isn't burned — it's just <em>gone</em>. He doesn't even remember where it used to be.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>I been smilin' so long I forgot what my face looks like otherwise. Don't worry about it, sha.</q>
+      <cite>— Cody</cite>
+    </div>
+  </section>
+
+  <!-- ====== MERCH (= gallery) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Cody IS the merch &middot; Stock: 1 &middot; He's photogenic when he doesn't know the camera's on</span>
+
+    <div class="pit-board merch-board">
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Hand-Delivered</div>
+
+      <button class="pit-cta gallery-entry" id="codyGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/Cody Pics/cody-gallery-cover.jpg" alt="Cody gallery cover" />
+          </div>
+          <div class="polaroid-caption">Cody<small>Limited Edition &middot; 10 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="codyGalleryData" type="application/json">[
+        {"src": "assets/Cody Pics/cody-gallery-01.jpg", "alt": "Cody behind the kit"},
+        {"src": "assets/Cody Pics/cody-gallery-02.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-03.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-04.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-05.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-06.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-07.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-08.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-09.jpg", "alt": ""},
+        {"src": "assets/Cody Pics/cody-gallery-10.jpg", "alt": ""}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Cody</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">CODY</div>
+        <div class="pass-role">Drums &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/19fe69d3-d995-4ca4-a38c-a9511077907b"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Cody &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-003</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER / BACK ====== -->
+  <section class="char-final-cta">
+    <a href="#" class="char-back-link" id="codyBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END CODY CHARACTER PAGE ===================== -->
+
+<!-- ===== CODY DATING PROFILE (not built yet) =====
+     When ready, paste a <div class="dating-page" id="codyDatingPage" ...>
+     here, mirroring the Scorch dating profile in scorch.html. -->
+
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Scorch (unlocked) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

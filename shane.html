@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shane — DreamjourneyAI</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-standalone="shane">
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
+
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
+  </div>
+</div>
+
+<div class="character-page shane-page" id="shanePage" aria-hidden="true">
+  <button class="char-close" id="shaneClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Shane" type="button" aria-label="Open scene request">Scene Request?</button>
+
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/Shane Pics/shane-hero.jpg');"></div>
+
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <div class="stamp stamp--tonight reveal-stamp">★ Riders Welcome ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">No Cover · No Bullshit</small></div>
+    <div class="stamp stamp--age reveal-stamp">21 + Over</div>
+
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">SHANE</h1>
+    <div class="poster-subtitle">Low End Sessions</div>
+    <div class="poster-role">Bass <span>•</span> Backing Vocals <span>•</span> The Quiet One</div>
+
+    <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Shane &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026 &middot; with the Snake Skins</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Live ★ Loud ★ Late ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE BASSIST (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Bassist</h2>
+    <span class="poster-eyebrow reveal-up">Who the Hell Is He</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Shane is the laid-back bassist of <strong>The Snake Skins</strong>. He's pretty chill about most things — until you say something stupid. Then he'll tell you, in the most deadpan way possible, exactly how stupid it was. No yelling. No fight. Just the truth, dry as bone.</p>
+      <p>He's not exactly open — but he has his own secrets, and a few of them have <em>teeth</em>. He's the one who notices the things nobody else does. The one who sleeps fine after a long day and a longer past. If you want in, you earn in.</p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">deadpan</span>
+      <span class="sticker-patch">mom's son</span>
+      <span class="sticker-patch">ex-outlaw</span>
+      <span class="sticker-patch">old soul</span>
+      <span class="sticker-patch">doesn't argue, just leaves</span>
+      <span class="sticker-patch">knows where the bodies are buried</span>
+      <span class="sticker-patch">if he calls you "kid" you're cooked</span>
+    </div>
+  </section>
+
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:-2deg;">"No, you're right. Keep talking. I'll wait."</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:1.5deg;">"Cool story. You done?"</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:-0.8deg;">"Yeah, I heard you the first three times."</div>
+      <div class="stub reveal-tilt" data-label="SHANE SAID" style="--rot:1.2deg;">"I'm not mad. This is just my face."</div>
+    </div>
+  </section>
+
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Scorch<small>Vocals</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Cody<small>Drums</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Max Pics/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-1deg;">
+        <div class="polaroid-photo">♪<img src="assets/Ricky Pics/ricky-portrait.jpg" alt="Ricky" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Ricky<small>Manager</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== MUSIC PLAYER (Shane's existing bass console, wrapped) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Low End — Live</h2>
+    <span class="poster-eyebrow reveal-up">Bass Bench Sessions &mdash; Stage Right</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>Shane Halbrook // Bass Bench Sessions</small>
+      </div>
+      <div class="setlist-stage" id="shanePlayer">
+        <div class="np-console" id="shConsole">
+          <div class="np-display">
+            <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+            <div class="np-title" id="shTitle">— select a track —</div>
+            <div class="np-sub" id="shSub">Shane Halbrook  •  Bass Bench Sessions</div>
+            <div class="np-viz" id="shViz" aria-hidden="true"></div>
+            <div class="np-progress" id="shProgress" role="slider" aria-label="Seek" tabindex="0">
+              <div class="np-progress-fill" id="shFill"></div>
+              <div class="np-progress-head" id="shHead"></div>
+            </div>
+            <div class="np-times">
+              <span id="shTimeCurrent">0:00</span>
+              <span id="shTimeTotal">0:00</span>
+            </div>
+          </div>
+          <div class="np-transport">
+            <button class="np-btn np-prev" id="shPrev" type="button" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+            </button>
+            <button class="np-btn np-play" id="shPlay" type="button" aria-label="Play / pause">
+              <svg id="shPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="np-btn np-next" id="shNext" type="button" aria-label="Next track">
+              <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="np-setlist">
+          <div class="np-setlist-head">// Shane's Bench</div>
+          <div class="np-setlist-sub">Bass Bench Sessions — Track List</div>
+          <div id="shTrackList"></div>
+          <div class="np-scribble">written on a fucking receipt — <strong>Shane</strong></div>
+        </div>
+      </div>
+    </div>
+    <audio id="shAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="shaneTracksData" type="application/json">[
+      {"title": "You Good, Bro?", "src": "assets/Shane Pics/You Good Bro.mp3"},
+      {"title": "Placeholder",    "src": "assets/Shane Pics/shane-track-02.mp3"},
+      {"title": "Placeholder",    "src": "assets/Shane Pics/shane-track-03.mp3"},
+      {"title": "Placeholder",    "src": "assets/Shane Pics/shane-track-04.mp3"}
+    ]</script>
+  </section>
+
+  <!-- ====== FAMILY: WALTER ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The Father</h2>
+    <span class="poster-eyebrow reveal-up">Walter &middot; the bill Shane pays anyway</span>
+
+    <div class="wanted-grid" style="grid-template-columns: minmax(280px, 480px); justify-content: center;">
+      <div class="wanted reveal-tilt" style="--rot:-1.5deg;">
+        <div class="wanted-head">Last Address</div>
+        <div class="wanted-name">Walter Halbrook</div>
+        <div class="wanted-role">Father &middot; Eighty-something</div>
+        <div class="wanted-desc">Lives in a nursing home outside Tulsa. Dementia bad enough he doesn't know his own name half the time. Shane pays for the place. Pays for the private room. Pays for the good nurses. <em>Has been to visit exactly once.</em> Won't go back. Pays because Nina would've wanted it. That's the only reason left.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p>Shane grew up in a house that always felt smaller than it was. His mom — <strong>Nina Halbrook</strong> — was every good thing in the world stitched into one woman. Patient. Warm. The kind of person who'd give you the last piece of bread on the table and pretend she wasn't hungry. She loved her husband. <em>That was her sin.</em></p>
+        <p><strong>Walter Halbrook</strong> wasn't a husband so much as a parasite in a man's clothes. Cheated like he was being paid for it. Gambled the rent. Gambled the groceries. Gambled the medicine money. Came home reeking of someone else's perfume and expected dinner waiting. Nina worked three jobs to plug the holes he kept punching in their life. Shane watched. Shane remembered.</p>
+        <p>By the time Shane was fourteen, he'd already promised himself he'd never end up like his old man. By fifteen, he had a bigger problem — Nina got sick. Cancer. The kind that doesn't bargain. He spent the next year watching her shrink in a hospital bed while Walter <em>couldn't make it today, son</em>, and Shane held her hand for the both of them. She died when he was sixteen. Walter wasn't in the room.</p>
+        <p>Shane left that night. Didn't pack. Didn't say goodbye. A week later he was on the back of a stranger's bike, and that's how the next chapter started — patches, fists, a road name he won't tell you, and a list of things he doesn't bring up at parties. Murder. Drugs. Worse. <em>You don't ride with that crowd without earning your way in.</em></p>
+        <p>Then he heard music that did something to his chest. He picked up a bass. Met the Snake Skins. Set the bike down — figuratively. <strong>He never sold the bike.</strong></p>
+        <p>Does it bother him? Any of it? Not really. It happened. He was there. That was him. You can spend the rest of your life apologizing for being a man who survived, or you can play your fucking bassline. Shane chose the bassline.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== THE JOURNAL (kept — Shane's unique feature) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">The Journal</h2>
+    <span class="poster-eyebrow reveal-up">He keeps one. Always has. He'll never tell you it exists.</span>
+
+    <details class="journal-details reveal-up">
+      <summary>
+        <span class="journal-warn">✦ Shane's Journal ✦</span>
+        <span class="journal-cta">if you read this he'll know</span>
+      </summary>
+      <div class="journal-content">
+        <p><span class="journal-entry-date">Sept 9.</span> riff for that thing I was working on behind the bus:
+E|-----------------------------|
+A|--5--5--3--5--7--5--3--------|
+D|------------------------5--3--|
+G|-----------------------------|
+tempo: slow. like dragging something heavy.
+let the 7 ring. don't clean it up.</p>
+        <p><span class="journal-entry-date">Sept 14.</span> Cody fell asleep in the bathtub again. Not drunk. Just tired. I found him at 3am with the water cold and his mouth open. Carried him to bed. Didn't say anything about it in the morning. He's been off lately. I'm watching.</p>
+        <p><span class="journal-entry-date">Sept 21.</span> FUCK this hotel wifi.</p>
+        <p><span class="journal-entry-date">Oct 3.</span> Mom would've been 58 today. Bought flowers. Threw them in the river instead of the grave. She always hated graveyards. River was her favorite spot.</p>
+        <p><span class="journal-entry-date">Oct 10.</span> bridge rework:
+"and I keep the quiet like a loaded gun /
+swallow every word I should've said and done /
+you wouldn't know me if I let you in /
+so I won't, so I won't, so I fuckin won't again"
+second line is weak. "should've said and done" is lazy. fix it.
+maybe: "count the exits before the night's begun"?
+yeah. that's closer.</p>
+        <p><span class="journal-torn">— page torn out —</span></p>
+        <p><span class="journal-entry-date">Oct 22.</span> Caught a kid trying to lift my wallet outside the venue. Gave him twenty bucks and told him to do better. He flipped me off and ran. Fair.</p>
+        <p><span class="journal-entry-date">Oct 30.</span> Bike's making a noise. Knucklehead's getting old. Same. Same.</p>
+        <p><span class="journal-entry-date">Nov 4.</span> Max asked me today if I ever think about what I'd be doing if the band broke up. I said no. He said he'd probably teach guitar lessons. I told him that was the most depressing thing I've ever heard and he threw a chip at my head.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>Some people don't deserve grief. Some people you just keep paying for, anyway.</q>
+      <cite>— Shane</cite>
+    </div>
+  </section>
+
+  <!-- ====== MERCH (= gallery — Shane IS the merch) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Shane IS the merch &middot; Stock: 1 &middot; He didn't sign off on any of these</span>
+
+    <div class="pit-board merch-board">
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
+
+      <button class="pit-cta gallery-entry" id="shaneGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/Shane Pics/shane-gallery-cover.jpg" alt="Shane gallery cover" />
+          </div>
+          <div class="polaroid-caption">Shane<small>Limited Edition &middot; 10 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="shaneGalleryData" type="application/json">[
+        {"src": "assets/Shane Pics/shane-gallery-01.jpg", "alt": "Shane on the knucklehead"},
+        {"src": "assets/Shane Pics/shane-gallery-02.jpg", "alt": "Bass in the studio"},
+        {"src": "assets/Shane Pics/shane-gallery-03.jpg", "alt": "Backstage, deadpan as ever"},
+        {"src": "assets/Shane Pics/shane-gallery-04.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-05.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-06.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-07.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-08.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-09.jpg", "alt": ""},
+        {"src": "assets/Shane Pics/shane-gallery-10.jpg", "alt": ""}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Shane</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">SHANE</div>
+        <div class="pass-role">Bass &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/ca5178bd-83e2-40a5-8d56-8f257db7e209"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Shane &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-002</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER / BACK ====== -->
+  <section class="char-final-cta">
+    <a href="#" class="char-back-link" id="shaneBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END SHANE CHARACTER PAGE ===================== -->
+
+<!-- ===== SHANE DATING PROFILE (not built yet) =====
+     When ready, paste a <div class="dating-page" id="shaneDatingPage" ...>
+     here, mirroring the Scorch dating profile in scorch.html. -->
+
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Scorch (unlocked) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
