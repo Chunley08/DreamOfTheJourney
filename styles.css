@@ -8606,70 +8606,76 @@
 /* reading panel (paper) */
 .shane-page .sh-bi-read {
   position: absolute; inset: 0; z-index: 8;
-  display: block;
-  padding: 0; border: none; border-radius: 4px;
-  overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  display: flex; flex-direction: column;
+  padding: 0; border: none; border-radius: 4px; overflow: hidden;
   background:
-    repeating-linear-gradient(180deg, transparent 0 27px, rgba(40,70,95,0.18) 27px 28px),
-    linear-gradient(180deg, #e7e2d4, #d8d2c0);
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(40,70,95,0.16) 27px 28px),
+    linear-gradient(180deg, #efe9db, #ddd6c4);
   box-shadow: inset 0 0 40px rgba(80,60,30,0.12);
 }
+.shane-page .sh-bi-read::before { content: ''; position: absolute; left: 34px; top: 0; bottom: 0; width: 2px; background: rgba(200,80,80,0.30); pointer-events: none; z-index: 1; }
+/* header bar: tag + X, always visible */
+.shane-page .sh-bi-read-head {
+  flex: none; display: flex; align-items: center; justify-content: space-between;
+  gap: 0.6rem; padding: 0.55rem 0.6rem 0.5rem 0.9rem; position: relative; z-index: 4;
+  border-bottom: 1px solid rgba(120,90,40,0.25);
+  background: linear-gradient(180deg, rgba(255,250,238,0.9), rgba(245,238,222,0.5));
+}
+/* scrollable entry body */
 .shane-page .sh-bi-read-body {
-  min-height: 100%; box-sizing: border-box;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 2.9rem 1.2rem 1.4rem;
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain; padding: 0.9rem 1.1rem 0.6rem 0.9rem; position: relative; z-index: 2;
 }
-.shane-page .sh-bi-read::before { content: ''; position: absolute; left: 30px; top: 0; bottom: 0; width: 2px; background: rgba(200,80,80,0.35); }
+/* footer: Continue button, always visible + tappable */
+.shane-page .sh-bi-read-foot {
+  flex: none; padding: 0.55rem 0.7rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(120,90,40,0.25); position: relative; z-index: 4;
+  background: linear-gradient(0deg, rgba(255,250,238,0.92), rgba(245,238,222,0.4));
+}
 .shane-page .sh-bi-read.rare   { box-shadow: inset 0 0 0 2px rgba(200,162,74,0.5), inset 0 0 50px rgba(200,162,74,0.16); }
-.shane-page .sh-bi-read.buried { box-shadow: inset 0 0 0 2px rgba(180,74,74,0.55), inset 0 0 55px rgba(120,20,20,0.25); background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70,30,30,0.22) 27px 28px), linear-gradient(180deg, #ddd0c4, #cabcae); }
-.shane-page .sh-bi-read.legend {
-  box-shadow: inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2);
-  animation: shBiLegend 1.8s ease-in-out infinite;
-}
+.shane-page .sh-bi-read.buried { box-shadow: inset 0 0 0 2px rgba(180,74,74,0.55), inset 0 0 55px rgba(120,20,20,0.22); background: repeating-linear-gradient(180deg, transparent 0 27px, rgba(70,30,30,0.20) 27px 28px), linear-gradient(180deg, #e0d3c6, #cbbdaf); }
+.shane-page .sh-bi-read.legend { box-shadow: inset 0 0 0 2px rgba(231,200,121,0.7), inset 0 0 60px rgba(231,200,121,0.2); animation: shBiLegend 1.8s ease-in-out infinite; }
 @keyframes shBiLegend {
   0%,100% { box-shadow: inset 0 0 0 2px rgba(231,200,121,0.55), inset 0 0 50px rgba(231,200,121,0.16); }
   50%     { box-shadow: inset 0 0 0 2px rgba(231,200,121,0.95), inset 0 0 70px rgba(231,200,121,0.3); }
 }
-/* reuse .sh-jr-tag / .sh-jr-entry / .sh-jr-date typography */
 .shane-page .sh-bi-read .sh-jr-tag {
   display: inline-block; font-family: 'Oswald', sans-serif; font-weight: 700;
-  font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase;
+  font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
   color: #2a5a78; border: 1px solid rgba(42,90,120,0.5); border-radius: 3px;
-  padding: 1px 7px; margin-bottom: 0.6rem; background: rgba(42,90,120,0.08);
+  padding: 2px 8px; background: rgba(42,90,120,0.08);
 }
 .shane-page .sh-bi-read.rare .sh-jr-tag   { color: #8a6d1f; border-color: rgba(200,162,74,0.6); background: rgba(200,162,74,0.12); }
 .shane-page .sh-bi-read.buried .sh-jr-tag { color: #8a1f1f; border-color: rgba(180,74,74,0.7); background: rgba(180,74,74,0.14); letter-spacing: 0.22em; }
-.shane-page .sh-bi-read.legend .sh-jr-tag { color: #6a4e08; border-color: rgba(231,200,121,0.85); background: rgba(231,200,121,0.22); letter-spacing: 0.28em; }
+.shane-page .sh-bi-read.legend .sh-jr-tag { color: #6a4e08; border-color: rgba(231,200,121,0.85); background: rgba(231,200,121,0.22); letter-spacing: 0.26em; }
 .shane-page .sh-bi-read .sh-jr-entry {
   font-family: 'Special Elite', monospace; color: #1f2d3a;
   font-size: 1.02rem; line-height: 1.75; white-space: pre-line;
-  min-height: 2.4em; filter: none; opacity: 1;
+  filter: none; opacity: 1;
 }
 .shane-page .sh-bi-read.buried .sh-jr-entry { color: #2a1414; }
 .shane-page .sh-bi-read.legend .sh-jr-entry { color: #4a370a; font-weight: 700; }
-.shane-page .sh-bi-read .sh-jr-date { margin-top: 0.8rem; text-align: right; font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.76rem; color: #5a6a78; }
-.shane-page .sh-bi-read-hint { margin-top: 0.7rem; text-align: center; font-family: 'Oswald', sans-serif; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6a78; }
+.shane-page .sh-bi-read .sh-jr-date { margin-top: 0.8rem; text-align: right; font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.78rem; color: #5a6a78; }
+.shane-page .sh-bi-read-hint { margin: 0.5rem 0 0; text-align: center; font-family: 'Oswald', sans-serif; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6a6253; }
 .shane-page .sh-bi-read-hint b { color: #2a5a78; }
 .shane-page .sh-bi-read-x {
-  position: sticky; float: right; top: 8px; right: 8px; margin: 8px 8px -40px 0; z-index: 5;
-  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
-  border: 2px solid rgba(40,90,120,0.6); background: rgba(231,226,212,0.96); color: #2a5a78;
-  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.2rem; line-height: 1;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4); transition: transform 0.1s ease, background 0.1s ease;
-  display: flex; align-items: center; justify-content: center;
+  flex: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+  border: 2px solid rgba(40,90,120,0.55); background: rgba(255,252,244,0.98); color: #2a5a78;
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.15rem; line-height: 1;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.1s ease, background 0.1s ease;
+  display: flex; align-items: center; justify-content: center; touch-action: manipulation;
 }
 .shane-page .sh-bi-read-x:hover,
 .shane-page .sh-bi-read-x:active { transform: scale(1.08); background: #fff; }
 .shane-page .sh-bi-read.buried .sh-bi-read-x { color: #8a1f1f; border-color: rgba(180,74,74,0.7); }
 .shane-page .sh-bi-read.legend .sh-bi-read-x { color: #6a4e08; border-color: rgba(231,200,121,0.8); }
 .shane-page .sh-bi-read-continue {
-  align-self: center; margin-top: 0.7rem; flex: none;
+  display: block; width: 100%; cursor: pointer; touch-action: manipulation;
   font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.1em; font-size: 0.9rem; cursor: pointer;
-  padding: 0.65rem 1.6rem; border-radius: 6px; color: #051018; border: none;
+  letter-spacing: 0.1em; font-size: 0.95rem;
+  padding: 0.7rem 1rem; border-radius: 8px; color: #051018; border: none;
   background: linear-gradient(135deg, #a8c8e0, #5fb0d4);
-  box-shadow: 0 6px 16px rgba(95,176,212,0.4);
+  box-shadow: 0 4px 14px rgba(95,176,212,0.4);
   transition: transform 0.1s ease, filter 0.1s ease;
 }
 .shane-page .sh-bi-read-continue:hover,
