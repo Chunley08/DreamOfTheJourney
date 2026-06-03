@@ -8599,9 +8599,8 @@
 /* stage / canvas */
 .shane-page .sh-bi-stage { position: relative; border-radius: 4px; overflow: hidden; border: 1px solid rgba(95,176,212,0.3); background: #060d18; }
 .shane-page #shCanvas {
-  display: block; width: 100%; height: auto; aspect-ratio: 320 / 180;
+  display: block; width: 100%; height: auto; aspect-ratio: 360 / 180;
   touch-action: none; cursor: pointer;
-  image-rendering: pixelated; image-rendering: crisp-edges;
 }
 
 /* reading panel (paper) */
@@ -8646,14 +8645,42 @@
 .shane-page .sh-bi-read .sh-jr-date { margin-top: 0.8rem; text-align: right; font-family: 'Special Elite', monospace; font-style: italic; font-size: 0.76rem; color: #5a6a78; }
 .shane-page .sh-bi-read-hint { margin-top: 0.7rem; text-align: center; font-family: 'Oswald', sans-serif; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6a78; }
 .shane-page .sh-bi-read-hint b { color: #2a5a78; }
+.shane-page .sh-bi-read-x {
+  position: absolute; top: 6px; right: 6px; z-index: 3;
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(40,90,120,0.5); background: rgba(231,226,212,0.9); color: #2a5a78;
+  font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 0.95rem; line-height: 1;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35); transition: transform 0.1s ease, background 0.1s ease;
+}
+.shane-page .sh-bi-read-x:hover { transform: scale(1.08); background: #fff; }
+.shane-page .sh-bi-read.buried .sh-bi-read-x { color: #8a1f1f; border-color: rgba(180,74,74,0.6); }
+.shane-page .sh-bi-read.legend .sh-bi-read-x { color: #6a4e08; border-color: rgba(231,200,121,0.7); }
+
+/* character select */
+.shane-page .sh-bi-charsel { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; margin-top: 0.2rem; }
+.shane-page .sh-bi-charsel-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.58rem; color: #6a96b4; }
+.shane-page .sh-bi-charsel-row { display: flex; gap: 0.5rem; }
+.shane-page .sh-bi-charbtn {
+  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.06em; font-size: 0.82rem;
+  padding: 0.45rem 1rem; border-radius: 6px; cursor: pointer; color: #aebfce;
+  background: rgba(20,32,46,0.8); border: 1px solid rgba(95,176,212,0.35);
+  transition: transform 0.1s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.shane-page .sh-bi-charbtn:hover { transform: translateY(-1px); color: #e8eef4; }
+.shane-page .sh-bi-charbtn.sel { background: linear-gradient(135deg, #a8c8e0, #5fb0d4); color: #051018; border-color: transparent; }
 
 /* overlay */
 .shane-page .sh-bi-overlay {
   position: absolute; inset: 0; z-index: 12;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0.7rem; text-align: center; padding: 1.4rem;
-  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.86), rgba(4,8,16,0.97));
+  text-align: center; padding: 0.8rem;
+  background: radial-gradient(circle at 50% 40%, rgba(8,16,28,0.88), rgba(4,8,16,0.97));
   backdrop-filter: blur(2px);
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.shane-page .sh-bi-overlay-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+  width: 100%; max-width: 46ch; margin: auto;
 }
 .shane-page .sh-bi-overlay.hidden { display: none; }
 .shane-page .sh-bi-callout {
