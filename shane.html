@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="styles.css?v=tourbus3" />
+<link rel="stylesheet" href="styles.css?v=tourbus5" />
 </head>
 <body data-standalone="shane">
 
@@ -284,10 +284,13 @@
         <!-- reading panel: unlocks, opens safely, X to continue -->
         <div class="sh-bi-read" id="shReadPanel" hidden>
           <button type="button" class="sh-bi-read-x" id="shReadClose" aria-label="Close entry and continue">✕</button>
-          <span class="sh-jr-tag" id="shTag">&mdash;</span>
-          <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
-          <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
-          <p class="sh-bi-read-hint">You read it. Tap <b>✕</b> to slip back out and ride on to the next stop.</p>
+          <div class="sh-bi-read-body">
+            <span class="sh-jr-tag" id="shTag">&mdash;</span>
+            <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
+            <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
+            <p class="sh-bi-read-hint">You read it. Tap <b>✕</b> or <b>Continue</b> to slip back out and ride on to the next stop.</p>
+            <button type="button" class="sh-bi-read-continue" id="shReadContinue">Continue ▸</button>
+          </div>
         </div>
 
         <!-- intro / game-over overlay (scrolls if tall on mobile) -->
@@ -542,6 +545,6 @@ yeah. that's closer.</p>
   </div>
 </div>
 
-<script src="script.js?v=tourbus3"></script>
+<script src="script.js?v=tourbus5"></script>
 </body>
 </html>
