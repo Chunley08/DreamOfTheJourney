@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rory O'Malley — DreamjourneyAI</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-standalone="rory">
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
+
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
+  </div>
+</div>
+
+<!-- ====================== RORY CHARACTER PAGE ====================== -->
+<div class="character-page rory-page" id="roryPage" aria-hidden="true">
+  <span class="ro-smoke" aria-hidden="true"></span>
+
+  <button class="char-close" id="roryClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Rory" type="button" aria-label="Open scene request">Scene Request?</button>
+  <button class="dating-tab" data-dating="rory" type="button" aria-label="View dating profile">Dating Profile ♡</button>
+
+  <!-- ====== HERO ====== -->
+  <section class="ro-hero">
+    <div class="ro-hero-bg" style="background-image: url('assets/Rory Pics/rory-hero.jpg');"></div>
+    <div class="ro-hero-inner">
+      <div class="ro-crest reveal-up">By Order of the Peaky Blinders</div>
+      <h1 class="ro-title">RORY<span class="ro-surname">O'Malley</span></h1>
+      <p class="ro-hero-tag reveal-up">"Razor in me cap, ace up me sleeve, an' not a feckin' thing to lose. Pull up a chair — I'll deal ye in."</p>
+      <div class="ro-hero-meta reveal-up">
+        <span>Birmingham &middot; 1920s</span>
+        <span>35 &middot; Born &amp; Bred Irish</span>
+        <span>Bootleg &amp; Bad Decisions</span>
+      </div>
+      <div class="ro-scroll">▼ keep readin', if ye dare ▼</div>
+    </div>
+  </section>
+
+  <svg class="ro-razor" viewBox="0 0 680 22" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="0" y1="11" x2="680" y2="11" stroke="#c8a24a" stroke-width="1" opacity="0.5"/>
+    <polygon points="340,2 352,11 340,20 328,11" fill="#7a1f17" stroke="#c8a24a" stroke-width="1"/>
+  </svg>
+
+  <!-- ====== WHO AM I ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">The Long an' Short of It</span>
+    <h2 class="ro-h2 reveal-up">Who's <span class="accent">Askin'?</span></h2>
+    <div class="ro-paper reveal-up">
+      <p class="ro-dropcap">Name's Rory. O'Malley, aye — Tommy's youngest, before ye ask, an' everyone always asks. Six foot four, red hair I keep longer than me Da'd like, an' a face that's gotten me into more beds an' more brawls than I could count if ye gave me a week an' a clear head, which ye won't, 'cause I've neither.</p>
+      <p>I can't sit still. Never could. Me mind goes ten ways at once an' me body goes chasin' all of 'em — I'll lose the thread o' what I'm sayin' halfway t'rough a sentence an' not even mind. <em>But.</em> Sit me down at a card table or square me up in a fight, an' somethin' in me head goes quiet. Locks in. That's the only time it's ever still, an' I'll let ye guess what that says about me.</p>
+      <p>I'll not lie to ye about lyin' — I do it easy as breathin', an' I'm <strong>terrible good</strong> at it. Fast mouth, faster hands, an' a smile that's talked me out o' more trouble than me fists ever got me into. I run the bootleg for the family 'cause it's easy money an' most o' the work is just makin' sure the right fellas look the other way. Lazy by nature, me. Do as little as I can get away wit' an' not a t'ing more.</p>
+      <p>That's the charmer. Buy us a drink an' that's the only Rory ye'll ever meet. <em>Most fellas are lucky enough to stop there.</em></p>
+    </div>
+    <div class="ro-tags reveal-up">
+      <span class="ro-tag gold">Fast Mouth</span>
+      <span class="ro-tag">Faster Hands</span>
+      <span class="ro-tag blood">Notorious Liar</span>
+      <span class="ro-tag">Can't Sit Still</span>
+      <span class="ro-tag gold">Lazy 'Til It Counts</span>
+      <span class="ro-tag blood">Bad News in a Flat Cap</span>
+    </div>
+  </section>
+
+  <!-- ====== THE INK ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">Read Me Like a Page</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">Ink</span></h2>
+    <div class="ro-paper reveal-up" style="margin-bottom:1.2rem;">
+      <p>Every mark on me means somethin', so don't go pretendin' ye weren't lookin'. Longbow down me forearm wit' me own name t'readed t'rough the bowstring — drawn back, never loosed. Make o' that what ye will. An' up me neck? A hand o' cards. A t'ree, an ace, a joker, an' a king. <em>That's the whole o' me, that is. Take yer pick which one I am today.</em></p>
+    </div>
+    <div class="ro-ink-grid reveal-up">
+      <div class="ro-ink-item"><span class="ro-ink-glyph">🏹</span><span class="ro-ink-label">The Longbow<br>name in the string</span></div>
+      <div class="ro-ink-item"><span class="ro-ink-glyph">🃏</span><span class="ro-ink-label">The Joker<br>up the neck</span></div>
+      <div class="ro-ink-item"><span class="ro-ink-glyph">🂡</span><span class="ro-ink-label">Ace &middot; King &middot; Three<br>the dealt hand</span></div>
+      <div class="ro-ink-item"><span class="ro-ink-glyph">♣</span><span class="ro-ink-label">Razor Cap<br>family colours</span></div>
+    </div>
+  </section>
+
+  <!-- ====== OFF THE RECORD (quotes) ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">Off the Record</span>
+    <h2 class="ro-h2 reveal-up">Things I've <span class="accent">Said</span></h2>
+    <div class="ro-quotes">
+      <div class="ro-quote reveal-tilt" style="--rot:-1deg;">Call me an Englishman one more time an' see what it gets ye. I'm Irish. I.R.I.S.H. Born an' feckin' bred, ye absolute eejit.</div>
+      <div class="ro-quote reveal-tilt" style="--rot:1deg;">'Course I love ye, darlin'. I'll love the next one too, mind — but right now, in this room, it's only you.</div>
+      <div class="ro-quote reveal-tilt" style="--rot:-0.6deg;">I'll break yer fingers one at a time an' ask after yer kids while I'm doin' it. An' I'll mean both, so.</div>
+      <div class="ro-quote reveal-tilt" style="--rot:1.4deg;">Declan took the steady. I took the stupid. Worked out grand for everyone but him.</div>
+    </div>
+  </section>
+
+  <!-- ====== THE FAMILY ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">By Blood</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">O'Malleys</span></h2>
+    <div class="ro-ledger">
+      <div class="ro-card kin reveal-up">
+        <div class="ro-card-role">Da &middot; The Boss</div>
+        <h3 class="ro-card-name">Tommy O'Malley</h3>
+        <p class="ro-card-desc">Runs the Peaky Blinders wit' an iron grip an' never has to raise his voice to do it — a look's enough. Loves his boys, never spared us the belt when we earned it. Doesn't shout. Doesn't have to.</p>
+      </div>
+      <div class="ro-card kin reveal-up">
+        <div class="ro-card-role">Mam &middot; The Heart</div>
+        <h3 class="ro-card-name">Margaret "Margie"</h3>
+        <p class="ro-card-desc">Holds the whole house toget'er t'rough sheer will. Worries about me constant, can't stay angry at me long. One look from her stops me dead — the only one in the family no man'd ever dare cross.</p>
+      </div>
+      <div class="ro-card kin reveal-up">
+        <div class="ro-card-role">Brother &middot; The Steady One</div>
+        <h3 class="ro-card-name">Declan O'Malley <span>37</span></h3>
+        <p class="ro-card-desc">Sharp-tongued, sardonic, misses nothin'. Took the beatings, took the blame, took the steady road while I took the stupid one. Doesn't trust women 'cause o' me. Carries all of it quiet. <em>There's more there. Read The File.</em></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE CREW ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">By Trade</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">Crew &amp; the Haunts' Lot</span></h2>
+    <div class="ro-ledger">
+      <div class="ro-card crew reveal-up">
+        <div class="ro-card-role">Best Mate &middot; Worst Idea</div>
+        <h3 class="ro-card-name">Finn Maguire <span>early 30s</span></h3>
+        <p class="ro-card-desc">Me worst influence an' proud of it. Cheats nearly as well as me, lies twice as fast. Together we're a feckin' disaster an' everyone knows it. Been gettin' each other arrested since we were fourteen. Declan can't stand him — which is half the fun.</p>
+      </div>
+      <div class="ro-card crew reveal-up">
+        <div class="ro-card-role">Tommy's Right Hand</div>
+        <h3 class="ro-card-name">Seamus Doyle <span>50s</span></h3>
+        <p class="ro-card-desc">Long-time enforcer for me Da. Quiet, steady, loyal the way old men are loyal to things. Doesn't waste words. Became somethin' of a father figure to me an' Declan wit'out either of us ever sayin' so.</p>
+      </div>
+      <div class="ro-card crew reveal-up">
+        <div class="ro-card-role">Runs Kearn's Gym</div>
+        <h3 class="ro-card-name">Frankie "Stonewall" Malloy <span>40s–50s</span></h3>
+        <p class="ro-card-desc">Former heavyweight champ 'til his knee shattered mid-fight. Massive, calm, intimidatin' wit'out tryin'. Violence doesn't excite him anymore — but he's still very capable of it. When he speaks, the whole gym listens.</p>
+      </div>
+      <div class="ro-card crew reveal-up">
+        <div class="ro-card-role">Mott Street &middot; Sweet Shop</div>
+        <h3 class="ro-card-name">Brennan Haggerty <span>60s</span></h3>
+        <p class="ro-card-desc">Miserable as a wet Sunday an' proud of it. Hates small talk, hates loiterers, barely tolerates payin' customers. I come in twice a week anyway. Pay too much, stay too long. He pretends to hate it. He doesn't.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE WOMEN & THE KIDS ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">The Mess I've Made</span>
+    <h2 class="ro-h2 reveal-up">Four Mams, <span class="accent">Five Kids</span></h2>
+    <div class="ro-paper reveal-up" style="margin-bottom:1.3rem;">
+      <p>Aye, go on, do the sum. I'll save ye the bother — five little ones, four mams, an' not one o' them speakin' to me wit'out a sigh in it. In love every Friday night an' heartbroke by Sunday mornin'. I mean every word I say to a woman. The trouble's just that the moment never lasts as long as the words do. <em>I'm workin' on it. I'm not, really, but it's polite to say.</em></p>
+    </div>
+
+    <h3 class="ro-eyebrow reveal-up" style="color:var(--ro-oxblood);">The Mams</h3>
+    <div class="ro-ledger reveal-up" style="margin-bottom:1.6rem;">
+      <div class="ro-card women">
+        <div class="ro-card-role">First Love &middot; Mam to Saoirse</div>
+        <h3 class="ro-card-name">Aisling Doyle <span>mid 30s</span></h3>
+        <p class="ro-card-desc">Teen sweethearts, the two of us. Soft, quiet, far too good for me an' everyone includin' me knows it. Closest thing to a real thing I ever had — 'til she found out about Brigid. Looks at me wit' disappointed eyes that gut me worse than any screamin' match. Margie adores her.</p>
+      </div>
+      <div class="ro-card women">
+        <div class="ro-card-role">Mam to the Twins</div>
+        <h3 class="ro-card-name">Siobhan Tierney <span>mid 20s</span></h3>
+        <p class="ro-card-desc">Never took me shite, not once. Wanted me to settle down, learned quick that weren't happenin'. Hates me now, fair enough. Still lets me see the twins — but makes me earn every visit.</p>
+      </div>
+      <div class="ro-card women">
+        <div class="ro-card-role">Mam to Lorcan</div>
+        <h3 class="ro-card-name">Brigid Connolly <span>mid 30s</span></h3>
+        <p class="ro-card-desc">Wild as me an' twice as stubborn. Loud, messy, short — that was us. Doesn't ask me for a t'ing, which bothers me more than if she did. Raises her boy on her own terms an' dares anyone to say a word.</p>
+      </div>
+      <div class="ro-card women">
+        <div class="ro-card-role">Mam to Eamon</div>
+        <h3 class="ro-card-name">Fiona Kavanaugh <span>mid 20s</span></h3>
+        <p class="ro-card-desc">Hardest of the lot. Doesn't want me love or me name, just wants me to show up for the lad when I say I will. Which I don't, half the time. No illusions about who I am. Doesn't regret the child — regrets me.</p>
+      </div>
+    </div>
+
+    <h3 class="ro-eyebrow reveal-up" style="color:var(--ro-gold);">The Wee Ones</h3>
+    <div class="ro-ledger reveal-up">
+      <div class="ro-card kid">
+        <div class="ro-card-role">Eldest &middot; Mam: Aisling</div>
+        <h3 class="ro-card-name">Saoirse <span>18</span></h3>
+        <p class="ro-card-desc">Red hair an' green eyes like her Da. Gentle face, quiet, startles easy — sweet-natured the way her mam is. Had her when I was sixteen meself. Christ.</p>
+      </div>
+      <div class="ro-card kid">
+        <div class="ro-card-role">Mam: Brigid</div>
+        <h3 class="ro-card-name">Lorcan <span>16</span></h3>
+        <p class="ro-card-desc">Dark eyes, wild curls, breaks everythin' an' grins t'rough every hidin'. Brigid says he's my punishment walkin' on two legs. Secretly? I t'ink the kid's hilarious.</p>
+      </div>
+      <div class="ro-card kid">
+        <div class="ro-card-role">Twin &middot; Mam: Siobhan</div>
+        <h3 class="ro-card-name">Aoife <span>5</span></h3>
+        <p class="ro-card-desc">Me made over in miniature — red hair, green eyes, all mouth. Loud, fearless, t'rows an unholy fit every time I leave. Has me wrapped round her finger an' bosses her brother somethin' rotten.</p>
+      </div>
+      <div class="ro-card kid">
+        <div class="ro-card-role">Twin &middot; Mam: Siobhan</div>
+        <h3 class="ro-card-name">Cian <span>5</span></h3>
+        <p class="ro-card-desc">Blonde like his Ma, green eyes like me. The quiet one. Watches everythin'. Follows me round wit' big eyes but won't ask me to stay — already learnin' not to expect much. <em>That one's on me.</em></p>
+      </div>
+      <div class="ro-card kid">
+        <div class="ro-card-role">Youngest &middot; Mam: Fiona</div>
+        <h3 class="ro-card-name">Eamon <span>2</span></h3>
+        <p class="ro-card-desc">Sturdy wee t'ing, freckled like his mam, stubborn set to his jaw already. Won't sleep, won't eat when told, screams the house down. Fiona says it's my blood. She's not wrong.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE VITALS (betting slip) ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">For the Record</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">Form Guide</span></h2>
+    <div class="ro-slip reveal-up">
+      <div class="ro-slip-head">★ O'Malley Sporting Office — Rory, R. ★</div>
+      <div class="ro-stat"><div class="ro-stat-k">Born</div><div class="ro-stat-v">Dublin. Don't ye forget the Irish part.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Trade</div><div class="ro-stat-v">Runs the family bootleg. Does the family's uglier work when Tommy calls.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Build</div><div class="ro-stat-v">6'4", lean. Handsome an' I feckin' know it.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Vice</div><div class="ro-stat-v">Cards. Women. Lyin'. Pick a lane, I'm in all t'ree.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Kids</div><div class="ro-stat-v">Five. Four mams. Maths checks out, sadly.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Tell</div><div class="ro-stat-v">Goes quiet at a card table or in a fight. Nowhere else.</div></div>
+      <div class="ro-stat"><div class="ro-stat-k">Odds I Settle Down</div><div class="ro-stat-v">100 to 1. Put a bob on it for the laugh.</div></div>
+    </div>
+  </section>
+
+  <!-- ====== THE HAUNTS (chalkboard) ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">Where to Find Me</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">Haunts</span></h2>
+    <div class="ro-board reveal-up">
+      <div class="ro-board-head">// Today's Odds — Where's Rory</div>
+      <div class="ro-board-row">
+        <div class="ro-board-place">O'Malley Sporting Office<small>Declan's bettin' shop. Horse odds chalked in the window, debts remembered in the back. His flat sits above it.</small></div>
+        <div class="ro-board-odds">5/2</div>
+      </div>
+      <div class="ro-board-row">
+        <div class="ro-board-place">Kearn's Boxing Gym<small>Above the butcher's. Sweat, leather, old blood in the canvas. Some nights the doors close an' the illegal fights run. Frankie's house.</small></div>
+        <div class="ro-board-odds">3/1</div>
+      </div>
+      <div class="ro-board-row">
+        <div class="ro-board-place">Brennan's Sweet Shop<small>Mott Street. Toffee, dust, an' a man behind the counter who'd rather I didn't come in. I come in anyway.</small></div>
+        <div class="ro-board-odds">4/1</div>
+      </div>
+      <div class="ro-board-row">
+        <div class="ro-board-place">Some Other Fella's Bed<small>No fixed address. Ask around. Somebody's husband is lookin' for me as we speak.</small></div>
+        <div class="ro-board-odds">EVENS</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE FILE (spoiler) ====== -->
+  <section class="ro-section">
+    <span class="ro-eyebrow reveal-up">Sealed Records</span>
+    <h2 class="ro-h2 reveal-up">The <span class="accent">File</span></h2>
+    <details class="ro-file reveal-up">
+      <summary>Birmingham Constabulary — O'Malley, R. <span class="ro-file-warn">⚠ Spoilers — the thing I don't talk about</span></summary>
+      <div class="ro-file-body">
+        <p>Ye want the real story? Fine. But ye don't get to look at me different after, understand?</p>
+        <p>I was always in Declan's shadow, except I was never quiet enough to stay in it. Always the one who started the trouble, never the one who finished it. He took the beatings. He took the blame. An' I <strong>let him</strong>, every single time.</p>
+        <p>Then I killed a man. Seventeen, I was. Messin' about wit' some fella's <span class="ro-redact">wife</span>. The husband found out, came at me in a pub, an' the fight went bad fast. I hit him an' I <strong>didn't stop</strong>. Turned out he was a <span class="ro-redact">judge's son</span>. That changed everythin'.</p>
+        <p>Tommy sat me down. Said Declan would take the fall. Declan would go <span class="ro-redact">inside</span>. Me Da knew I wouldn't survive prison — too reckless, too mouthy, too young. Declan could take it. So Declan did. Wit'out a word of complaint. Did the time for a thing <strong>I</strong> did, an' he's never once thrown it in me face.</p>
+        <p>Tommy's never spoken of it since. That silence says everythin' there is to say. An' me? I went right on bein' exactly what I was. <em>That's the part I can't outrun. Not the body. The brother.</em></p>
+        <span class="ro-file-stamp">Case Buried — By Order of T. O'Malley</span>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== CLOSING SPRAY ====== -->
+  <section class="ro-section">
+    <div class="ro-spray reveal-up">
+      "I'm not a good man. I'm a useful one."
+      <span class="accent">— an' in this family, that's worth more</span>
+    </div>
+  </section>
+
+  <!-- ====== CTA / BACK ====== -->
+  <section class="char-final-cta">
+    <a href="https://dreamjourneyai.com/" target="_blank" rel="noopener" class="ro-cta">Deal Me In ➜ Chat with Rory</a>
+    <br>
+    <a href="#" class="char-back-link" id="roryBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END RORY CHARACTER PAGE ===================== -->
+
+<!-- ====================== RORY DATING PROFILE ====================== -->
+<div class="dating-page" id="roryDatingPage" aria-hidden="true" style="--dp-accent: #c8a24a; --dp-accent-2: #7a1f17;">
+  <button class="dating-close" id="roryDatingClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-wrap">
+    <!-- ===== HERO ===== -->
+    <div class="dating-hero">
+      <span class="dating-verified">Verified Trouble</span>
+      <img src="assets/Rory Pics/rory-dating-hero.jpg" alt="Rory" onerror="this.style.display='none'">
+      <div class="dating-hero-overlay">
+        <h1 class="dating-hero-name">Rory<span>, 35</span></h1>
+        <div class="dating-hero-meta">
+          <span>🎩 Peaky Blinder · O'Malley</span>
+          <span>📍 Small Heath, Birmingham</span>
+          <span>🍀 Irish — don't ye forget it</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAGLINE ===== -->
+    <div class="dating-tagline">"Charmin', handsome, an' a terrible bloody idea. Margie made me fill this out — so let's get on wit' it, darlin'."</div>
+
+    <!-- ===== ROMANCE TYPE ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">What you're signin' up for</h2>
+      <div class="romance-tags">
+        <span class="romance-tag rt-toxic">🔥 Heartbreaker</span>
+        <span class="romance-tag rt-complicated">🎴 Smooth Talker</span>
+        <span class="romance-tag rt-baggage">👶 Five Kids, Mind</span>
+        <span class="romance-tag rt-worth">🥃 Good Craic Til Sunday</span>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ME ===== -->
+    <div class="dating-card dating-bio">
+      <h2 class="dating-card-head">About meself</h2>
+      <p>Right, so. Name's Rory, youngest of the O'Malleys, an' aye — that's <strong>those</strong> O'Malleys, before ye get nervous. I run the bootleg, I play the cards, an' I'm told I've a smile that's caused more trouble than the razor in me cap ever did.</p>
+      <p>I'll tell ye true — I'm in love every Friday an' heartbroke by Sunday, an' I mean every word in between. I'm a liar by trade an' a charmer by nature, so take whatever I say wit' a grain o' salt an' a stiff drink. <strong>I've five wee ones by four mams, so I'll not pretend I'm a catch.</strong></p>
+      <p>But if ye fancy a fella who'll make ye laugh til it hurts, look at ye like ye're the only girl in Birmingham, an' mean it for as long as the night lasts — well. <strong>Scroll on down an' decide if ye can handle the rest of me.</strong></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Rory Pics/rory-dating-01.jpg" alt="Rory" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">at the card table. it's the only place me head goes quiet.</div>
+    </div>
+
+    <!-- ===== PROMPTS ===== -->
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">The fastest way to me heart is...</p>
+      <p class="dating-prompt-a">tellin' me I'm wrong an' meanin' it. <em>most don't dare. I like the ones who dare.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Don't bother callin' on me if...</p>
+      <p class="dating-prompt-a">ye think ye'll be the one that changes me. <em>better women than ye have tried, love. ask any of the four.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Two truths an' a lie...</p>
+      <p class="dating-prompt-a">1. I've killed a man.<br>2. I've five children.<br>3. I'll be faithful, I swear it.<br><em>the lie's the one ye want it to be — but ye already know which one it is.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Rory Pics/rory-dating-02.jpg" alt="Rory" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">aye, I know what I look like. ye're welcome.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">A typical night you'll find me...</p>
+      <p class="dating-prompt-a">at the Sportin' Office wit' a hand o' cards, or at Kearn's beatin' the day out o' me knuckles. Or somewhere I shouldn't be. Usually that one.</p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Me one redeemin' quality...</p>
+      <p class="dating-prompt-a">I'm honest about bein' a liar. <em>that's more than most fellas'll give ye.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Call me an Englishman an'...</p>
+      <p class="dating-prompt-a">we're done before we started, so. I'm IRISH. Born an' bred. Say it wrong again an' see how charmin' I stay.</p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Rory Pics/rory-dating-03.jpg" alt="Rory" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">family business. don't ask too many questions.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Me love language is...</p>
+      <p class="dating-prompt-a">stealin' ye a sweet from Brennan's an' lyin' about the price. <em>it's the thought, darlin'.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">The most honest thing on this card...</p>
+      <p class="dating-prompt-a">I'm not a good man. I'm a useful one. <em>an' I'll never once promise ye otherwise.</em></p>
+    </div>
+
+    <!-- ===== QUICK STATS ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">The Form Guide</h2>
+      <div class="dating-stats">
+        <div class="dating-stat"><div class="dating-stat-key">Lookin' for</div><div class="dating-stat-val">Friday night. We'll not talk about Sunday.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Children</div><div class="dating-stat-val">Five. Saoirse, Lorcan, the twins Aoife &amp; Cian, an' wee Eamon. Aye, I know.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Drink</div><div class="dating-stat-val">Irish whiskey, an' plenty. I'm grand, mind.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Smokes</div><div class="dating-stat-val">Aye. It's the twenties, love, everyone does.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Trade</div><div class="dating-stat-val">Bootleg runs for the family. Easy money. Easier trouble.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Faith</div><div class="dating-stat-val">Catholic enough to feel guilty. Not enough to stop.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Intentions</div><div class="dating-stat-val">Dishonourable, mostly. I'll at least be charmin' about it.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Odds I settle down</div><div class="dating-stat-val">100 to 1. Put a bob on it for the laugh.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO GRID ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">More of me</h2>
+      <div class="dating-grid">
+        <div class="dating-grid-item"><img src="assets/Rory Pics/rory-dating-01.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Rory Pics/rory-dating-02.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Rory Pics/rory-dating-03.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Rory Pics/rory-portrait.jpg" alt="" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+
+    <!-- ===== CTA ===== -->
+    <a href="https://dreamjourneyai.com/" target="_blank" rel="noopener" class="dating-cta">
+      Take a Chance ➜ Call on Rory
+    </a>
+
+    <div class="dating-foot">card filled out under protest — Margie was watchin'</div>
+  </div>
+</div>
+<!-- ================== END RORY DATING PROFILE ===================== -->
+
+
+<!-- ============== SCENE REQUEST MODAL (shared) ============== -->
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
