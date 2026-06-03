@@ -2378,22 +2378,19 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 
 
-
 /* ============================================================
-   SHANE — DON'T GET CAUGHT  (side-view pixel stealth)
+   SHANE — DON'T GET CAUGHT  (tour-bus stealth, side-scroller)
    ------------------------------------------------------------
-   A little pixel YOU sneaks across Shane's room to the pixel
-   journal on his desk. Side view. Walk left/right, CROUCH behind
-   furniture to break his sightline. Shane sits with his bass and
-   periodically looks up and scans the room. You're only safe when
-   you're OUT OF HIS SIGHTLINE — behind a piece of furniture, or
-   crouched below low cover. Caught in his gaze with no cover =
-   suspicion climbs; max it and he closes the book.
-   Reach the desk -> READING phase (hold to read while he looks
-   away, release when he glances back; reuses the tiered entry
-   generator with all the lines). Each page scales difficulty.
-   Controls: big on-screen <  >  CROUCH buttons (hold, multitouch)
-   AND arrows / A,D / Down,S on keyboard. Same engine drives both.
+   Break in through the FRONT WINDOW of the band's tour bus, sneak
+   back through the lounge (amps, cases, kitchenette) and the bunk
+   hallway to SHANE'S BUNK, where his journal is kept. Shane PATROLS
+   the aisle. Stay out of his sightline / behind gear. Reach the
+   journal -> the entry unlocks and opens SAFELY; read it, hit X to
+   close -> advance to the next LEVEL (camera longer/harder, and
+   the deeper you go the better your odds at rare/buried/legendary
+   pages). Pick a girl or boy "you" first; Shane always looks like
+   Shane (brown ponytail). Cartoon/anime drawn style, scrolling
+   camera. Controls: big hold buttons + arrows/A,D/crouch keys.
    Only initialises if #shBreakin exists.
    ============================================================ */
 (function initShaneBreakin() {
@@ -2406,30 +2403,32 @@ document.addEventListener('DOMContentLoaded', function(){
     var gaze     = document.getElementById('shGaze');
     var gazeTxt  = document.getElementById('shGazeText');
     var suspFill = document.getElementById('shSuspFill');
-    var readFill = document.getElementById('shReadFill');
-    var readStat = document.getElementById('shReadStat');
     var countEl  = document.getElementById('shCount');
     var floorEl  = document.getElementById('shFloor');
     var readPanel= document.getElementById('shReadPanel');
     var tagEl    = document.getElementById('shTag');
     var entryEl  = document.getElementById('shEntry');
     var dateEl   = document.getElementById('shDate');
+    var readClose= document.getElementById('shReadClose');
     var overlay  = document.getElementById('shOverlay');
     var callout  = document.getElementById('shCallout');
-    var subEl    = document.getElementById('shSub');
+    var subEl    = document.getElementById('shGameSub');
     var startBtn = document.getElementById('shStart');
+    var charSel  = document.getElementById('shCharSel');
     var lineEl   = document.getElementById('shLine');
     var btnLeft  = document.getElementById('shBtnLeft');
     var btnRight = document.getElementById('shBtnRight');
     var btnCrouch= document.getElementById('shBtnCrouch');
     if (!canvas || !startBtn) return;
     var ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
 
     var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function pick(a) { return a[(Math.random() * a.length) | 0]; }
     function rand(lo, hi) { return lo + Math.random() * (hi - lo); }
     function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+    /* chosen player character: 'girl' | 'boy' */
+    var heroType = 'girl';
 
     var DATES = [
       "\u2014 late", "\u2014 couldn't sleep", "\u2014 3 a.m. again", "\u2014 tour bus, somewhere",
@@ -2590,23 +2589,31 @@ document.addEventListener('DOMContentLoaded', function(){
     function fresh(t) { return recent.indexOf(t) === -1; }
     function remember(t) { recent.push(t); if (recent.length > 9) recent.shift(); }
 
+    /* ---------- entry generator: deeper LEVEL => better rare odds ---------- */
     function genEntry() {
-      // LEGENDARY — the white whale, hardest thing in the book
-      if (count >= 8 && !eurielleThisGame && Math.random() < 0.014) {
+      var L = level;                         // 1,2,3...
+      // LEGENDARY — the white whale; unlocks deeper, climbs slightly with level
+      var legChance = clamp(0.010 + L * 0.004, 0.010, 0.060);
+      if (L >= 3 && !eurielleThisGame && Math.random() < legChance) {
         eurielleThisGame = true;
         return { tag: LEGENDARY.tag, text: LEGENDARY.t, date: LEGENDARY.date, rarity: 'legendary' };
       }
-      // BURIED — gated behind a few pages, capped per run
-      if (count >= 3 && buriedThisGame < 2 && Math.random() < 0.05) {
+      // BURIED — dark tier; odds and cap both grow with level
+      var burChance = clamp(0.05 + L * 0.02, 0.05, 0.22);
+      var burCap = 1 + Math.floor(L / 2);
+      if (L >= 2 && buriedThisGame < burCap && Math.random() < burChance) {
         buriedThisGame++;
         var b, g = 0;
         do { b = pick(BURIED); g++; } while (!fresh(b.t) && g < 20);
         remember(b.t);
         return { tag: b.tag, text: b.t, date: pick(DATES), rarity: 'buried' };
       }
+      // common/uncommon/rare split shifts toward rare as level climbs
+      var rareCut = clamp(0.13 + L * 0.03, 0.13, 0.42);
+      var uncCut  = rareCut + clamp(0.30 + L * 0.01, 0.30, 0.42);
       var r = Math.random(), tier, pool, useTpl = false;
-      if (r < 0.13) { tier = 'rare'; pool = RARE; }
-      else if (r < 0.43) { tier = 'uncommon'; pool = UNCOMMON; useTpl = Math.random() < 0.4; }
+      if (r < rareCut) { tier = 'rare'; pool = RARE; }
+      else if (r < uncCut) { tier = 'uncommon'; pool = UNCOMMON; useTpl = Math.random() < 0.4; }
       else { tier = 'common'; pool = COMMON; useTpl = Math.random() < 0.5; }
 
       var e, guard = 0;
@@ -2619,94 +2626,110 @@ document.addEventListener('DOMContentLoaded', function(){
       remember(e.t);
       return { tag: e.tag, text: e.t, date: pick(DATES), rarity: tier };
     }
+
     /* ---------- banter ---------- */
     var LINES = {
-      got:   ["Got that one.", "\u2026Noted.", "Keep going.", "Don't push it.", "Still here.", "One more. Maybe."],
-      catch: ["\u2026You readin' my journal?", "That's not yours.", "Eyes up.", "Bold.", "Hands off.", "I saw that."],
-      spot:  ["He saw something move. FREEZE.", "He's squinting at the corner. Don't.", "Did he just\u2014 don't move.", "He heard the floor. Hold still."],
+      got:   ["Got that one.", "\u2026Noted.", "Still here."],
       over:  ["He closes the book without a word. Worse than yelling.", "'\u2026Find what you were lookin' for?'", "Caught. He won't bring it up. He won't forget it either.", "He just looks at you. That's the whole punishment."],
-      escaped: ["You slipped out. He never knew. Probably.", "Door clicks shut behind you. Clean.", "Gone before he turned around. This time."],
-      away:  ["He's tuning his bass.", "He's staring out the window.", "He's lighting a smoke.", "He's lost in the low end.", "He's miles away.", "His back's to you. Move."],
-      turn:  ["\u2026he shifts.", "\u2026he's stirring.", "\u2026he tilts his head."],
-      look:  ["He's scanning the room. GET DOWN.", "Eyes sweeping. Cover NOW.", "He's looking. Don't be seen."],
-      reachDesk: ["The journal. Right there.", "You made it. Now read fast.", "Desk. Go. Quiet."]
+      spot:  ["He heard the floor. FREEZE.", "He's looking your way. Don't move.", "Did he just\u2014 get down.", "Cover. NOW."],
+      away:  ["He's down the aisle.", "He's rummaging in a case.", "He's staring out a window.", "His back's to you. Move.", "He's miles away.", "He's tuning, not looking."],
+      turn:  ["\u2026he stops.", "\u2026he's turning.", "\u2026he tilts his head."],
+      look:  ["He's scanning the bus. GET DOWN.", "Eyes sweeping. Cover NOW.", "He's looking. Don't be seen."],
+      reachDesk: ["Shane's bunk. The journal's right there.", "You made it to the bunk.", "There it is. His journal."]
     };
     function say(t, k) { lineEl.textContent = t; lineEl.className = 'sh-bi-line' + (k ? ' ' + k : ''); }
 
     /* ===========================================================
        STATE
        =========================================================== */
-    var playing = false, rafId = null, lastT = 0;
+    var playing = false, rafId = null, lastT = 0, started = false;
     var phase = 'sneak';            // 'sneak' | 'reading'
     var gazeState = 'away', gazeTimer = 0;
-    var suspicion = 0, count = 0, best = 0, floor = 1;
+    var suspicion = 0, count = 0, best = 0, level = 1;
     var lastEntry = '', currentRarity = 'common';
     var foundEurielleEver = false, eurielleThisGame = false, buriedThisGame = 0, buriedFindsRun = 0, rareFinds = 0;
-    var reading = false, readMeter = 0, readLock = false, savoring = false, savorTimer = 0;
     var keys = { left: false, right: false, crouch: false };
-    var animT = 0;                  // walk-cycle clock
+    var animT = 0, cam = 0;
 
     /* ===========================================================
-       ROOM GEOMETRY  (logical 320x180 pixel-art canvas, scaled up)
-       Side view: floor along the bottom; furniture sits on it.
+       VIEWPORT + TOUR-BUS WORLD
+       Canvas is 360x180 (view). World is wider and scrolls (camera).
+       Side view: floor near the bottom; gear sits on it; bunks at back.
        =========================================================== */
-    var W = 320, H = 180;
-    var FLOOR_Y = 150;              // top of the floor band (feet rest here)
-    // furniture: x,w along floor; h = height; tall = full sightline block, low = crouch-only cover
-    var FURN = [
-      { x: 40,  w: 34, h: 30, tall: false, label: 'crate' },   // low — crouch to hide
-      { x: 104, w: 40, h: 46, tall: true,  label: 'amp'   },   // tall — full cover standing
-      { x: 170, w: 30, h: 26, tall: false, label: 'stool' },   // low
-      { x: 214, w: 38, h: 44, tall: true,  label: 'cab'   }    // tall
-    ];
-    // desk + journal (goal), far right
-    var DESK = { x: 272, w: 40, h: 26 };
-    // door (start / escape), far left
-    var DOOR = { x: 6, w: 22, h: 44 };
-    // Shane sits roughly center-right with his bass, facing variable
-    var shane = { x: 250, faceDir: -1 };   // faceDir: -1 looks left (toward door), +1 right
+    var VW = 360, VH = 180;
+    var FLOOR_Y = 150;
+    var worldW = 900;               // recomputed per level
+    var WINDOW = { x: 24, w: 30 };  // entry window (front, left)
+    var DESK = { x: 0, w: 44 };     // Shane's bunk w/ journal (back, right) — set per level
+    // furniture: x,w along floor; h height; tall=full standing cover; low=crouch cover
+    var FURN = [];
+    function buildLevel() {
+      // bus gets a touch longer & busier each level
+      worldW = 820 + (level - 1) * 120;
+      DESK.x = worldW - 70; DESK.w = 46;
+      WINDOW.x = 22; WINDOW.w = 30;
+      // gear scattered along the aisle; alternate tall/low; denser deeper
+      FURN = [];
+      var gearDefs = [
+        { rx: 0.16, w: 40, h: 46, tall: true,  kind: 'amp' },
+        { rx: 0.28, w: 30, h: 26, tall: false, kind: 'case' },
+        { rx: 0.40, w: 24, h: 40, tall: true,  kind: 'guitar' },
+        { rx: 0.52, w: 34, h: 24, tall: false, kind: 'kitchen' },
+        { rx: 0.63, w: 40, h: 46, tall: true,  kind: 'cab' },
+        { rx: 0.74, w: 28, h: 26, tall: false, kind: 'crate' },
+        { rx: 0.85, w: 24, h: 44, tall: true,  kind: 'bunkpost' }
+      ];
+      for (var i = 0; i < gearDefs.length; i++) {
+        var g = gearDefs[i];
+        FURN.push({ x: Math.round(worldW * g.rx), w: g.w, h: g.h, tall: g.tall, kind: g.kind });
+      }
+    }
+
     // player
-    var P = { x: DOOR.x + DOOR.w / 2, w: 12, hStand: 22, hCrouch: 13, speed: 64, crouching: false, dir: 1, moving: false };
+    var P = { x: 0, w: 12, hStand: 24, hCrouch: 14, speed: 70, crouching: false, dir: 1, moving: false };
+    // patrolling Shane
+    var shane = { x: 0, dir: -1, speed: 26, faceDir: -1, walkPhase: 0, pauseT: 0, target: 0 };
 
     function playerHeight() { return P.crouching ? P.hCrouch : P.hStand; }
-    function playerTop() { return FLOOR_Y - playerHeight(); }
-
     function rangesOverlap(a0, a1, b0, b1) { return a0 < b1 && a1 > b0; }
-    // which furniture is the player horizontally within?
     function coverAtPlayer() {
-      var px0 = P.x - P.w / 2, px1 = P.x + P.w / 2;
-      for (var i = 0; i < FURN.length; i++) {
-        var f = FURN[i];
-        if (rangesOverlap(px0, px1, f.x, f.x + f.w)) return f;
-      }
+      var x0 = P.x - P.w / 2, x1 = P.x + P.w / 2;
+      for (var i = 0; i < FURN.length; i++) { var f = FURN[i]; if (rangesOverlap(x0, x1, f.x, f.x + f.w)) return f; }
       return null;
     }
-    // hidden = behind cover that's tall enough for your current pose
     function playerHidden() {
       var f = coverAtPlayer();
       if (!f) return false;
-      if (f.tall) return true;               // tall furniture hides you standing or crouched
-      return P.crouching;                    // low furniture only hides you crouched
+      return f.tall ? true : P.crouching;
     }
-    // Shane's eye position
-    function eye() { return { x: shane.x, y: FLOOR_Y - 30 }; }
-    // is the player on the side Shane is currently facing? (cover is handled by playerHidden)
+    // sightline: player on the side Shane faces, within his look range, and not behind tall gear between them
     function inSightline() {
-      if (shane.faceDir < 0) return P.x <= shane.x;
-      return P.x >= shane.x;
+      var dx = P.x - shane.x;
+      if (shane.faceDir < 0 && dx > 0) return false;
+      if (shane.faceDir > 0 && dx < 0) return false;
+      if (Math.abs(dx) > 230) return false;
+      // tall gear standing between his eye and the player blocks the view
+      var lo = Math.min(shane.x, P.x), hi = Math.max(shane.x, P.x);
+      for (var i = 0; i < FURN.length; i++) {
+        var f = FURN[i]; if (!f.tall) continue;
+        var fc = f.x + f.w / 2;
+        if (fc > lo + 6 && fc < hi - 6) return false;
+      }
+      return true;
     }
 
-    /* ---------- difficulty scales with pages stolen (floor) ---------- */
+    /* ---------- difficulty scales with level ---------- */
     function difficulty() {
+      var L = level;
       return {
-        lookChance: clamp(0.52 + floor * 0.05, 0.52, 0.86),
-        suspGain:   clamp(64 + floor * 6, 64, 104),
-        suspLeak:   clamp(20 - floor * 1.6, 8, 20),
-        awayMin:    clamp(1500 - floor * 110, 650, 1500),
-        awayMax:    clamp(2600 - floor * 150, 1100, 2600),
-        lookMin:    clamp(950 + floor * 60, 950, 1800),
-        lookMax:    clamp(1600 + floor * 90, 1600, 2600),
-        readSpeed:  clamp(44 - floor * 1.5, 28, 44)
+        lookChance: clamp(0.46 + L * 0.04, 0.46, 0.82),
+        suspGain:   clamp(58 + L * 6, 58, 100),
+        suspLeak:   clamp(20 - L * 1.4, 9, 20),
+        awayMin:    clamp(1500 - L * 90, 700, 1500),
+        awayMax:    clamp(2500 - L * 130, 1100, 2500),
+        lookMin:    clamp(900 + L * 50, 900, 1700),
+        lookMax:    clamp(1500 + L * 80, 1500, 2400),
+        shaneSpeed: clamp(24 + L * 3, 24, 48)
       };
     }
 
@@ -2716,27 +2739,27 @@ document.addEventListener('DOMContentLoaded', function(){
       gaze.className = 'sh-bi-gaze ' + state;
       gazeTxt.textContent = state === 'away' ? pick(LINES.away) : state === 'turning' ? pick(LINES.turn) : pick(LINES.look);
       if (state === 'away')          gazeTimer = rand(d.awayMin, d.awayMax);
-      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(560 - floor * 14, 300, 560);
+      else if (state === 'turning')  gazeTimer = REDUCE ? 600 : clamp(540 - level * 14, 300, 540);
       else                           gazeTimer = rand(d.lookMin, d.lookMax);
-      // when he looks, he faces toward wherever the player is (makes cover matter)
       if (state === 'turning' || state === 'looking') shane.faceDir = (P.x <= shane.x) ? -1 : 1;
     }
 
-    /* ---------- reading phase ---------- */
+    /* ---------- reading phase: unlock, read SAFELY, X to continue ---------- */
     function enterReading() {
       phase = 'reading';
-      readPanel.hidden = false; readStat.hidden = false;
-      reading = false; readMeter = 0; readLock = false; savoring = false;
-      loadEntry(); applyRead();
+      readPanel.hidden = false;
+      loadEntry();
+      // fully reveal — reading is safe; no timing
+      entryEl.style.filter = 'none'; entryEl.style.opacity = '1';
       say(pick(LINES.reachDesk), 'good');
     }
-    function exitReading() {
+    function nextLevel() {
       phase = 'sneak';
-      readPanel.hidden = true; readStat.hidden = true;
-      reading = false; savoring = false;
-      P.x = DESK.x - 16;                 // step back from the desk
-      floor++; floorEl.textContent = floor;
-      say("Page in hand. Back to the door — or push your luck.", 'good');
+      readPanel.hidden = true;
+      level++; floorEl.textContent = level;
+      buildLevel();
+      resetPositions();
+      say("Next stop. Deeper in. The good stuff's further back.", 'good');
     }
     function loadEntry() {
       var e = genEntry();
@@ -2749,45 +2772,38 @@ document.addEventListener('DOMContentLoaded', function(){
       if (currentRarity === 'rare') readPanel.classList.add('rare');
       else if (currentRarity === 'buried') readPanel.classList.add('buried');
       else if (currentRarity === 'legendary') readPanel.classList.add('legend');
-      readMeter = 0; applyRead();
-    }
-    function applyRead() {
-      var p = readMeter / 100;
-      entryEl.style.filter = 'blur(' + (7 * (1 - p)).toFixed(2) + 'px)';
-      entryEl.style.opacity = (0.32 + 0.68 * p).toFixed(2);
-      readFill.style.width = readMeter + '%';
-    }
-    function readingActive() { return playing && phase === 'reading' && reading && !readLock && !savoring; }
-    function completeRead() {
       count++; countEl.textContent = count;
-      readMeter = 100; applyRead();
-      savoring = true; setGaze('away');
-      if (currentRarity === 'legendary') {
-        foundEurielleEver = true; savorTimer = 3600;
-        say("\u2026You weren't ever supposed to read that one.", 'gold');
-      } else if (currentRarity === 'buried') {
-        buriedFindsRun++; savorTimer = 3000;
-        say(pick(["He buried that for a reason. You dug it up anyway.", "Some pages aren't secrets. They're graves. You just read one.", "\u2026You can't un-know that."]), 'blood');
-      } else if (currentRarity === 'rare') {
-        rareFinds++; savorTimer = 2200;
-        say(pick(["A rare one. He'd kill you if he knew.", "That one he buried deep. You dug it up.", "Page he never meant for anyone."]), 'gold');
-      } else {
-        savorTimer = 1500;
-        if (Math.random() < 0.6) say(pick(LINES.got), 'good');
+      if (currentRarity === 'legendary') foundEurielleEver = true;
+      else if (currentRarity === 'buried') buriedFindsRun++;
+      else if (currentRarity === 'rare') rareFinds++;
+    }
+
+    function resetPositions() {
+      P.x = WINDOW.x + WINDOW.w / 2 + 6; P.crouching = false; P.dir = 1; P.moving = false;
+      shane.x = worldW * 0.55; shane.dir = -1; shane.faceDir = -1; shane.pauseT = 0; shane.target = worldW * 0.3;
+      keys.left = keys.right = keys.crouch = false;
+      cam = 0;
+      setGaze('away');
+    }
+
+    /* ---------- patrol: Shane walks the aisle, pausing now and then ---------- */
+    function updateShane(dt) {
+      var d = difficulty();
+      shane.speed = d.shaneSpeed;
+      if (shane.pauseT > 0) { shane.pauseT -= dt * 1000; shane.walkPhase = 0; return; }
+      // walk toward target
+      var dir = shane.target > shane.x ? 1 : -1;
+      shane.x += dir * shane.speed * dt;
+      shane.dir = dir;
+      if (gazeState === 'away') shane.faceDir = dir;   // looks where he walks unless actively scanning
+      shane.walkPhase += dt * 8;
+      // reached target? pick a new one along the aisle, sometimes pause
+      if (Math.abs(shane.x - shane.target) < 4) {
+        if (Math.random() < 0.5) shane.pauseT = rand(500, 1400);
+        shane.target = rand(worldW * 0.22, worldW * 0.82);
       }
-    }
-    function bustedRead() {
-      suspicion = clamp(suspicion + 36, 0, 100);
-      suspFill.style.width = suspicion + '%';
-      readMeter = Math.max(0, readMeter - 28); applyRead();
-      reading = false; readLock = true;
-      say(pick(LINES.catch), 'bad');
-      flashCanvas();
-      if (suspicion >= 100) over(false);
-    }
-    function flashCanvas() {
-      root.classList.remove('sh-bi-flash'); void root.offsetWidth; root.classList.add('sh-bi-flash');
-      setTimeout(function () { root.classList.remove('sh-bi-flash'); }, 360);
+      // keep him in bus bounds
+      shane.x = clamp(shane.x, 60, worldW - 90);
     }
 
     /* ---------- sneak update ---------- */
@@ -2795,13 +2811,15 @@ document.addEventListener('DOMContentLoaded', function(){
       var d = difficulty();
       P.crouching = !!keys.crouch;
       var vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
-      P.moving = !!vx && !P.crouching ? true : (!!vx);
+      P.moving = !!vx;
       if (vx) {
         P.dir = vx > 0 ? 1 : -1;
         var sp = P.speed * (P.crouching ? 0.55 : 1);
-        P.x = clamp(P.x + vx * sp * dt, P.w / 2 + 2, W - P.w / 2 - 2);
-        animT += dt * (P.crouching ? 6 : 10);
-      } else { P.moving = false; }
+        P.x = clamp(P.x + vx * sp * dt, P.w / 2 + 2, worldW - P.w / 2 - 2);
+        animT += dt * (P.crouching ? 6 : 11);
+      }
+
+      updateShane(dt);
 
       // gaze cycle
       gazeTimer -= dt * 1000;
@@ -2811,176 +2829,223 @@ document.addEventListener('DOMContentLoaded', function(){
         else setGaze('away');
       }
 
-      // detection: seen only if LOOKING + in sightline + not hidden
       var seen = (gazeState === 'looking') && inSightline() && !playerHidden();
       if (seen) {
         suspicion = clamp(suspicion + d.suspGain * dt, 0, 100);
         if (suspicion < 45 && Math.random() < 0.05) say(pick(LINES.spot), 'bad');
-        if (suspicion >= 100) { over(false); return; }
+        if (suspicion >= 100) { over(); return; }
       } else {
         suspicion = clamp(suspicion - d.suspLeak * dt, 0, 100);
       }
       suspFill.style.width = suspicion + '%';
 
-      // reached desk?
+      // reached the bunk/journal?
       if (rangesOverlap(P.x - P.w / 2, P.x + P.w / 2, DESK.x, DESK.x + DESK.w)) { enterReading(); return; }
-      // escaped through the door (only meaningful once you've read something)
-      if (count > 0 && rangesOverlap(P.x - P.w / 2, P.x + P.w / 2, DOOR.x, DOOR.x + DOOR.w)) { over(true); return; }
-    }
 
-    function updateReading(dt) {
-      var d = difficulty();
-      if (savoring) {
-        savorTimer -= dt * 1000;
-        if (savorTimer <= 0) { savoring = false; exitReading(); }
-        return;
-      }
-      gazeTimer -= dt * 1000;
-      if (gazeTimer <= 0) {
-        if (gazeState === 'away') setGaze('turning');
-        else if (gazeState === 'turning') setGaze(Math.random() < d.lookChance ? 'looking' : 'away');
-        else setGaze('away');
-      }
-      if (readingActive() && gazeState === 'looking') bustedRead();
-      else if (readingActive() && gazeState !== 'looking') {
-        readMeter += d.readSpeed * dt; applyRead();
-        if (readMeter >= 100) completeRead();
-      }
-      if (suspicion > 0) { suspicion = Math.max(0, suspicion - 10 * dt); suspFill.style.width = suspicion + '%'; }
+      // camera follows player (clamped to world)
+      var targetCam = clamp(P.x - VW / 2, 0, worldW - VW);
+      cam += (targetCam - cam) * Math.min(1, dt * 8);
     }
 
     /* ===========================================================
-       PIXEL RENDER  — chunky, readable, matches the page palette
+       RENDER — cartoon/anime drawn style (smooth shapes, shading),
+       scrolling tour-bus interior.
        =========================================================== */
-    var C = {
-      floor:  '#0e1b2c', floorHi: '#15293f', wall: '#091420', wallHi: 'rgba(95,176,212,0.05)',
-      door:   '#1c3a2a', doorFrame: '#3fe39a',
-      desk:   '#3a2e22', deskTop: '#5a4632', book: '#d8d2c0', bookEdge: '#8a6d1f', bookSpine: '#b44a4a',
-      furnA:  '#2a3c50', furnB: '#22323f', furnEdge: 'rgba(95,176,212,0.45)',
-      youSkin:'#e9c9a8', youHair: '#3a2a22', youShirt: '#5fb0d4', youPants: '#243447', youHi:'#a8d4ec',
-      shSkin: '#d8b48c', shHair: '#1c1c22', shShirt: '#4a4a55', shBass: '#caa24a', shPants:'#20202a',
-      seenBeam: 'rgba(255,106,82,0.16)', warnBeam: 'rgba(255,194,74,0.13)', hideTag:'#5fe39a'
-    };
-    function px(x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(x | 0, y | 0, w | 0, h | 0); }
+    function rr(x, y, w, h, r, col) {           // rounded rect
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, w, h, r);
+      else { ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); }
+      ctx.closePath(); ctx.fillStyle = col; ctx.fill();
+    }
+    function circle(x, y, r, col) { ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fillStyle = col; ctx.fill(); }
 
     function draw() {
-      // wall
-      px(0, 0, W, H, C.wall);
-      ctx.strokeStyle = C.wallHi; ctx.lineWidth = 1;
-      for (var gx = 0; gx < W; gx += 16) { ctx.beginPath(); ctx.moveTo(gx + 0.5, 0); ctx.lineTo(gx + 0.5, FLOOR_Y); ctx.stroke(); }
-      // floor band
-      px(0, FLOOR_Y, W, H - FLOOR_Y, C.floor);
-      px(0, FLOOR_Y, W, 2, C.floorHi);
-      for (var fx = 0; fx < W; fx += 20) px(fx, FLOOR_Y + 4, 1, H - FLOOR_Y - 4, C.floorHi);
+      ctx.clearRect(0, 0, VW, VH);
+      // bus interior wall (warm, with a long window strip)
+      var g = ctx.createLinearGradient(0, 0, 0, VH);
+      g.addColorStop(0, '#1a2436'); g.addColorStop(0.62, '#14202f'); g.addColorStop(1, '#0c1622');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
 
-      // sightline beam (drawn low, behind sprites) when he looks/turns
+      ctx.save();
+      ctx.translate(-Math.round(cam), 0);
+
+      // ceiling trim + LED strip
+      ctx.fillStyle = '#0c1420'; ctx.fillRect(0, 0, worldW, 12);
+      ctx.fillStyle = 'rgba(95,176,212,0.5)'; ctx.fillRect(0, 12, worldW, 1);
+      // running window strip along the top wall
+      for (var wx = 16; wx < worldW - 30; wx += 92) {
+        rr(wx, 22, 64, 40, 6, '#0e2336');
+        var night = ctx.createLinearGradient(0, 22, 0, 62); night.addColorStop(0, '#14304a'); night.addColorStop(1, '#0a1828');
+        ctx.fillStyle = night; ctx.fillRect(wx + 3, 25, 58, 34);
+        // streaking road lights
+        ctx.fillStyle = 'rgba(231,200,121,0.25)';
+        for (var s = 0; s < 3; s++) { var sx = wx + 8 + ((animT * 30 + s * 22) % 54); ctx.fillRect(sx, 30 + s * 8, 10, 1); }
+        ctx.strokeStyle = 'rgba(95,176,212,0.35)'; ctx.lineWidth = 1; ctx.strokeRect(wx + 0.5, 22.5, 63, 39);
+      }
+
+      // ENTRY WINDOW (front-left) — slightly ajar, marked
+      var wy = FLOOR_Y - 54;
+      rr(WINDOW.x, wy, WINDOW.w, 54, 4, '#102a40');
+      ctx.fillStyle = '#0a1c2c'; ctx.fillRect(WINDOW.x + 3, wy + 3, WINDOW.w - 6, 48);
+      ctx.strokeStyle = '#5fe39a'; ctx.lineWidth = 1.5; ctx.strokeRect(WINDOW.x + 0.5, wy + 0.5, WINDOW.w - 1, 53);
+      ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('IN', WINDOW.x + WINDOW.w / 2, wy - 4);
+
+      // floor
+      ctx.fillStyle = '#101d2b'; ctx.fillRect(0, FLOOR_Y, worldW, VH - FLOOR_Y);
+      ctx.fillStyle = 'rgba(95,176,212,0.25)'; ctx.fillRect(0, FLOOR_Y, worldW, 2);
+      ctx.fillStyle = 'rgba(95,176,212,0.07)';
+      for (var fx = 0; fx < worldW; fx += 22) ctx.fillRect(fx, FLOOR_Y + 4, 1, VH - FLOOR_Y - 4);
+
+      // sightline glow (under sprites)
       if (gazeState !== 'away') {
-        var e = eye();
-        var beamCol = gazeState === 'looking' ? C.seenBeam : C.warnBeam;
-        var endX = shane.faceDir < 0 ? 0 : W;
-        ctx.fillStyle = beamCol;
-        ctx.beginPath();
-        ctx.moveTo(e.x, e.y - 6); ctx.lineTo(endX, FLOOR_Y - 40); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(e.x, FLOOR_Y);
-        ctx.closePath(); ctx.fill();
+        var ex = shane.x, ey = FLOOR_Y - 34;
+        var beam = gazeState === 'looking' ? 'rgba(255,106,82,0.16)' : 'rgba(255,194,74,0.12)';
+        var endX = shane.faceDir < 0 ? shane.x - 230 : shane.x + 230;
+        ctx.fillStyle = beam;
+        ctx.beginPath(); ctx.moveTo(ex, ey - 4); ctx.lineTo(endX, FLOOR_Y - 46); ctx.lineTo(endX, FLOOR_Y); ctx.lineTo(ex, FLOOR_Y); ctx.closePath(); ctx.fill();
       }
 
-      // door (left)
-      px(DOOR.x, FLOOR_Y - DOOR.h, DOOR.w, DOOR.h, C.door);
-      ctx.strokeStyle = C.doorFrame; ctx.lineWidth = 1;
-      ctx.strokeRect(DOOR.x + 0.5, FLOOR_Y - DOOR.h + 0.5, DOOR.w - 1, DOOR.h - 1);
-      px(DOOR.x + DOOR.w - 6, FLOOR_Y - DOOR.h / 2, 3, 3, C.doorFrame); // knob
+      // gear / furniture
+      for (var i = 0; i < FURN.length; i++) drawGear(FURN[i]);
 
-      // desk + journal (right)
-      var dTopY = FLOOR_Y - DESK.h;
-      px(DESK.x, dTopY, DESK.w, DESK.h, C.desk);
-      px(DESK.x, dTopY, DESK.w, 4, C.deskTop);
-      px(DESK.x + 4, FLOOR_Y - 14, 4, 14, C.desk);
-      px(DESK.x + DESK.w - 8, FLOOR_Y - 14, 4, 14, C.desk);
-      // little book on the desk
-      var bx = DESK.x + DESK.w / 2 - 7, by = dTopY - 8;
-      px(bx, by, 14, 8, C.book);
-      px(bx + 6, by, 2, 8, C.bookSpine);
-      ctx.strokeStyle = C.bookEdge; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 13, 7);
-      if (((animT * 2) | 0) % 2 === 0) px(bx + 3, by - 3, 2, 2, '#e7c879'); // sparkle
+      // Shane's bunk + journal (goal, back-right)
+      drawBunk();
 
-      // furniture
-      for (var i = 0; i < FURN.length; i++) {
-        var f = FURN[i];
-        var fy = FLOOR_Y - f.h;
-        var pc = coverAtPlayer();
-        var active = pc === f && playerHidden();
-        px(f.x, fy, f.w, f.h, active ? '#274a3a' : C.furnA);
-        px(f.x, fy, f.w, 3, active ? '#3fe39a' : C.furnB);
-        ctx.strokeStyle = active ? C.hideTag : C.furnEdge; ctx.lineWidth = 1;
-        ctx.strokeRect(f.x + 0.5, fy + 0.5, f.w - 1, f.h - 1);
-        // amp = grille dots; cab = speaker circle; crate/stool = slats
-        if (f.label === 'amp') { for (var ax = f.x + 4; ax < f.x + f.w - 3; ax += 4) for (var ay = fy + 6; ay < fy + f.h - 3; ay += 4) px(ax, ay, 1, 1, C.furnEdge); }
-        else if (f.label === 'cab') { ctx.strokeStyle = C.furnEdge; ctx.beginPath(); ctx.arc(f.x + f.w / 2, fy + f.h / 2, f.h / 3, 0, 6.283); ctx.stroke(); }
-        else { for (var sy = fy + 5; sy < fy + f.h - 2; sy += 6) px(f.x + 3, sy, f.w - 6, 1, C.furnEdge); }
-      }
-
-      // SHANE — sitting with his bass, center-right
+      // characters
       drawShane();
-
-      // YOU — little pixel person
       drawYou();
+
+      ctx.restore();
     }
 
+    function drawGear(f) {
+      var y = FLOOR_Y - f.h;
+      var active = (coverAtPlayer() === f) && playerHidden();
+      var base = active ? '#274a3a' : '#243646';
+      var edge = active ? '#5fe39a' : 'rgba(95,176,212,0.5)';
+      if (f.kind === 'amp' || f.kind === 'cab') {
+        rr(f.x, y, f.w, f.h, 3, base);
+        ctx.fillStyle = '#10202e'; ctx.fillRect(f.x + 4, y + 5, f.w - 8, f.h - 10);
+        ctx.strokeStyle = edge; ctx.lineWidth = 1;
+        for (var ax = f.x + 7; ax < f.x + f.w - 5; ax += 5) for (var ay = y + 8; ay < y + f.h - 6; ay += 5) circle(ax + 1, ay + 1, 0.8, edge);
+        circle(f.x + f.w - 8, y + 7, 2, '#e7c879');               // power LED
+      } else if (f.kind === 'guitar' || f.kind === 'bunkpost') {
+        rr(f.x, y, f.w, f.h, 6, base);                            // case / post
+        ctx.strokeStyle = edge; ctx.lineWidth = 1; ctx.strokeRect(f.x + 3.5, y + 3.5, f.w - 7, f.h - 7);
+        circle(f.x + f.w / 2, y + f.h * 0.36, f.w * 0.22, '#10202e');
+      } else if (f.kind === 'kitchen') {
+        rr(f.x, y, f.w, f.h, 2, base);                            // counter
+        ctx.fillStyle = '#3a4a5a'; ctx.fillRect(f.x, y, f.w, 4);  // countertop
+        ctx.fillStyle = '#10202e'; ctx.fillRect(f.x + 5, y + 8, 8, f.h - 12);
+        circle(f.x + f.w - 8, y + 11, 2, edge);                  // faucet/knob
+      } else {                                                    // case / crate
+        rr(f.x, y, f.w, f.h, 2, base);
+        ctx.strokeStyle = edge; ctx.lineWidth = 1;
+        ctx.strokeRect(f.x + 2.5, y + 2.5, f.w - 5, f.h - 5);
+        ctx.beginPath(); ctx.moveTo(f.x + 3, y + f.h / 2); ctx.lineTo(f.x + f.w - 3, y + f.h / 2); ctx.stroke();
+        ctx.fillStyle = edge; ctx.fillRect(f.x + f.w / 2 - 3, y + f.h / 2 - 2, 6, 4); // latch
+      }
+      if (active) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('hidden', f.x + f.w / 2, y - 3); }
+    }
+
+    function drawBunk() {
+      var x = DESK.x, w = DESK.w, h = 70, y = FLOOR_Y - h;
+      // bunk alcove
+      rr(x - 4, y, w + 8, h, 4, '#1a2636');
+      ctx.fillStyle = '#0c1622'; ctx.fillRect(x, y + 4, w, h - 8);
+      // pillow + blanket
+      rr(x + 3, y + h - 22, w - 6, 18, 4, '#3a4658');
+      rr(x + 4, y + 8, 16, 10, 3, '#52607a');
+      // the journal — glowing book on the bunk shelf
+      var bx = x + w / 2 - 8, by = y + 16;
+      rr(bx, by, 16, 11, 2, '#e7e2d4');
+      ctx.fillStyle = '#b44a4a'; ctx.fillRect(bx + 7, by, 2, 11);
+      ctx.strokeStyle = '#8a6d1f'; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, 15, 10);
+      // sparkle
+      if (((animT * 2) | 0) % 2 === 0) { ctx.fillStyle = '#e7c879'; ctx.fillRect(bx + 4, by - 4, 2, 2); ctx.fillRect(bx + 11, by - 2, 1, 1); }
+      ctx.fillStyle = 'rgba(231,200,121,0.85)'; ctx.font = 'bold 7px Oswald, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText("SHANE'S BUNK", x + w / 2, y - 4);
+    }
+
+    /* ---- anime-ish little people: rounded body, hair, simple face ---- */
     function drawShane() {
       var x = shane.x, baseY = FLOOR_Y;
-      var sit = 10;                          // sits a bit lower
-      // legs (seated)
-      px(x - 6, baseY - 8, 5, 8, C.shPants);
-      px(x + 1, baseY - 8, 5, 8, C.shPants);
-      // torso
-      px(x - 6, baseY - 22, 12, 15, C.shShirt);
+      var walk = (shane.pauseT <= 0) ? Math.sin(shane.walkPhase) : 0;
+      var d = shane.faceDir;
+      // legs
+      ctx.fillStyle = '#20202a';
+      rr(x - 5, baseY - 14, 4, 14 + walk * 1.5, 2, '#20202a');
+      rr(x + 1, baseY - 14, 4, 14 - walk * 1.5, 2, '#20202a');
+      // torso (band tee)
+      rr(x - 7, baseY - 30, 14, 18, 4, '#3c3c46');
+      rr(x - 7, baseY - 30, 14, 4, 3, '#4a4a55');
+      // arm
+      rr(x + (d > 0 ? 4 : -7), baseY - 28, 3, 12, 2, '#d8b48c');
       // head
-      px(x - 4, baseY - 32, 8, 9, C.shSkin);
-      px(x - 5, baseY - 34, 10, 4, C.shHair);   // hair top
-      px(x - 5, baseY - 32, 1, 4, C.shHair);
-      px(x + 4, baseY - 32, 1, 4, C.shHair);
-      // eyes — direction shows where he looks
-      var ex = shane.faceDir < 0 ? x - 3 : x + 2;
-      if (gazeState === 'away') px(x - 2, baseY - 28, 4, 1, '#0a0a0a');   // looking down at bass (closed-ish)
-      else { px(ex, baseY - 29, 2, 2, '#0a0a0a'); }
-      // bass across his lap (a gold slash)
-      ctx.save();
-      ctx.translate(x, baseY - 12); ctx.rotate(-0.35);
-      px(-2, -2, 22, 4, C.shBass);
-      px(16, -4, 7, 8, C.shBass);            // body of the bass
-      ctx.restore();
-      // a tiny "S" tag above when looking, for clarity
-      if (gazeState === 'looking') px(x - 1, baseY - 40, 2, 2, '#ff6a52');
+      circle(x, baseY - 36, 7, '#e2c2a0');
+      // brown hair + PONYTAIL (his look)
+      ctx.fillStyle = '#5a3a22';
+      ctx.beginPath(); ctx.arc(x, baseY - 38, 8, Math.PI, 0); ctx.fill();      // hair cap
+      rr(x - 8, baseY - 40, 16, 5, 2, '#5a3a22');
+      // ponytail trailing behind (opposite facing dir)
+      var pdx = d > 0 ? -1 : 1;
+      ctx.fillStyle = '#4a2f1b';
+      rr(x + pdx * 7, baseY - 38, 5, 14, 3, '#4a2f1b');
+      circle(x + pdx * 9, baseY - 24, 2.5, '#4a2f1b');
+      // stubble jaw + face
+      ctx.fillStyle = '#0e0e12';
+      var ex = d < 0 ? x - 3 : x + 1;
+      if (gazeState === 'away') { ctx.fillRect(x - 2, baseY - 35, 4, 1); }      // looking down
+      else { ctx.fillRect(ex, baseY - 37, 2, 2); }
+      // bass slung on back when walking
+      ctx.save(); ctx.translate(x, baseY - 22); ctx.rotate(d > 0 ? 0.5 : -0.5);
+      rr(-2, -10, 4, 20, 2, '#caa24a'); rr(-4, 8, 8, 7, 3, '#caa24a'); ctx.restore();
+      if (gazeState === 'looking') { ctx.fillStyle = '#ff6a52'; ctx.font = 'bold 9px Oswald'; ctx.textAlign='center'; ctx.fillText('!', x, baseY - 48); }
     }
 
     function drawYou() {
-      var x = P.x, h = playerHeight(), topY = FLOOR_Y - h;
-      var crouch = P.crouching;
-      var hidden = playerHidden();
-      var d = P.dir;
-      var bob = (P.moving && !crouch) ? (Math.sin(animT) * 1.2) : 0;
-      var ty = topY + bob;
+      var x = P.x, crouch = P.crouching, hidden = playerHidden(), d = P.dir;
+      var baseY = FLOOR_Y;
+      var top = crouch ? 16 : 26;
+      var bob = (P.moving && !crouch) ? Math.sin(animT) * 1.2 : 0;
       ctx.globalAlpha = hidden ? 0.55 : 1;
-      // legs / walk cycle
-      var legSwing = P.moving ? Math.sin(animT) * 2 : 0;
-      var legY = FLOOR_Y - (crouch ? 5 : 7);
-      px(x - 4, legY, 3, crouch ? 5 : 7, C.youPants);
-      px(x + 1, legY - (P.moving ? legSwing : 0), 3, crouch ? 5 : 7, C.youPants);
-      // torso (shorter when crouching)
-      var torsoH = crouch ? 7 : 11;
-      px(x - 5, FLOOR_Y - (crouch ? 5 : 7) - torsoH, 10, torsoH, C.youShirt);
-      px(x - 5, FLOOR_Y - (crouch ? 5 : 7) - torsoH, 10, 2, C.youHi);
+      var skin = '#f0d0b0';
+      var shirt = heroType === 'girl' ? '#e85ee8' : '#5fb0d4';
+      var shirtHi = heroType === 'girl' ? '#f4a0f4' : '#a8d4ec';
+      var hair = heroType === 'girl' ? '#3a2418' : '#2a2a30';
+      var pants = '#243447';
+      var walk = P.moving ? Math.sin(animT) * 2 : 0;
+      // legs
+      var legH = crouch ? 6 : 9;
+      rr(x - 4, baseY - legH, 3, legH + (P.moving ? walk : 0), 2, pants);
+      rr(x + 1, baseY - legH, 3, legH - (P.moving ? walk : 0), 2, pants);
+      // torso
+      var torsoTop = baseY - legH - (crouch ? 8 : 12);
+      rr(x - 5, torsoTop, 10, (crouch ? 8 : 12), 3, shirt);
+      rr(x - 5, torsoTop, 10, 3, 2, shirtHi);
+      // arm
+      rr(x + (d > 0 ? 3 : -6), torsoTop + 1, 3, crouch ? 6 : 9, 2, skin);
       // head
-      var headY = ty;
-      px(x - 4, headY, 8, 8, C.youSkin);
-      px(x - 5, headY - 2, 10, 4, C.youHair);
-      px(x - 5, headY, 1, 4, C.youHair);
-      px(x + 4, headY, 1, 4, C.youHair);
-      // eye (facing dir)
-      px(x + (d > 0 ? 1 : -2), headY + 3, 2, 2, '#1a1a22');
+      var hy = torsoTop - 7 + bob;
+      circle(x, hy, 6, skin);
+      // hair
+      ctx.fillStyle = hair;
+      ctx.beginPath(); ctx.arc(x, hy - 1, 7, Math.PI, 0); ctx.fill();
+      if (heroType === 'girl') {
+        // long hair down the back + a side bit
+        var hd = d > 0 ? -1 : 1;
+        rr(x + hd * 5, hy - 2, 4, 14, 2, hair);
+      } else {
+        // short tuft
+        rr(x - 6, hy - 4, 12, 4, 2, hair);
+      }
+      // face — eyes facing dir
+      ctx.fillStyle = '#1a1a22';
+      ctx.fillRect(x + (d > 0 ? 1 : -3), hy, 2, 2);
+      ctx.fillRect(x + (d > 0 ? -3 : 1), hy, 1, 2);
       ctx.globalAlpha = 1;
-      // "hid" tag
-      if (hidden) px(x - 1, headY - 7, 2, 2, C.hideTag);
+      if (hidden) { ctx.fillStyle = '#5fe39a'; ctx.font = 'bold 7px Oswald'; ctx.textAlign='center'; ctx.fillText('hid', x, hy - 9); }
     }
 
     /* ===========================================================
@@ -2991,95 +3056,96 @@ document.addEventListener('DOMContentLoaded', function(){
       var dt = (t - lastT) / 1000; lastT = t;
       if (dt > 0.05) dt = 0.05;
       if (phase === 'sneak') updateSneak(dt);
-      else updateReading(dt);
-      draw();
+      // reading phase: safe, nothing to update (camera holds)
+      try { draw(); } catch (e) {}
       rafId = window.requestAnimationFrame(frame);
     }
     function startLoop() { lastT = (window.performance && performance.now) ? performance.now() : Date.now(); rafId = window.requestAnimationFrame(frame); }
     function pauseLoop() { if (rafId) { window.cancelAnimationFrame(rafId); rafId = null; } }
 
     function start() {
-      playing = true; phase = 'sneak';
-      suspicion = 0; count = 0; floor = 1; buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
-      P.x = DOOR.x + DOOR.w / 2; P.crouching = false; P.dir = 1; P.moving = false;
-      keys.left = keys.right = keys.crouch = false;
+      playing = true; started = true; phase = 'sneak';
+      suspicion = 0; count = 0; level = 1;
+      buriedThisGame = 0; buriedFindsRun = 0; rareFinds = 0; eurielleThisGame = false;
       countEl.textContent = '0'; floorEl.textContent = '1'; suspFill.style.width = '0%';
-      readPanel.hidden = true; readStat.hidden = true;
+      readPanel.hidden = true;
       overlay.classList.add('hidden');
-      setGaze('away');
-      say(pick(["Door's open. Go quiet.", "You're in. Don't blow it.", "Journal's on the desk. Get there."]));
-      draw(); startLoop();
+      buildLevel(); resetPositions();
+      say(pick(["Window's open. Climb in quiet.", "You're on the bus. Don't blow it.", "Front window. In you go."]));
+      try { draw(); } catch (e) {}
+      startLoop();
     }
-    function over(escaped) {
+    function over() {
       playing = false; pauseLoop();
       if (count > best) best = count;
-      callout.textContent = escaped ? 'You Got Out.' : 'Caught.';
-      subEl.innerHTML = '<span class="sh-bi-final">Pages stolen <b>' + count + '</b>' +
-        '<span class="best">Best run: ' + best + '  \u00B7  floor reached: ' + floor +
+      callout.textContent = 'Caught.';
+      subEl.innerHTML = '<span class="sh-bi-final">Pages read <b>' + count + '</b>' +
+        '<span class="best">Best run: ' + best + '  \u00B7  level reached: ' + level +
           (rareFinds ? '  \u00B7  rare: ' + rareFinds : '') +
           (buriedFindsRun ? '  \u00B7  buried: ' + buriedFindsRun : '') + '</span>' +
         (foundEurielleEver ? '<span class="last gold">\u2606 You found the one he\u2019ll never say out loud.</span>' : '') +
         (buriedFindsRun ? '<span class="last blood">\u26A0 You read what he buried. He doesn\u2019t know. Yet.</span>' : '') +
         (lastEntry ? '<span class="last">last thing you saw: \u201C' + lastEntry + '\u201D</span>' : '') + '</span>';
-      startBtn.textContent = escaped ? 'Go Back In' : 'Try Again';
-      readPanel.hidden = true; readStat.hidden = true;
+      startBtn.textContent = 'Break In Again';
+      readPanel.hidden = true;
       overlay.classList.remove('hidden');
-      say(pick(escaped ? LINES.escaped : LINES.over), escaped ? 'good' : 'bad');
-      draw();
+      say(pick(LINES.over), 'bad');
+      try { draw(); } catch (e) {}
     }
 
     /* ===========================================================
-       CONTROLS — keyboard + hold buttons (multitouch, pointer)
+       CONTROLS
        =========================================================== */
-    var KEYMAP = {
-      ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'crouch',
-      a: 'left', d: 'right', s: 'crouch', A: 'left', D: 'right', S: 'crouch'
-    };
+    var KEYMAP = { ArrowLeft:'left', ArrowRight:'right', ArrowDown:'crouch', a:'left', d:'right', s:'crouch', A:'left', D:'right', S:'crouch' };
     document.addEventListener('keydown', function (e) {
       if (!playing) return;
-      if (phase === 'reading' && (e.key === ' ' || e.code === 'Space')) { e.preventDefault(); if (!e.repeat) reading = true; return; }
+      if (phase === 'reading') { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeReading(); } return; }
       var k = KEYMAP[e.key];
       if (k) { e.preventDefault(); keys[k] = true; }
     });
     document.addEventListener('keyup', function (e) {
-      if (e.key === ' ' || e.code === 'Space') { reading = false; readLock = false; return; }
       var k = KEYMAP[e.key];
       if (k) keys[k] = false;
     });
 
-    function holdBtn(el, onDown, onUp) {
+    function holdBtn(el, dir) {
       if (!el) return;
-      var press = function (e) { if (e && e.cancelable) e.preventDefault(); el.classList.add('held'); onDown(); };
-      var release = function () { el.classList.remove('held'); onUp(); };
-      el.addEventListener('pointerdown', press);
-      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { el.addEventListener(ev, release); });
+      var on = function (e) { if (e && e.cancelable) e.preventDefault(); el.classList.add('held'); keys[dir] = true; };
+      var off = function () { el.classList.remove('held'); keys[dir] = false; };
+      el.addEventListener('pointerdown', on);
+      ['pointerup','pointercancel','pointerleave'].forEach(function (ev) { el.addEventListener(ev, off); });
     }
-    holdBtn(btnLeft,  function () { keys.left = true; },  function () { keys.left = false; });
-    holdBtn(btnRight, function () { keys.right = true; }, function () { keys.right = false; });
-    holdBtn(btnCrouch,function () { keys.crouch = true; },function () { keys.crouch = false; });
+    holdBtn(btnLeft, 'left'); holdBtn(btnRight, 'right'); holdBtn(btnCrouch, 'crouch');
 
-    // during READING, hold anywhere on the canvas to read
-    canvas.addEventListener('pointerdown', function (e) {
-      if (!playing || phase !== 'reading') return;
-      if (e.cancelable) e.preventDefault(); reading = true;
-    });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) {
-      canvas.addEventListener(ev, function () { if (phase === 'reading') { reading = false; readLock = false; } });
-    });
-    window.addEventListener('pointerup', function () { if (phase === 'reading') { reading = false; readLock = false; } });
+    function closeReading() {
+      if (phase !== 'reading') return;
+      nextLevel();
+    }
+    if (readClose) readClose.addEventListener('click', closeReading);
+
+    // character select
+    if (charSel) {
+      charSel.querySelectorAll('[data-hero]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          heroType = b.getAttribute('data-hero');
+          charSel.querySelectorAll('[data-hero]').forEach(function (o) { o.classList.remove('sel'); });
+          b.classList.add('sel');
+        });
+      });
+    }
 
     startBtn.addEventListener('click', start);
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) { keys.left = keys.right = keys.crouch = false; reading = false; pauseLoop(); }
+      if (document.hidden) { keys.left = keys.right = keys.crouch = false; pauseLoop(); }
       else if (playing && !rafId) startLoop();
     });
 
-    try { draw(); } catch (err) { /* first paint is cosmetic; never let it block Start */ }
+    // first paint (room behind the intro overlay)
+    buildLevel(); resetPositions(); try { draw(); } catch (e) {}
   }
 
   function boot() {
     build();
-    // if the section wasn't ready yet, retry briefly (covers dynamic reveal / late layout)
     var r0 = document.getElementById('shBreakin');
     if (!r0 || !r0._init) {
       var tries = 0;
