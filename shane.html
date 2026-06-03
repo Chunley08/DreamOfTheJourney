@@ -257,10 +257,10 @@
     </details>
   </section>
 
-  <!-- ====== DON'T GET CAUGHT (top-down stealth break-in) ====== -->
+  <!-- ====== DON'T GET CAUGHT (side-view pixel stealth) ====== -->
   <section class="char-section poster-section" id="shaneGameSection">
     <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Get Caught</h2>
-    <span class="poster-eyebrow reveal-up">Break Into His Room &middot; Reach the Journal</span>
+    <span class="poster-eyebrow reveal-up">Sneak Across His Room &middot; Reach the Journal</span>
 
     <div class="sh-bi reveal-up" id="shBreakin">
 
@@ -283,30 +283,29 @@
 
       <!-- the room -->
       <div class="sh-bi-stage" id="shStage">
-        <canvas id="shCanvas" width="720" height="480" aria-label="Shane's room — stealth break-in"></canvas>
+        <canvas id="shCanvas" width="320" height="180" aria-label="Shane's room — sneak to the journal"></canvas>
 
         <!-- reading panel (re-uses the journal entry system) -->
         <div class="sh-bi-read" id="shReadPanel" hidden>
           <span class="sh-jr-tag" id="shTag">&mdash;</span>
           <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
           <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
-          <p class="sh-bi-read-hint" id="shReadHint"><b>Hold</b> to read while he looks away &middot; <b>let go</b> the instant he glances back</p>
+          <p class="sh-bi-read-hint" id="shReadHint"><b>Hold</b> anywhere to read while he looks away &middot; <b>let go</b> the instant he glances back</p>
         </div>
 
         <!-- overlay -->
         <div class="sh-bi-overlay" id="shOverlay">
           <p class="sh-bi-callout" id="shCallout">His Door's Unlocked.</p>
-          <p class="sh-bi-sub" id="shSub">He's in there — tuning his bass, not looking. The journal's on the desk across the room. <b>Move</b> with the arrows / WASD or the on-screen pad. <b>Duck behind furniture</b> so he can't see you, and <b>never cross his line of sight</b> while he's looking. Reach the desk to read. Every page is different, and the deepest, rarest pages are things he buried a long time ago.</p>
+          <p class="sh-bi-sub" id="shSub">He's sitting with his bass, not really looking. The journal's on the desk across the room. <b>Walk</b> with the on-screen buttons (or arrow keys / A&nbsp;D). <b>Crouch</b> behind furniture so he can't see you — and when he looks up, make sure something's between you and him. Reach the desk to read. Every page is different, and the deepest, rarest pages are things he buried a long time ago.</p>
           <button type="button" class="sh-bi-btn" id="shStart">Break In</button>
         </div>
       </div>
 
-      <!-- touch dpad -->
-      <div class="sh-bi-pad" id="shPad" aria-hidden="true">
-        <button type="button" class="sh-bi-dir up"    data-dir="up"    aria-label="Up">▲</button>
-        <button type="button" class="sh-bi-dir left"  data-dir="left"  aria-label="Left">◀</button>
-        <button type="button" class="sh-bi-dir down"  data-dir="down"  aria-label="Down">▼</button>
-        <button type="button" class="sh-bi-dir right" data-dir="right" aria-label="Right">▶</button>
+      <!-- controls: big hold buttons (mobile + mouse), arrow/AD keys also work -->
+      <div class="sh-bi-controls" aria-label="Game controls">
+        <button type="button" class="sh-bi-cbtn move" id="shBtnLeft"  aria-label="Move left">◀</button>
+        <button type="button" class="sh-bi-cbtn crouch" id="shBtnCrouch" aria-label="Crouch">⊽ Crouch</button>
+        <button type="button" class="sh-bi-cbtn move" id="shBtnRight" aria-label="Move right">▶</button>
       </div>
 
       <p class="sh-bi-line" id="shLine">The floor creaks. Pick your moment.</p>
