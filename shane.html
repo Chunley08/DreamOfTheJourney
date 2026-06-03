@@ -257,34 +257,59 @@
     </details>
   </section>
 
-  <!-- ====== THE LONG RIDE (mini-game) ====== -->
+  <!-- ====== DON'T GET CAUGHT (top-down stealth break-in) ====== -->
   <section class="char-section poster-section" id="shaneGameSection">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The Long Ride</h2>
-    <span class="poster-eyebrow reveal-up">He Never Sold the Bike</span>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Don't Get Caught</h2>
+    <span class="poster-eyebrow reveal-up">Break Into His Room &middot; Reach the Journal</span>
 
-    <div class="sh-ride reveal-up" id="scShaneRide">
-      <div class="sh-ride-hud">
-        <div class="sh-ride-gauge"><span class="sh-ride-gauge-label">Speed</span><span class="sh-ride-gauge-val"><b id="shSpeed">96</b> <small>mph</small></span></div>
-        <div class="sh-ride-gauge"><span class="sh-ride-gauge-label">Distance</span><span class="sh-ride-gauge-val"><b id="shDist">0.0</b> <small>mi</small></span></div>
-        <div class="sh-ride-gauge style" id="shStyleGauge"><span class="sh-ride-gauge-label">Style</span><span class="sh-ride-gauge-val" id="shStyle">0</span></div>
+    <div class="sh-bi reveal-up" id="shBreakin">
+
+      <!-- HUD -->
+      <div class="sh-bi-hud">
+        <div class="sh-bi-gaze away" id="shGaze">
+          <span class="dot"></span><span id="shGazeText">He's not looking.</span>
+        </div>
+        <div class="sh-bi-stat">
+          <span class="sh-bi-stat-label">Suspicion</span>
+          <div class="sh-bi-bar"><div class="sh-bi-bar-fill susp" id="shSuspFill"></div></div>
+        </div>
+        <div class="sh-bi-stat sh-bi-stat--narrow" id="shReadStat" hidden>
+          <span class="sh-bi-stat-label">Reading</span>
+          <div class="sh-bi-bar"><div class="sh-bi-bar-fill read" id="shReadFill"></div></div>
+        </div>
+        <span class="sh-bi-count">Pages <b id="shCount">0</b></span>
+        <span class="sh-bi-count sh-bi-floor">Floor <b id="shFloor">1</b></span>
       </div>
 
-      <div class="sh-ride-road" id="shRoad">
-        <div class="sh-ride-lines" id="shLines"></div>
-        <div class="sh-ride-bike" id="shBike">&#127949;</div>
-        <div class="sh-ride-overlay" id="shOverlay">
-          <p class="sh-ride-callout" id="shCallout">Midnight. Empty Road.</p>
-          <p class="sh-ride-sub" id="shSub">Weave through the traffic. Grab the <b>&#9981; fuel</b>. Squeeze past for <b>style</b>. One wrong move an' it's over.</p>
-          <button type="button" class="sh-ride-btn" id="shStart">Kick the Stand Up</button>
+      <!-- the room -->
+      <div class="sh-bi-stage" id="shStage">
+        <canvas id="shCanvas" width="720" height="480" aria-label="Shane's room — stealth break-in"></canvas>
+
+        <!-- reading panel (re-uses the journal entry system) -->
+        <div class="sh-bi-read" id="shReadPanel" hidden>
+          <span class="sh-jr-tag" id="shTag">&mdash;</span>
+          <div class="sh-jr-entry" id="shEntry">&middot; &middot; &middot; &middot; &middot; &middot; &middot;</div>
+          <div class="sh-jr-date" id="shDate">&mdash; private. obviously.</div>
+          <p class="sh-bi-read-hint" id="shReadHint"><b>Hold</b> to read while he looks away &middot; <b>let go</b> the instant he glances back</p>
+        </div>
+
+        <!-- overlay -->
+        <div class="sh-bi-overlay" id="shOverlay">
+          <p class="sh-bi-callout" id="shCallout">His Door's Unlocked.</p>
+          <p class="sh-bi-sub" id="shSub">He's in there — tuning his bass, not looking. The journal's on the desk across the room. <b>Move</b> with the arrows / WASD or the on-screen pad. <b>Duck behind furniture</b> so he can't see you, and <b>never cross his line of sight</b> while he's looking. Reach the desk to read. Every page is different, and the deepest, rarest pages are things he buried a long time ago.</p>
+          <button type="button" class="sh-bi-btn" id="shStart">Break In</button>
         </div>
       </div>
 
-      <div class="sh-ride-controls">
-        <button type="button" class="sh-ride-steer" id="shSteerL" aria-label="Steer left">&#9664;</button>
-        <button type="button" class="sh-ride-steer" id="shSteerR" aria-label="Steer right">&#9654;</button>
+      <!-- touch dpad -->
+      <div class="sh-bi-pad" id="shPad" aria-hidden="true">
+        <button type="button" class="sh-bi-dir up"    data-dir="up"    aria-label="Up">▲</button>
+        <button type="button" class="sh-bi-dir left"  data-dir="left"  aria-label="Left">◀</button>
+        <button type="button" class="sh-bi-dir down"  data-dir="down"  aria-label="Down">▼</button>
+        <button type="button" class="sh-bi-dir right" data-dir="right" aria-label="Right">▶</button>
       </div>
-      <p class="sh-ride-hint">tap the road's left / right side &middot; or use &larr; &rarr; / A D</p>
-      <p class="sh-ride-line" id="shLine">Long stretch of nothin' ahead. Just how he likes it.</p>
+
+      <p class="sh-bi-line" id="shLine">The floor creaks. Pick your moment.</p>
     </div>
   </section>
 
