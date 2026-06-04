@@ -77,8 +77,9 @@ export default async function handler(req, res) {
   // history: prior messages (for dm chat continuity)
   // pastComments: this username's earlier comments (for "remembering" them)
   // username: who is commenting
-  const { character, comment, mode = "comment", history = [], pastComments = [], username = "", clientId = "" } = req.body || {};
-  if (!comment) return res.status(400).json({ error: "No comment" });
+  const { character, comment, mode = "comment", history = [], pastComments = [], username = "", clientId = "",
+          parentId = null, threadContext = "", voteDir = "" } = req.body || {};
+  if (!comment && mode !== "vote-reaction") return res.status(400).json({ error: "No comment" });
 
   // ---- BLOCK GATE: if Scorch has blocked this person, refuse before doing anything ----
   {
@@ -197,6 +198,20 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
       })),
       { role: "user", content: comment },
     ];
+  } else if (mode === "reply") {
+    // a fan replied to a comment/reply inside a thread. Scorch MIGHT jump in.
+    system += `\n\nYou're scrolling the replies under a public comment on your profile and you see this. ${threadContext ? `The thread so far:\n${threadContext}\n` : ""}Someone just replied. If you feel like throwing in your two cents, write a SHORT, sharp, in-character reply to THIS specific message - like butting into a conversation. One or two lines, crude and unmistakably you.`;
+    messages = [
+      { role: "system", content: system },
+      { role: "user", content: comment },
+    ];
+  } else if (mode === "vote-reaction") {
+    // someone liked/disliked a comment. tiny chance Scorch notices + comments.
+    system += `\n\nYou noticed someone just ${voteDir === "dislike" ? "DISLIKED" : "LIKED"} a comment on your profile${threadContext ? `: "${threadContext}"` : ""}. React with ONE short, off-the-cuff line about them ${voteDir === "dislike" ? "downvoting" : "upvoting"} it - amused, smug, irritated, whatever fits. Like you caught them tapping the button. Keep it to one line, pure Scorch.`;
+    messages = [
+      { role: "system", content: system },
+      { role: "user", content: voteDir === "dislike" ? "(someone just disliked a comment)" : "(someone just liked a comment)" },
+    ];
   } else {
     system += `\n\nYou are replying to a PUBLIC comment left on your dating profile. Short, sharp, in-character.`;
     messages = [
@@ -227,6 +242,20 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
   }
 
   try {
+    // For thread replies and vote reactions, Scorch only SOMETIMES speaks up.
+    // Decide the chance up front so we don't waste a model call (and so silence
+    // is a real outcome). Tune these two numbers to taste.
+    const REPLY_CHANCE = 0.55;        // chance he answers a fan's in-thread reply
+    const VOTE_REACTION_CHANCE = 0.12; // low chance he reacts to a like/dislike
+
+    if (mode === "vote-reaction") {
+      if (Math.random() > VOTE_REACTION_CHANCE) {
+        return res.status(200).json({ reply: null, reacted: false });
+      }
+      const r = await callModel(messages);
+      return res.status(200).json({ reply: r.text || null, reacted: !!r.text, debug: r.debug || null });
+    }
+
     const main = await callModel(messages);
     let reply = main.text || "...(no reply)";
 
@@ -274,19 +303,39 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
       }
     }
 
-    // ---- SAVE TO THE PUBLIC WALL (only real public comments with a real reply) ----
+    // ---- SAVE TO THE PUBLIC WALL ----
     let saved = null;
     let wallDebug = null;
+
     if (mode === "comment" && main.text) {
       saved = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        parentId: null,
         name: (username || "Anonymous").slice(0, 40),
         comment: String(comment).slice(0, 400),
         reply,
+        likes: 0, dislikes: 0,
         ts: Date.now(),
       };
       const w = await saveToWall(saved);
-      if (!w.ok) { wallDebug = w.error; saved = null; } // don't claim it saved if it didn't
+      if (!w.ok) { wallDebug = w.error; saved = null; }
+    } else if (mode === "reply") {
+      // the fan's reply always gets saved into the thread.
+      // Scorch's answer only attaches SOMETIMES (otherwise he stayed quiet).
+      const scorchAnswers = !justBlocked && main.text && Math.random() < REPLY_CHANCE;
+      saved = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        parentId: parentId || null,
+        name: (username || "Anonymous").slice(0, 40),
+        comment: String(comment).slice(0, 400),
+        reply: scorchAnswers ? reply : null,
+        likes: 0, dislikes: 0,
+        ts: Date.now(),
+      };
+      const w = await saveToWall(saved);
+      if (!w.ok) { wallDebug = w.error; saved = null; }
+      // for thread replies, only surface his words if he actually answered
+      reply = scorchAnswers ? reply : null;
     }
 
     // debug surfaces the real reason when there's no text (model busy, error, etc.)
