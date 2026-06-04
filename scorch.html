@@ -7,7 +7,7 @@
 <link rel="icon" type="image/webp" href="assets/favicon.webp" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body data-standalone="scorch">
@@ -343,30 +343,28 @@
     </div>
   </section>
 
-  <!-- ====== MERCH (= the photo gallery, because Scorch IS the merch) ====== -->
+  <!-- ====== FANMAIL ====== -->
   <section class="char-section poster-section">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
-    <span class="poster-eyebrow reveal-up">Scorch IS the merch &middot; Stock: 1 &middot; Apply within</span>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Fanmail</h2>
+    <span class="poster-eyebrow reveal-up">Write him a letter &middot; he might even write back</span>
 
-    <div class="pit-board merch-board">
-      <!-- Decorative price-tag stickers playing on the "merch = Scorch" joke. -->
-      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
-      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
-      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
-
-      <button class="pit-cta gallery-entry" id="scorchGalleryEntry" type="button" aria-label="Open gallery">
-        <div class="polaroid">
-          <div class="polaroid-photo">
-            <img class="gallery-entry-cover" src="assets/Scorch Pics/scorch-gallery-cover.jpg" alt="Scorch gallery cover" />
-          </div>
-          <div class="polaroid-caption">Scorch<small>Limited Edition &middot; 12 Photos &middot; View All</small></div>
+    <div class="fanmail-board reveal-up" id="scorchFanmail">
+      <!-- the blank stationery you write on -->
+      <div class="fanmail-card fanmail-write">
+        <div class="fanmail-letterhead">
+          <span class="fanmail-band">THE SNAKE SKINS</span>
+          <span class="fanmail-from">c/o Scorch &middot; Bite Back Tour '26</span>
         </div>
-      </button>
-      <script id="scorchGalleryData" type="application/json">[
-        {"src": "assets/Scorch Pics/scorch-gallery-01.jpg", "alt": "Scorch on stage"},
-        {"src": "assets/Scorch Pics/scorch-gallery-02.jpg", "alt": "Backstage with the band"},
-        {"src": "assets/Scorch Pics/scorch-gallery-03.jpg", "alt": "Snake Skins live"}
-      ]</script>
+        <input type="text" class="fanmail-name" id="fmName" maxlength="24" placeholder="— sign your letter (name) —" autocomplete="off">
+        <textarea class="fanmail-body" id="fmBody" maxlength="900" placeholder="Dear Scorch,&#10;&#10;write whatever you want him to read..."></textarea>
+        <div class="fanmail-actions">
+          <button type="button" class="fanmail-send" id="fmSend">Mail It ✉</button>
+          <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <!-- where his replies stack up -->
+      <div class="fanmail-replies" id="fmReplies"></div>
     </div>
   </section>
 
@@ -690,7 +688,56 @@
 </div>
 
 <style>
-.scorch-comments { --sc-accent: var(--dp-accent, #ff5a1f); --sc-accent-2: var(--dp-accent-2, #c8281a); }
+/* ===== FANMAIL — band stationery + handwritten reply ===== */
+.fanmail-board { display:flex; flex-direction:column; gap:1.4rem; max-width:560px; margin:0 auto; }
+.fanmail-card {
+  position:relative; background:#f4ecd8; color:#2b2118; border-radius:4px; padding:1.5rem 1.6rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.08);
+  background-image:repeating-linear-gradient(#f4ecd8, #f4ecd8 31px, #d8cba8 32px);
+  transform:rotate(-.4deg);
+}
+.fanmail-card::after {
+  content:''; position:absolute; top:0; left:0; right:0; height:6px; border-radius:4px 4px 0 0;
+  background:repeating-linear-gradient(45deg,#ff5a1f 0 10px,#c8281a 10px 20px); opacity:.85;
+}
+.fanmail-letterhead { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.3rem; border-bottom:1.5px dashed #b8a988; padding-bottom:.6rem; margin-bottom:.9rem; }
+.fanmail-band { font-family:'Metal Mania',cursive; font-size:1.5rem; color:#c8281a; letter-spacing:.02em; }
+.fanmail-from { font-family:'Special Elite',monospace; font-size:.72rem; color:#6e5f48; }
+.fanmail-name, .fanmail-body {
+  width:100%; box-sizing:border-box; background:transparent; border:none; color:#2b2118;
+  font-family:'Special Elite',monospace; font-size:1rem; line-height:32px; padding:0;
+}
+.fanmail-name { border-bottom:1px solid #b8a988; padding-bottom:2px; margin-bottom:.4rem; }
+.fanmail-body { resize:vertical; min-height:160px; }
+.fanmail-name:focus, .fanmail-body:focus { outline:none; }
+.fanmail-name::placeholder, .fanmail-body::placeholder { color:#9a8c70; }
+.fanmail-actions { display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+.fanmail-send {
+  cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  font-size:.9rem; color:#fff; padding:.6rem 1.4rem; border-radius:3px;
+  background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 4px 14px rgba(200,40,26,.4); transition:transform .15s;
+}
+.fanmail-send:hover { transform:translateY(-2px); }
+.fanmail-send:disabled { opacity:.55; transform:none; cursor:default; }
+.fanmail-status { font-family:'Special Elite',monospace; font-size:.8rem; color:#8a3a1a; }
+
+/* his reply — same paper, messy handwriting */
+.fanmail-reply { position:relative; transform:rotate(.5deg); }
+.fanmail-reply:nth-child(even) { transform:rotate(-.7deg); }
+.fanmail-reply .fanmail-stamp {
+  position:absolute; top:-12px; right:14px; width:54px; height:60px; background:#ff5a1f;
+  border:3px solid #f4ecd8; box-shadow:0 2px 8px rgba(0,0,0,.4); transform:rotate(6deg);
+  display:flex; align-items:center; justify-content:center; font-family:'Metal Mania',cursive; color:#fff; font-size:.7rem; text-align:center; line-height:1.1;
+}
+.fanmail-reply-to { font-family:'Special Elite',monospace; font-size:.78rem; color:#6e5f48; margin-bottom:.5rem; }
+.fanmail-reply-text {
+  font-family:'Caveat',cursive; font-size:1.5rem; line-height:1.5; color:#1a2740;
+  white-space:pre-wrap; word-wrap:break-word;
+}
+.fanmail-reply-sign { font-family:'Caveat',cursive; font-size:1.7rem; color:#c8281a; text-align:right; margin-top:.6rem; transform:rotate(-2deg); }
+.fanmail-reply.pending .fanmail-reply-text { color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
+
+
 .sc-comments-sub { font-family:'Outfit',sans-serif; font-size:.92rem; color:var(--dp-ink-dim,rgba(255,255,255,.6)); margin:0 0 1.1rem; line-height:1.5; }
 .sc-comments-sub em { color:var(--sc-accent); font-style:italic; }
 .sc-comment-form { display:flex; flex-direction:column; gap:.7rem; }
@@ -912,6 +959,87 @@
   }
   if (chatSend) chatSend.addEventListener("click", sendDM);
   if (chatInput) chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendDM(); });
+
+  // ===== FANMAIL (letters, with per-username memory) =====
+  const fmName = document.getElementById("fmName");
+  const fmBody = document.getElementById("fmBody");
+  const fmSend = document.getElementById("fmSend");
+  const fmStatus = document.getElementById("fmStatus");
+  const fmReplies = document.getElementById("fmReplies");
+
+  // render any saved letters for the name currently signed
+  function renderLetters(name){
+    const user = getUser(name || (fmName && fmName.value.trim()) || "Anonymous");
+    fmReplies.innerHTML = "";
+    (user.letters || []).forEach(entry => {
+      if (entry.from === "scorch") addLetterReply(entry.text, user.name, false);
+    });
+  }
+
+  function addLetterReply(text, toName, persist){
+    const wrap = document.createElement("div");
+    wrap.className = "fanmail-card fanmail-reply";
+    wrap.innerHTML =
+      '<div class="fanmail-stamp">SS<br>2026</div>' +
+      '<div class="fanmail-reply-to">To ' + esc(toName || "Anonymous") + ' —</div>' +
+      '<div class="fanmail-reply-text">' + esc(text) + '</div>' +
+      '<div class="fanmail-reply-sign">— Scorch</div>';
+    fmReplies.prepend(wrap);
+    if (persist !== false) {
+      const user = getUser(toName);
+      user.letters = user.letters || [];
+      user.letters.push({ from:"scorch", text });
+      user.letters = user.letters.slice(-20);
+      saveMem(memory);
+    }
+    return wrap;
+  }
+
+  if (fmSend) fmSend.addEventListener("click", async () => {
+    const body = fmBody.value.trim();
+    const name = (fmName.value.trim() || "Anonymous");
+    if (!body) { fmStatus.textContent = "write something first."; return; }
+
+    const user = getUser(name);
+    user.letters = user.letters || [];
+    // save the fan's letter to memory thread
+    user.letters.push({ from:"user", text: body });
+    user.letters = user.letters.slice(-20);
+    saveMem(memory);
+
+    // pending reply card
+    const pending = document.createElement("div");
+    pending.className = "fanmail-card fanmail-reply pending";
+    pending.innerHTML =
+      '<div class="fanmail-stamp">SS<br>2026</div>' +
+      '<div class="fanmail-reply-to">To ' + esc(name) + ' —</div>' +
+      '<div class="fanmail-reply-text">sealing the envelope... he\'s reading it.</div>';
+    fmReplies.prepend(pending);
+
+    fmBody.value = ""; fmSend.disabled = true; fmStatus.textContent = "mailing...";
+    try {
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ character: CHAR, comment: body, mode:"letter", history: user.letters, username: name, pastComments: user.comments }) });
+      const data = await res.json();
+      pending.remove();
+      if (data.reply) {
+        addLetterReply(data.reply, name);
+      } else if (data.error) {
+        addLetterReply("(the mail's backed up — free AI's busy. send it again in a sec.)", name, false);
+      } else {
+        addLetterReply("...(he read it. didn't write back. typical.)", name, false);
+      }
+      fmStatus.textContent = "";
+    } catch (e) {
+      pending.remove();
+      addLetterReply("(letter got lost in the mail — try again.)", name, false);
+      fmStatus.textContent = "connection failed.";
+    } finally { fmSend.disabled = false; }
+  });
+
+  // when you change the signed name, show that person's letter history
+  if (fmName) fmName.addEventListener("change", () => renderLetters(fmName.value.trim()));
+  renderLetters();
 
   // ===== RANDOM SURPRISE DM (by chance, anytime on the page) =====
   // small rolling chance every ~40s that Scorch randomly slides in.
