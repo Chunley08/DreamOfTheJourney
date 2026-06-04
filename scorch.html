@@ -766,6 +766,9 @@
 .sc-reply-author { font-family:'Oswald',sans-serif; font-weight:700; color:var(--sc-accent); font-size:.9rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem; }
 .sc-reply-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.92); font-size:.95rem; line-height:1.45; }
 .sc-typing { font-style:italic; color:rgba(255,255,255,.5); }
+.sc-del { margin-top:.7rem; cursor:pointer; font-family:'Outfit',sans-serif; font-size:.78rem; color:rgba(255,255,255,.75); background:rgba(255,60,60,.14); border:1px solid rgba(255,90,90,.35); border-radius:8px; padding:.3rem .7rem; transition:background .15s,opacity .15s; }
+.sc-del:hover { background:rgba(255,60,60,.28); color:#fff; }
+.sc-del:disabled { opacity:.5; cursor:default; }
 .sc-dm-fab { position:fixed; bottom:22px; right:22px; z-index:9998; width:62px; height:62px; border-radius:50%; border:2px solid #ff5a1f; background:#1a0a0a; cursor:pointer; overflow:hidden; padding:0; box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 18px rgba(255,90,31,.45); transition:transform .2s, box-shadow .2s; animation:scFabPulse 2.6s ease-in-out infinite; }
 .sc-dm-fab:hover { transform:scale(1.08); box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 26px rgba(255,90,31,.7); }
 .sc-dm-fab img { width:100%; height:100%; object-fit:cover; }
@@ -837,6 +840,13 @@
   const CHAR = "scorch";
   const esc = s => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
+  // ---- PUBLIC WALL ----
+  // /api/comment  -> generates + saves Scorch's reply
+  // /api/comments -> reads the shared wall (and admin-deletes)
+  const WALL_URL = FUNCTION_URL.replace(/\/comment$/, "/comments");
+  // open the page as  ...scorch.html?admin=YOURKEY  to get delete buttons.
+  const ADMIN_KEY = new URLSearchParams(location.search).get("admin") || "";
+
   // ---- per-session memory (sessionStorage) ----
   // remembers each username's comments + DM thread + letters during THIS visit.
   // sessionStorage wipes automatically when the tab is closed, so a fresh visit
@@ -857,6 +867,61 @@
   const textEl  = document.getElementById("scComment");
   const statusEl= document.getElementById("scStatus");
   const thread  = document.getElementById("scThread");
+
+  // ===== PUBLIC WALL: load + render (shared across all visitors) =====
+  let lastSig = "";
+  function buildComment(it){
+    const block = document.createElement("div");
+    block.className = "sc-comment";
+    let html =
+      '<div class="sc-comment-author">' + esc(it.name || "Anonymous") + '</div>' +
+      '<div class="sc-comment-text">' + esc(it.comment || "") + '</div>';
+    if (it.reply) {
+      html += '<div class="sc-reply"><div class="sc-reply-author">Scorch <span>\u2713</span></div>' +
+              '<div class="sc-reply-text">' + esc(it.reply) + '</div></div>';
+    }
+    if (ADMIN_KEY && it.id) {
+      html += '<button type="button" class="sc-del" data-id="' + esc(it.id) + '">\uD83D\uDDD1 delete</button>';
+    }
+    block.innerHTML = html;
+    return block;
+  }
+  function renderWall(items){
+    const sig = items.map(i => i.id).join(",") + (ADMIN_KEY ? "|a" : "");
+    if (sig === lastSig) return;          // unchanged -> don't redraw (no flicker)
+    lastSig = sig;
+    thread.innerHTML = "";
+    items.forEach(it => thread.appendChild(buildComment(it)));   // already newest-first
+  }
+  async function loadWall(){
+    try {
+      const res = await fetch(WALL_URL, { method:"GET" });
+      const data = await res.json();
+      if (Array.isArray(data.comments)) renderWall(data.comments);
+    } catch (e) { /* keep whatever's on screen */ }
+  }
+
+  // admin: delete a single comment (only when ?admin=KEY is present)
+  if (ADMIN_KEY) {
+    thread.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".sc-del");
+      if (!btn) return;
+      if (!confirm("Delete this comment for everyone?")) return;
+      btn.disabled = true; btn.textContent = "deleting...";
+      try {
+        await fetch(WALL_URL, {
+          method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ action:"delete", id: btn.dataset.id, key: ADMIN_KEY }),
+        });
+        lastSig = ""; await loadWall();
+      } catch (err) { btn.disabled = false; btn.textContent = "\uD83D\uDDD1 delete"; }
+    });
+  }
+
+  // load now + refresh every 15s so other people's comments appear live
+  loadWall();
+  setInterval(loadWall, 15000);
+
 
   if (sendBtn) sendBtn.addEventListener("click", async () => {
     const comment = textEl.value.trim();
@@ -891,6 +956,10 @@
       user.comments.push(comment);
       user.comments = user.comments.slice(-12);
       saveMem(memory);
+
+      // if it saved to the public wall, refresh so it shows as the shared/canonical
+      // entry (with delete button in admin mode) instead of the local preview.
+      if (data.saved) { lastSig = ""; loadWall(); }
 
       // did he decide to slide into the DMs?
       if (data.dm) {
