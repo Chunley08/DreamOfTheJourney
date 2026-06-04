@@ -1,221 +1,652 @@
-<!-- ============================================================ -->
-<!--  SCORCH COMMENT SECTION + DM POPUP                            -->
-<!--  Paste this block INSIDE Scorch's dating page, right before   -->
-<!--  the closing  </div>  of  <div class="dating-wrap">           -->
-<!--  (i.e. after the last .dating-card, before the wrap closes).  -->
-<!-- ============================================================ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Scorch — DreamjourneyAI</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-standalone="scorch">
 
-<div class="dating-card scorch-comments" id="scorchComments">
-  <h2 class="dating-card-head">Leave him a comment — if you dare</h2>
-  <p class="sc-comments-sub">he reads every one. he replies to most. <em>sometimes he slides into your DMs.</em></p>
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
 
-  <div class="sc-comment-form">
-    <input type="text" class="sc-name-input" id="scName" maxlength="24" placeholder="your name (or stay anonymous)" autocomplete="off">
-    <textarea class="sc-comment-input" id="scComment" maxlength="280" placeholder="say something to Scorch..."></textarea>
-    <button type="button" class="sc-comment-send" id="scSend">Post Comment</button>
-    <div class="sc-comment-status" id="scStatus" role="status" aria-live="polite"></div>
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
   </div>
-
-  <div class="sc-comment-thread" id="scThread"></div>
 </div>
 
+<!-- ====================== SCORCH CHARACTER PAGE ====================== -->
+<div class="character-page scorch-page" id="scorchPage" aria-hidden="true">
+  <button class="char-close" id="scorchClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Scorch" type="button" aria-label="Open scene request">Scene Request?</button>
+  <button class="dating-tab" data-dating="scorch" type="button" aria-label="View dating profile">Dating Profile ♡</button>
 
-<!-- ===== DM POPUP (lives near end of body, before scripts) ===== -->
-<div class="sc-dm-popup" id="scDmPopup" aria-hidden="true">
-  <div class="sc-dm-card">
-    <button class="sc-dm-close" id="scDmClose" type="button" aria-label="Close">✕</button>
-    <div class="sc-dm-header">
-      <div class="sc-dm-avatar">
-        <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="Scorch" onerror="this.style.display='none'">
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/Scorch Pics/scorch-hero.jpg');"></div>
+
+    <!-- decorative blood/fire splats -->
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <!-- corner stamps -->
+    <div class="stamp stamp--tonight reveal-stamp">★ Tonight ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">One Night Only</small></div>
+    <div class="stamp stamp--age reveal-stamp">21 + Over</div>
+
+    <!-- decorative tape -->
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">SCORCH</h1>
+    <div class="poster-subtitle">Bite Back Tour</div>
+    <div class="poster-role">Frontman <span>•</span> Vocals <span>•</span> Walking Dumpster Fire</div>
+
+    <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Scorch &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Live ★ Loud ★ Unhinged ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
       </div>
-      <div class="sc-dm-who">
-        <div class="sc-dm-name">Scorch <span class="sc-dm-verified">✓</span></div>
-        <div class="sc-dm-status">slid into your DMs</div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
       </div>
     </div>
-    <div class="sc-dm-body" id="scDmBody"></div>
-    <div class="sc-dm-footer">you can't reply — he'd just leave you on read anyway</div>
+  </section>
+
+  <!-- ====== THE FRONTMAN (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Frontman</h2>
+    <span class="poster-eyebrow reveal-up">Who the Hell Is He</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Scorch is an emotional dumpster fire on two legs. He says whatever the fuck he wants, when he wants, and your feelings can take a hike if they don't like it. He's not a bad guy. Not <em>really</em>. Just an asshole. A misunderstood one &mdash; but an asshole all the same.</p>
+      <p>Catch him on the right day and you'll see the boyish charm hiding under all that scowl. Win his heart and that asshole is <strong>your</strong> asshole. He's got layers, like an onion. Peel carefully &mdash; he bites.</p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">asshole with a heart</span>
+      <span class="sticker-patch">emotional dumpster fire</span>
+      <span class="sticker-patch">no filter</span>
+      <span class="sticker-patch">misunderstood</span>
+      <span class="sticker-patch">boyish charm</span>
+      <span class="sticker-patch">touch him and die</span>
+      <span class="sticker-patch">layers like an onion</span>
+    </div>
+  </section>
+
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">He Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" style="--rot:-2deg;">"Heh. Yeah, you're cute. Until you open your fucking mouth."</div>
+      <div class="stub reveal-tilt" style="--rot:1.5deg;">"Yeah? Well you can suck my dick, you little bitch."</div>
+      <div class="stub reveal-tilt" style="--rot:-0.8deg;">"Yeah, cool. Whatever. I don't give a shit anyways."</div>
+    </div>
+  </section>
+
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Shane<small>Bass</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Kayla<small>Cello / Piano</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Cody<small>Drums</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Max Pics/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-1deg;">
+        <div class="polaroid-photo">♪<img src="assets/Ricky Pics/ricky-portrait.jpg" alt="Ricky" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Ricky<small>Manager</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== MUSIC PLAYER (existing wiring, wrapped in stage frame) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Bite Back — Live</h2>
+    <span class="poster-eyebrow reveal-up">Bootleg Recording &mdash; Stage Left</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>The Snake Skins // Bite Back Tour</small>
+      </div>
+      <div class="setlist-stage" id="snakeSkinsPlayer">
+        <div class="np-console" id="npConsole">
+          <div class="np-display">
+            <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+            <div class="np-title" id="npTitle">— select a track —</div>
+            <div class="np-sub" id="npSub">The Snake Skins  •  Bite Back Tour</div>
+            <div class="np-viz" id="npViz" aria-hidden="true"></div>
+            <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
+              <div class="np-progress-fill" id="npFill"></div>
+              <div class="np-progress-head" id="npHead"></div>
+            </div>
+            <div class="np-times">
+              <span id="npTimeCurrent">0:00</span>
+              <span id="npTimeTotal">0:00</span>
+            </div>
+          </div>
+          <div class="np-transport">
+            <button class="np-btn np-prev" id="npPrev" type="button" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+            </button>
+            <button class="np-btn np-play" id="npPlay" type="button" aria-label="Play / pause">
+              <svg id="npPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="np-btn np-next" id="npNext" type="button" aria-label="Next track">
+              <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="np-setlist">
+          <div class="np-setlist-head">// The Setlist</div>
+          <div class="np-setlist-sub">Bite Back Tour — Track List</div>
+          <div id="npTrackList"></div>
+          <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
+        </div>
+      </div>
+    </div>
+    <audio id="npAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="snakeSkinsTracksData" type="application/json">[
+      {"title": "Cult Of Scorch",        "src": "assets/Scorch Pics/Cult Of Scorch.mp3"},
+      {"title": "Placeholder",    "src": "assets/Scorch Pics/snakeskins-track-02.mp3"},
+      {"title": "Placeholder", "src": "assets/Scorch Pics/snakeskins-track-03.mp3"}
+    ]</script>
+  </section>
+
+  <!-- ====== RAT HUNT (mini-game) ====== -->
+  <section class="char-section poster-section" id="scorchGameSection">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Pest Control</h2>
+    <span class="poster-eyebrow reveal-up">Rat Hunt &mdash; Stomp the Street Rats, Spare the Snakes</span>
+
+    <div class="sc-rat reveal-up" id="scorchRat">
+      <div class="sc-rat-hud">
+        <div class="sc-rat-meter">
+          <span class="sc-rat-meter-label">Patience</span>
+          <div class="sc-rat-bar"><div class="sc-rat-bar-fill" id="scRatPatience"></div></div>
+        </div>
+        <div class="sc-rat-stats">
+          <span class="sc-rat-score">Score <b id="scRatScore">0</b></span>
+          <span class="sc-rat-combo" id="scRatCombo">x1</span>
+        </div>
+      </div>
+
+      <div class="sc-rat-set">
+        <span class="sc-rat-set-label">// The Hunt</span>
+        <div class="sc-rat-set-bar"><div class="sc-rat-set-fill" id="scRatSet"></div></div>
+      </div>
+
+      <div class="sc-rat-pit" id="scRatPit">
+        <div class="sc-rat-strip">&#9656; Out Back &#9656;</div>
+        <div class="sc-rat-overlay" id="scRatOverlay">
+          <p class="sc-rat-callout" id="scRatCallout">The Street Rats Are Back.</p>
+          <p class="sc-rat-rules" id="scRatRules">Stomp <b class="rat">Sin, Mason, Ash &amp; Skye</b> &mdash; <b class="dbl">Skye's worth double</b>. But <b class="snake">do NOT hit the Snakes</b> &mdash; that's your band.</p>
+          <button type="button" class="sc-rat-btn" id="scRatStart">Start the Hunt</button>
+        </div>
+      </div>
+
+      <p class="sc-rat-line" id="scRatLine">Tap fast. Hit a rat, score. Hit a Snake, lose your shit. Last the hunt.</p>
+    </div>
+  </section>
+
+  <!-- ====== FAMILY DRAMA ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Family Drama</h2>
+    <span class="poster-eyebrow reveal-up">Baby Momma + Kid</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">The Ex</div>
+        <div class="wanted-name">Naomi</div>
+        <div class="wanted-role">Mother of his child</div>
+        <div class="wanted-desc">She hates him. He hates her. What a happy fucking family. She wants Scorch nowhere near her — or their kid — and she'll burn the world down to keep it that way. He just wants to be in his son's life. Pick a side or don't, but it's getting ugly either way.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">The Reason</div>
+        <div class="wanted-name">Conner</div>
+        <div class="wanted-role">Five years old</div>
+        <div class="wanted-desc">Scorch's kid. A sweet boy, most of the time. The reason Scorch still gives a shit about anything at all.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== STREET RATS (RIVALS) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ The Street Rats ★</h2>
+    <span class="poster-eyebrow reveal-up">The Street Rats — Scorch fucking hates these guys</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-1deg;">
+        <div class="wanted-head">Little Bitch Rat</div>
+        <div class="wanted-name">Sin</div>
+        <div class="wanted-role">Frontman</div>
+        <div class="wanted-desc">"Whiney little bitch." &mdash; Scorch</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:1.5deg;">
+        <div class="wanted-head">Off-Beat Rat</div>
+        <div class="wanted-name">Mason</div>
+        <div class="wanted-role">Drummer</div>
+        <div class="wanted-desc">"Heartbeat of the band? Yeah, fucking right." &mdash; Scorch</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">Dumbass Rat</div>
+        <div class="wanted-name">Ash</div>
+        <div class="wanted-role">Guitarist</div>
+        <div class="wanted-desc">"Idiot. But the most tolerable one of the bunch." &mdash; Scorch</div>
+      </div>
+      <div class="wanted traitor reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">Traitor Rat</div>
+        <div class="wanted-name">Skye</div>
+        <div class="wanted-role">Bass</div>
+        <div class="wanted-desc">Ex-best friend. Brother in everything but blood — once. Now? A traitor.</div>
+        <div class="wanted-stamp">⚠ Traitor</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY SPOILER) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p>Scorch grew up in a shitty household. His dad died on an oil rig — an explosion — when Scorch was just a kid. His mom, <strong>Miranda</strong>, blamed him for it. Took it out on her only kid in every way a mother can. Emotional. Physical. Monstrous.</p>
+        <p><strong>Skye</strong> was Scorch's best friend growing up. His brother in everything but blood. Scorch spent every hour he could over at Skye's place — and <strong>Donna</strong>, Skye's mom, always opened the door. Together, Skye and Scorch started <em>The Snake Skins</em>.</p>
+        <p>Then came the drugs. Scorch got addicted. Skye tried to help — for a while. And then, when nothing else worked, Skye thought turning him over to the police might save his life. Maybe it did.</p>
+        <p>Scorch served two years — he broke probation — and prison didn't humble him. It made him meaner. He lost all visitation rights to Conner. Skye never once showed up. Not one visit. Not one letter.</p>
+        <p>Now Scorch hates Skye. Hates the whole Street Rats lineup Skye whored himself to. Hates a lot of things. But he's still here. Still climbing back. Still trying to be in his kid's life.</p>
+        <p>He's got layers. Find them.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>Never said I was a good person.</q>
+      <cite>— Scorch</cite>
+    </div>
+  </section>
+
+  <!-- ====== MERCH (= the photo gallery, because Scorch IS the merch) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
+    <span class="poster-eyebrow reveal-up">Scorch IS the merch &middot; Stock: 1 &middot; Apply within</span>
+
+    <div class="pit-board merch-board">
+      <!-- Decorative price-tag stickers playing on the "merch = Scorch" joke. -->
+      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
+      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
+      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
+
+      <button class="pit-cta gallery-entry" id="scorchGalleryEntry" type="button" aria-label="Open gallery">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img class="gallery-entry-cover" src="assets/Scorch Pics/scorch-gallery-cover.jpg" alt="Scorch gallery cover" />
+          </div>
+          <div class="polaroid-caption">Scorch<small>Limited Edition &middot; 12 Photos &middot; View All</small></div>
+        </div>
+      </button>
+      <script id="scorchGalleryData" type="application/json">[
+        {"src": "assets/Scorch Pics/scorch-gallery-01.jpg", "alt": "Scorch on stage"},
+        {"src": "assets/Scorch Pics/scorch-gallery-02.jpg", "alt": "Backstage with the band"},
+        {"src": "assets/Scorch Pics/scorch-gallery-03.jpg", "alt": "Snake Skins live"}
+      ]</script>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS (CTA) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Scorch</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">SCORCH</div>
+        <div class="pass-role">Frontman &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Scorch &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-001</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER / BACK ====== -->
+  <section class="char-final-cta">
+    <a href="#" class="char-back-link" id="scorchBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END SCORCH CHARACTER PAGE ===================== -->
+
+<!-- ====================== SCORCH DATING PROFILE ====================== -->
+<div class="dating-page" id="scorchDatingPage" aria-hidden="true" style="--dp-accent: #ff5a1f; --dp-accent-2: #c8281a;">
+  <button class="dating-close" id="scorchDatingClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-wrap">
+    <!-- ===== HERO ===== -->
+    <div class="dating-hero">
+      <span class="dating-verified">Verified Hot Mess</span>
+      <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="Scorch hero" onerror="this.style.display='none'">
+      <div class="dating-hero-overlay">
+        <h1 class="dating-hero-name">Scorch<span>, 36</span></h1>
+        <div class="dating-hero-meta">
+          <span>🎸 Frontman, The Snake Skins</span>
+          <span>📍 Austin, TX</span>
+          <span>♨ Single (mostly bitter about it)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAGLINE ===== -->
+    <div class="dating-tagline">"Walking dumpster fire. Proceed at own risk."</div>
+
+    <!-- ===== ROMANCE TYPE ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">Romance Type — what you're signing up for</h2>
+      <div class="romance-tags">
+        <span class="romance-tag rt-toxic">🔥 Toxic</span>
+        <span class="romance-tag rt-baggage">💔 Heavy Baggage</span>
+        <span class="romance-tag rt-complicated">⚠ Complicated</span>
+        <span class="romance-tag rt-worth">🌹 Worth The Work</span>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ME ===== -->
+    <div class="dating-card dating-bio">
+      <h2 class="dating-card-head">About me</h2>
+      <p>Whatever. Fine. You wanna know me? I'm in a band. I write angry songs about angry feelings. I've got a kid named Conner — he's five and he's the only good thing I've ever done. His mom and I aren't speaking. <strong>That part probably stays that way.</strong></p>
+      <p>I'm two years clean. Don't ask about it. I'll tell you when I'm ready. Maybe.</p>
+      <p>I'm not nice. I won't pretend to be. I'll listen when you talk and I'll tell you the truth about whatever you ask — even when you don't want to hear it. If you're a pussy, swipe left. If you want someone who'll match your worst energy on your worst day and still show up the morning after, <strong>scroll all the way through this and decide if you can handle what's at the bottom.</strong></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/ScorchOnStage.webp" alt="Scorch live" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">on stage. it's where I'm easiest to find.</div>
+    </div>
+
+    <!-- ===== PROMPTS ===== -->
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My most controversial opinion is...</p>
+      <p class="dating-prompt-a">that feelings are for people who don't have actual problems. <em>and I've got plenty.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">I'll fall for you if...</p>
+      <p class="dating-prompt-a">You're not a little bitch? <em>that's it. that's the whole list.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My red flag is...</p>
+      <p class="dating-prompt-a">take your pick, sweetheart. <em>there's a buffet.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/ScorchKissy.webp" alt="Backstage" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">Eat Your Heart Out.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">On a typical Tuesday night, you'll find me...</p>
+      <p class="dating-prompt-a">either on stage or at the 7 eleven? I like their trash food.</p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">You should NOT date me if...</p>
+      <p class="dating-prompt-a">you need stable. you need predictable. you need... I don't know, a whiney bitch like Sin?. The fuck are these questions?</p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">The most spontaneous thing I've ever done...</p>
+      <p class="dating-prompt-a">got my kid's name tattooed on my collarbone in the back of a van in Tulsa. <em>worth it. ten out of ten. would do again.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Scorch Pics/scorch-gallery-03.jpg" alt="Snake Skins live" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">the band. they put up with more than they should.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My love language is...</p>
+      <p class="dating-prompt-a">Flicking your forehead and stealing your snacks?</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Two truths and a lie...</p>
+      <p class="dating-prompt-a">1. I've been to prison.<br>2. I've been in love three times.<br>3. I cry at sad movies.<br><em>the lie is the one you want it to be.</em></p>
+    </div>
+
+    <!-- ===== QUICK STATS ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">The Vitals</h2>
+      <div class="dating-stats">
+        <div class="dating-stat"><div class="dating-stat-key">Looking for</div><div class="dating-stat-val">I have no fucking clue. Ricky made me fill this out.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Kids</div><div class="dating-stat-val">one. his name is Conner. he's the best thing I've ever done.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Drinks</div><div class="dating-stat-val">sober two years. don't make it weird.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Smokes</div><div class="dating-stat-val">cigs when I'm stressed. yeah, I know.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Religion</div><div class="dating-stat-val">complicated. I have a cult?</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Pets</div><div class="dating-stat-val">a reptile named Lilith she hates everyone but me. we get along.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Languages</div><div class="dating-stat-val">English, profanity.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Income</div><div class="dating-stat-val">I'm a touring musician. do the math.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO GRID ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">More of me</h2>
+      <div class="dating-grid">
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-01.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-02.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-gallery-03.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Scorch Pics/scorch-g03.jpg" alt="" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+
+    <!-- ===== CTA ===== -->
+    <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
+       target="_blank" rel="noopener" class="dating-cta">
+      Swipe Right ➜ Chat with Scorch
+    </a>
+
+    <div class="dating-foot">profile last updated by Scorch when he ran out of excuses</div>
+  </div>
+</div>
+<!-- ================== END SCORCH DATING PROFILE ===================== -->
+
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Scorch (unlocked) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
   </div>
 </div>
 
-
-<style>
-/* ============= SCORCH COMMENTS + DM — matches dating-page fire theme ============= */
-.scorch-comments { --sc-accent: var(--dp-accent, #ff5a1f); --sc-accent-2: var(--dp-accent-2, #c8281a); }
-.sc-comments-sub {
-  font-family: 'Outfit', sans-serif; font-size: 0.92rem;
-  color: var(--dp-ink-dim, rgba(255,255,255,0.6)); margin: 0 0 1.1rem; line-height: 1.5;
-}
-.sc-comments-sub em { color: var(--sc-accent); font-style: italic; }
-
-.sc-comment-form { display: flex; flex-direction: column; gap: 0.7rem; }
-.sc-name-input, .sc-comment-input {
-  width: 100%; box-sizing: border-box;
-  background: rgba(0,0,0,0.28); border: 1.5px solid rgba(255,255,255,0.12);
-  border-radius: 12px; padding: 0.8rem 1rem; color: #fff;
-  font-family: 'Outfit', sans-serif; font-size: 0.98rem; transition: border-color .18s ease, box-shadow .18s ease;
-}
-.sc-comment-input { resize: vertical; min-height: 90px; line-height: 1.5; }
-.sc-name-input:focus, .sc-comment-input:focus {
-  outline: none; border-color: var(--sc-accent);
-  box-shadow: 0 0 0 3px rgba(255,90,31,0.18);
-}
-.sc-name-input::placeholder, .sc-comment-input::placeholder { color: rgba(255,255,255,0.4); }
-
-.sc-comment-send {
-  align-self: flex-start; cursor: pointer; border: none;
-  font-family: 'Oswald', sans-serif; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  font-size: 0.92rem; color: #fff; padding: 0.7rem 1.5rem; border-radius: 999px;
-  background: linear-gradient(135deg, var(--sc-accent), var(--sc-accent-2));
-  box-shadow: 0 6px 20px rgba(255,90,31,0.35); transition: transform .15s ease, box-shadow .15s ease, opacity .15s;
-}
-.sc-comment-send:hover { transform: translateY(-2px); box-shadow: 0 9px 26px rgba(255,90,31,0.5); }
-.sc-comment-send:disabled { opacity: 0.5; cursor: default; transform: none; }
-
-.sc-comment-status { font-family: 'Outfit', sans-serif; font-size: 0.85rem; color: var(--sc-accent); min-height: 1.2em; }
-
-.sc-comment-thread { margin-top: 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
-
-/* a single comment (user post + scorch reply) */
-.sc-comment {
-  background: rgba(255,255,255,0.045); border-radius: 14px; padding: 0.9rem 1.05rem;
-  border: 1px solid rgba(255,255,255,0.07);
-}
-.sc-comment-author { font-family: 'Oswald', sans-serif; font-weight: 600; color: #fff; font-size: 0.95rem; margin-bottom: 0.2rem; }
-.sc-comment-text { font-family: 'Outfit', sans-serif; color: rgba(255,255,255,0.88); font-size: 0.96rem; line-height: 1.45; }
-
-.sc-reply {
-  margin-top: 0.8rem; margin-left: 0.8rem; padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, rgba(255,90,31,0.12), rgba(200,40,26,0.06));
-  border-left: 3px solid var(--sc-accent); border-radius: 0 12px 12px 0;
-}
-.sc-reply-author {
-  font-family: 'Oswald', sans-serif; font-weight: 700; color: var(--sc-accent);
-  font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.25rem;
-}
-.sc-reply-author .sc-mini-verified { color: var(--sc-accent); font-size: 0.78rem; }
-.sc-reply-text { font-family: 'Outfit', sans-serif; color: rgba(255,255,255,0.92); font-size: 0.95rem; line-height: 1.45; }
-.sc-typing { font-style: italic; color: rgba(255,255,255,0.5); }
-
-/* ===== DM POPUP ===== */
-.sc-dm-popup {
-  position: fixed; inset: 0; z-index: 9999;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(5,2,15,0.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  opacity: 0; pointer-events: none; transition: opacity .3s ease;
-  padding: 1.2rem;
-}
-.sc-dm-popup.open { opacity: 1; pointer-events: auto; }
-.sc-dm-card {
-  position: relative; width: min(440px, 100%);
-  background: linear-gradient(160deg, #1a0a1f, #14060c);
-  border-radius: 22px; padding: 1.5rem;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,90,31,0.25);
-  transform: translateY(24px) scale(0.96); transition: transform .35s cubic-bezier(.2,.9,.3,1.3);
-}
-.sc-dm-popup.open .sc-dm-card { transform: translateY(0) scale(1); }
-.sc-dm-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 22px 22px 0 0;
-  background: linear-gradient(90deg, transparent, var(--dp-accent, #ff5a1f), transparent);
-}
-.sc-dm-close {
-  position: absolute; top: 0.9rem; right: 1rem; background: none; border: none;
-  color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; transition: color .15s;
-}
-.sc-dm-close:hover { color: #fff; }
-.sc-dm-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
-.sc-dm-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
-  border: 2px solid var(--dp-accent, #ff5a1f); box-shadow: 0 0 14px rgba(255,90,31,0.5); background: #000; }
-.sc-dm-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.sc-dm-name { font-family: 'Oswald', sans-serif; font-weight: 700; color: #fff; font-size: 1.05rem; display: flex; align-items: center; gap: 0.35rem; }
-.sc-dm-verified { color: var(--dp-accent, #ff5a1f); font-size: 0.8rem; }
-.sc-dm-status { font-family: 'Outfit', sans-serif; font-size: 0.8rem; color: var(--dp-accent, #ff5a1f); opacity: 0.85; }
-.sc-dm-body {
-  font-family: 'Outfit', sans-serif; color: #fff; font-size: 1rem; line-height: 1.55;
-  background: rgba(255,90,31,0.1); border-radius: 14px; padding: 0.95rem 1.1rem; min-height: 2em;
-}
-.sc-dm-footer { font-family: 'Outfit', sans-serif; font-size: 0.78rem; color: rgba(255,255,255,0.4); text-align: center; margin-top: 0.9rem; font-style: italic; }
-</style>
-
-
-<script>
-/* ============= SCORCH COMMENTS + DM LOGIC ============= */
-(function () {
-  // 🔧 PASTE YOUR VERCEL URL HERE (the .vercel.app address, no trailing slash):
-  const FUNCTION_URL = "https://YOUR-PROJECT.vercel.app/api/comment";
-
-  const sendBtn = document.getElementById("scSend");
-  const nameEl  = document.getElementById("scName");
-  const textEl  = document.getElementById("scComment");
-  const statusEl= document.getElementById("scStatus");
-  const thread  = document.getElementById("scThread");
-
-  const dmPopup = document.getElementById("scDmPopup");
-  const dmBody  = document.getElementById("scDmBody");
-  const dmClose = document.getElementById("scDmClose");
-
-  function escapeHtml(s) {
-    return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-
-  function openDM(text) {
-    dmBody.textContent = text;
-    dmPopup.classList.add("open");
-    dmPopup.setAttribute("aria-hidden", "false");
-  }
-  function closeDM() {
-    dmPopup.classList.remove("open");
-    dmPopup.setAttribute("aria-hidden", "true");
-  }
-  dmClose.addEventListener("click", closeDM);
-  dmPopup.addEventListener("click", e => { if (e.target === dmPopup) closeDM(); });
-
-  sendBtn.addEventListener("click", async () => {
-    const comment = textEl.value.trim();
-    const name = nameEl.value.trim() || "Anonymous";
-    if (!comment) { statusEl.textContent = "type something first."; return; }
-
-    // render the user's comment immediately
-    const block = document.createElement("div");
-    block.className = "sc-comment";
-    block.innerHTML =
-      `<div class="sc-comment-author">${escapeHtml(name)}</div>
-       <div class="sc-comment-text">${escapeHtml(comment)}</div>
-       <div class="sc-reply">
-         <div class="sc-reply-author">Scorch <span class="sc-mini-verified">✓</span></div>
-         <div class="sc-reply-text sc-typing">typing...</div>
-       </div>`;
-    thread.prepend(block);
-    const replyEl = block.querySelector(".sc-reply-text");
-
-    textEl.value = "";
-    sendBtn.disabled = true;
-    statusEl.textContent = "sending...";
-
-    try {
-      const res = await fetch(FUNCTION_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ character: "scorch", comment }),
-      });
-      const data = await res.json();
-
-      replyEl.classList.remove("sc-typing");
-      replyEl.textContent = data.reply || "…(he ignored you)";
-      statusEl.textContent = "";
-
-      // if the function sent a DM, pop it after a beat
-      if (data.dm) {
-        setTimeout(() => openDM(data.dm), 1200);
-      }
-    } catch (err) {
-      replyEl.classList.remove("sc-typing");
-      replyEl.textContent = "(couldn't reach him — try again)";
-      statusEl.textContent = "connection failed.";
-    } finally {
-      sendBtn.disabled = false;
-    }
-  });
-})();
-</script>
-<!-- ===================== END SCORCH COMMENTS + DM ===================== -->
+<script src="script.js"></script>
+</body>
+</html>
