@@ -83,29 +83,44 @@ export default async function handler(req, res) {
     // prev = what they had before ("like"|"dislike"|"none") so we adjust counts
     if (action === "vote") {
       const id = body.id;
-      const dir = body.dir;   // desired state
-      const prev = body.prev || "none";
+      const dir = body.dir;                 // desired state: like | dislike | none
+      const voter = String(body.clientId || "").slice(0, 80);
       if (!id) return res.status(400).json({ error: "no id" });
+      if (!voter) return res.status(400).json({ error: "no voter" });
       if (!["like", "dislike", "none"].includes(dir)) return res.status(400).json({ error: "bad dir" });
 
-      const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
-      if (!list.ok) return res.status(200).json({ ok: false, debug: list.error });
-      const arr = list.result || [];
-      let idx = -1, rec = null;
-      for (let i = 0; i < arr.length; i++) {
-        try { const o = JSON.parse(arr[i]); if (o.id === id) { idx = i; rec = normalize(o); break; } } catch (e) {}
+      // per-comment hash of who voted what: VOTES_KEY:<id> -> { clientId: "like"|"dislike" }
+      const vkey = "scorch:votes:" + id;
+
+      // record (or clear) THIS person's vote — idempotent, so re-tapping can't double-count
+      if (dir === "none") {
+        await redis(["HDEL", vkey, voter]);
+      } else {
+        await redis(["HSET", vkey, voter, dir]);
       }
-      if (idx < 0 || !rec) return res.status(200).json({ ok: false, note: "comment gone" });
 
-      // undo the previous vote
-      if (prev === "like") rec.likes = Math.max(0, rec.likes - 1);
-      else if (prev === "dislike") rec.dislikes = Math.max(0, rec.dislikes - 1);
-      // apply the new vote
-      if (dir === "like") rec.likes += 1;
-      else if (dir === "dislike") rec.dislikes += 1;
+      // recount from the source of truth (everyone's stored votes)
+      const all = await redis(["HVALS", vkey]);
+      let likes = 0, dislikes = 0;
+      (all.result || []).forEach(v => { if (v === "like") likes++; else if (v === "dislike") dislikes++; });
 
-      const w = await redis(["LSET", WALL_KEY, String(idx), JSON.stringify(rec)]);
-      return res.status(200).json({ ok: w.ok, likes: rec.likes, dislikes: rec.dislikes, debug: w.error || null });
+      // mirror the totals onto the comment record so GET stays correct
+      const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
+      if (list.ok) {
+        const arr = list.result || [];
+        for (let i = 0; i < arr.length; i++) {
+          try {
+            const o = JSON.parse(arr[i]);
+            if (o.id === id) {
+              o.likes = likes; o.dislikes = dislikes;
+              await redis(["LSET", WALL_KEY, String(i), JSON.stringify(o)]);
+              break;
+            }
+          } catch (e) {}
+        }
+      }
+
+      return res.status(200).json({ ok: true, likes, dislikes, you: dir });
     }
 
     // ===== ADMIN ACTIONS (need the key) =====
@@ -181,6 +196,7 @@ export default async function handler(req, res) {
         if (toKill.has(p.obj.id)) {
           const out = await redis(["LREM", WALL_KEY, "1", p.raw]);
           if (out.ok) removed += (out.result || 0);
+          await redis(["DEL", "scorch:votes:" + p.obj.id]);   // clear its vote tally too
         }
       }
       return res.status(200).json({ ok: true, removed, killed: [...toKill].length });
