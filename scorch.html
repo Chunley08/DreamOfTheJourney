@@ -746,6 +746,83 @@
 .fanmail-reply-sign { font-family:'Caveat',cursive; font-size:1.7rem; color:#c8281a; text-align:right; margin-top:.6rem; transform:rotate(-2deg); }
 .fanmail-reply.pending .fanmail-reply-text { color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
 
+/* ===== FANMAIL — animated mailing experience ===== */
+.fanmail-write { transition:transform .25s ease, box-shadow .25s ease; }
+.fanmail-write:focus-within { transform:rotate(0deg) translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.08); }
+/* wax-seal style send button */
+.fanmail-send { position:relative; overflow:hidden; }
+.fanmail-send::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.35), transparent 60%); opacity:0; transition:opacity .2s; }
+.fanmail-send:hover::before { opacity:1; }
+.fanmail-send:active { transform:translateY(0) scale(.96); }
+
+/* the little letter that folds + flies off when you mail it */
+.fm-flyaway {
+  position:absolute; z-index:40; background:#f4ecd8; border-radius:4px; pointer-events:none;
+  box-shadow:0 10px 26px rgba(0,0,0,.5); transform-origin:center;
+  background-image:repeating-linear-gradient(#f4ecd8,#f4ecd8 12px,#d8cba8 13px);
+  border-top:5px solid #c8281a;
+  animation:fmFold .45s ease forwards, fmFly 1.15s .45s cubic-bezier(.55,-0.2,.7,1) forwards;
+}
+.fm-flyaway::after { /* a stamp thunks on mid-flight */
+  content:'★'; position:absolute; top:6px; right:8px; width:26px; height:30px; background:#ff5a1f; color:#fff;
+  display:flex; align-items:center; justify-content:center; border:2px solid #f4ecd8; transform:rotate(8deg) scale(0);
+  font-size:.9rem; animation:fmStamp .25s .4s ease forwards;
+}
+@keyframes fmFold { 0%{transform:scaleY(1)} 55%{transform:scaleY(.55) translateY(8px)} 100%{transform:scaleY(.5) translateY(8px)} }
+@keyframes fmStamp { to { transform:rotate(-9deg) scale(1); } }
+@keyframes fmFly {
+  0%   { opacity:1; }
+  100% { opacity:0; transform:translate(60vw,-60vh) scale(.18) rotate(22deg); }
+}
+
+/* incoming envelope (his reply arrives) */
+.fm-arrival { position:relative; display:flex; flex-direction:column; align-items:center; margin-bottom:1.4rem; }
+.fm-envelope { position:relative; width:min(300px,82%); height:170px; margin:0 auto; perspective:900px; z-index:2; opacity:0; transform:translateY(-120%) rotate(-4deg); }
+.fm-envelope.drop { animation:fmDrop .8s cubic-bezier(.3,1.4,.5,1) forwards; }
+.fm-env-body { position:absolute; inset:0; background:linear-gradient(#efe2c5,#e3d3ac); border-radius:7px; box-shadow:0 12px 30px rgba(0,0,0,.45); overflow:hidden; }
+.fm-env-body::before { /* the V seam of the envelope */
+  content:''; position:absolute; left:0; right:0; bottom:0; top:46%;
+  background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.08) 50%) , linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.08) 50%);
+}
+.fm-env-flap {
+  position:absolute; left:0; right:0; top:0; height:55%; transform-origin:top center; z-index:5;
+  background:linear-gradient(#e8d9b6,#dcc99e); clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.15); transition:transform .55s ease, z-index 0s .28s;
+}
+.fm-env-flap .fm-wax { position:absolute; left:50%; bottom:6px; transform:translate(-50%,50%); width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ff6a3a,#b51f12); color:#fff; font-family:'Metal Mania',cursive; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+.fm-envelope.open .fm-env-flap { transform:rotateX(178deg); z-index:1; }
+/* the letter tucked inside, slides up on open */
+.fm-env-letter { position:absolute; left:6%; right:6%; top:14%; bottom:8%; background:#f4ecd8; border-radius:3px 3px 0 0;
+  box-shadow:0 -2px 8px rgba(0,0,0,.15); z-index:3; transform:translateY(0); transition:transform .6s ease .3s; }
+.fm-envelope.open .fm-env-letter { transform:translateY(-46%); }
+
+@keyframes fmDrop {
+  0%   { opacity:0; transform:translateY(-130%) rotate(-5deg); }
+  70%  { opacity:1; transform:translateY(6%) rotate(1.5deg); }
+  85%  { transform:translateY(-3%) rotate(-1deg); }
+  100% { opacity:1; transform:translateY(0) rotate(0); }
+}
+/* the actual reply paper that rises out + gets written on */
+.fanmail-reply.arriving { opacity:0; transform:translateY(34px) scale(.96); transition:opacity .5s ease, transform .5s ease; margin-top:-26px; z-index:1; position:relative; }
+.fanmail-reply.arriving.show { opacity:1; transform:translateY(0) scale(1); }
+.fm-caret::after { content:'|'; color:#1a2740; animation:fmCaret .7s steps(1) infinite; }
+@keyframes fmCaret { 50%{opacity:0;} }
+
+/* blocked notices */
+.sc-blocked-note { color:#ff5a3c; font-family:'Special Elite',monospace; font-weight:700; letter-spacing:.02em; }
+.sc-blocked-stamp { margin-top:.7rem; display:inline-block; padding:.25rem .7rem; border:2px solid #ff3b3b; border-radius:6px;
+  color:#ff5a3c; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem;
+  transform:rotate(-4deg); background:rgba(255,40,40,.08); animation:fmStampIn .3s ease; }
+@keyframes fmStampIn { 0%{transform:rotate(-4deg) scale(1.6); opacity:0;} 100%{transform:rotate(-4deg) scale(1); opacity:1;} }
+
+@media (prefers-reduced-motion: reduce) {
+  .fm-flyaway, .fm-envelope.drop { animation:none; }
+  .fm-envelope { opacity:1; transform:none; }
+  .fanmail-reply.arriving { transition:none; opacity:1; transform:none; margin-top:0; }
+}
+
 
 .sc-comments-sub { font-family:'Outfit',sans-serif; font-size:.92rem; color:var(--dp-ink-dim,rgba(255,255,255,.6)); margin:0 0 1.1rem; line-height:1.5; }
 .sc-comments-sub em { color:var(--sc-accent); font-style:italic; }
@@ -769,6 +846,20 @@
 .sc-del { margin-top:.7rem; cursor:pointer; font-family:'Outfit',sans-serif; font-size:.78rem; color:rgba(255,255,255,.75); background:rgba(255,60,60,.14); border:1px solid rgba(255,90,90,.35); border-radius:8px; padding:.3rem .7rem; transition:background .15s,opacity .15s; }
 .sc-del:hover { background:rgba(255,60,60,.28); color:#fff; }
 .sc-del:disabled { opacity:.5; cursor:default; }
+/* admin panel */
+.sc-admin-panel { background:rgba(255,40,40,.06); border:1px solid rgba(255,90,90,.3); border-radius:12px; padding:.8rem 1rem; margin-bottom:1.1rem; }
+.sc-admin-head { font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.04em; color:#ff7a5c; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; font-size:.92rem; }
+.sc-admin-btn { cursor:pointer; font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.85); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:7px; padding:.25rem .6rem; transition:background .15s; }
+.sc-admin-btn:hover { background:rgba(255,255,255,.16); }
+.sc-admin-btn:disabled { opacity:.5; cursor:default; }
+.sc-admin-danger { color:#ff6a6a; border-color:rgba(255,80,80,.5); background:rgba(255,40,40,.12); }
+.sc-admin-body { margin-top:.7rem; display:flex; flex-direction:column; gap:.5rem; }
+.sc-admin-empty { font-family:'Outfit',sans-serif; font-size:.85rem; color:rgba(255,255,255,.5); font-style:italic; }
+.sc-admin-row { display:flex; align-items:center; gap:.8rem; background:rgba(0,0,0,.25); border-radius:8px; padding:.5rem .7rem; }
+.sc-admin-info { display:flex; flex-direction:column; gap:.1rem; flex:1; min-width:0; }
+.sc-admin-info b { font-family:'Oswald',sans-serif; color:#fff; font-size:.92rem; }
+.sc-admin-reason { font-family:'Outfit',sans-serif; font-size:.78rem; color:rgba(255,255,255,.6); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sc-admin-when { font-family:'Outfit',sans-serif; font-size:.68rem; color:rgba(255,255,255,.38); }
 .sc-dm-fab { position:fixed; bottom:22px; right:22px; z-index:9998; width:62px; height:62px; border-radius:50%; border:2px solid #ff5a1f; background:#1a0a0a; cursor:pointer; overflow:hidden; padding:0; box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 18px rgba(255,90,31,.45); transition:transform .2s, box-shadow .2s; animation:scFabPulse 2.6s ease-in-out infinite; }
 .sc-dm-fab:hover { transform:scale(1.08); box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 26px rgba(255,90,31,.7); }
 .sc-dm-fab img { width:100%; height:100%; object-fit:cover; }
@@ -847,6 +938,36 @@
   // open the page as  ...scorch.html?admin=YOURKEY  to get delete buttons.
   const ADMIN_KEY = new URLSearchParams(location.search).get("admin") || "";
 
+  // ---- BLOCK STATE ----
+  // a stable per-device id so being blocked can't be dodged by just renaming.
+  function getCID(){
+    try {
+      let c = localStorage.getItem("scorchCID");
+      if (!c) { c = "c_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("scorchCID", c); }
+      return c;
+    } catch (e) { return ""; }
+  }
+  const CID = getCID();
+  let IS_BLOCKED = false;
+
+  // flip the whole page into "you've been blocked" mode
+  function setBlocked(){
+    if (IS_BLOCKED) return;
+    IS_BLOCKED = true;
+    const cs = document.getElementById("scSend");
+    if (cs) { cs.disabled = true; cs.textContent = "Blocked ✗"; }
+    const st = document.getElementById("scStatus");
+    if (st) st.innerHTML = '<span class="sc-blocked-note">🚫 Scorch blocked you. Your messages won\'t send.</span>';
+    const fs = document.getElementById("fmSend");
+    if (fs) { fs.disabled = true; fs.textContent = "Returned ✗"; }
+    const fst = document.getElementById("fmStatus");
+    if (fst) fst.textContent = "🚫 returned to sender — he's blocked you.";
+    const ds = document.getElementById("scChatSend");
+    if (ds) ds.disabled = true;
+    const di = document.getElementById("scChatInput");
+    if (di) { di.disabled = true; di.placeholder = "he blocked you."; }
+  }
+
   // ---- per-session memory (sessionStorage) ----
   // remembers each username's comments + DM thread + letters during THIS visit.
   // sessionStorage wipes automatically when the tab is closed, so a fresh visit
@@ -916,6 +1037,61 @@
         lastSig = ""; await loadWall();
       } catch (err) { btn.disabled = false; btn.textContent = "\uD83D\uDDD1 delete"; }
     });
+
+    // ----- admin panel: who Scorch has blocked -----
+    const panel = document.createElement("div");
+    panel.className = "sc-admin-panel";
+    panel.innerHTML =
+      '<div class="sc-admin-head">\uD83D\uDEE1 Admin \u00b7 Blocked list ' +
+        '<button type="button" class="sc-admin-btn" id="scAdminRefresh">refresh</button>' +
+        '<button type="button" class="sc-admin-btn sc-admin-danger" id="scAdminClear">clear ALL comments</button>' +
+      '</div><div class="sc-admin-body" id="scAdminBody">loading...</div>';
+    const commentsCard = document.getElementById("scorchComments");
+    if (commentsCard) commentsCard.insertBefore(panel, commentsCard.querySelector(".sc-comment-form"));
+
+    const adminBody = panel.querySelector("#scAdminBody");
+    async function loadBlocked(){
+      adminBody.textContent = "loading...";
+      try {
+        const res = await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ action:"listblocked", key: ADMIN_KEY }) });
+        const data = await res.json();
+        const list = data.blocked || [];
+        if (!list.length) { adminBody.innerHTML = '<div class="sc-admin-empty">nobody\u2019s blocked. he\u2019s being\u2026 tolerant.</div>'; return; }
+        adminBody.innerHTML = "";
+        list.forEach(b => {
+          const row = document.createElement("div");
+          row.className = "sc-admin-row";
+          const when = b.ts ? new Date(b.ts).toLocaleString() : "";
+          row.innerHTML =
+            '<div class="sc-admin-info"><b>' + esc(b.name || "Anonymous") + '</b>' +
+            '<span class="sc-admin-reason">' + esc((b.reason || "").slice(0,120)) + '</span>' +
+            '<span class="sc-admin-when">' + esc(when) + '</span></div>';
+          const ub = document.createElement("button");
+          ub.type = "button"; ub.className = "sc-admin-btn"; ub.textContent = "unblock";
+          ub.addEventListener("click", async () => {
+            ub.disabled = true; ub.textContent = "...";
+            try {
+              await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify({ action:"unblock", field: b.field, key: ADMIN_KEY }) });
+              loadBlocked();
+            } catch (e) { ub.disabled = false; ub.textContent = "unblock"; }
+          });
+          row.appendChild(ub);
+          adminBody.appendChild(row);
+        });
+      } catch (e) { adminBody.textContent = "couldn't load blocked list."; }
+    }
+    panel.querySelector("#scAdminRefresh").addEventListener("click", loadBlocked);
+    panel.querySelector("#scAdminClear").addEventListener("click", async () => {
+      if (!confirm("Wipe the ENTIRE public comment wall? This can't be undone.")) return;
+      try {
+        await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ action:"clear", key: ADMIN_KEY }) });
+        lastSig = ""; loadWall();
+      } catch (e) {}
+    });
+    loadBlocked();
   }
 
   // load now + refresh every 15s so other people's comments appear live
@@ -924,6 +1100,7 @@
 
 
   if (sendBtn) sendBtn.addEventListener("click", async () => {
+    if (IS_BLOCKED) { statusEl.innerHTML = '<span class="sc-blocked-note">🚫 message could not be sent — you\'ve been blocked.</span>'; return; }
     const comment = textEl.value.trim();
     const name = (nameEl.value.trim() || "Anonymous");
     if (!comment) { statusEl.textContent = "type something first."; return; }
@@ -942,8 +1119,17 @@
     const replyEl = block.querySelector(".sc-reply-text");
     textEl.value = ""; sendBtn.disabled = true; statusEl.textContent = "sending...";
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments, clientId: CID }) });
       const data = await res.json();
+
+      // already blocked — the message never reached him
+      if (data.blocked) {
+        block.remove();
+        statusEl.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "message could not be sent — you've been blocked.") + '</span>';
+        setBlocked();
+        return;
+      }
+
       replyEl.classList.remove("sc-typing");
       if (data.reply && data.reply !== "...(no reply)") {
         replyEl.textContent = data.reply;
@@ -960,6 +1146,15 @@
       // if it saved to the public wall, refresh so it shows as the shared/canonical
       // entry (with delete button in admin mode) instead of the local preview.
       if (data.saved) { lastSig = ""; loadWall(); }
+
+      // he just blocked them — his last words show above; now drop the hammer.
+      if (data.justBlocked) {
+        const tag = document.createElement("div");
+        tag.className = "sc-blocked-note sc-blocked-stamp";
+        tag.textContent = "🚫 He blocked you.";
+        block.appendChild(tag);
+        setTimeout(setBlocked, 600);
+      }
 
       // did he decide to slide into the DMs?
       if (data.dm) {
@@ -1054,6 +1249,7 @@
   }
 
   async function sendDM(){
+    if (IS_BLOCKED) { addMsg("🚫 message could not be sent — he blocked you.", "scorch", false); return; }
     const text = chatInput.value.trim();
     if (!text) return;
     addMsg(text, "user");
@@ -1061,9 +1257,14 @@
     const typing = addMsg("typing...", "scorch", false);
     typing.classList.add("sc-typing");
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments, clientId: CID }) });
       const data = await res.json();
       typing.remove();
+      if (data.blocked) {
+        addMsg("🚫 " + (data.notice || "message could not be sent — you've been blocked."), "scorch", false);
+        setBlocked();
+        return;
+      }
       if (data.reply) {
         addMsg(data.reply, "scorch");
       } else if (data.error) {
@@ -1071,10 +1272,15 @@
       } else {
         addMsg("...", "scorch");
       }
+      if (data.justBlocked) {
+        const n = addMsg("🚫 He blocked you.", "scorch", false);
+        n.classList.add("sc-blocked-note");
+        setTimeout(setBlocked, 600);
+      }
     } catch (e) {
       typing.remove();
       addMsg("(he's not answering. typical.)", "scorch", false);
-    } finally { chatSend.disabled = false; chatInput.focus(); }
+    } finally { if (!IS_BLOCKED) { chatSend.disabled = false; chatInput.focus(); } }
   }
   if (chatSend) chatSend.addEventListener("click", sendDM);
   if (chatInput) chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendDM(); });
@@ -1114,65 +1320,159 @@
     return wrap;
   }
 
+  // ---- animation helpers ----
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  // fold the written letter and fly it off into the mail
+  function playSend(){
+    return new Promise(resolve => {
+      const card = document.querySelector(".fanmail-write");
+      const board = document.getElementById("scorchFanmail");
+      if (reduceMotion || !card || !board) return resolve();
+      const cr = card.getBoundingClientRect();
+      const br = board.getBoundingClientRect();
+      const fly = document.createElement("div");
+      fly.className = "fm-flyaway";
+      fly.style.left = (cr.left - br.left) + "px";
+      fly.style.top = (cr.top - br.top) + "px";
+      fly.style.width = cr.width + "px";
+      fly.style.height = cr.height + "px";
+      board.style.position = "relative";
+      board.appendChild(fly);
+      setTimeout(() => { fly.remove(); resolve(); }, 1650);
+    });
+  }
+
+  // type text on like handwriting
+  function typeWriter(el, text){
+    return new Promise(resolve => {
+      if (reduceMotion) { el.textContent = text; resolve(); return; }
+      el.textContent = "";
+      el.classList.add("fm-caret");
+      let i = 0;
+      const step = () => {
+        if (i >= text.length) { el.classList.remove("fm-caret"); return resolve(); }
+        el.textContent += text[i++];
+        setTimeout(step, 14 + Math.random() * 22);
+      };
+      step();
+    });
+  }
+
+  // his reply flies in as a sealed envelope, opens, the letter rises + gets written
+  async function playReceive(toName, text){
+    try {
+      if (reduceMotion) { return addLetterReply(text, toName, false); }
+      const arrival = document.createElement("div");
+      arrival.className = "fm-arrival";
+      arrival.innerHTML =
+        '<div class="fm-envelope">' +
+          '<div class="fm-env-body"></div>' +
+          '<div class="fm-env-letter"></div>' +
+          '<div class="fm-env-flap"><span class="fm-wax">SS</span></div>' +
+        '</div>';
+      fmReplies.prepend(arrival);
+      const env = arrival.querySelector(".fm-envelope");
+
+      await wait(40);
+      env.classList.add("drop");          // flies in + bounces
+      await wait(850);
+      env.classList.add("open");          // flap flips, inner letter peeks up
+      await wait(650);
+
+      // the real reply paper rises out of the envelope
+      const wrap = document.createElement("div");
+      wrap.className = "fanmail-card fanmail-reply arriving";
+      wrap.innerHTML =
+        '<div class="fanmail-stamp">SS<br>2026</div>' +
+        '<div class="fanmail-reply-to">To ' + esc(toName || "Anonymous") + ' —</div>' +
+        '<div class="fanmail-reply-text"></div>' +
+        '<div class="fanmail-reply-sign" style="opacity:0">— Scorch</div>';
+      arrival.appendChild(wrap);
+      await wait(30);
+      wrap.classList.add("show");
+      // fade the envelope away as the letter takes its place
+      env.style.transition = "opacity .5s ease, transform .5s ease";
+      env.style.opacity = "0";
+      env.style.transform = "translateY(-18px) scale(.92)";
+      await wait(380);
+      env.remove();
+
+      // handwriting
+      await typeWriter(wrap.querySelector(".fanmail-reply-text"), text);
+      const sign = wrap.querySelector(".fanmail-reply-sign");
+      sign.style.transition = "opacity .4s ease";
+      sign.style.opacity = "1";
+
+      // move the finished card out of the arrival wrapper so it's permanent
+      arrival.replaceWith(wrap);
+      wrap.classList.remove("arriving", "show");
+      return wrap;
+    } catch (e) {
+      return addLetterReply(text, toName, false);   // never lose the reply
+    }
+  }
+
   if (fmSend) fmSend.addEventListener("click", async () => {
+    if (IS_BLOCKED) { fmStatus.innerHTML = '<span class="sc-blocked-note">🚫 returned to sender — he\'s blocked you.</span>'; return; }
     const body = fmBody.value.trim();
     const name = (fmName.value.trim() || "Anonymous");
     if (!body) { fmStatus.textContent = "write something first."; return; }
 
     const user = getUser(name);
     user.letters = user.letters || [];
-    // save the fan's letter to memory thread
     user.letters.push({ from:"user", text: body });
     user.letters = user.letters.slice(-20);
     saveMem(memory);
 
-    // pending reply card
-    const pending = document.createElement("div");
-    pending.className = "fanmail-card fanmail-reply pending";
-    pending.innerHTML =
-      '<div class="fanmail-stamp">SS<br>2026</div>' +
-      '<div class="fanmail-reply-to">To ' + esc(name) + ' —</div>' +
-      '<div class="fanmail-reply-text">sealing the envelope... he\'s reading it.</div>';
-    fmReplies.prepend(pending);
+    fmBody.value = ""; fmSend.disabled = true; fmStatus.textContent = "sealing the envelope...";
 
-    fmBody.value = ""; fmSend.disabled = true; fmStatus.textContent = "mailing...";
-    try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ character: CHAR, comment: body, mode:"letter", history: user.letters, username: name, pastComments: user.comments }) });
-      const data = await res.json();
-      pending.remove();
-      if (data.reply) {
-        addLetterReply(data.reply, name);
-      } else if (data.error) {
-        addLetterReply("(the mail's backed up — free AI's busy. send it again in a sec.)", name, false);
-      } else {
-        addLetterReply("...(he read it. didn't write back. typical.)", name, false);
-      }
+    // fire the request and the send animation at the same time
+    const netP = fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ character: CHAR, comment: body, mode:"letter", history: user.letters, username: name, pastComments: user.comments, clientId: CID }) })
+      .then(r => r.json()).catch(() => ({ error: "net" }));
+
+    await playSend();
+    fmStatus.textContent = "waiting on the mailman...";
+    const data = await netP;
+
+    // blocked before he ever read it
+    if (data.blocked) {
+      fmStatus.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "returned to sender — you've been blocked.") + '</span>';
+      setBlocked();
+      return;
+    }
+
+    let replyText, real = false;
+    if (data.reply) { replyText = data.reply; real = true; }
+    else if (data.error) replyText = "(the mail's backed up — free AI's busy. send it again in a sec.)";
+    else replyText = "...(he read it. didn't write back. typical.)";
+
+    await playReceive(name, replyText);
+
+    // persist his reply so it shows on a later visit (only real replies)
+    if (real) {
+      user.letters.push({ from:"scorch", text: replyText });
+      user.letters = user.letters.slice(-20);
+      saveMem(memory);
+    }
+
+    if (data.justBlocked) {
+      fmStatus.innerHTML = '<span class="sc-blocked-note">🚫 ...and then he blocked you.</span>';
+      setTimeout(setBlocked, 600);
+    } else {
       fmStatus.textContent = "";
-    } catch (e) {
-      pending.remove();
-      addLetterReply("(letter got lost in the mail — try again.)", name, false);
-      fmStatus.textContent = "connection failed.";
-    } finally { fmSend.disabled = false; }
+      fmSend.disabled = false;
+    }
   });
 
   // when you change the signed name, show that person's letter history
   if (fmName) fmName.addEventListener("change", () => renderLetters(fmName.value.trim()));
   renderLetters();
 
-  // ===== RANDOM SURPRISE DM (by chance, anytime on the page) =====
-  // small rolling chance every ~40s that Scorch randomly slides in.
-  setInterval(async () => {
-    if (chat.classList.contains("open")) return;     // don't interrupt an open chat
-    if (Math.random() > 0.12) return;                 // ~12% per tick
-    const who = (nameEl && nameEl.value.trim()) || currentDmUser || "Anonymous";
-    try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ character: CHAR, comment: "(slide into their DMs out of nowhere with a random unprompted message — bored, cocky, or stirring shit. one or two lines.)", mode:"dm", history: getUser(who).dm, username: who, pastComments: getUser(who).comments }) });
-      const data = await res.json();
-      if (data.reply) { currentDmUser = who; receiveDM(data.reply); }
-    } catch (e) {}
-  }, 40000);
+  // (Scorch only slides into DMs as a reaction to a comment he likes or really
+  // hates — that's handled server-side per comment. No out-of-nowhere timer DMs.)
 })();
 </script>
 
