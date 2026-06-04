@@ -16,6 +16,13 @@ export default async function handler(req, res) {
   const apiKey = process.env.OPENROUTER_KEY;
 
   // ============================================================
+  //  MODEL — change this one line to switch models.
+  //  Must be the exact slug from the model's OpenRouter page,
+  //  including :free on the end if it's a free model.
+  // ============================================================
+  const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
+
+  // ============================================================
   //  CHARACTER PERSONAS — the "drawer" of personalities.
   //  Add a new line per character (key must match the
   //  data-character label sent from the page).
@@ -113,33 +120,41 @@ Stay in character at all times.`,
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "nousresearch/hermes-3-llama-3.1-405b:free", messages: msgs }),
+      body: JSON.stringify({ model: MODEL, messages: msgs }),
     });
     const data = await r.json();
-    return data.choices?.[0]?.message?.content?.trim() || null;
+    // surface whatever actually happened so we're not flying blind
+    const text = data?.choices?.[0]?.message?.content?.trim();
+    if (text) return { text };
+    // no text — figure out why
+    const apiErr = data?.error?.message || data?.error || null;
+    return { text: null, debug: apiErr ? String(apiErr) : `empty response (status ${r.status})` };
   }
 
   try {
-    const reply = (await callModel(messages)) || "...(no reply)";
+    const main = await callModel(messages);
+    const reply = main.text || "...(no reply)";
 
     // ---- DM CHANCE (only on public comments, not inside an existing DM chat) ----
     let dm = null;
-    if (mode === "comment") {
+    if (mode === "comment" && main.text) {
       const lc = comment.toLowerCase();
       const spicy = ["love","cute","hot","handsome","marry","kiss","date","suck","hate","ugly","trash","mid","overrated"];
       const isSpicy = spicy.some(w => lc.includes(w));
       // higher chance if the comment is spicy/rude, plus a smaller random baseline
       const chance = isSpicy ? 0.55 : 0.18;
       if (Math.random() < chance) {
-        dm = await callModel([
+        const dmRes = await callModel([
           { role: "system", content: system + `\n\nYou just read this fan's public comment and something about it made you decide to slide into their DMs privately. Write ONLY the opening DM message - short, unprompted, like a text. Make it clearly a reaction to what they said.` },
           { role: "user", content: `Their comment was: "${comment}". Write your opening DM.` },
         ]);
+        dm = dmRes.text;
       }
     }
 
-    return res.status(200).json({ reply, dm });
+    // debug surfaces the real reason when there's no text (model busy, error, etc.)
+    return res.status(200).json({ reply, dm, debug: main.debug || null });
   } catch (e) {
-    return res.status(500).json({ error: "AI request failed" });
+    return res.status(500).json({ error: "AI request failed", debug: String(e && e.message || e) });
   }
 }
