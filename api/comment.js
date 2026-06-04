@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
+  const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
 
   // ============================================================
   //  CHARACTER PERSONAS — the "drawer" of personalities.
