@@ -10,7 +10,7 @@
     --glow-purple: rgba(157, 92, 255, 0.6);
     --glow-magenta: rgba(232, 94, 232, 0.5);
     --glow-cyan: rgba(94, 220, 255, 0.4);
-    --rainbow-gradient: linear-gradient(90deg, #ff8eaa 0%, #ffa86e 12%, #ffe87a 25%, #92ffb3 38%, #6ee7ff 51%, #8e9bff 64%, #c98eff 77%, #ff8ee0 90%, #ff8eaa 100%);
+    --rainbow-gradient: linear-gradient(90deg, #ff6f9c 0%, #ff9a4d 12%, #ffe14d 25%, #5cff97 38%, #4ddfff 51%, #7a8cff 64%, #b86bff 77%, #ff6fd6 90%, #ff6f9c 100%);
     --rainbow-dark: linear-gradient(90deg, #6e1430 0%, #6e3210 12%, #5c4a08 25%, #0d4a22 38%, #0a3a52 51%, #1c2c5b 64%, #3a1466 77%, #5c0c4a 90%, #6e1430 100%);
   }
 
@@ -197,6 +197,7 @@
   /* ---------- CLICKABLE SECTION TITLE ---------- */
   .section-title-link {
     display: block;
+    text-align: center;
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
@@ -314,26 +315,33 @@
     83%  { color:#9d5cff; text-shadow:0 0 10px #9d5cff, 0 0 20px rgba(157,92,255,.7); }
     100% { color:#ff6ec7; text-shadow:0 0 10px #ff6ec7, 0 0 20px rgba(255,110,199,.7); }
   }
-  /* "click here" hint that drifts in under the button */
+  /* "click to open" — a glowing pill CTA chip under the button */
   .section-title-link::after {
     content: '↓ click to open ↓';
-    display: block;
-    margin-top: 0.6rem;
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1.35rem;
     font-family: 'Cinzel', serif;
     font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.4em;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em; /* balance the trailing letter-spacing so it sits centered */
     text-transform: uppercase;
-    color: #ecdfff;
-    text-shadow: 0 0 10px rgba(157, 92, 255, 0.7), 0 1px 2px rgba(0, 0, 0, 0.6);
-    transition: opacity 0.3s ease, transform 0.3s ease, letter-spacing 0.4s ease, color 0.3s ease;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+    background: linear-gradient(135deg, rgba(157, 92, 255, 0.4), rgba(232, 94, 232, 0.3) 55%, rgba(94, 220, 255, 0.34));
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 999px;
+    box-shadow: 0 0 16px rgba(157, 92, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, letter-spacing 0.3s ease;
     position: relative;
     z-index: 1;
-    animation: clickHintPulse 2.2s ease-in-out infinite;
+    animation: clickHintGlow 3.6s ease-in-out infinite;
   }
-  @keyframes clickHintPulse {
-    0%, 100% { opacity: 0.78; }
-    50%      { opacity: 1; }
+  @keyframes clickHintGlow {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(157, 92, 255, 0.6)); }
+    33%      { filter: drop-shadow(0 0 9px rgba(232, 94, 232, 0.75)); }
+    66%      { filter: drop-shadow(0 0 9px rgba(94, 220, 255, 0.65)); }
   }
   .section-title-link:hover {
     transform: translateY(-6px) scale(1.015);
@@ -352,10 +360,10 @@
       0 0 56px rgba(180, 220, 255, 0.6);
   }
   .section-title-link:hover::after {
-    opacity: 1;
-    transform: translateY(2px);
-    letter-spacing: 0.55em;
-    color: var(--accent-magenta);
+    transform: translateY(2px) scale(1.06);
+    letter-spacing: 0.34em;
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 28px rgba(232, 94, 232, 0.65), 0 0 46px rgba(157, 92, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   }
   .section-title-link:active {
     transform: translateY(-2px) scale(0.99);
@@ -450,6 +458,44 @@
     -webkit-text-stroke: 2.5px transparent;
     /* a tight dark shadow to deepen the edge — no bright bloom */
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.65));
+  }
+  /* a bright glint that sweeps across the letters — the "shimmer" */
+  .meet-title::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(110deg,
+      transparent 0%, transparent 42%,
+      rgba(255,255,255,0.9) 50%,
+      transparent 58%, transparent 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: titleShimmer 5s ease-in-out infinite;
+  }
+  @keyframes titleShimmer {
+    0%       { background-position: 160% 0; }
+    55%, 100% { background-position: -60% 0; }
+  }
+
+  /* opaque glassy bar behind the "Request a Scene" title — matches the
+     Meet the Characters panel so it reads clearly against the starfield */
+  #request .section-title {
+    display: block;
+    width: fit-content;
+    max-width: 92%;
+    margin: 0 auto 0.6rem;
+    padding: 0.85rem 1.9rem;
+    background: linear-gradient(135deg, rgba(157, 92, 255, 0.32), rgba(94, 220, 255, 0.16) 55%, rgba(232, 94, 232, 0.26));
+    border: 1.5px solid rgba(180, 140, 255, 0.55);
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   /* fallback for browsers without text-stroke support */
   @supports not (-webkit-text-stroke: 1px red) {
@@ -7361,23 +7407,23 @@
     align-items: center;
     gap: 0.5rem;
     margin: 2rem auto 0;
-    padding: 0.9rem 2rem;
-    background: linear-gradient(135deg, #ff5a8a, #c83a8c);
+    padding: 0.9rem 2.1rem;
+    background: #ff4d8d;
     color: #fff;
-    border: none;
+    border: 1px solid #ff80ad;
     border-radius: 999px;
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.08em;
     cursor: none;
-    box-shadow: 0 6px 22px rgba(200, 58, 140, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: 0 6px 22px rgba(255, 77, 141, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   }
   .dating-browse-all-btn:hover {
-    background: linear-gradient(135deg, #ff6e9c, #d8499c);
+    background: #ff6ba0;
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(200, 58, 140, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 77, 141, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   }
 
   /* ============================================================
