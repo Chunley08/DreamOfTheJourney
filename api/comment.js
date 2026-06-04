@@ -304,43 +304,60 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
     }
 
     // ---- SAVE TO THE PUBLIC WALL ----
+    // Each entry is its own node. Scorch's reply is saved as a CHILD node
+    // (author "Scorch") parented to the comment he's answering — so it can be
+    // replied to and voted on just like any other comment.
     let saved = null;
+    let savedScorch = null;
     let wallDebug = null;
+    const mkId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
     if (mode === "comment" && main.text) {
       saved = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        parentId: null,
+        id: mkId(), parentId: null, isScorch: false,
         name: (username || "Anonymous").slice(0, 40),
         comment: String(comment).slice(0, 400),
-        reply,
-        likes: 0, dislikes: 0,
-        ts: Date.now(),
+        likes: 0, dislikes: 0, ts: Date.now(),
       };
-      const w = await saveToWall(saved);
+      let w = await saveToWall(saved);
       if (!w.ok) { wallDebug = w.error; saved = null; }
+      // his auto-reply becomes a child node under their comment
+      if (saved && reply && reply !== "...(no reply)" && !justBlocked) {
+        savedScorch = {
+          id: mkId(), parentId: saved.id, isScorch: true,
+          name: "Scorch", comment: reply,
+          likes: 0, dislikes: 0, ts: Date.now() + 1,
+        };
+        const w2 = await saveToWall(savedScorch);
+        if (!w2.ok) savedScorch = null;
+      }
     } else if (mode === "reply") {
-      // the fan's reply always gets saved into the thread.
-      // Scorch's answer only attaches SOMETIMES (otherwise he stayed quiet).
+      // the fan's reply always saves into the thread.
       const scorchAnswers = !justBlocked && main.text && Math.random() < REPLY_CHANCE;
       saved = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        parentId: parentId || null,
+        id: mkId(), parentId: parentId || null, isScorch: false,
         name: (username || "Anonymous").slice(0, 40),
         comment: String(comment).slice(0, 400),
-        reply: scorchAnswers ? reply : null,
-        likes: 0, dislikes: 0,
-        ts: Date.now(),
+        likes: 0, dislikes: 0, ts: Date.now(),
       };
-      const w = await saveToWall(saved);
+      let w = await saveToWall(saved);
       if (!w.ok) { wallDebug = w.error; saved = null; }
-      // for thread replies, only surface his words if he actually answered
+      // Scorch sometimes answers — as a child node under the fan's reply
+      if (saved && scorchAnswers) {
+        savedScorch = {
+          id: mkId(), parentId: saved.id, isScorch: true,
+          name: "Scorch", comment: reply,
+          likes: 0, dislikes: 0, ts: Date.now() + 1,
+        };
+        const w2 = await saveToWall(savedScorch);
+        if (!w2.ok) savedScorch = null;
+      }
       reply = scorchAnswers ? reply : null;
     }
 
     // debug surfaces the real reason when there's no text (model busy, error, etc.)
     return res.status(200).json({
-      reply, dm, saved,
+      reply, dm, saved, savedScorch,
       justBlocked,
       notice: justBlocked ? "you've been blocked." : null,
       debug: main.debug || wallDebug || null,
