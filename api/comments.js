@@ -18,6 +18,7 @@
 // ============================================================
 
 const WALL_KEY = "scorch:wall";
+const BLOCK_KEY = "scorch:blocked";
 const MAX = 100; // keep newest 100
 
 function creds() {
@@ -68,6 +69,41 @@ export default async function handler(req, res) {
     if (action === "clear") {
       const out = await redis(["DEL", WALL_KEY]);
       return res.status(200).json({ ok: out.ok, cleared: true, debug: out.error || null });
+    }
+
+    // ---- list everyone Scorch has blocked ----
+    if (action === "listblocked") {
+      const out = await redis(["HGETALL", BLOCK_KEY]);
+      if (!out.ok) return res.status(200).json({ blocked: [], debug: out.error });
+      // HGETALL returns a flat [field, value, field, value, ...]
+      const flat = out.result || [];
+      const seen = new Set();
+      const blocked = [];
+      for (let i = 0; i < flat.length; i += 2) {
+        const field = flat[i];
+        let rec; try { rec = JSON.parse(flat[i + 1]); } catch (e) { continue; }
+        const dedupe = (rec.name || "") + "|" + (rec.ts || "");
+        if (seen.has(dedupe)) continue;       // skip the n:/c: duplicate
+        seen.add(dedupe);
+        blocked.push({ field, name: rec.name, reason: rec.reason, ts: rec.ts, clientId: rec.clientId });
+      }
+      blocked.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      return res.status(200).json({ blocked });
+    }
+
+    // ---- unblock someone (removes BOTH their name-key and device-key) ----
+    if (action === "unblock") {
+      const field = (req.body || {}).field;
+      if (!field) return res.status(400).json({ error: "no field" });
+      const got = await redis(["HGET", BLOCK_KEY, field]);
+      let rec = null; try { rec = JSON.parse(got.result); } catch (e) {}
+      const dels = [field];
+      if (rec) {
+        if (rec.name && rec.name.toLowerCase() !== "anonymous") dels.push("n:" + rec.name.toLowerCase().trim());
+        if (rec.clientId) dels.push("c:" + rec.clientId);
+      }
+      for (const f of [...new Set(dels)]) await redis(["HDEL", BLOCK_KEY, f]);
+      return res.status(200).json({ ok: true, unblocked: rec ? rec.name : field });
     }
 
     if (action === "delete") {
