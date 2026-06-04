@@ -1,25 +1,39 @@
 // ============================================================
 //  /api/comments  —  the PUBLIC COMMENT WALL store
-//  GET    -> returns the shared wall (newest first), up to 100
-//  POST   -> admin actions only:
-//              { action:"delete", id:"<id>", key:"<ADMIN_KEY>" }
-//              { action:"clear",  key:"<ADMIN_KEY>" }
+//  GET    -> returns the shared wall (newest first), up to 200.
+//            Each item: { id, parentId, name, comment, reply,
+//                         likes, dislikes, ts }
+//  POST (public):
+//     { action:"vote", id, dir:"like"|"dislike"|"none", prev }
+//        -> toggles a vote count and returns {likes,dislikes}
+//  POST (admin, needs key):
+//     { action:"delete", id, key }   -> deletes a comment + all its replies
+//     { action:"clear", key }
+//     { action:"listblocked", key } / { action:"unblock", field, key }
 //
-//  Storage: a Redis LIST at key "scorch:wall".
-//    - newest comment is at the head (LPUSH)
-//    - capped at the newest 100 (LTRIM) so old ones auto-delete
-//
-//  Reads Redis creds from EITHER naming the Vercel/Upstash
-//  integration might have created:
-//    KV_REST_API_URL / KV_REST_API_TOKEN     (Vercel marketplace)
-//    UPSTASH_REDIS_REST_URL / ..._TOKEN       (Upstash direct)
-//
-//  Admin password comes from env var ADMIN_KEY (set it in Vercel).
+//  Storage: a Redis LIST at key "scorch:wall" (newest at head,
+//  capped at MAX). Threading is by parentId; the front end nests.
+//  Replies + Scorch's in-thread answers are written by /api/comment.
 // ============================================================
 
 const WALL_KEY = "scorch:wall";
 const BLOCK_KEY = "scorch:blocked";
-const MAX = 100; // keep newest 100
+const MAX = 200; // keep newest 200 (threads use up more slots)
+
+// normalize an old/new stored record so threading + votes always exist
+function normalize(c) {
+  if (!c || typeof c !== "object") return null;
+  return {
+    id: c.id,
+    parentId: c.parentId || null,
+    name: c.name || "Anonymous",
+    comment: c.comment || "",
+    reply: c.reply || null,
+    likes: c.likes || 0,
+    dislikes: c.dislikes || 0,
+    ts: c.ts || 0,
+  };
+}
 
 function creds() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -53,14 +67,48 @@ export default async function handler(req, res) {
       return res.status(200).json({ comments: [], debug: out.error || "redis read failed" });
     }
     const comments = (out.result || [])
-      .map((s) => { try { return JSON.parse(s); } catch (e) { return null; } })
+      .map((s) => { try { return normalize(JSON.parse(s)); } catch (e) { return null; } })
       .filter(Boolean);
     return res.status(200).json({ comments });
   }
 
-  // -------- ADMIN ACTIONS --------
+  // -------- POST --------
   if (req.method === "POST") {
-    const { action, id, key } = req.body || {};
+    const body = req.body || {};
+    const { action } = body;
+
+    // ===== PUBLIC: toggle a like/dislike on a comment =====
+    // dir = the vote the user now wants ("like"|"dislike"|"none")
+    // prev = what they had before ("like"|"dislike"|"none") so we adjust counts
+    if (action === "vote") {
+      const id = body.id;
+      const dir = body.dir;   // desired state
+      const prev = body.prev || "none";
+      if (!id) return res.status(400).json({ error: "no id" });
+      if (!["like", "dislike", "none"].includes(dir)) return res.status(400).json({ error: "bad dir" });
+
+      const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
+      if (!list.ok) return res.status(200).json({ ok: false, debug: list.error });
+      const arr = list.result || [];
+      let idx = -1, rec = null;
+      for (let i = 0; i < arr.length; i++) {
+        try { const o = JSON.parse(arr[i]); if (o.id === id) { idx = i; rec = normalize(o); break; } } catch (e) {}
+      }
+      if (idx < 0 || !rec) return res.status(200).json({ ok: false, note: "comment gone" });
+
+      // undo the previous vote
+      if (prev === "like") rec.likes = Math.max(0, rec.likes - 1);
+      else if (prev === "dislike") rec.dislikes = Math.max(0, rec.dislikes - 1);
+      // apply the new vote
+      if (dir === "like") rec.likes += 1;
+      else if (dir === "dislike") rec.dislikes += 1;
+
+      const w = await redis(["LSET", WALL_KEY, String(idx), JSON.stringify(rec)]);
+      return res.status(200).json({ ok: w.ok, likes: rec.likes, dislikes: rec.dislikes, debug: w.error || null });
+    }
+
+    // ===== ADMIN ACTIONS (need the key) =====
+    const { id, key } = body;
     const ADMIN = process.env.ADMIN_KEY || "";
 
     if (!ADMIN) return res.status(500).json({ error: "ADMIN_KEY not set on the server" });
@@ -108,15 +156,33 @@ export default async function handler(req, res) {
 
     if (action === "delete") {
       if (!id) return res.status(400).json({ error: "no id" });
-      // find the exact stored string whose parsed id matches, then LREM it
       const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
       if (!list.ok) return res.status(200).json({ ok: false, debug: list.error });
-      const raw = (list.result || []).find((s) => {
-        try { return JSON.parse(s).id === id; } catch (e) { return false; }
-      });
-      if (!raw) return res.status(200).json({ ok: true, note: "already gone" });
-      const out = await redis(["LREM", WALL_KEY, "1", raw]);
-      return res.status(200).json({ ok: out.ok, removed: out.result, debug: out.error || null });
+      const arr = list.result || [];
+
+      // parse everything so we can walk the thread tree
+      const parsed = arr.map((s) => { try { return { raw: s, obj: JSON.parse(s) }; } catch (e) { return null; } }).filter(Boolean);
+
+      // collect the target id + every descendant (replies, replies-of-replies, ...)
+      const toKill = new Set([id]);
+      let grew = true;
+      while (grew) {
+        grew = false;
+        for (const p of parsed) {
+          if (p.obj.parentId && toKill.has(p.obj.parentId) && !toKill.has(p.obj.id)) {
+            toKill.add(p.obj.id); grew = true;
+          }
+        }
+      }
+
+      let removed = 0;
+      for (const p of parsed) {
+        if (toKill.has(p.obj.id)) {
+          const out = await redis(["LREM", WALL_KEY, "1", p.raw]);
+          if (out.ok) removed += (out.result || 0);
+        }
+      }
+      return res.status(200).json({ ok: true, removed, killed: [...toKill].length });
     }
 
     return res.status(400).json({ error: "unknown action" });
