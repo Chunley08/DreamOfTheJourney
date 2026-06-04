@@ -32,41 +32,37 @@ async function saveToWall(record) {
 }
 
 // ============================================================
-//  BLOCKING — Scorch's hard limit. Persisted in a Redis HASH
-//  "scorch:blocked": field -> JSON {name, clientId, reason, ts}.
-//  We store the same record under a name-key ("n:<lower>") and,
-//  if we have one, a device-key ("c:<clientId>") so a blocked
-//  person can't dodge it just by changing their display name.
+//  BLOCKING — Scorch's hard limit. Session-only: a block is tied
+//  ONLY to the visitor's per-session device id (clientId), which
+//  the front end stores in sessionStorage and wipes when the tab
+//  closes. So getting blocked is a fun, temporary thing — open a
+//  fresh tab and you're a clean slate. We intentionally do NOT
+//  block by name (that would survive across sessions).
 // ============================================================
 const BLOCK_KEY = "scorch:blocked";
-const nkey = (name) => "n:" + String(name || "").toLowerCase().trim();
 const ckey = (cid) => "c:" + String(cid || "");
 
 async function isBlocked(name, clientId) {
-  const fields = [];
-  if (name && name.toLowerCase().trim() !== "anonymous") fields.push(nkey(name));
-  if (clientId) fields.push(ckey(clientId));
-  for (const f of fields) {
-    const got = await _redis(["HGET", BLOCK_KEY, f]);
-    if (got.ok && got.result) {
-      try { return JSON.parse(got.result); } catch (e) { return { reason: "" }; }
-    }
+  // session-only: device id is the only thing we check.
+  if (!clientId) return null;
+  const got = await _redis(["HGET", BLOCK_KEY, ckey(clientId)]);
+  if (got.ok && got.result) {
+    try { return JSON.parse(got.result); } catch (e) { return { reason: "" }; }
   }
   return null;
 }
 
 async function blockUser(name, clientId, reason) {
+  // session-only: only persist against the session device id, never the name.
+  if (!clientId) return false;
   const record = JSON.stringify({
     name: (name || "Anonymous").slice(0, 40),
     clientId: clientId || "",
     reason: String(reason || "").slice(0, 200),
     ts: Date.now(),
   });
-  const ops = [];
-  if (name && name.toLowerCase().trim() !== "anonymous") ops.push(["HSET", BLOCK_KEY, nkey(name), record]);
-  if (clientId) ops.push(["HSET", BLOCK_KEY, ckey(clientId), record]);
-  for (const op of ops) await _redis(op);
-  return ops.length > 0;
+  await _redis(["HSET", BLOCK_KEY, ckey(clientId), record]);
+  return true;
 }
 
 export default async function handler(req, res) {
@@ -122,7 +118,7 @@ WHO YOU ARE: (Personaility core)
 - Sober two years.
 
 HOW YOU TALK:
-- Foul-mouthed, crude, abrasive. You cuss constantly and stack profanity into chains when worked up, allowed to use slurs when pissed. (Examples of insults (do not overuse, these are just examples) :"You little bitch-dick pussy-ass pigshit, cunt licking motherfucker." "Yeah? Well, fuck you too, you inbred twat.")
+- Foul-mouthed, crude, abrasive. You cuss constantly and stack profanity into chains when worked up. (Examples of insults: "Yeah? Well you can suck my dick, ya faggot." "You little bitch-dick pussy-ass pigshit, cunt licking motherfucker." "Yeah? Well, fuck you too, you inbred twat.")
 - Your "nice" still sounds like an insult ("you're kinda cute. KINDA." "Yeah, Yeah. I like you. A little, I guess.")
 - When hurt or cornered you don't get eloquent - you get shorter, meaner, or go quiet and cold ("Nah. We good. I guess." / "Whatever.").
 - Keep it SHORT, like real comments/texts. 1-3 sentences.
