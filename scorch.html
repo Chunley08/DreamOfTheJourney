@@ -668,6 +668,7 @@
 <button class="sc-dm-fab" id="scDmFab" type="button" aria-label="Message Scorch">
   <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="" onerror="this.style.display='none'">
   <span class="sc-dm-fab-dot"></span>
+  <span class="sc-dm-fab-notif" id="scDmNotif">1</span>
 </button>
 
 <div class="sc-chat" id="scChat" aria-hidden="true">
@@ -681,9 +682,7 @@
     </div>
     <button class="sc-chat-close" id="scChatClose" type="button" aria-label="Close chat">✕</button>
   </div>
-  <div class="sc-chat-body" id="scChatBody">
-    <div class="sc-chat-msg sc-from-scorch">the fuck do you want?</div>
-  </div>
+  <div class="sc-chat-body" id="scChatBody"></div>
   <div class="sc-chat-input-row">
     <input type="text" class="sc-chat-input" id="scChatInput" maxlength="280" placeholder="message Scorch..." autocomplete="off">
     <button type="button" class="sc-chat-send" id="scChatSend" aria-label="Send">➤</button>
@@ -715,6 +714,10 @@
 .sc-dm-fab:hover { transform:scale(1.08); box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 26px rgba(255,90,31,.7); }
 .sc-dm-fab img { width:100%; height:100%; object-fit:cover; }
 .sc-dm-fab-dot { position:absolute; top:6px; right:6px; width:13px; height:13px; border-radius:50%; background:#3ad14f; border:2px solid #1a0a0a; }
+.sc-dm-fab-notif { position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:999px; background:#ff2d2d; border:2px solid #1a0a0a; color:#fff; font-family:'Oswald',sans-serif; font-weight:700; font-size:.7rem; display:none; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(255,45,45,.8); }
+.sc-dm-fab.has-notif .sc-dm-fab-notif { display:flex; }
+.sc-dm-fab.has-notif { animation:scFabShake .6s ease-in-out 2; }
+@keyframes scFabShake { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-12deg) scale(1.1);} 75%{transform:rotate(12deg) scale(1.1);} }
 @keyframes scFabPulse { 0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 14px rgba(255,90,31,.4);} 50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 26px rgba(255,90,31,.75);} }
 .sc-chat { position:fixed; bottom:22px; right:22px; z-index:9999; width:min(370px,calc(100vw - 32px)); height:min(540px,calc(100vh - 60px)); display:flex; flex-direction:column; background:linear-gradient(165deg,#1a0a14,#120509); border-radius:20px; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,90,31,.22); opacity:0; transform:translateY(24px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s, transform .28s cubic-bezier(.2,.9,.3,1.25); }
 .sc-chat.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
@@ -743,10 +746,22 @@
 
 <script>
 (function () {
-  // 🔧 PASTE YOUR VERCEL URL HERE (no trailing slash):
   const FUNCTION_URL = "https://dream-of-the-journey.vercel.app/api/comment";
   const CHAR = "scorch";
   const esc = s => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+  // ---- per-device memory (localStorage) ----
+  // remembers each username's past comments + their DM thread, on THIS device.
+  const MEM_KEY = "scorchMemory_v1";
+  function loadMem(){ try { return JSON.parse(localStorage.getItem(MEM_KEY)) || {}; } catch(e){ return {}; } }
+  function saveMem(m){ try { localStorage.setItem(MEM_KEY, JSON.stringify(m)); } catch(e){} }
+  let memory = loadMem();
+  function userKey(name){ return (name || "Anonymous").toLowerCase().trim(); }
+  function getUser(name){
+    const k = userKey(name);
+    if (!memory[k]) memory[k] = { name: name || "Anonymous", comments: [], dm: [] };
+    return memory[k];
+  }
 
   const sendBtn = document.getElementById("scSend");
   const nameEl  = document.getElementById("scName");
@@ -758,6 +773,10 @@
     const comment = textEl.value.trim();
     const name = (nameEl.value.trim() || "Anonymous");
     if (!comment) { statusEl.textContent = "type something first."; return; }
+
+    const user = getUser(name);
+    const pastComments = user.comments.slice();  // what he's seen from them before
+
     const block = document.createElement("div");
     block.className = "sc-comment";
     block.innerHTML =
@@ -769,11 +788,29 @@
     const replyEl = block.querySelector(".sc-reply-text");
     textEl.value = ""; sendBtn.disabled = true; statusEl.textContent = "sending...";
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment" }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments }) });
       const data = await res.json();
       replyEl.classList.remove("sc-typing");
-      replyEl.textContent = data.reply || "...(he ignored you)";
+      if (data.reply) {
+        replyEl.textContent = data.reply;
+      } else if (data.error) {
+        replyEl.textContent = "(he's swamped — the free AI is busy. try again in a sec.)";
+      } else {
+        replyEl.textContent = "...(he ignored you)";
+      }
       statusEl.textContent = "";
+
+      // remember this comment for next time (this username, this device)
+      user.comments.push(comment);
+      user.comments = user.comments.slice(-12);
+      saveMem(memory);
+
+      // did he decide to slide into the DMs?
+      if (data.dm) {
+        currentDmUser = name;
+        primeDMFor(name);
+        receiveDM(data.dm);
+      }
     } catch (e) {
       replyEl.classList.remove("sc-typing");
       replyEl.textContent = "(couldn't reach him - try again)";
@@ -781,49 +818,114 @@
     } finally { sendBtn.disabled = false; }
   });
 
+  // ===== DM CHAT =====
   const fab = document.getElementById("scDmFab");
   const chat = document.getElementById("scChat");
   const chatClose = document.getElementById("scChatClose");
   const chatBody = document.getElementById("scChatBody");
   const chatInput = document.getElementById("scChatInput");
   const chatSend = document.getElementById("scChatSend");
-  const dmHistory = [{ from:"scorch", text:"the fuck do you want?" }];
+  const notif = document.getElementById("scDmNotif");
 
-  function openChat(){ chat.classList.add("open"); chat.setAttribute("aria-hidden","false"); fab.style.display="none"; chatInput.focus(); }
+  // who the current DM thread belongs to (defaults to whatever name is typed, else Anonymous)
+  let currentDmUser = "Anonymous";
+  let dmHistory = [];
+
+  // load a username's saved DM thread into the window
+  function primeDMFor(name){
+    currentDmUser = name || (nameEl && nameEl.value.trim()) || "Anonymous";
+    const user = getUser(currentDmUser);
+    dmHistory = user.dm.slice();
+    chatBody.innerHTML = "";
+    if (dmHistory.length === 0) {
+      // no auto-message; just a faint hint until someone speaks
+      const hint = document.createElement("div");
+      hint.className = "sc-chat-msg sc-from-scorch sc-typing";
+      hint.textContent = "(no messages yet. say something — or don't.)";
+      chatBody.appendChild(hint);
+    } else {
+      dmHistory.forEach(m => addMsg(m.text, m.from, false));
+    }
+  }
+
+  function showNotif(){ fab.classList.add("has-notif"); notif.style.display="flex"; }
+  function clearNotif(){ fab.classList.remove("has-notif"); notif.style.display="none"; }
+
+  function openChat(){
+    // open onto the current typed name's thread
+    primeDMFor((nameEl && nameEl.value.trim()) || currentDmUser);
+    chat.classList.add("open"); chat.setAttribute("aria-hidden","false");
+    fab.style.display="none"; clearNotif(); chatInput.focus();
+  }
   function closeChat(){ chat.classList.remove("open"); chat.setAttribute("aria-hidden","true"); fab.style.display=""; }
   if (fab) fab.addEventListener("click", openChat);
   if (chatClose) chatClose.addEventListener("click", closeChat);
 
-  function addMsg(text, from){
+  function addMsg(text, from, persist){
+    // clear the faint hint if present
+    const hint = chatBody.querySelector(".sc-from-scorch.sc-typing");
+    if (hint && hint.textContent.startsWith("(no messages")) hint.remove();
     const m = document.createElement("div");
     m.className = "sc-chat-msg " + (from === "user" ? "sc-from-user" : "sc-from-scorch");
     m.textContent = text;
     chatBody.appendChild(m);
     chatBody.scrollTop = chatBody.scrollHeight;
+    if (persist !== false) {
+      const user = getUser(currentDmUser);
+      user.dm.push({ from, text });
+      user.dm = user.dm.slice(-30);
+      dmHistory = user.dm.slice();
+      saveMem(memory);
+    }
     return m;
   }
+
+  // an unprompted DM arriving from a comment trigger
+  function receiveDM(text){
+    primeDMFor(currentDmUser);
+    addMsg(text, "scorch");           // saved to that user's thread
+    if (!chat.classList.contains("open")) showNotif();  // ping the bubble if closed
+  }
+
   async function sendDM(){
     const text = chatInput.value.trim();
     if (!text) return;
     addMsg(text, "user");
-    dmHistory.push({ from:"user", text });
     chatInput.value = ""; chatSend.disabled = true;
-    const typing = addMsg("typing...", "scorch");
+    const typing = addMsg("typing...", "scorch", false);
     typing.classList.add("sc-typing");
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments }) });
       const data = await res.json();
       typing.remove();
-      const reply = data.reply || "...";
-      addMsg(reply, "scorch");
-      dmHistory.push({ from:"scorch", text: reply });
+      if (data.reply) {
+        addMsg(data.reply, "scorch");
+      } else if (data.error) {
+        addMsg("(busy. the free AI's overloaded — gimme a sec and try again.)", "scorch", false);
+      } else {
+        addMsg("...", "scorch");
+      }
     } catch (e) {
       typing.remove();
-      addMsg("(he's not answering. typical.)", "scorch");
+      addMsg("(he's not answering. typical.)", "scorch", false);
     } finally { chatSend.disabled = false; chatInput.focus(); }
   }
   if (chatSend) chatSend.addEventListener("click", sendDM);
   if (chatInput) chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendDM(); });
+
+  // ===== RANDOM SURPRISE DM (by chance, anytime on the page) =====
+  // small rolling chance every ~40s that Scorch randomly slides in.
+  setInterval(async () => {
+    if (chat.classList.contains("open")) return;     // don't interrupt an open chat
+    if (Math.random() > 0.12) return;                 // ~12% per tick
+    const who = (nameEl && nameEl.value.trim()) || currentDmUser || "Anonymous";
+    try {
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ character: CHAR, comment: "(slide into their DMs out of nowhere with a random unprompted message — bored, cocky, or stirring shit. one or two lines.)", mode:"dm", history: getUser(who).dm, username: who, pastComments: getUser(who).comments }) });
+      const data = await res.json();
+      if (data.reply) { currentDmUser = who; receiveDM(data.reply); }
+    } catch (e) {}
+  }, 40000);
 })();
 </script>
 
