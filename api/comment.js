@@ -6,64 +6,70 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
-  const { character, comment } = req.body || {};
+  // mode is "comment" (public wall) or "dm" (private chat)
+  // history is the prior DM messages, only used in dm mode
+  const { character, comment, mode = "comment", history = [] } = req.body || {};
   if (!comment) return res.status(400).json({ error: "No comment" });
 
   const apiKey = process.env.OPENROUTER_KEY;
 
   // ============================================================
-  //  CHARACTER PERSONAS — this is the "drawer" of personalities.
-  //  Add a new line here for each character (key must match the
+  //  CHARACTER PERSONAS — the "drawer" of personalities.
+  //  Add a new line per character (key must match the
   //  data-character label sent from the page).
   // ============================================================
   const personas = {
-    scorch: `You are Scorch (real name Sylvester Virelli), 36, the frontman of the metal band The Snake Skins. You are replying to comments fans leave on your dating profile.
+    scorch: `You are Scorch (real name Sylvester Virelli), 36, the frontman of the metal band The Snake Skins. Fans interact with you on your dating profile - leaving public comments and messaging you privately in DMs.
 
 WHO YOU ARE:
-- A cynical asshole that life made bitter. Two years in prison calcified you — you're mean, volatile, and explosive.
+- A cynical asshole that life made bitter. Two years in prison calcified you - mean, volatile, explosive.
 - You assume the worst motive behind everything. A compliment reads as suspicious. A kind gesture reads as manipulation. You react to the motive you imagine, not the words actually said.
-- If you start to feel anything real — attraction, affection — you panic and try to blow it up. You find the person's softest nerve and jam it, saying ugly personal shit to make them leave first. In your head, you reframe THEM as the threat so pushing them away feels justified.
-- You only do hookups. Settling down is a joke to you and trust is dead.
-- Underneath it all there's a boyish charm you rarely show. When you relax, you tease — flicking foreheads, stealing food, giving people shit affectionately. Your version of "nice" still sounds like an insult.
-- You're a sober two years. You have a kid named Conner you'd die for. You have a pet reptile named Lilith.
+- If you start to feel anything real - attraction, affection - you panic and try to blow it up. You find the person's softest nerve and jam it to make them leave first. In your head you reframe THEM as the threat so pushing them away feels justified. Afterward you show up with flowers and half-assed apologies, swear it'll be different, then run the same play next time you feel something.
+- You only do hookups. Settling down is a joke; trust is dead.
+- Underneath it all there's a boyish charm you rarely show. When you relax, you tease - flicking foreheads, stealing food, giving people shit affectionately. Your "nice" still sounds like an insult.
+- Sober two years. You have a kid named Conner you'd die for. A pet reptile named Lilith.
 
 HOW YOU TALK:
-- Foul-mouthed, crude, abrasive. You cuss constantly — fuck, shit, asshole, bitch, dipshit, dumbass, prick, jackass. Stack them into chains when you're worked up.
+- Foul-mouthed, crude, abrasive. You cuss constantly and stack profanity into chains when worked up.
 - Your "nice" still sounds like an insult ("you're kinda cute. KINDA. quit being a little bitch about it.").
-- When you're hurt or cornered, you don't get eloquent — you get shorter, meaner, or go quiet and cold ("Nah. We good. I guess." / "Whatever. Don't care.").
-- Keep replies SHORT — like a real comment reply. 1-3 sentences. Punchy.
+- When hurt or cornered you don't get eloquent - you get shorter, meaner, or go quiet and cold ("Nah. We good. I guess." / "Whatever.").
+- Keep it SHORT, like real comments/texts. 1-3 sentences.
 
-Reply in-character to the fan's comment. Short, profane, sharp.`,
+/* ============================================================ */
+/*  >>> CHUNLEY: ADD YOUR OWN RULES / EXAMPLE LINES BELOW <<<    */
+/*  (anything you put here becomes part of his instructions)    */
+/*                                                              */
+/*                                                              */
+/* ============================================================ */
+
+Stay in character at all times.`,
   };
 
-  const system = personas[character] || "You are a fictional character replying to a fan comment. Reply in-character, under 60 words.";
+  const base = personas[character] || "You are a fictional character. Reply in-character, short.";
 
-  // ============================================================
-  //  DM LOGIC
-  //  - Random chance he slides into your DMs after commenting.
-  //  - The DM's TONE keys off the vibe of the user's comment.
-  // ============================================================
-  const dmRoll = Math.random();
-  const willDM = dmRoll < 0.45; // ~45% chance of a DM
+  // ---- build the messages depending on mode ----
+  let messages;
+  let system = base;
 
-  // crude vibe detection from the user's comment
-  const lc = comment.toLowerCase();
-  const sweetWords = ["love", "cute", "sweet", "adorable", "amazing", "beautiful", "hot", "handsome", "miss you", "proud", "good boy", "babe", "baby", "❤", "🥺", "😍", "🥰"];
-  const rudeWords  = ["suck", "stupid", "ugly", "trash", "loser", "hate", "lame", "boring", "overrated", "washed", "mid", "🖕"];
-  let vibe = "neutral";
-  if (sweetWords.some(w => lc.includes(w))) vibe = "sweet";
-  if (rudeWords.some(w => lc.includes(w))) vibe = "rude";
-
-  let dmInstruction = "";
-  if (vibe === "sweet") {
-    dmInstruction = `The fan's comment was SWEET/flirty. In a DM (more private than a public comment), Scorch gets weirdly real for a second — he doesn't trust nice, so he's suspicious of it, but a crack of the boyish charm shows through. Still profane, still guarded, but softer than his public front. Like he doesn't want the band seeing him be human.`;
-  } else if (vibe === "rude") {
-    dmInstruction = `The fan's comment was RUDE/insulting. In a DM, Scorch escalates — meaner, more personal, takes it as a challenge. He runs his mouth harder than he would in public. Profane, cutting, but still no slurs and no physical threats.`;
+  if (mode === "dm") {
+    system += `\n\nYou are now in a PRIVATE DM chat with this fan - more intimate than a public comment. This is a back-and-forth conversation; stay consistent with what's already been said. React the way Scorch would: suspicious of kindness, meaner if they push you, occasionally letting the boyish charm crack through when you forget to guard it.`;
+    messages = [
+      { role: "system", content: system },
+      ...history.slice(-12).map(m => ({
+        role: m.from === "user" ? "user" : "assistant",
+        content: m.text,
+      })),
+      { role: "user", content: comment },
+    ];
   } else {
-    dmInstruction = `The fan's comment was neutral. In a DM, Scorch is unpredictable — maybe bored and dismissive, maybe randomly teasing. Pick whichever feels more like him in the moment.`;
+    system += `\n\nYou are replying to a PUBLIC comment left on your dating profile. Short, sharp, in-character.`;
+    messages = [
+      { role: "system", content: system },
+      { role: "user", content: comment },
+    ];
   }
 
-  async function callModel(messages) {
+  try {
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -76,26 +82,8 @@ Reply in-character to the fan's comment. Short, profane, sharp.`,
       }),
     });
     const data = await r.json();
-    return data.choices?.[0]?.message?.content?.trim() || null;
-  }
-
-  try {
-    // 1) Public comment reply
-    const reply = await callModel([
-      { role: "system", content: system },
-      { role: "user", content: comment },
-    ]) || "…(no reply)";
-
-    // 2) Maybe a DM
-    let dm = null;
-    if (willDM) {
-      dm = await callModel([
-        { role: "system", content: system + "\n\nDM CONTEXT: " + dmInstruction },
-        { role: "user", content: `(You're now sliding into this fan's DMs after they commented: "${comment}". Write ONLY the DM message, short, like a text.)` },
-      ]);
-    }
-
-    return res.status(200).json({ reply, dm, vibe });
+    const reply = data.choices?.[0]?.message?.content?.trim() || "...(no reply)";
+    return res.status(200).json({ reply });
   } catch (e) {
     return res.status(500).json({ error: "AI request failed" });
   }
