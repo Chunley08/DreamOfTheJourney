@@ -26,9 +26,10 @@ function normalize(c) {
   return {
     id: c.id,
     parentId: c.parentId || null,
+    isScorch: !!c.isScorch,
     name: c.name || "Anonymous",
     comment: c.comment || "",
-    reply: c.reply || null,
+    reply: c.reply || null,   // legacy field (old embedded replies) — front end backfills
     likes: c.likes || 0,
     dislikes: c.dislikes || 0,
     ts: c.ts || 0,
