@@ -1,3 +1,36 @@
+// ============================================================
+//  PUBLIC WALL STORAGE (Redis) — saves each public comment +
+//  Scorch's reply so EVERYONE sees them. Newest 100 are kept;
+//  older ones auto-delete. Reads creds from whichever names the
+//  Vercel/Upstash integration created.
+// ============================================================
+const WALL_KEY = "scorch:wall";
+const WALL_MAX = 100;
+function _redisCreds() {
+  return {
+    url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN,
+  };
+}
+async function _redis(cmd) {
+  const { url, token } = _redisCreds();
+  if (!url || !token) return { ok: false, error: "no-redis-env" };
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(cmd),
+  });
+  const data = await r.json().catch(() => ({}));
+  return { ok: r.ok, result: data.result, error: data.error };
+}
+async function saveToWall(record) {
+  // push newest to the head, then trim to the newest WALL_MAX
+  const push = await _redis(["LPUSH", WALL_KEY, JSON.stringify(record)]);
+  if (!push.ok) return { ok: false, error: push.error };
+  await _redis(["LTRIM", WALL_KEY, "0", String(WALL_MAX - 1)]);
+  return { ok: true };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -158,8 +191,23 @@ Stay in character at all times.`,
       }
     }
 
+    // ---- SAVE TO THE PUBLIC WALL (only real public comments with a real reply) ----
+    let saved = null;
+    let wallDebug = null;
+    if (mode === "comment" && main.text) {
+      saved = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        name: (username || "Anonymous").slice(0, 40),
+        comment: String(comment).slice(0, 400),
+        reply,
+        ts: Date.now(),
+      };
+      const w = await saveToWall(saved);
+      if (!w.ok) { wallDebug = w.error; saved = null; } // don't claim it saved if it didn't
+    }
+
     // debug surfaces the real reason when there's no text (model busy, error, etc.)
-    return res.status(200).json({ reply, dm, debug: main.debug || null });
+    return res.status(200).json({ reply, dm, saved, debug: main.debug || wallDebug || null });
   } catch (e) {
     return res.status(500).json({ error: "AI request failed", debug: String(e && e.message || e) });
   }
