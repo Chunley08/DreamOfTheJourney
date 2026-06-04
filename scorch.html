@@ -900,14 +900,23 @@
 .sc-comment-status { font-family:'Outfit',sans-serif; font-size:.85rem; color:var(--sc-accent); min-height:1.2em; }
 
 /* ===== THREAD ===== */
-.sc-comment-thread { margin-top:1.6rem; display:flex; flex-direction:column; gap:1.1rem;
-  max-height:min(72vh,760px); overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch; padding-right:.4rem;
-  scrollbar-width:thin; scrollbar-color:rgba(255,90,31,.45) transparent; }
-.sc-comment-thread::-webkit-scrollbar { width:8px; }
-.sc-comment-thread::-webkit-scrollbar-track { background:transparent; }
-.sc-comment-thread::-webkit-scrollbar-thumb { background:rgba(255,90,31,.4); border-radius:999px; }
-.sc-comment-thread::-webkit-scrollbar-thumb:hover { background:rgba(255,90,31,.65); }
+.sc-comment-thread { margin-top:1.6rem; display:flex; flex-direction:column; gap:1.1rem; }
+
+/* The thread scrolls WITH THE PAGE by default. The self-contained
+   scroll box (max-height + overflow) is only handed to devices with a
+   real mouse cursor — on touch it created a nested-scroll trap where
+   reaching the bottom would get "stuck" unless you swiped off to the
+   side. (hover/pointer) is reliable where a width breakpoint isn't:
+   phones never report a fine pointer, regardless of viewport width,
+   in-app browsers, or orientation. */
+@media (hover:hover) and (pointer:fine) {
+  .sc-comment-thread { max-height:min(72vh,760px); overflow-y:auto; overflow-x:hidden;
+    padding-right:.4rem; scrollbar-width:thin; scrollbar-color:rgba(255,90,31,.45) transparent; }
+  .sc-comment-thread::-webkit-scrollbar { width:8px; }
+  .sc-comment-thread::-webkit-scrollbar-track { background:transparent; }
+  .sc-comment-thread::-webkit-scrollbar-thumb { background:rgba(255,90,31,.4); border-radius:999px; }
+  .sc-comment-thread::-webkit-scrollbar-thumb:hover { background:rgba(255,90,31,.65); }
+}
 
 /* a card */
 .sc-comment { position:relative; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1rem 1.15rem .85rem; transition:border-color .2s, background .2s; }
@@ -924,19 +933,31 @@
 .sc-c-time { font-family:'Outfit',sans-serif; font-size:.72rem; color:rgba(255,255,255,.4); }
 .sc-comment-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.9); font-size:.98rem; line-height:1.5; min-width:0; overflow-wrap:break-word; word-break:break-word; }
 
-/* nested replies: indent + connector rail.
-   Indentation is CAPPED so deep reply-chains can never squeeze a card
-   down to nothing: the first few levels indent (with a rail, so it
-   reads as a real thread), then everything deeper renders flat.
-   Desktop cap = 4 levels; mobile cap = 2 (see media query below). */
-.sc-children { margin-top:.9rem; margin-left:1rem; padding-left:1rem;
-  border-left:2px solid rgba(255,90,31,.18); display:flex; flex-direction:column; gap:.9rem; min-width:0; }
-
-/* DESKTOP: from the 5th level down, stop adding inset entirely —
-   deeper replies stack flat under the last indented ancestor */
-.sc-children .sc-children .sc-children .sc-children .sc-children {
-  margin-left:0; padding-left:0; border-left:none;
+/* ============================================================
+   FLAT THREAD MODEL
+   Every comment is a SIBLING in the thread — no boxes nested inside
+   boxes — so a reply-chain of any length can never compound the
+   indentation and collapse a card. Reply depth is expressed as a
+   SINGLE clamped indent (the --d variable, capped by --cap), plus a
+   connector rail and a "replying to" line so it still reads as a
+   genuine threaded conversation at any depth.
+   ============================================================ */
+.sc-comment { --d:0; --step:1.5rem; --cap:6; }
+.sc-comment[data-depth]:not([data-depth="0"]) {
+  position:relative;
+  margin-left:calc(min(var(--d), var(--cap)) * var(--step));
 }
+/* connector rail down the left of every reply */
+.sc-comment[data-depth]:not([data-depth="0"])::before {
+  content:""; position:absolute; top:-.55rem; bottom:auto; left:calc(var(--step) * -0.5);
+  width:2px; height:calc(100% + 1.1rem);
+  background:linear-gradient(180deg, rgba(255,90,31,.32), rgba(255,90,31,.1));
+  border-radius:2px; pointer-events:none;
+}
+/* "↳ replying to NAME" context line */
+.sc-reply-to { font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.45);
+  margin:-.1rem 0 .5rem; display:flex; align-items:center; gap:.25rem; min-width:0; }
+.sc-reply-to b { color:var(--sc-accent); font-weight:600; max-width:14ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
 /* action bar */
 .sc-actions { display:flex; align-items:center; gap:.45rem; margin-top:.7rem; flex-wrap:wrap; }
@@ -1058,19 +1079,14 @@
 
 /* ============================================================
    Thread layout — mobile tuning
-   On phones the indent cap drops to 2 levels: deeper replies render
-   flat so a card never collapses (the old design let a deep chain
-   shrink text to one character per line). Cards also tighten up a bit.
+   Smaller indent step + lower depth cap so even a very deep chain
+   stays comfortably readable on a narrow screen. Because indent is a
+   single clamped value (not nested boxes), this is just two numbers.
    ============================================================ */
 @media (max-width: 560px) {
-  .sc-comment { padding:.8rem .9rem .7rem; border-radius:14px; }
+  .sc-comment { padding:.8rem .9rem .7rem; border-radius:14px; --step:.85rem; --cap:4; }
   .sc-avatar { width:32px; height:32px; font-size:.85rem; }
-  .sc-children { margin-left:.55rem; padding-left:.7rem; }
-  /* from the 3rd level down: no extra inset — stack flat */
-  .sc-children .sc-children .sc-children {
-    margin-left:0; padding-left:0; border-left:none;
-  }
-  .sc-comment-thread { max-height:none; } /* let the page scroll on small screens */
+  .sc-comment[data-depth]:not([data-depth="0"])::before { left:calc(var(--step) * -0.45); }
 }
 </style>
 
@@ -1203,6 +1219,9 @@
     const av = '<div class="sc-avatar" style="background:' + (isScorch ? "" : avatarColor(it.name)) + '">' + esc(initials(it.name)) + '</div>';
     const badge = isScorch ? ' <span class="sc-badge">\u2713 Scorch</span>' : '';
     const when = it.ts ? '<span class="sc-c-time">' + esc(timeAgo(it.ts)) + '</span>' : '';
+    const replyingTo = it.__replyingTo
+      ? '<div class="sc-reply-to">\u21B3 replying to <b>' + esc(it.__replyingTo) + '</b></div>'
+      : '';
     let html =
       '<div class="sc-c-head">' + av +
         '<div class="sc-c-namewrap">' +
@@ -1210,6 +1229,7 @@
           when +
         '</div>' +
       '</div>' +
+      replyingTo +
       '<div class="sc-comment-text">' + esc(it.comment || "") + '</div>';
     html += voteRow(it);
     if (ADMIN_KEY && it.id) {
@@ -1233,8 +1253,9 @@
     return out;
   }
 
-  // nest a flat list by parentId and render recursively
+  // render a flat list, threading expressed by clamped indent (not nested DOM)
   let pendingItems = null;   // stash a redraw we deferred because the user was typing
+  let commentIndex = { byId: {} };  // id -> record, for building reply context from data (not DOM)
   function userIsTyping(){
     // an open reply composer, OR focus inside the thread/composer = don't yank the DOM
     if (thread.querySelector(".sc-reply-box.open")) return true;
@@ -1252,23 +1273,31 @@
     lastSig = sig;
 
     const byParent = {};
-    items.forEach(it => { const p = it.parentId || "__root"; (byParent[p] = byParent[p] || []).push(it); });
+    const byId = {};
+    items.forEach(it => {
+      byId[it.id] = it;
+      const p = it.parentId || "__root";
+      (byParent[p] = byParent[p] || []).push(it);
+    });
+    commentIndex.byId = byId;   // so the reply handler can climb the tree via data
 
+    // walk the tree depth-first so replies still appear directly under
+    // their parent — but EMIT EVERY COMMENT AS A FLAT SIBLING of the thread.
+    // Depth is just a number we hand to CSS as --d (clamped there), so it
+    // can never compound into a collapsed card no matter how deep the chain.
     thread.innerHTML = "";
-    const renderInto = (container, parentKey, depth) => {
-      const kids = byParent[parentKey] || [];
-      kids.forEach(it => {
+    const emit = (parentKey, depth) => {
+      (byParent[parentKey] || []).forEach(it => {
+        const parent = it.parentId ? byId[it.parentId] : null;
+        if (parent) it.__replyingTo = parent.isScorch ? "Scorch" : (parent.name || "Anonymous");
         const node = buildComment(it);
-        container.appendChild(node);
-        if (byParent[it.id] && depth < 12) {
-          const childWrap = document.createElement("div");
-          childWrap.className = "sc-children";
-          node.appendChild(childWrap);
-          renderInto(childWrap, it.id, depth + 1);
-        }
+        node.dataset.depth = String(depth);
+        node.style.setProperty("--d", String(depth));
+        thread.appendChild(node);
+        emit(it.id, depth + 1);   // no depth limit needed — flat DOM, clamped indent
       });
     };
-    renderInto(thread, "__root", 0);
+    emit("__root", 0);
   }
   async function loadWall(){
     try {
@@ -1366,21 +1395,17 @@
       const name = (nameI.value.trim() || "Anonymous");
       if (!text) { mini.textContent = "type something first."; return; }
 
-      // build the FULL thread context by walking up the ancestor chain, so
-      // Scorch sees the whole conversation and knows exactly who's replying to whom.
+      // build the FULL thread context by climbing the parentId chain in the
+      // DATA model (the DOM is flat now, so there are no ancestor nodes to walk).
+      const authorOf = (rec) => rec.isScorch ? "Scorch" : (rec.name || "someone");
       const chain = [];
-      let cur = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-      // the comment being directly replied to (the parent)
+      const start = commentIndex.byId[id] || null;
       let parentAuthor = "someone", parentText = "";
-      if (cur) {
-        parentAuthor = cur.querySelector(".sc-comment-author")?.textContent?.replace(/\s*✓ Scorch$/,"").trim() || "someone";
-        parentText = cur.querySelector(".sc-comment-text")?.textContent || "";
-      }
-      while (cur && cur.classList && cur.classList.contains("sc-comment")) {
-        const a = cur.querySelector(".sc-comment-author")?.textContent?.replace(/\s*✓ Scorch$/,"").trim() || "someone";
-        const t = cur.querySelector(".sc-comment-text")?.textContent || "";
-        chain.unshift("  " + a + ': "' + (t||"") + '"');
-        cur = cur.parentElement ? cur.parentElement.closest(".sc-comment") : null;
+      if (start) { parentAuthor = authorOf(start); parentText = start.comment || ""; }
+      let cur = start, guard = 0;
+      while (cur && guard++ < 60) {
+        chain.unshift("  " + authorOf(cur) + ': "' + (cur.comment || "") + '"');
+        cur = cur.parentId ? commentIndex.byId[cur.parentId] : null;
       }
       // spell it out so even a weak model gets who's agreeing with whom
       const ctx =
@@ -1508,13 +1533,14 @@
     const user = getUser(name);
     const pastComments = user.comments.slice();  // what he's seen from them before
 
-    // optimistic preview in the new card style: the comment + a "typing" Scorch child
+    // optimistic preview (flat model): the comment + a "typing" Scorch reply,
+    // both as siblings, the reply indented one level via --d
     const block = buildComment({ id:"_pending", name, comment, likes:0, dislikes:0, ts:Date.now() });
-    const kids = document.createElement("div"); kids.className = "sc-children";
-    const sc = buildComment({ id:"_pending_r", name:"Scorch", isScorch:true, comment:"typing\u2026", likes:0, dislikes:0, ts:Date.now() });
+    block.dataset.depth = "0"; block.style.setProperty("--d", "0");
+    const sc = buildComment({ id:"_pending_r", name:"Scorch", isScorch:true, comment:"typing\u2026", likes:0, dislikes:0, ts:Date.now(), __replyingTo: name });
+    sc.dataset.depth = "1"; sc.style.setProperty("--d", "1");
     sc.querySelector(".sc-comment-text").classList.add("sc-typing");
-    kids.appendChild(sc); block.appendChild(kids);
-    thread.prepend(block);
+    thread.prepend(sc); thread.prepend(block);   // block on top, Scorch reply right below it
     const replyEl = sc.querySelector(".sc-comment-text");
 
     textEl.value = ""; sendBtn.disabled = true; statusEl.textContent = "sending...";
@@ -1534,7 +1560,7 @@
         replyEl.textContent = data.reply;
       } else {
         // he didn't answer (or model busy) — drop the empty Scorch preview
-        kids.remove();
+        sc.remove();
         if (data.debug) statusEl.textContent = "⚠ " + data.debug;
       }
       statusEl.textContent = statusEl.textContent || "";
