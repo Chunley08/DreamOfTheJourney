@@ -350,42 +350,62 @@
 
     <div class="fanmail-board reveal-up" id="scorchFanmail">
 
-      <!-- the sheet of stationery you actually write on -->
-      <div class="letter-stage">
-        <div class="letter-sheet fanmail-write" id="fmSheet">
-          <!-- breeze-curled corner -->
-          <div class="letter-curl" aria-hidden="true"></div>
-          <!-- Snake Skins postage stamp pressed into the corner -->
-          <div class="ss-stamp" aria-hidden="true">
-            <div class="ss-stamp-inner">
-              <span class="ss-stamp-snake">🐍</span>
-              <span class="ss-stamp-band">THE<br>SNAKE<br>SKINS</span>
-              <span class="ss-stamp-val">★ 2026 ★</span>
+      <!-- the writing desk surface everything sits on -->
+      <div class="letter-desk" id="fmDesk">
+
+        <!-- the envelope that the letter folds into when sent (hidden until send) -->
+        <div class="send-envelope" id="sendEnvelope" aria-hidden="true">
+          <div class="se-back"></div>
+          <div class="se-pocket"></div>
+          <div class="se-letter" id="seLetter"></div>
+          <div class="se-flap"></div>
+          <div class="se-wax" id="seWax"><span>SS</span></div>
+        </div>
+
+        <!-- the sheet of stationery you actually write on -->
+        <div class="letter-stage" id="fmStage">
+          <div class="letter-sheet fanmail-write" id="fmSheet">
+            <span class="paper-fiber" aria-hidden="true"></span>
+            <span class="paper-shade" aria-hidden="true"></span>
+            <!-- faint fold creases (thirds) -->
+            <span class="fold-crease fold-crease--1" aria-hidden="true"></span>
+            <span class="fold-crease fold-crease--2" aria-hidden="true"></span>
+            <!-- breeze-curled corner -->
+            <div class="letter-curl" aria-hidden="true"></div>
+
+            <!-- Snake Skins postage stamp pressed into the corner -->
+            <div class="ss-stamp" aria-hidden="true">
+              <div class="ss-stamp-inner">
+                <span class="ss-stamp-snake">🐍</span>
+                <span class="ss-stamp-band">THE<br>SNAKE<br>SKINS</span>
+                <span class="ss-stamp-val">★ 2026 ★</span>
+              </div>
+            </div>
+
+            <div class="fanmail-letterhead">
+              <span class="fanmail-band">THE SNAKE SKINS</span>
+              <span class="fanmail-from">c/o Scorch &middot; Bite Back Tour '26</span>
+            </div>
+
+            <div class="letter-greeting">Dear&nbsp;Scorch,</div>
+
+            <textarea class="fanmail-body" id="fmBody" maxlength="900" placeholder="...say whatever you want him to read."></textarea>
+
+            <div class="letter-signoff">
+              <span class="letter-yours">— yours,</span>
+              <input type="text" class="fanmail-name" id="fmName" maxlength="24" placeholder="sign here" autocomplete="off">
+            </div>
+
+            <div class="fanmail-actions">
+              <button type="button" class="fanmail-send" id="fmSend">
+                <span class="fm-send-wax">SS</span>
+                <span class="fm-send-label">Seal &amp; Mail</span>
+              </button>
+              <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
             </div>
           </div>
-
-          <div class="fanmail-letterhead">
-            <span class="fanmail-band">THE SNAKE SKINS</span>
-            <span class="fanmail-from">c/o Scorch &middot; Bite Back Tour '26</span>
-          </div>
-
-          <div class="letter-greeting">Dear&nbsp;Scorch,</div>
-
-          <textarea class="fanmail-body" id="fmBody" maxlength="900" placeholder="...say whatever you want him to read."></textarea>
-
-          <div class="letter-signoff">
-            <span class="letter-yours">— yours,</span>
-            <input type="text" class="fanmail-name" id="fmName" maxlength="24" placeholder="sign here" autocomplete="off">
-          </div>
-
-          <div class="fanmail-actions">
-            <button type="button" class="fanmail-send" id="fmSend">
-              <span class="fm-send-wax">SS</span>
-              <span class="fm-send-label">Seal &amp; Mail</span>
-            </button>
-            <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
-          </div>
         </div>
+
       </div>
 
       <!-- where his replies stack up -->
@@ -723,299 +743,358 @@
 
 <style>
 /* ============================================================
-   FANMAIL — a real letter you write, seal, and send.
-   A breeze stirs the paper. A corner curls. A snake-skin stamp
-   sits in the corner. Seal it, watch it fly, and Scorch writes
-   back — his envelope sails in, the wax cracks, the page unfurls
-   and his answer is scrawled out in his own hand.
+   FANMAIL  ·  real paper you write, fold, seal in wax, and send.
+   Idle: the sheet breathes and leans toward your cursor like it's
+   lying on a desk. Send: folds in thirds, slides into the envelope,
+   flap closes, wax stamps down with a squish. Receive: his envelope
+   skids in, the wax cracks and shatters, the page rips out and
+   unfolds, and his answer bleeds onto the paper in ink.
    ============================================================ */
-.fanmail-board { display:flex; flex-direction:column; gap:2rem; max-width:580px; margin:0 auto; perspective:1400px; }
+:root{
+  --paper:#f3e9d2;
+  --paper-hi:#fbf4e2;
+  --paper-lo:#dccba0;
+  --paper-edge:#c8b48a;
+  --ink:#26344f;
+  --ink-soft:#3a4a66;
+  --rule:#cdbf9c;
+  --margin:#c8281a;
+  --wax-a:#ff7a4a;
+  --wax-b:#a3160a;
+  --wax-c:#5e0c05;
+}
 
-/* the stage holds the sheet so the flutter has room to breathe */
-.letter-stage { position:relative; transform-style:preserve-3d; }
+.fanmail-board{ position:relative; max-width:600px; margin:0 auto; }
 
-/* ---------- THE SHEET OF STATIONERY ---------- */
-.letter-sheet {
-  position:relative; color:#2b2118; border-radius:3px;
-  padding:2rem 2.1rem 1.6rem;
+/* ---------- THE DESK ---------- */
+.letter-desk{
+  position:relative; padding:34px 18px 30px;
+  border-radius:14px;
   background:
-    /* faint coffee-stain + aging */
-    radial-gradient(120px 90px at 86% 78%, rgba(150,110,60,.10), transparent 70%),
-    radial-gradient(90px 70px at 12% 18%, rgba(120,90,50,.08), transparent 70%),
-    /* ruled lines */
-    repeating-linear-gradient(#f6efdb, #f6efdb 31px, #d9cba6 32px),
-    #f6efdb;
+    radial-gradient(160% 120% at 50% -10%, rgba(255,180,120,.05), transparent 60%),
+    repeating-linear-gradient(91deg, rgba(0,0,0,.16) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(89deg, rgba(0,0,0,.10) 0 1px, transparent 1px 9px),
+    linear-gradient(160deg, #2b1c12, #1a110b 70%);
+  box-shadow: inset 0 2px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,170,110,.06), 0 18px 40px rgba(0,0,0,.5);
+  perspective:1500px; perspective-origin:50% 30%;
+}
+.letter-desk::after{ /* warm desk-lamp pool */
+  content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 0%, rgba(255,150,80,.12), transparent 55%);
+  mix-blend-mode:screen;
+}
+
+/* ---------- THE STAGE (3D tilt container) ---------- */
+.letter-stage{
+  position:relative; transform-style:preserve-3d; z-index:3;
+  transition:transform .5s cubic-bezier(.2,.8,.3,1);
+}
+
+/* ---------- THE SHEET ---------- */
+.letter-sheet{
+  --tiltx:0deg; --tilty:0deg; --lift:0px;
+  position:relative; color:var(--ink); border-radius:2px;
+  padding:30px 32px 26px;
+  transform-style:preserve-3d;
+  background:
+    radial-gradient(140px 110px at 88% 82%, rgba(150,110,55,.12), transparent 72%),
+    radial-gradient(110px 80px at 10% 16%, rgba(120,90,45,.10), transparent 72%),
+    repeating-linear-gradient(var(--paper) 0 31px, var(--rule) 31px 32px),
+    linear-gradient(155deg, var(--paper-hi), var(--paper) 40%, var(--paper-lo) 100%);
   box-shadow:
-    0 22px 48px rgba(0,0,0,.55),
-    0 4px 10px rgba(0,0,0,.4),
-    inset 0 0 0 1px rgba(0,0,0,.06),
-    inset 0 0 60px rgba(180,150,100,.18);
-  transform-origin:50% 0%;
-  /* the gentle breeze — whole sheet sways + lifts a touch */
-  animation:sheetBreeze 7s ease-in-out infinite;
+    0 1px 0 rgba(255,255,255,.5) inset,
+    0 28px 50px -10px rgba(0,0,0,.6),
+    0 10px 18px -8px rgba(0,0,0,.5),
+    0 0 60px rgba(180,150,100,.16) inset;
+  transform:
+    rotateX(var(--tiltx)) rotateY(var(--tilty))
+    translateY(var(--lift)) translateZ(0);
+  transition:transform .35s cubic-bezier(.2,.8,.3,1), box-shadow .35s ease;
+  animation:sheetBreathe 9s ease-in-out infinite;
+  will-change:transform;
 }
-/* a left "margin" red rule, like a real legal pad */
-.letter-sheet::before {
-  content:''; position:absolute; top:0; bottom:0; left:46px; width:2px;
-  background:rgba(200,40,26,.35); pointer-events:none;
-}
-/* paper grain */
-.letter-sheet::after {
-  content:''; position:absolute; inset:0; border-radius:3px; pointer-events:none; opacity:.5; mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-}
-@keyframes sheetBreeze {
-  0%,100% { transform:rotate(-.5deg) rotateX(0deg) translateY(0); }
-  35%     { transform:rotate(.25deg) rotateX(1.4deg) translateY(-3px); }
-  65%     { transform:rotate(-.15deg) rotateX(-.8deg) translateY(1px); }
-}
-.letter-sheet:focus-within { animation-play-state:paused; transform:rotate(0deg) translateY(-4px); box-shadow:0 28px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(0,0,0,.07), inset 0 0 60px rgba(180,150,100,.18); transition:transform .3s ease, box-shadow .3s ease; }
+/* red margin rule */
+.letter-sheet > .fanmail-letterhead,
+.letter-sheet > .letter-greeting,
+.letter-sheet > .fanmail-body,
+.letter-sheet > .letter-signoff,
+.letter-sheet > .fanmail-actions{ position:relative; z-index:2; }
 
-/* ---------- THE CURLED CORNER (bottom-right, lifted by the breeze) ---------- */
-.letter-curl {
-  position:absolute; right:-1px; bottom:-1px; width:62px; height:62px; pointer-events:none; z-index:4;
-  background:linear-gradient(135deg, #e7d8b3 0%, #f6efdb 45%, #fffdf6 60%, #cbbb92 100%);
-  border-radius:3px 0 3px 0;
-  box-shadow:-4px -4px 10px rgba(0,0,0,.28);
-  clip-path:polygon(100% 0, 100% 100%, 0 100%);
-  transform-origin:100% 100%;
-  animation:curlFlutter 7s ease-in-out infinite;
+/* paper fiber + grain layer */
+.paper-fiber{
+  content:''; position:absolute; inset:0; border-radius:2px; pointer-events:none; z-index:1;
+  mix-blend-mode:multiply; opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.045 0.012' numOctaves='4' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.34 0 0 0 0 0.2 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size:240px 240px;
 }
-/* the shadow the lifted corner casts on the page */
-.letter-curl::before {
-  content:''; position:absolute; right:0; bottom:0; width:62px; height:62px; z-index:-1;
-  background:radial-gradient(circle at 100% 100%, rgba(0,0,0,.28), transparent 70%);
-  transform:translate(-8px,-8px); border-radius:3px;
-  animation:curlShadow 7s ease-in-out infinite;
+.paper-fiber::after{ /* fine speckle */
+  content:''; position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
-@keyframes curlFlutter {
-  0%,100% { transform:rotate(0deg) scale(1); }
-  35%     { transform:rotate(-9deg) scale(1.12) translate(-3px,-3px); }
-  65%     { transform:rotate(-3deg) scale(1.04) translate(-1px,-1px); }
-}
-@keyframes curlShadow {
-  0%,100% { opacity:.5; transform:translate(-8px,-8px) scale(1); }
-  35%     { opacity:.85; transform:translate(-14px,-14px) scale(1.25); }
-}
-
-/* ---------- SNAKE SKINS POSTAGE STAMP ---------- */
-.ss-stamp {
-  position:absolute; top:-14px; right:30px; width:64px; height:78px; z-index:6;
-  transform:rotate(7deg);
-  filter:drop-shadow(0 4px 7px rgba(0,0,0,.45));
-  animation:stampWobble 7s ease-in-out infinite;
-}
-.ss-stamp-inner {
-  width:100%; height:100%; padding:5px 4px;
-  display:flex; flex-direction:column; align-items:center; justify-content:space-between;
-  text-align:center; color:#fff7ec;
+/* edge darkening + soft vignette so it reads as a thick sheet */
+.paper-shade{
+  position:absolute; inset:0; border-radius:2px; pointer-events:none; z-index:1;
+  box-shadow:inset 0 0 22px rgba(120,90,50,.18), inset 0 0 2px rgba(90,60,30,.4);
   background:
-    radial-gradient(circle at 35% 28%, #3a6b34, #234d22 55%, #14331a 100%);
-  /* perforated postage edge */
-  -webkit-mask:radial-gradient(circle 3px at 3px 50%, transparent 98%, #000) -3px 0/9px 100% repeat-y,
-               radial-gradient(circle 3px at 50% 3px, transparent 98%, #000) 0 -3px/100% 9px repeat-x,
-               linear-gradient(#000,#000);
-          mask:radial-gradient(circle 3px at 3px 50%, transparent 98%, #000) -3px 0/9px 100% repeat-y,
-               radial-gradient(circle 3px at 50% 3px, transparent 98%, #000) 0 -3px/100% 9px repeat-x,
-               linear-gradient(#000,#000);
-  -webkit-mask-composite:source-out; mask-composite:exclude;
-  box-shadow:inset 0 0 0 2px rgba(255,247,236,.5);
-  position:relative; overflow:hidden;
+    linear-gradient(90deg, rgba(110,80,40,.10), transparent 6%, transparent 94%, rgba(110,80,40,.10)),
+    linear-gradient(0deg, rgba(110,80,40,.12), transparent 5%, transparent 95%, rgba(110,80,40,.08));
 }
-/* faint snake-scale texture over the stamp */
-.ss-stamp-inner::after {
-  content:''; position:absolute; inset:0; opacity:.22; mix-blend-mode:overlay;
-  background-image:radial-gradient(circle at 50% 0, rgba(255,255,255,.6) 0 3px, transparent 4px);
-  background-size:9px 7px;
+/* DECKLE — torn left + bottom edge */
+.letter-sheet{
+  -webkit-mask:
+    radial-gradient(circle 4px at 3px var(--y,0), transparent 0) 0 0/100% 11px,
+    linear-gradient(#000,#000);
 }
-.ss-stamp-snake { font-size:1rem; line-height:1; }
-.ss-stamp-band { font-family:'Oswald',sans-serif; font-weight:700; font-size:.4rem; line-height:1.15; letter-spacing:.06em; }
-.ss-stamp-val { font-family:'Special Elite',monospace; font-size:.36rem; letter-spacing:.02em; opacity:.9; }
-@keyframes stampWobble {
-  0%,100% { transform:rotate(7deg); }
-  35%     { transform:rotate(4.5deg) translateY(-1px); }
+.letter-sheet::before{ /* margin rule sits above fiber */
+  content:''; position:absolute; top:10px; bottom:10px; left:44px; width:2px; z-index:2;
+  background:linear-gradient(var(--margin),rgba(200,40,26,.15)); opacity:.5;
 }
+/* fold creases — invisible until folding */
+.fold-crease{ position:absolute; left:0; right:0; height:1px; z-index:3; pointer-events:none; opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(80,55,25,.5),transparent);
+  box-shadow:0 1px 0 rgba(255,255,255,.4); transition:opacity .25s; }
+.fold-crease--1{ top:33.33%; } .fold-crease--2{ top:66.66%; }
 
-/* ---------- LETTERHEAD & LETTER BODY ---------- */
-.fanmail-letterhead { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.3rem; border-bottom:1.5px dashed #b8a988; padding-bottom:.55rem; margin-bottom:.5rem; }
-.fanmail-band { font-family:'Metal Mania',cursive; font-size:1.55rem; color:#c8281a; letter-spacing:.02em; }
-.fanmail-from { font-family:'Special Elite',monospace; font-size:.72rem; color:#6e5f48; }
-
-.letter-greeting { font-family:'Caveat',cursive; font-size:1.7rem; color:#1a2740; margin:.2rem 0 .1rem; transform:rotate(-.6deg); }
-
-.fanmail-name, .fanmail-body {
-  width:100%; box-sizing:border-box; background:transparent; border:none; color:#243a63;
-  font-family:'Caveat',cursive; font-size:1.5rem; line-height:32px; padding:0;
+@keyframes sheetBreathe{
+  0%,100%{ transform:rotateX(var(--tiltx)) rotateY(var(--tilty)) translateY(var(--lift)); }
+  50%    { transform:rotateX(calc(var(--tiltx) + 1.1deg)) rotateY(var(--tilty)) translateY(calc(var(--lift) - 3px)); }
 }
-.fanmail-body { resize:vertical; min-height:170px; }
-.fanmail-name:focus, .fanmail-body:focus { outline:none; }
-.fanmail-name::placeholder, .fanmail-body::placeholder { color:#9a8c70; font-family:'Special Elite',monospace; font-size:.95rem; }
+.letter-sheet:focus-within{ animation-play-state:paused; }
 
-/* sign-off line */
-.letter-signoff { display:flex; align-items:flex-end; gap:.6rem; margin-top:.4rem; }
-.letter-yours { font-family:'Caveat',cursive; font-size:1.5rem; color:#1a2740; white-space:nowrap; transform:rotate(-1deg); }
-.fanmail-name { width:auto; flex:1; border-bottom:1.5px solid #b8a988; padding-bottom:1px; color:#c8281a; }
-.fanmail-name::placeholder { color:#bba; }
+/* ---------- CURLED CORNER ---------- */
+.letter-curl{
+  position:absolute; right:-1px; bottom:-1px; width:64px; height:64px; pointer-events:none; z-index:5;
+  background:linear-gradient(135deg, #e3d2aa 0%, var(--paper) 42%, #fffdf6 58%, #c3b187 100%);
+  border-radius:2px 0 2px 0; box-shadow:-5px -5px 12px rgba(0,0,0,.3);
+  clip-path:polygon(100% 0,100% 100%,0 100%); transform-origin:100% 100%;
+  animation:curlFlutter 9s ease-in-out infinite;
+}
+.letter-curl::before{ content:''; position:absolute; right:0; bottom:0; width:64px; height:64px; z-index:-1;
+  background:radial-gradient(circle at 100% 100%, rgba(0,0,0,.3), transparent 70%);
+  transform:translate(-8px,-8px); animation:curlShadow 9s ease-in-out infinite; }
+@keyframes curlFlutter{ 0%,100%{transform:rotate(0) scale(1);} 45%{transform:rotate(-11deg) scale(1.14) translate(-3px,-3px);} 70%{transform:rotate(-4deg) scale(1.05);} }
+@keyframes curlShadow{ 0%,100%{opacity:.5; transform:translate(-8px,-8px) scale(1);} 45%{opacity:.85; transform:translate(-15px,-15px) scale(1.3);} }
 
-/* ---------- THE WAX-SEAL SEND BUTTON ---------- */
-.fanmail-actions { display:flex; align-items:center; gap:1rem; margin-top:1.1rem; }
-.fanmail-send {
-  cursor:pointer; border:none; display:inline-flex; align-items:center; gap:.6rem;
+/* ---------- SNAKE SKINS STAMP ---------- */
+.ss-stamp{ position:absolute; top:-14px; right:30px; width:62px; height:76px; z-index:6; transform:rotate(7deg);
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.5)); animation:stampWobble 9s ease-in-out infinite; }
+.ss-stamp-inner{ width:100%; height:100%; padding:5px 4px; display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+  text-align:center; color:#fff7ec; position:relative; overflow:hidden;
+  background:radial-gradient(circle at 35% 28%, #3a6b34, #234d22 55%, #14331a 100%);
+  -webkit-mask:radial-gradient(circle 3px at 3px 50%,transparent 98%,#000) -3px 0/9px 100% repeat-y,
+               radial-gradient(circle 3px at 50% 3px,transparent 98%,#000) 0 -3px/100% 9px repeat-x, linear-gradient(#000,#000);
+          mask:radial-gradient(circle 3px at 3px 50%,transparent 98%,#000) -3px 0/9px 100% repeat-y,
+               radial-gradient(circle 3px at 50% 3px,transparent 98%,#000) 0 -3px/100% 9px repeat-x, linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out; mask-composite:exclude; box-shadow:inset 0 0 0 2px rgba(255,247,236,.5); }
+.ss-stamp-inner::after{ content:''; position:absolute; inset:0; opacity:.22; mix-blend-mode:overlay;
+  background-image:radial-gradient(circle at 50% 0, rgba(255,255,255,.6) 0 3px, transparent 4px); background-size:9px 7px; }
+.ss-stamp-snake{ font-size:1rem; line-height:1; }
+.ss-stamp-band{ font-family:'Oswald',sans-serif; font-weight:700; font-size:.4rem; line-height:1.15; letter-spacing:.06em; }
+.ss-stamp-val{ font-family:'Special Elite',monospace; font-size:.36rem; letter-spacing:.02em; opacity:.9; }
+@keyframes stampWobble{ 0%,100%{transform:rotate(7deg);} 50%{transform:rotate(4.5deg) translateY(-1px);} }
+
+/* ---------- LETTERHEAD + TEXT ---------- */
+.fanmail-letterhead{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.3rem; border-bottom:1.5px dashed #b8a988; padding-bottom:.55rem; margin-bottom:.5rem; }
+.fanmail-band{ font-family:'Metal Mania',cursive; font-size:1.55rem; color:var(--margin); letter-spacing:.02em; text-shadow:0 1px 0 rgba(255,255,255,.4); }
+.fanmail-from{ font-family:'Special Elite',monospace; font-size:.72rem; color:#6e5f48; }
+.letter-greeting{ font-family:'Caveat',cursive; font-size:1.75rem; color:var(--ink); margin:.2rem 0 .1rem; transform:rotate(-.6deg); }
+
+.fanmail-name,.fanmail-body{ width:100%; box-sizing:border-box; background:transparent; border:none; color:var(--ink);
+  font-family:'Caveat',cursive; font-size:1.55rem; line-height:32px; padding:0; text-shadow:0 .5px .4px rgba(40,55,80,.25); }
+.fanmail-body{ resize:vertical; min-height:170px; }
+.fanmail-name:focus,.fanmail-body:focus{ outline:none; }
+.fanmail-name::placeholder,.fanmail-body::placeholder{ color:#9a8c70; font-family:'Special Elite',monospace; font-size:.95rem; }
+
+.letter-signoff{ display:flex; align-items:flex-end; gap:.6rem; margin-top:.4rem; }
+.letter-yours{ font-family:'Caveat',cursive; font-size:1.5rem; color:var(--ink); white-space:nowrap; transform:rotate(-1deg); }
+.fanmail-name{ width:auto; flex:1; border-bottom:1.5px solid #b8a988; padding-bottom:1px; color:var(--margin); }
+.fanmail-name::placeholder{ color:#bba; }
+
+/* ---------- WAX SEAL SEND BUTTON ---------- */
+.fanmail-actions{ display:flex; align-items:center; gap:1rem; margin-top:1.1rem; }
+.fanmail-send{ cursor:pointer; border:none; display:inline-flex; align-items:center; gap:.6rem;
   font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
   font-size:.9rem; color:#fff; padding:.5rem 1.3rem .5rem .5rem; border-radius:40px;
   background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 5px 16px rgba(200,40,26,.45);
-  transition:transform .15s, box-shadow .2s; position:relative; overflow:hidden;
-}
-.fm-send-wax {
-  width:34px; height:34px; border-radius:50%; flex:none;
-  background:radial-gradient(circle at 34% 30%, #ff7a4a, #a81d10 70%);
+  transition:transform .15s, box-shadow .2s; position:relative; overflow:hidden; }
+.fm-send-wax{ width:34px; height:34px; border-radius:50%; flex:none;
+  background:radial-gradient(circle at 34% 30%, var(--wax-a), var(--wax-b) 70%);
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.25), 0 2px 5px rgba(0,0,0,.4);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Metal Mania',cursive; font-size:.85rem; color:#ffe9dd; text-shadow:0 1px 2px rgba(0,0,0,.5);
-}
-.fanmail-send::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.4), transparent 60%); opacity:0; transition:opacity .2s; }
-.fanmail-send:hover { transform:translateY(-2px); box-shadow:0 9px 22px rgba(200,40,26,.55); }
-.fanmail-send:hover::before { opacity:1; }
-.fanmail-send:active { transform:translateY(0) scale(.96); }
-.fanmail-send:disabled { opacity:.55; transform:none; cursor:default; }
-.fanmail-status { font-family:'Special Elite',monospace; font-size:.8rem; color:#ff7043; }
+  font-family:'Metal Mania',cursive; font-size:.85rem; color:#ffe9dd; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+.fanmail-send::before{ content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.4), transparent 60%); opacity:0; transition:opacity .2s; }
+.fanmail-send:hover{ transform:translateY(-2px); box-shadow:0 9px 22px rgba(200,40,26,.55); }
+.fanmail-send:hover::before{ opacity:1; }
+.fanmail-send:active{ transform:translateY(0) scale(.96); }
+.fanmail-send:disabled{ opacity:.55; transform:none; cursor:default; }
+.fanmail-status{ font-family:'Special Elite',monospace; font-size:.8rem; color:#ff7043; min-height:1em; }
 
-/* sheet states during the send sequence */
-.letter-sheet.sealing { animation:none; }
-.letter-sheet.folding { animation:none; transform-origin:50% 50%; animation:sheetFold .55s ease forwards; }
-@keyframes sheetFold {
-  0%   { transform:rotate(0) scaleY(1); }
-  55%  { transform:rotate(0) scaleY(.5) translateY(10px); }
-  100% { transform:rotate(0) scaleY(.46) translateY(10px); opacity:.96; }
-}
+/* ============================================================
+   SEND SEQUENCE — fold in thirds, slide into envelope, seal
+   ============================================================ */
+.letter-sheet.is-sealing .fold-crease{ opacity:1; }
 
-/* ---------- THE FLY-AWAY (sealed letter rockets off) ---------- */
-.fm-flyaway {
-  position:absolute; z-index:60; border-radius:5px; pointer-events:none; transform-origin:center;
-  background:linear-gradient(#efe2c5,#e3d3ac);
-  box-shadow:0 14px 30px rgba(0,0,0,.5);
-  border-top:none;
-  animation:fmFly 1.25s .15s cubic-bezier(.5,-0.25,.7,1) forwards;
+/* the sheet folds in thirds (a 3-panel CSS fold illusion) */
+.letter-sheet.fold-go{
+  animation:none;
+  animation:sheetFoldThirds 1.05s cubic-bezier(.6,.02,.3,1) forwards;
+  transform-origin:50% 50%;
+  z-index:8;
 }
-/* envelope flap + wax seal on the flying letter */
-.fm-flyaway::before {
-  content:''; position:absolute; left:0; right:0; top:0; height:52%;
-  background:linear-gradient(#e8d9b6,#d8c393); clip-path:polygon(0 0,100% 0,50% 92%);
-  box-shadow:0 3px 6px rgba(0,0,0,.18);
+@keyframes sheetFoldThirds{
+  0%   { transform:rotateX(0) scaleY(1) translateY(0); }
+  30%  { transform:rotateX(8deg) scaleY(.92) translateY(2px); }    /* bottom third lifts */
+  60%  { transform:rotateX(2deg) scaleY(.62) translateY(34px); }   /* folds down */
+  100% { transform:rotateX(-4deg) scaleY(.34) translateY(78px) scale(.84); opacity:.96; } /* tri-fold, drops toward envelope */
 }
-.fm-flyaway::after {
-  content:'SS'; position:absolute; left:50%; top:42%; transform:translate(-50%,-50%) scale(0);
-  width:30px; height:30px; border-radius:50%;
-  background:radial-gradient(circle at 34% 30%,#ff7a4a,#a81d10 70%); color:#ffe9dd;
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Metal Mania',cursive; font-size:.8rem; box-shadow:0 2px 6px rgba(0,0,0,.45);
-  animation:fmWaxPress .3s .05s cubic-bezier(.3,1.6,.5,1) forwards;
+/* a crease-shadow sweeps as it folds */
+.letter-sheet.fold-go .paper-shade{ animation:foldShade 1.05s ease forwards; }
+@keyframes foldShade{ 0%{opacity:1;} 45%{box-shadow:inset 0 -40px 30px -20px rgba(60,40,20,.55), inset 0 40px 30px -20px rgba(60,40,20,.55);} 100%{opacity:.8;} }
+
+/* ---------- THE ENVELOPE (send) ---------- */
+.send-envelope{
+  position:absolute; left:50%; bottom:14px; width:300px; height:150px;
+  transform:translateX(-50%) translateY(40px) scale(.7); transform-origin:50% 100%;
+  opacity:0; z-index:2; perspective:800px; pointer-events:none;
 }
-@keyframes fmWaxPress { to { transform:translate(-50%,-50%) scale(1) rotate(-6deg); } }
-@keyframes fmFly {
-  0%   { opacity:1; transform:translate(0,0) rotate(0) scale(1); }
-  18%  { opacity:1; transform:translate(0,8px) rotate(-3deg) scale(1); }
-  100% { opacity:0; transform:translate(58vw,-62vh) rotate(20deg) scale(.16); }
+.send-envelope.show{ animation:envRise .5s ease forwards; }
+@keyframes envRise{ to{ opacity:1; transform:translateX(-50%) translateY(0) scale(1);} }
+.se-back,.se-pocket,.se-flap{ position:absolute; inset:0; border-radius:8px; }
+.se-back{ background:linear-gradient(#e8d6ac,#d8c397); box-shadow:0 16px 34px rgba(0,0,0,.5), inset 0 0 0 1px rgba(120,90,50,.3); }
+.se-pocket{ top:auto; height:58%; bottom:0; border-radius:0 0 8px 8px;
+  background:linear-gradient(#ecdcb4,#ddca9f);
+  clip-path:polygon(0 22%, 50% 100%, 100% 22%, 100% 100%, 0 100%); z-index:4; }
+.se-pocket::after{ content:''; position:absolute; left:0; right:0; top:22%; bottom:0;
+  background:linear-gradient(135deg,transparent 49.6%,rgba(0,0,0,.07) 50%), linear-gradient(225deg,transparent 49.6%,rgba(0,0,0,.07) 50%); }
+/* the folded letter that slips inside */
+.se-letter{ position:absolute; left:9%; right:9%; top:-64%; height:128%; z-index:3; border-radius:3px;
+  background:repeating-linear-gradient(var(--paper) 0 8px,var(--rule) 8px 9px), var(--paper);
+  box-shadow:0 6px 14px rgba(0,0,0,.3); transform:translateY(0); opacity:0; }
+.send-envelope.tuck .se-letter{ animation:letterTuck .6s cubic-bezier(.5,.1,.2,1) forwards; }
+@keyframes letterTuck{ 0%{opacity:1; transform:translateY(-30%);} 100%{opacity:1; transform:translateY(54%);} }
+/* the flap that folds down + closes */
+.se-flap{ height:52%; transform-origin:top center; z-index:6;
+  background:linear-gradient(#e2cf9f,#d2bd86); clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.18); transform:rotateX(178deg); }
+.send-envelope.close .se-flap{ animation:flapShut .5s ease forwards; }
+@keyframes flapShut{ 0%{transform:rotateX(178deg);} 100%{transform:rotateX(0deg);} }
+/* the wax stamping down with a squish */
+.se-wax{ position:absolute; left:50%; top:46%; width:0; height:0; z-index:8;
+  transform:translate(-50%,-50%); display:flex; align-items:center; justify-content:center;
+  font-family:'Metal Mania',cursive; color:#ffe9dd; font-size:0; opacity:0; }
+.se-wax span{ position:relative; z-index:2; text-shadow:0 1px 2px rgba(0,0,0,.5); }
+.se-wax::before{ content:''; position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, var(--wax-a), var(--wax-b) 65%, var(--wax-c) 100%);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.22), 0 4px 10px rgba(0,0,0,.5); }
+.send-envelope.seal .se-wax{ animation:waxDrop .55s cubic-bezier(.3,1.5,.5,1) forwards; }
+@keyframes waxDrop{
+  0%  { width:8px; height:8px; font-size:0; opacity:0; transform:translate(-50%,-260%) scale(.4); }
+  55% { width:46px; height:46px; font-size:.95rem; opacity:1; transform:translate(-50%,-50%) scale(1.18,.72); } /* squish */
+  72% { transform:translate(-50%,-50%) scale(.92,1.08); }
+  100%{ width:42px; height:42px; font-size:.95rem; opacity:1; transform:translate(-50%,-50%) scale(1,1); }
+}
+/* spark/heat ring when the wax hits */
+.wax-spark{ position:absolute; left:50%; top:46%; width:44px; height:44px; transform:translate(-50%,-50%); z-index:7; pointer-events:none;
+  border-radius:50%; border:2px solid rgba(255,150,80,.9); opacity:0; }
+.send-envelope.seal .wax-spark{ animation:sparkRing .6s .28s ease-out forwards; }
+@keyframes sparkRing{ 0%{opacity:.9; transform:translate(-50%,-50%) scale(.4);} 100%{opacity:0; transform:translate(-50%,-50%) scale(2.6);} }
+
+/* envelope whisks off into the dark */
+.send-envelope.launch{ animation:envLaunch 1s cubic-bezier(.5,-0.2,.7,1) forwards; }
+@keyframes envLaunch{
+  0%  { opacity:1; transform:translateX(-50%) translateY(0) rotate(0) scale(1); }
+  20% { transform:translateX(-50%) translateY(10px) rotate(-3deg) scale(1.02); } /* wind-up */
+  100%{ opacity:0; transform:translateX(40vw) translateY(-70vh) rotate(28deg) scale(.12); }
 }
 
 /* ============================================================
-   HIS REPLY ARRIVES
+   RECEIVE SEQUENCE — his envelope skids in, wax shatters, rips open
    ============================================================ */
-.fm-arrival { position:relative; display:flex; flex-direction:column; align-items:center; margin-bottom:1.6rem; }
-.fm-envelope { position:relative; width:min(330px,86%); height:188px; margin:0 auto; perspective:1000px; z-index:2; opacity:0; transform:translateY(-130%) rotate(-5deg); }
-.fm-envelope.drop { animation:fmDrop .9s cubic-bezier(.3,1.35,.5,1) forwards; }
-.fm-env-body { position:absolute; inset:0; background:linear-gradient(#efe2c5,#e1d0a6); border-radius:8px; box-shadow:0 16px 34px rgba(0,0,0,.5); overflow:hidden; }
-.fm-env-body::before {
-  content:''; position:absolute; left:0; right:0; bottom:0; top:46%;
-  background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.09) 50%), linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.09) 50%);
+.fm-arrival{ position:relative; display:flex; flex-direction:column; align-items:center; margin-bottom:1.8rem; perspective:1100px; }
+.fm-envelope{ position:relative; width:min(340px,88%); height:196px; margin:0 auto; z-index:2; opacity:0; transform:translateX(-130%) rotate(-14deg); }
+.fm-envelope.skid{ animation:fmSkid .85s cubic-bezier(.15,.85,.25,1) forwards; }
+@keyframes fmSkid{
+  0%   { opacity:0; transform:translateX(-130%) translateY(-40%) rotate(-16deg); }
+  55%  { opacity:1; transform:translateX(8%) translateY(0) rotate(5deg); }   /* overshoots right */
+  72%  { transform:translateX(-3%) rotate(-2deg); }
+  86%  { transform:translateX(1.5%) rotate(.8deg); }
+  100% { opacity:1; transform:translateX(0) rotate(0); }
 }
-/* address scrawl on the envelope front */
-.fm-env-body::after {
-  content:'Scorch'; position:absolute; left:18px; top:16px; font-family:'Caveat',cursive; color:#5a4a32; font-size:1.4rem; transform:rotate(-3deg); opacity:.8;
-}
-.fm-env-flap {
-  position:absolute; left:0; right:0; top:0; height:54%; transform-origin:top center; z-index:5;
-  background:linear-gradient(#ead9b4,#dcc99e); clip-path:polygon(0 0,100% 0,50% 100%);
-  box-shadow:0 4px 8px rgba(0,0,0,.16); transition:transform .6s ease, z-index 0s .3s;
-}
-/* wax seal holding the flap shut */
-.fm-env-flap .fm-wax {
-  position:absolute; left:50%; bottom:4px; transform:translate(-50%,50%); width:40px; height:40px; border-radius:50%;
-  background:radial-gradient(circle at 34% 30%,#ff7a4a,#a81d10 72%); color:#ffe9dd;
-  font-family:'Metal Mania',cursive; font-size:.95rem;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 3px 8px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.22);
-}
-.fm-env-flap .fm-wax::before { content:''; position:absolute; inset:5px; border-radius:50%; border:1px dashed rgba(255,255,255,.35); }
-/* the moment it cracks */
-.fm-envelope.cracking .fm-wax { animation:waxShake .4s ease; }
-@keyframes waxShake { 0%,100%{transform:translate(-50%,50%) rotate(0)} 25%{transform:translate(-54%,50%) rotate(-8deg)} 75%{transform:translate(-46%,50%) rotate(8deg)} }
-.fm-envelope.open .fm-env-flap { transform:rotateX(178deg); z-index:1; }
-.fm-envelope.open .fm-wax { opacity:0; transition:opacity .3s; }
-/* the letter tucked inside */
-.fm-env-letter { position:absolute; left:6%; right:6%; top:14%; bottom:8%; background:#f6efdb; border-radius:3px 3px 0 0; box-shadow:0 -2px 8px rgba(0,0,0,.15); z-index:3; transform:translateY(0); transition:transform .65s ease .3s; }
-.fm-envelope.open .fm-env-letter { transform:translateY(-50%); }
-@keyframes fmDrop {
-  0%   { opacity:0; transform:translateY(-135%) rotate(-6deg); }
-  55%  { opacity:1; transform:translateY(8%) rotate(2deg); }
-  72%  { transform:translateY(-4%) rotate(-1.5deg); }
-  88%  { transform:translateY(2%) rotate(.6deg); }
-  100% { opacity:1; transform:translateY(0) rotate(0); }
-}
+/* impact shudder */
+.fm-envelope.land{ animation:fmShudder .3s ease; }
+@keyframes fmShudder{ 0%,100%{} 30%{transform:translateY(2px) rotate(.6deg);} 60%{transform:translateY(-1px) rotate(-.4deg);} }
 
-/* ---------- HIS REPLY LETTER (the permanent card) ---------- */
-.fanmail-reply {
-  position:relative; color:#2b2118; border-radius:3px; padding:1.7rem 1.8rem 1.5rem;
-  background:repeating-linear-gradient(#f6efdb,#f6efdb 31px,#d9cba6 32px), #f6efdb;
-  box-shadow:0 14px 34px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.06), inset 0 0 50px rgba(180,150,100,.16);
-  transform:rotate(.5deg);
-  animation:replyBreeze 8s ease-in-out infinite;
-}
-.fanmail-reply:nth-child(even) { transform:rotate(-.7deg); animation-duration:9s; }
-@keyframes replyBreeze {
-  0%,100% { transform:rotate(.5deg); }
-  50%     { transform:rotate(-.1deg) translateY(-2px); }
-}
-.fanmail-reply::before { content:''; position:absolute; top:0; bottom:0; left:40px; width:2px; background:rgba(200,40,26,.3); }
-/* a torn-edge top, like he ripped it out of a notebook */
-.fanmail-reply::after {
-  content:''; position:absolute; top:-1px; left:0; right:0; height:8px;
-  background:repeating-linear-gradient(90deg, transparent 0 5px, #f6efdb 5px 7px);
-  -webkit-mask:linear-gradient(#000,#000); filter:drop-shadow(0 1px 1px rgba(0,0,0,.2));
-}
-.fanmail-reply .fanmail-stamp {
-  position:absolute; top:-12px; right:18px; width:56px; height:66px; z-index:3;
-  background:radial-gradient(circle at 35% 28%, #3a6b34, #1c401d 80%);
-  border:3px solid #f6efdb; box-shadow:0 3px 9px rgba(0,0,0,.45); transform:rotate(7deg);
-  display:flex; align-items:center; justify-content:center;
-  font-family:'Oswald',sans-serif; font-weight:700; color:#fff7ec; font-size:.6rem; text-align:center; line-height:1.2; letter-spacing:.06em;
-}
-.fanmail-reply-to { font-family:'Special Elite',monospace; font-size:.8rem; color:#6e5f48; margin-bottom:.6rem; }
-.fanmail-reply-text {
-  font-family:'Caveat',cursive; font-size:1.55rem; line-height:32px; color:#1a2740;
-  white-space:pre-wrap; word-wrap:break-word; min-height:32px;
-}
-.fanmail-reply-sign { font-family:'Caveat',cursive; font-size:1.85rem; color:#c8281a; text-align:right; margin-top:.7rem; transform:rotate(-2.5deg); }
-.fanmail-reply.pending .fanmail-reply-text { color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
+.fm-env-body{ position:absolute; inset:0; background:linear-gradient(#efe2c5,#dccba0); border-radius:8px; box-shadow:0 18px 36px rgba(0,0,0,.55), inset 0 0 0 1px rgba(120,90,50,.25); overflow:hidden; }
+.fm-env-body::before{ content:''; position:absolute; left:0; right:0; bottom:0; top:46%;
+  background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.1) 50%), linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.1) 50%); }
+.fm-env-body::after{ content:'Scorch'; position:absolute; left:20px; top:18px; font-family:'Caveat',cursive; color:#5a4a32; font-size:1.5rem; transform:rotate(-3deg); opacity:.85; }
+.fm-env-flap{ position:absolute; left:0; right:0; top:0; height:54%; transform-origin:top center; z-index:5;
+  background:linear-gradient(#ead9b4,#d8c393); clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.16); transition:transform .6s ease, z-index 0s .3s; }
+.fm-env-flap .fm-wax{ position:absolute; left:50%; bottom:2px; transform:translate(-50%,50%); width:44px; height:44px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,var(--wax-a),var(--wax-b) 68%,var(--wax-c) 100%); color:#ffe9dd;
+  font-family:'Metal Mania',cursive; font-size:1rem; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.22); }
+.fm-env-flap .fm-wax::after{ content:''; position:absolute; inset:5px; border-radius:50%; border:1px dashed rgba(255,255,255,.35); }
+/* wax shatter */
+.fm-envelope.crack .fm-wax{ animation:waxBurst .45s ease forwards; }
+@keyframes waxBurst{ 0%{transform:translate(-50%,50%) scale(1);} 40%{transform:translate(-50%,50%) scale(1.25) rotate(-6deg);} 100%{transform:translate(-50%,50%) scale(.2) rotate(20deg); opacity:0;} }
+.wax-shard{ position:absolute; width:8px; height:8px; background:radial-gradient(circle at 35% 30%,var(--wax-a),var(--wax-c)); border-radius:40% 60% 55% 45%; z-index:7; opacity:0; pointer-events:none; box-shadow:0 1px 3px rgba(0,0,0,.5); }
+.fm-envelope.crack .wax-shard{ animation:shardFly .6s ease-out forwards; }
+@keyframes shardFly{ 0%{opacity:1; transform:translate(0,0) rotate(0) scale(1);} 100%{opacity:0; transform:translate(var(--sx,30px),var(--sy,-40px)) rotate(var(--sr,180deg)) scale(.4);} }
+.fm-envelope.open .fm-env-flap{ transform:rotateX(182deg); z-index:1; }
+.fm-env-letter{ position:absolute; left:6%; right:6%; top:14%; bottom:8%; background:var(--paper); border-radius:3px 3px 0 0; box-shadow:0 -2px 8px rgba(0,0,0,.15); z-index:3; transform:translateY(0); transition:transform .55s cubic-bezier(.5,-0.2,.4,1.3) .25s; }
+.fm-envelope.open .fm-env-letter{ transform:translateY(-58%); }
 
-/* the reply rising out of the opened envelope */
-.fanmail-reply.arriving { opacity:0; transform:translateY(40px) scale(.95); transition:opacity .55s ease, transform .55s ease; margin-top:-30px; z-index:1; }
-.fanmail-reply.arriving.show { opacity:1; transform:translateY(0) scale(1); }
-.fm-caret::after { content:'|'; color:#1a2740; animation:fmCaret .7s steps(1) infinite; }
-@keyframes fmCaret { 50%{opacity:0;} }
+/* ---------- HIS REPLY (the page that rips out + unfolds) ---------- */
+.fanmail-reply{ position:relative; color:var(--ink); border-radius:2px; padding:1.7rem 1.8rem 1.5rem;
+  background:
+    radial-gradient(120px 90px at 86% 80%, rgba(150,110,55,.12), transparent 72%),
+    repeating-linear-gradient(var(--paper) 0 31px,var(--rule) 31px 32px),
+    linear-gradient(155deg,var(--paper-hi),var(--paper) 45%,var(--paper-lo));
+  box-shadow:0 16px 36px -8px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.05), inset 0 0 50px rgba(180,150,100,.16);
+  transform:rotate(.5deg); animation:replyBreathe 10s ease-in-out infinite; overflow:hidden; }
+.fanmail-reply:nth-child(even){ transform:rotate(-.7deg); animation-duration:11s; }
+@keyframes replyBreathe{ 0%,100%{transform:rotate(.5deg);} 50%{transform:rotate(-.1deg) translateY(-2px);} }
+.fanmail-reply::before{ content:''; position:absolute; top:0; bottom:0; left:40px; width:2px; background:rgba(200,40,26,.3); z-index:2; }
+/* grain on the reply too */
+.fanmail-reply > *{ position:relative; z-index:2; }
+.fanmail-reply::after{ content:''; position:absolute; inset:0; pointer-events:none; z-index:1; mix-blend-mode:multiply; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.045 0.012' numOctaves='4' seed='3'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.34 0 0 0 0 0.2 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f2)'/%3E%3C/svg%3E"); background-size:240px 240px; }
+.fanmail-reply .fanmail-stamp{ position:absolute; top:-12px; right:18px; width:56px; height:66px; z-index:4;
+  background:radial-gradient(circle at 35% 28%, #3a6b34, #1c401d 80%); border:3px solid var(--paper);
+  box-shadow:0 3px 9px rgba(0,0,0,.45); transform:rotate(7deg);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Oswald',sans-serif; font-weight:700; color:#fff7ec; font-size:.6rem; text-align:center; line-height:1.2; letter-spacing:.06em; }
+.fanmail-reply-to{ font-family:'Special Elite',monospace; font-size:.8rem; color:#6e5f48; margin-bottom:.6rem; }
+.fanmail-reply-text{ font-family:'Caveat',cursive; font-size:1.6rem; line-height:32px; color:var(--ink); white-space:pre-wrap; word-wrap:break-word; min-height:32px; text-shadow:0 .5px .4px rgba(40,55,80,.3); }
+.fanmail-reply-sign{ font-family:'Caveat',cursive; font-size:1.95rem; color:var(--margin); text-align:right; margin-top:.7rem; transform:rotate(-2.5deg); }
+.fanmail-reply.pending .fanmail-reply-text{ color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
+
+/* the reply rips out of the envelope, unfolds with overshoot */
+.fanmail-reply.arriving{ opacity:0; transform:translateY(46px) scaleY(.2) scaleX(.96); transform-origin:top center;
+  transition:opacity .5s ease, transform .6s cubic-bezier(.34,1.56,.5,1); margin-top:-34px; z-index:1; }
+.fanmail-reply.arriving.show{ opacity:1; transform:translateY(0) scaleY(1) scaleX(1); }
+
+/* ink writes on with a wet-bleed caret */
+.fm-caret::after{ content:'|'; color:var(--ink); animation:fmCaret .7s steps(1) infinite; }
+@keyframes fmCaret{ 50%{opacity:0;} }
+.ink-wet{ animation:inkBleed 1.4s ease forwards; }
+@keyframes inkBleed{ 0%{filter:blur(.6px); opacity:.7;} 100%{filter:blur(0); opacity:1;} }
 
 /* blocked notices */
-.sc-blocked-note { color:#ff5a3c; font-family:'Special Elite',monospace; font-weight:700; letter-spacing:.02em; }
-.sc-blocked-stamp { margin-top:.7rem; display:inline-block; padding:.25rem .7rem; border:2px solid #ff3b3b; border-radius:6px;
+.sc-blocked-note{ color:#ff5a3c; font-family:'Special Elite',monospace; font-weight:700; letter-spacing:.02em; }
+.sc-blocked-stamp{ margin-top:.7rem; display:inline-block; padding:.25rem .7rem; border:2px solid #ff3b3b; border-radius:6px;
   color:#ff5a3c; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem;
   transform:rotate(-4deg); background:rgba(255,40,40,.08); animation:fmStampIn .3s ease; }
-@keyframes fmStampIn { 0%{transform:rotate(-4deg) scale(1.6); opacity:0;} 100%{transform:rotate(-4deg) scale(1); opacity:1;} }
+@keyframes fmStampIn{ 0%{transform:rotate(-4deg) scale(1.6); opacity:0;} 100%{transform:rotate(-4deg) scale(1); opacity:1;} }
 
-@media (prefers-reduced-motion: reduce) {
-  .letter-sheet, .letter-curl, .letter-curl::before, .ss-stamp, .fanmail-reply { animation:none; }
-  .fm-flyaway, .fm-envelope.drop { animation:none; }
-  .fm-envelope { opacity:1; transform:none; }
-  .fanmail-reply.arriving { transition:none; opacity:1; transform:none; margin-top:0; }
+@media (prefers-reduced-motion: reduce){
+  .letter-sheet,.letter-curl,.letter-curl::before,.ss-stamp,.fanmail-reply{ animation:none; }
+  .letter-sheet.fold-go,.send-envelope,.fm-envelope.skid,.send-envelope.launch{ animation:none; }
+  .send-envelope,.fm-envelope{ opacity:1; transform:none; }
+  .fanmail-reply.arriving{ transition:none; opacity:1; transform:none; margin-top:0; }
+  .letter-stage{ transition:none; }
 }
 
 
@@ -1519,40 +1598,87 @@
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
 
-  // fold the written letter, press the wax, and send it sailing off
+  // ---- the sheet leans toward your cursor like it's lying on a desk ----
+  (function initParallax(){
+    const desk  = document.getElementById("fmDesk");
+    const stage = document.getElementById("fmStage");
+    const sheet = document.getElementById("fmSheet");
+    if (reduceMotion || !desk || !stage || !sheet) return;
+    let raf = null, tx = 0, ty = 0;
+    desk.addEventListener("pointermove", (e) => {
+      const r = desk.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width  - 0.5;   // -0.5..0.5
+      const py = (e.clientY - r.top)  / r.height - 0.5;
+      ty = px * 9;          // rotateY
+      tx = -py * 7;         // rotateX
+      if (!raf) raf = requestAnimationFrame(apply);
+    });
+    desk.addEventListener("pointerleave", () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(apply); });
+    function apply(){
+      raf = null;
+      if (sheet.classList.contains("fold-go")) return;
+      sheet.style.setProperty("--tilty", ty.toFixed(2) + "deg");
+      sheet.style.setProperty("--tiltx", tx.toFixed(2) + "deg");
+      sheet.style.setProperty("--lift", (-(Math.abs(tx)+Math.abs(ty)) * 0.4).toFixed(1) + "px");
+    }
+  })();
+
+  // ============================================================
+  //  SEND — fold in thirds, slip into the envelope, stamp the wax
+  // ============================================================
   function playSend(){
     return new Promise(resolve => {
-      const card = document.getElementById("fmSheet") || document.querySelector(".fanmail-write");
-      const board = document.getElementById("scorchFanmail");
-      if (reduceMotion || !card || !board) {
-        if (card) { card.style.transition = "opacity .25s"; card.style.opacity = ".4"; setTimeout(()=>{ card.style.opacity=""; },300); }
+      const sheet = document.getElementById("fmSheet");
+      const env   = document.getElementById("sendEnvelope");
+      if (reduceMotion || !sheet || !env) {
+        if (sheet) { sheet.style.transition = "opacity .25s"; sheet.style.opacity = ".35"; setTimeout(()=>{ sheet.style.opacity=""; },300); }
         return resolve();
       }
-      const cr = card.getBoundingClientRect();
-      const br = board.getBoundingClientRect();
+      // reset tilt so the fold is clean
+      sheet.style.setProperty("--tiltx","0deg");
+      sheet.style.setProperty("--tilty","0deg");
+      sheet.style.setProperty("--lift","0px");
 
-      // fold the real sheet down
-      card.classList.add("folding");
+      (async () => {
+        sheet.classList.add("is-sealing");           // creases appear
+        await wait(220);
 
-      // a sealed letter takes its place and flies off
-      const fly = document.createElement("div");
-      fly.className = "fm-flyaway";
-      fly.style.left = (cr.left - br.left) + "px";
-      fly.style.top = (cr.top - br.top) + "px";
-      fly.style.width = cr.width + "px";
-      fly.style.height = Math.min(cr.height, 150) + "px";
-      board.style.position = "relative";
-      board.appendChild(fly);
+        env.classList.add("show");                   // envelope rises behind
+        await wait(120);
 
-      setTimeout(() => {
-        fly.remove();
-        card.classList.remove("folding");
+        sheet.classList.add("fold-go");              // fold in thirds + drop
+        await wait(620);
+
+        env.classList.add("tuck");                   // folded letter slips inside
+        await wait(560);
+
+        sheet.style.transition = "opacity .3s ease";
+        sheet.style.opacity = "0";                   // hide the original
+        env.classList.add("close");                  // flap shuts
+        await wait(360);
+
+        // wax stamps down with a squish + spark
+        const spark = document.createElement("span");
+        spark.className = "wax-spark";
+        env.appendChild(spark);
+        env.classList.add("seal");
+        await wait(580);
+
+        env.classList.add("launch");                 // whisk it off into the dark
+        await wait(820);
+
+        // cleanup so a later send works fresh
+        env.className = "send-envelope";
+        env.setAttribute("aria-hidden","true");
+        spark.remove();
+        sheet.classList.remove("is-sealing","fold-go");
+        sheet.style.transition = ""; sheet.style.opacity = "";
         resolve();
-      }, 1500);
+      })();
     });
   }
 
-  // type text on like handwriting
+  // type text on like handwriting, with a wet-ink bleed
   function typeWriter(el, text){
     return new Promise(resolve => {
       if (reduceMotion) { el.textContent = text; resolve(); return; }
@@ -1560,39 +1686,62 @@
       el.classList.add("fm-caret");
       let i = 0;
       const step = () => {
-        if (i >= text.length) { el.classList.remove("fm-caret"); return resolve(); }
-        el.textContent += text[i++];
-        setTimeout(step, 14 + Math.random() * 22);
+        if (i >= text.length) {
+          el.classList.remove("fm-caret");
+          el.classList.add("ink-wet");
+          return resolve();
+        }
+        const ch = text[i++];
+        el.textContent += ch;
+        // pause a beat longer at punctuation, like a real hand
+        let d = 12 + Math.random() * 20;
+        if (".!?,—".indexOf(ch) >= 0) d += 90 + Math.random()*120;
+        setTimeout(step, d);
       };
       step();
     });
   }
 
-  // his reply sails in as a sealed envelope; the wax cracks, the flap opens,
-  // the page unfurls and his answer is scrawled out in his own hand
+  // ============================================================
+  //  RECEIVE — his envelope skids in, wax shatters, page rips out
+  // ============================================================
   async function playReceive(toName, text){
     try {
       if (reduceMotion) { return addLetterReply(text, toName, false); }
       const arrival = document.createElement("div");
       arrival.className = "fm-arrival";
+
+      // build wax shards (flung when it cracks)
+      let shards = "";
+      for (let i = 0; i < 7; i++){
+        const ang = (Math.PI * (0.15 + Math.random()*0.7)) * -1;
+        const dist = 28 + Math.random()*40;
+        const sx = Math.cos(ang) * dist * (Math.random()<.5?-1:1);
+        const sy = Math.sin(ang) * dist - 10;
+        shards += '<span class="wax-shard" style="left:50%;top:54%;--sx:'+sx.toFixed(0)+'px;--sy:'+sy.toFixed(0)+'px;--sr:'+(Math.random()*360|0)+'deg"></span>';
+      }
+
       arrival.innerHTML =
         '<div class="fm-envelope">' +
           '<div class="fm-env-body"></div>' +
           '<div class="fm-env-letter"></div>' +
           '<div class="fm-env-flap"><span class="fm-wax">SS</span></div>' +
+          shards +
         '</div>';
       fmReplies.prepend(arrival);
       const env = arrival.querySelector(".fm-envelope");
 
       await wait(40);
-      env.classList.add("drop");          // sails in + settles
-      await wait(900);
-      env.classList.add("cracking");      // the wax seal shudders + cracks
-      await wait(420);
-      env.classList.add("open");          // flap flips back, letter peeks up
-      await wait(680);
+      env.classList.add("skid");          // skids in hard, overshoots, settles
+      await wait(620);
+      env.classList.add("land");          // impact shudder
+      await wait(230);
+      env.classList.add("crack");         // wax bursts, shards fly
+      await wait(360);
+      env.classList.add("open");          // flap flips, letter shoots up
+      await wait(620);
 
-      // the real reply paper rises out of the envelope
+      // the real reply paper rips out + unfolds with overshoot
       const wrap = document.createElement("div");
       wrap.className = "fanmail-reply arriving";
       wrap.innerHTML =
@@ -1603,20 +1752,20 @@
       arrival.appendChild(wrap);
       await wait(30);
       wrap.classList.add("show");
-      // fade the envelope away as the letter takes its place
-      env.style.transition = "opacity .5s ease, transform .5s ease";
+      // fade the envelope as the letter takes over
+      env.style.transition = "opacity .45s ease, transform .45s ease";
       env.style.opacity = "0";
-      env.style.transform = "translateY(-22px) scale(.9)";
-      await wait(420);
+      env.style.transform = "translateY(-26px) scale(.88) rotate(-3deg)";
+      await wait(460);
       env.remove();
 
-      // handwriting
+      // ink scrawls on
       await typeWriter(wrap.querySelector(".fanmail-reply-text"), text);
       const sign = wrap.querySelector(".fanmail-reply-sign");
-      sign.style.transition = "opacity .4s ease";
+      sign.style.transition = "opacity .4s ease, transform .4s ease";
       sign.style.opacity = "1";
 
-      // move the finished card out of the arrival wrapper so it's permanent
+      // make it permanent
       arrival.replaceWith(wrap);
       wrap.classList.remove("arriving", "show");
       return wrap;
@@ -1624,7 +1773,6 @@
       return addLetterReply(text, toName, false);   // never lose the reply
     }
   }
-
   if (fmSend) fmSend.addEventListener("click", async () => {
     if (IS_BLOCKED) { fmStatus.innerHTML = '<span class="sc-blocked-note">🚫 returned to sender — he\'s blocked you.</span>'; return; }
     const body = fmBody.value.trim();
