@@ -1000,11 +1000,13 @@
   const ADMIN_KEY = new URLSearchParams(location.search).get("admin") || "";
 
   // ---- BLOCK STATE ----
-  // a stable per-device id so being blocked can't be dodged by just renaming.
+  // a per-SESSION id: lives in sessionStorage, so it's wiped when the tab
+  // closes. that makes "getting blocked" a fun, temporary thing — a fresh
+  // tab gets a brand-new id the server has never blocked, so the block is gone.
   function getCID(){
     try {
-      let c = localStorage.getItem("scorchCID");
-      if (!c) { c = "c_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem("scorchCID", c); }
+      let c = sessionStorage.getItem("scorchCID");
+      if (!c) { c = "c_" + Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem("scorchCID", c); }
       return c;
     } catch (e) { return ""; }
   }
