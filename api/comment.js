@@ -107,7 +107,7 @@ Stay in character at all times.`,
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "z-ai/glm-4.5-air:free", messages: msgs }),
+      body: JSON.stringify({ model: "qwen/qwen3-next-80b-a3b-instruct:free", messages: msgs }),
     });
     const data = await r.json();
     return data.choices?.[0]?.message?.content?.trim() || null;
