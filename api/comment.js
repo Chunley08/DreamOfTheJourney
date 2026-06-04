@@ -6,9 +6,11 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
-  // mode is "comment" (public wall) or "dm" (private chat)
-  // history is the prior DM messages, only used in dm mode
-  const { character, comment, mode = "comment", history = [] } = req.body || {};
+  // mode: "comment" (public wall) or "dm" (private chat)
+  // history: prior messages (for dm chat continuity)
+  // pastComments: this username's earlier comments (for "remembering" them)
+  // username: who is commenting
+  const { character, comment, mode = "comment", history = [], pastComments = [], username = "" } = req.body || {};
   if (!comment) return res.status(400).json({ error: "No comment" });
 
   const apiKey = process.env.OPENROUTER_KEY;
@@ -51,6 +53,12 @@ Stay in character at all times.`,
   let messages;
   let system = base;
 
+  // If we know this user and they've commented before, let Scorch remember.
+  if (username && pastComments.length) {
+    const recap = pastComments.slice(-6).map(c => `- "${c}"`).join("\n");
+    system += `\n\nYou've talked to this fan before. Their name is "${username}". Here's what they've said to you previously:\n${recap}\nReference your history naturally if it fits - recognize them, callback to what they said, hold a grudge or warm up slightly. Don't list it robotically; just talk like someone who remembers them.`;
+  }
+
   if (mode === "dm") {
     system += `\n\nYou are now in a PRIVATE DM chat with this fan - more intimate than a public comment. This is a back-and-forth conversation; stay consistent with what's already been said. React the way Scorch would: suspicious of kindness, meaner if they push you, occasionally letting the boyish charm crack through when you forget to guard it.`;
     messages = [
@@ -69,21 +77,36 @@ Stay in character at all times.`,
     ];
   }
 
-  try {
+  async function callModel(msgs) {
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "z-ai/glm-4.5-air:free",
-        messages,
-      }),
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "z-ai/glm-4.5-air:free", messages: msgs }),
     });
     const data = await r.json();
-    const reply = data.choices?.[0]?.message?.content?.trim() || "...(no reply)";
-    return res.status(200).json({ reply });
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  }
+
+  try {
+    const reply = (await callModel(messages)) || "...(no reply)";
+
+    // ---- DM CHANCE (only on public comments, not inside an existing DM chat) ----
+    let dm = null;
+    if (mode === "comment") {
+      const lc = comment.toLowerCase();
+      const spicy = ["love","cute","hot","handsome","marry","kiss","date","suck","hate","ugly","trash","mid","overrated"];
+      const isSpicy = spicy.some(w => lc.includes(w));
+      // higher chance if the comment is spicy/rude, plus a smaller random baseline
+      const chance = isSpicy ? 0.55 : 0.18;
+      if (Math.random() < chance) {
+        dm = await callModel([
+          { role: "system", content: system + `\n\nYou just read this fan's public comment and something about it made you decide to slide into their DMs privately. Write ONLY the opening DM message - short, unprompted, like a text. Make it clearly a reaction to what they said.` },
+          { role: "user", content: `Their comment was: "${comment}". Write your opening DM.` },
+        ]);
+      }
+    }
+
+    return res.status(200).json({ reply, dm });
   } catch (e) {
     return res.status(500).json({ error: "AI request failed" });
   }
