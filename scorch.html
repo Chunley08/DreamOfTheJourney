@@ -349,17 +349,42 @@
     <span class="poster-eyebrow reveal-up">Write him a letter &middot; he might even write back</span>
 
     <div class="fanmail-board reveal-up" id="scorchFanmail">
-      <!-- the blank stationery you write on -->
-      <div class="fanmail-card fanmail-write">
-        <div class="fanmail-letterhead">
-          <span class="fanmail-band">THE SNAKE SKINS</span>
-          <span class="fanmail-from">c/o Scorch &middot; Bite Back Tour '26</span>
-        </div>
-        <input type="text" class="fanmail-name" id="fmName" maxlength="24" placeholder="— sign your letter (name) —" autocomplete="off">
-        <textarea class="fanmail-body" id="fmBody" maxlength="900" placeholder="Dear Scorch,&#10;&#10;write whatever you want him to read..."></textarea>
-        <div class="fanmail-actions">
-          <button type="button" class="fanmail-send" id="fmSend">Mail It ✉</button>
-          <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
+
+      <!-- the sheet of stationery you actually write on -->
+      <div class="letter-stage">
+        <div class="letter-sheet fanmail-write" id="fmSheet">
+          <!-- breeze-curled corner -->
+          <div class="letter-curl" aria-hidden="true"></div>
+          <!-- Snake Skins postage stamp pressed into the corner -->
+          <div class="ss-stamp" aria-hidden="true">
+            <div class="ss-stamp-inner">
+              <span class="ss-stamp-snake">🐍</span>
+              <span class="ss-stamp-band">THE<br>SNAKE<br>SKINS</span>
+              <span class="ss-stamp-val">★ 2026 ★</span>
+            </div>
+          </div>
+
+          <div class="fanmail-letterhead">
+            <span class="fanmail-band">THE SNAKE SKINS</span>
+            <span class="fanmail-from">c/o Scorch &middot; Bite Back Tour '26</span>
+          </div>
+
+          <div class="letter-greeting">Dear&nbsp;Scorch,</div>
+
+          <textarea class="fanmail-body" id="fmBody" maxlength="900" placeholder="...say whatever you want him to read."></textarea>
+
+          <div class="letter-signoff">
+            <span class="letter-yours">— yours,</span>
+            <input type="text" class="fanmail-name" id="fmName" maxlength="24" placeholder="sign here" autocomplete="off">
+          </div>
+
+          <div class="fanmail-actions">
+            <button type="button" class="fanmail-send" id="fmSend">
+              <span class="fm-send-wax">SS</span>
+              <span class="fm-send-label">Seal &amp; Mail</span>
+            </button>
+            <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
+          </div>
         </div>
       </div>
 
@@ -697,115 +722,284 @@
 </div>
 
 <style>
-/* ===== FANMAIL — band stationery + handwritten reply ===== */
-.fanmail-board { display:flex; flex-direction:column; gap:1.4rem; max-width:560px; margin:0 auto; }
-.fanmail-card {
-  position:relative; background:#f4ecd8; color:#2b2118; border-radius:4px; padding:1.5rem 1.6rem;
-  box-shadow:0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.08);
-  background-image:repeating-linear-gradient(#f4ecd8, #f4ecd8 31px, #d8cba8 32px);
-  transform:rotate(-.4deg);
+/* ============================================================
+   FANMAIL — a real letter you write, seal, and send.
+   A breeze stirs the paper. A corner curls. A snake-skin stamp
+   sits in the corner. Seal it, watch it fly, and Scorch writes
+   back — his envelope sails in, the wax cracks, the page unfurls
+   and his answer is scrawled out in his own hand.
+   ============================================================ */
+.fanmail-board { display:flex; flex-direction:column; gap:2rem; max-width:580px; margin:0 auto; perspective:1400px; }
+
+/* the stage holds the sheet so the flutter has room to breathe */
+.letter-stage { position:relative; transform-style:preserve-3d; }
+
+/* ---------- THE SHEET OF STATIONERY ---------- */
+.letter-sheet {
+  position:relative; color:#2b2118; border-radius:3px;
+  padding:2rem 2.1rem 1.6rem;
+  background:
+    /* faint coffee-stain + aging */
+    radial-gradient(120px 90px at 86% 78%, rgba(150,110,60,.10), transparent 70%),
+    radial-gradient(90px 70px at 12% 18%, rgba(120,90,50,.08), transparent 70%),
+    /* ruled lines */
+    repeating-linear-gradient(#f6efdb, #f6efdb 31px, #d9cba6 32px),
+    #f6efdb;
+  box-shadow:
+    0 22px 48px rgba(0,0,0,.55),
+    0 4px 10px rgba(0,0,0,.4),
+    inset 0 0 0 1px rgba(0,0,0,.06),
+    inset 0 0 60px rgba(180,150,100,.18);
+  transform-origin:50% 0%;
+  /* the gentle breeze — whole sheet sways + lifts a touch */
+  animation:sheetBreeze 7s ease-in-out infinite;
 }
-.fanmail-card::after {
-  content:''; position:absolute; top:0; left:0; right:0; height:6px; border-radius:4px 4px 0 0;
-  background:repeating-linear-gradient(45deg,#ff5a1f 0 10px,#c8281a 10px 20px); opacity:.85;
+/* a left "margin" red rule, like a real legal pad */
+.letter-sheet::before {
+  content:''; position:absolute; top:0; bottom:0; left:46px; width:2px;
+  background:rgba(200,40,26,.35); pointer-events:none;
 }
-.fanmail-letterhead { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.3rem; border-bottom:1.5px dashed #b8a988; padding-bottom:.6rem; margin-bottom:.9rem; }
-.fanmail-band { font-family:'Metal Mania',cursive; font-size:1.5rem; color:#c8281a; letter-spacing:.02em; }
+/* paper grain */
+.letter-sheet::after {
+  content:''; position:absolute; inset:0; border-radius:3px; pointer-events:none; opacity:.5; mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+@keyframes sheetBreeze {
+  0%,100% { transform:rotate(-.5deg) rotateX(0deg) translateY(0); }
+  35%     { transform:rotate(.25deg) rotateX(1.4deg) translateY(-3px); }
+  65%     { transform:rotate(-.15deg) rotateX(-.8deg) translateY(1px); }
+}
+.letter-sheet:focus-within { animation-play-state:paused; transform:rotate(0deg) translateY(-4px); box-shadow:0 28px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(0,0,0,.07), inset 0 0 60px rgba(180,150,100,.18); transition:transform .3s ease, box-shadow .3s ease; }
+
+/* ---------- THE CURLED CORNER (bottom-right, lifted by the breeze) ---------- */
+.letter-curl {
+  position:absolute; right:-1px; bottom:-1px; width:62px; height:62px; pointer-events:none; z-index:4;
+  background:linear-gradient(135deg, #e7d8b3 0%, #f6efdb 45%, #fffdf6 60%, #cbbb92 100%);
+  border-radius:3px 0 3px 0;
+  box-shadow:-4px -4px 10px rgba(0,0,0,.28);
+  clip-path:polygon(100% 0, 100% 100%, 0 100%);
+  transform-origin:100% 100%;
+  animation:curlFlutter 7s ease-in-out infinite;
+}
+/* the shadow the lifted corner casts on the page */
+.letter-curl::before {
+  content:''; position:absolute; right:0; bottom:0; width:62px; height:62px; z-index:-1;
+  background:radial-gradient(circle at 100% 100%, rgba(0,0,0,.28), transparent 70%);
+  transform:translate(-8px,-8px); border-radius:3px;
+  animation:curlShadow 7s ease-in-out infinite;
+}
+@keyframes curlFlutter {
+  0%,100% { transform:rotate(0deg) scale(1); }
+  35%     { transform:rotate(-9deg) scale(1.12) translate(-3px,-3px); }
+  65%     { transform:rotate(-3deg) scale(1.04) translate(-1px,-1px); }
+}
+@keyframes curlShadow {
+  0%,100% { opacity:.5; transform:translate(-8px,-8px) scale(1); }
+  35%     { opacity:.85; transform:translate(-14px,-14px) scale(1.25); }
+}
+
+/* ---------- SNAKE SKINS POSTAGE STAMP ---------- */
+.ss-stamp {
+  position:absolute; top:-14px; right:30px; width:64px; height:78px; z-index:6;
+  transform:rotate(7deg);
+  filter:drop-shadow(0 4px 7px rgba(0,0,0,.45));
+  animation:stampWobble 7s ease-in-out infinite;
+}
+.ss-stamp-inner {
+  width:100%; height:100%; padding:5px 4px;
+  display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+  text-align:center; color:#fff7ec;
+  background:
+    radial-gradient(circle at 35% 28%, #3a6b34, #234d22 55%, #14331a 100%);
+  /* perforated postage edge */
+  -webkit-mask:radial-gradient(circle 3px at 3px 50%, transparent 98%, #000) -3px 0/9px 100% repeat-y,
+               radial-gradient(circle 3px at 50% 3px, transparent 98%, #000) 0 -3px/100% 9px repeat-x,
+               linear-gradient(#000,#000);
+          mask:radial-gradient(circle 3px at 3px 50%, transparent 98%, #000) -3px 0/9px 100% repeat-y,
+               radial-gradient(circle 3px at 50% 3px, transparent 98%, #000) 0 -3px/100% 9px repeat-x,
+               linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out; mask-composite:exclude;
+  box-shadow:inset 0 0 0 2px rgba(255,247,236,.5);
+  position:relative; overflow:hidden;
+}
+/* faint snake-scale texture over the stamp */
+.ss-stamp-inner::after {
+  content:''; position:absolute; inset:0; opacity:.22; mix-blend-mode:overlay;
+  background-image:radial-gradient(circle at 50% 0, rgba(255,255,255,.6) 0 3px, transparent 4px);
+  background-size:9px 7px;
+}
+.ss-stamp-snake { font-size:1rem; line-height:1; }
+.ss-stamp-band { font-family:'Oswald',sans-serif; font-weight:700; font-size:.4rem; line-height:1.15; letter-spacing:.06em; }
+.ss-stamp-val { font-family:'Special Elite',monospace; font-size:.36rem; letter-spacing:.02em; opacity:.9; }
+@keyframes stampWobble {
+  0%,100% { transform:rotate(7deg); }
+  35%     { transform:rotate(4.5deg) translateY(-1px); }
+}
+
+/* ---------- LETTERHEAD & LETTER BODY ---------- */
+.fanmail-letterhead { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:.3rem; border-bottom:1.5px dashed #b8a988; padding-bottom:.55rem; margin-bottom:.5rem; }
+.fanmail-band { font-family:'Metal Mania',cursive; font-size:1.55rem; color:#c8281a; letter-spacing:.02em; }
 .fanmail-from { font-family:'Special Elite',monospace; font-size:.72rem; color:#6e5f48; }
+
+.letter-greeting { font-family:'Caveat',cursive; font-size:1.7rem; color:#1a2740; margin:.2rem 0 .1rem; transform:rotate(-.6deg); }
+
 .fanmail-name, .fanmail-body {
-  width:100%; box-sizing:border-box; background:transparent; border:none; color:#2b2118;
-  font-family:'Special Elite',monospace; font-size:1rem; line-height:32px; padding:0;
+  width:100%; box-sizing:border-box; background:transparent; border:none; color:#243a63;
+  font-family:'Caveat',cursive; font-size:1.5rem; line-height:32px; padding:0;
 }
-.fanmail-name { border-bottom:1px solid #b8a988; padding-bottom:2px; margin-bottom:.4rem; }
-.fanmail-body { resize:vertical; min-height:160px; }
+.fanmail-body { resize:vertical; min-height:170px; }
 .fanmail-name:focus, .fanmail-body:focus { outline:none; }
-.fanmail-name::placeholder, .fanmail-body::placeholder { color:#9a8c70; }
-.fanmail-actions { display:flex; align-items:center; gap:1rem; margin-top:.8rem; }
+.fanmail-name::placeholder, .fanmail-body::placeholder { color:#9a8c70; font-family:'Special Elite',monospace; font-size:.95rem; }
+
+/* sign-off line */
+.letter-signoff { display:flex; align-items:flex-end; gap:.6rem; margin-top:.4rem; }
+.letter-yours { font-family:'Caveat',cursive; font-size:1.5rem; color:#1a2740; white-space:nowrap; transform:rotate(-1deg); }
+.fanmail-name { width:auto; flex:1; border-bottom:1.5px solid #b8a988; padding-bottom:1px; color:#c8281a; }
+.fanmail-name::placeholder { color:#bba; }
+
+/* ---------- THE WAX-SEAL SEND BUTTON ---------- */
+.fanmail-actions { display:flex; align-items:center; gap:1rem; margin-top:1.1rem; }
 .fanmail-send {
-  cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  font-size:.9rem; color:#fff; padding:.6rem 1.4rem; border-radius:3px;
-  background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 4px 14px rgba(200,40,26,.4); transition:transform .15s;
+  cursor:pointer; border:none; display:inline-flex; align-items:center; gap:.6rem;
+  font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  font-size:.9rem; color:#fff; padding:.5rem 1.3rem .5rem .5rem; border-radius:40px;
+  background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 5px 16px rgba(200,40,26,.45);
+  transition:transform .15s, box-shadow .2s; position:relative; overflow:hidden;
 }
-.fanmail-send:hover { transform:translateY(-2px); }
-.fanmail-send:disabled { opacity:.55; transform:none; cursor:default; }
-.fanmail-status { font-family:'Special Elite',monospace; font-size:.8rem; color:#8a3a1a; }
-
-/* his reply — same paper, messy handwriting */
-.fanmail-reply { position:relative; transform:rotate(.5deg); }
-.fanmail-reply:nth-child(even) { transform:rotate(-.7deg); }
-.fanmail-reply .fanmail-stamp {
-  position:absolute; top:-12px; right:14px; width:54px; height:60px; background:#ff5a1f;
-  border:3px solid #f4ecd8; box-shadow:0 2px 8px rgba(0,0,0,.4); transform:rotate(6deg);
-  display:flex; align-items:center; justify-content:center; font-family:'Metal Mania',cursive; color:#fff; font-size:.7rem; text-align:center; line-height:1.1;
+.fm-send-wax {
+  width:34px; height:34px; border-radius:50%; flex:none;
+  background:radial-gradient(circle at 34% 30%, #ff7a4a, #a81d10 70%);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.25), 0 2px 5px rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Metal Mania',cursive; font-size:.85rem; color:#ffe9dd; text-shadow:0 1px 2px rgba(0,0,0,.5);
 }
-.fanmail-reply-to { font-family:'Special Elite',monospace; font-size:.78rem; color:#6e5f48; margin-bottom:.5rem; }
-.fanmail-reply-text {
-  font-family:'Caveat',cursive; font-size:1.5rem; line-height:1.5; color:#1a2740;
-  white-space:pre-wrap; word-wrap:break-word;
-}
-.fanmail-reply-sign { font-family:'Caveat',cursive; font-size:1.7rem; color:#c8281a; text-align:right; margin-top:.6rem; transform:rotate(-2deg); }
-.fanmail-reply.pending .fanmail-reply-text { color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
-
-/* ===== FANMAIL — animated mailing experience ===== */
-.fanmail-write { transition:transform .25s ease, box-shadow .25s ease; }
-.fanmail-write:focus-within { transform:rotate(0deg) translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.08); }
-/* wax-seal style send button */
-.fanmail-send { position:relative; overflow:hidden; }
-.fanmail-send::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.35), transparent 60%); opacity:0; transition:opacity .2s; }
+.fanmail-send::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.4), transparent 60%); opacity:0; transition:opacity .2s; }
+.fanmail-send:hover { transform:translateY(-2px); box-shadow:0 9px 22px rgba(200,40,26,.55); }
 .fanmail-send:hover::before { opacity:1; }
 .fanmail-send:active { transform:translateY(0) scale(.96); }
+.fanmail-send:disabled { opacity:.55; transform:none; cursor:default; }
+.fanmail-status { font-family:'Special Elite',monospace; font-size:.8rem; color:#ff7043; }
 
-/* the little letter that folds + flies off when you mail it */
+/* sheet states during the send sequence */
+.letter-sheet.sealing { animation:none; }
+.letter-sheet.folding { animation:none; transform-origin:50% 50%; animation:sheetFold .55s ease forwards; }
+@keyframes sheetFold {
+  0%   { transform:rotate(0) scaleY(1); }
+  55%  { transform:rotate(0) scaleY(.5) translateY(10px); }
+  100% { transform:rotate(0) scaleY(.46) translateY(10px); opacity:.96; }
+}
+
+/* ---------- THE FLY-AWAY (sealed letter rockets off) ---------- */
 .fm-flyaway {
-  position:absolute; z-index:40; background:#f4ecd8; border-radius:4px; pointer-events:none;
-  box-shadow:0 10px 26px rgba(0,0,0,.5); transform-origin:center;
-  background-image:repeating-linear-gradient(#f4ecd8,#f4ecd8 12px,#d8cba8 13px);
-  border-top:5px solid #c8281a;
-  animation:fmFold .45s ease forwards, fmFly 1.15s .45s cubic-bezier(.55,-0.2,.7,1) forwards;
+  position:absolute; z-index:60; border-radius:5px; pointer-events:none; transform-origin:center;
+  background:linear-gradient(#efe2c5,#e3d3ac);
+  box-shadow:0 14px 30px rgba(0,0,0,.5);
+  border-top:none;
+  animation:fmFly 1.25s .15s cubic-bezier(.5,-0.25,.7,1) forwards;
 }
-.fm-flyaway::after { /* a stamp thunks on mid-flight */
-  content:'★'; position:absolute; top:6px; right:8px; width:26px; height:30px; background:#ff5a1f; color:#fff;
-  display:flex; align-items:center; justify-content:center; border:2px solid #f4ecd8; transform:rotate(8deg) scale(0);
-  font-size:.9rem; animation:fmStamp .25s .4s ease forwards;
+/* envelope flap + wax seal on the flying letter */
+.fm-flyaway::before {
+  content:''; position:absolute; left:0; right:0; top:0; height:52%;
+  background:linear-gradient(#e8d9b6,#d8c393); clip-path:polygon(0 0,100% 0,50% 92%);
+  box-shadow:0 3px 6px rgba(0,0,0,.18);
 }
-@keyframes fmFold { 0%{transform:scaleY(1)} 55%{transform:scaleY(.55) translateY(8px)} 100%{transform:scaleY(.5) translateY(8px)} }
-@keyframes fmStamp { to { transform:rotate(-9deg) scale(1); } }
+.fm-flyaway::after {
+  content:'SS'; position:absolute; left:50%; top:42%; transform:translate(-50%,-50%) scale(0);
+  width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#ff7a4a,#a81d10 70%); color:#ffe9dd;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Metal Mania',cursive; font-size:.8rem; box-shadow:0 2px 6px rgba(0,0,0,.45);
+  animation:fmWaxPress .3s .05s cubic-bezier(.3,1.6,.5,1) forwards;
+}
+@keyframes fmWaxPress { to { transform:translate(-50%,-50%) scale(1) rotate(-6deg); } }
 @keyframes fmFly {
-  0%   { opacity:1; }
-  100% { opacity:0; transform:translate(60vw,-60vh) scale(.18) rotate(22deg); }
+  0%   { opacity:1; transform:translate(0,0) rotate(0) scale(1); }
+  18%  { opacity:1; transform:translate(0,8px) rotate(-3deg) scale(1); }
+  100% { opacity:0; transform:translate(58vw,-62vh) rotate(20deg) scale(.16); }
 }
 
-/* incoming envelope (his reply arrives) */
-.fm-arrival { position:relative; display:flex; flex-direction:column; align-items:center; margin-bottom:1.4rem; }
-.fm-envelope { position:relative; width:min(300px,82%); height:170px; margin:0 auto; perspective:900px; z-index:2; opacity:0; transform:translateY(-120%) rotate(-4deg); }
-.fm-envelope.drop { animation:fmDrop .8s cubic-bezier(.3,1.4,.5,1) forwards; }
-.fm-env-body { position:absolute; inset:0; background:linear-gradient(#efe2c5,#e3d3ac); border-radius:7px; box-shadow:0 12px 30px rgba(0,0,0,.45); overflow:hidden; }
-.fm-env-body::before { /* the V seam of the envelope */
+/* ============================================================
+   HIS REPLY ARRIVES
+   ============================================================ */
+.fm-arrival { position:relative; display:flex; flex-direction:column; align-items:center; margin-bottom:1.6rem; }
+.fm-envelope { position:relative; width:min(330px,86%); height:188px; margin:0 auto; perspective:1000px; z-index:2; opacity:0; transform:translateY(-130%) rotate(-5deg); }
+.fm-envelope.drop { animation:fmDrop .9s cubic-bezier(.3,1.35,.5,1) forwards; }
+.fm-env-body { position:absolute; inset:0; background:linear-gradient(#efe2c5,#e1d0a6); border-radius:8px; box-shadow:0 16px 34px rgba(0,0,0,.5); overflow:hidden; }
+.fm-env-body::before {
   content:''; position:absolute; left:0; right:0; bottom:0; top:46%;
-  background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.08) 50%) , linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.08) 50%);
+  background:linear-gradient(135deg,transparent 49.5%,rgba(0,0,0,.09) 50%), linear-gradient(225deg,transparent 49.5%,rgba(0,0,0,.09) 50%);
+}
+/* address scrawl on the envelope front */
+.fm-env-body::after {
+  content:'Scorch'; position:absolute; left:18px; top:16px; font-family:'Caveat',cursive; color:#5a4a32; font-size:1.4rem; transform:rotate(-3deg); opacity:.8;
 }
 .fm-env-flap {
-  position:absolute; left:0; right:0; top:0; height:55%; transform-origin:top center; z-index:5;
-  background:linear-gradient(#e8d9b6,#dcc99e); clip-path:polygon(0 0,100% 0,50% 100%);
-  box-shadow:0 4px 8px rgba(0,0,0,.15); transition:transform .55s ease, z-index 0s .28s;
+  position:absolute; left:0; right:0; top:0; height:54%; transform-origin:top center; z-index:5;
+  background:linear-gradient(#ead9b4,#dcc99e); clip-path:polygon(0 0,100% 0,50% 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.16); transition:transform .6s ease, z-index 0s .3s;
 }
-.fm-env-flap .fm-wax { position:absolute; left:50%; bottom:6px; transform:translate(-50%,50%); width:30px; height:30px; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#ff6a3a,#b51f12); color:#fff; font-family:'Metal Mania',cursive; font-size:.85rem;
-  display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+/* wax seal holding the flap shut */
+.fm-env-flap .fm-wax {
+  position:absolute; left:50%; bottom:4px; transform:translate(-50%,50%); width:40px; height:40px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#ff7a4a,#a81d10 72%); color:#ffe9dd;
+  font-family:'Metal Mania',cursive; font-size:.95rem;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.22);
+}
+.fm-env-flap .fm-wax::before { content:''; position:absolute; inset:5px; border-radius:50%; border:1px dashed rgba(255,255,255,.35); }
+/* the moment it cracks */
+.fm-envelope.cracking .fm-wax { animation:waxShake .4s ease; }
+@keyframes waxShake { 0%,100%{transform:translate(-50%,50%) rotate(0)} 25%{transform:translate(-54%,50%) rotate(-8deg)} 75%{transform:translate(-46%,50%) rotate(8deg)} }
 .fm-envelope.open .fm-env-flap { transform:rotateX(178deg); z-index:1; }
-/* the letter tucked inside, slides up on open */
-.fm-env-letter { position:absolute; left:6%; right:6%; top:14%; bottom:8%; background:#f4ecd8; border-radius:3px 3px 0 0;
-  box-shadow:0 -2px 8px rgba(0,0,0,.15); z-index:3; transform:translateY(0); transition:transform .6s ease .3s; }
-.fm-envelope.open .fm-env-letter { transform:translateY(-46%); }
-
+.fm-envelope.open .fm-wax { opacity:0; transition:opacity .3s; }
+/* the letter tucked inside */
+.fm-env-letter { position:absolute; left:6%; right:6%; top:14%; bottom:8%; background:#f6efdb; border-radius:3px 3px 0 0; box-shadow:0 -2px 8px rgba(0,0,0,.15); z-index:3; transform:translateY(0); transition:transform .65s ease .3s; }
+.fm-envelope.open .fm-env-letter { transform:translateY(-50%); }
 @keyframes fmDrop {
-  0%   { opacity:0; transform:translateY(-130%) rotate(-5deg); }
-  70%  { opacity:1; transform:translateY(6%) rotate(1.5deg); }
-  85%  { transform:translateY(-3%) rotate(-1deg); }
+  0%   { opacity:0; transform:translateY(-135%) rotate(-6deg); }
+  55%  { opacity:1; transform:translateY(8%) rotate(2deg); }
+  72%  { transform:translateY(-4%) rotate(-1.5deg); }
+  88%  { transform:translateY(2%) rotate(.6deg); }
   100% { opacity:1; transform:translateY(0) rotate(0); }
 }
-/* the actual reply paper that rises out + gets written on */
-.fanmail-reply.arriving { opacity:0; transform:translateY(34px) scale(.96); transition:opacity .5s ease, transform .5s ease; margin-top:-26px; z-index:1; position:relative; }
+
+/* ---------- HIS REPLY LETTER (the permanent card) ---------- */
+.fanmail-reply {
+  position:relative; color:#2b2118; border-radius:3px; padding:1.7rem 1.8rem 1.5rem;
+  background:repeating-linear-gradient(#f6efdb,#f6efdb 31px,#d9cba6 32px), #f6efdb;
+  box-shadow:0 14px 34px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.06), inset 0 0 50px rgba(180,150,100,.16);
+  transform:rotate(.5deg);
+  animation:replyBreeze 8s ease-in-out infinite;
+}
+.fanmail-reply:nth-child(even) { transform:rotate(-.7deg); animation-duration:9s; }
+@keyframes replyBreeze {
+  0%,100% { transform:rotate(.5deg); }
+  50%     { transform:rotate(-.1deg) translateY(-2px); }
+}
+.fanmail-reply::before { content:''; position:absolute; top:0; bottom:0; left:40px; width:2px; background:rgba(200,40,26,.3); }
+/* a torn-edge top, like he ripped it out of a notebook */
+.fanmail-reply::after {
+  content:''; position:absolute; top:-1px; left:0; right:0; height:8px;
+  background:repeating-linear-gradient(90deg, transparent 0 5px, #f6efdb 5px 7px);
+  -webkit-mask:linear-gradient(#000,#000); filter:drop-shadow(0 1px 1px rgba(0,0,0,.2));
+}
+.fanmail-reply .fanmail-stamp {
+  position:absolute; top:-12px; right:18px; width:56px; height:66px; z-index:3;
+  background:radial-gradient(circle at 35% 28%, #3a6b34, #1c401d 80%);
+  border:3px solid #f6efdb; box-shadow:0 3px 9px rgba(0,0,0,.45); transform:rotate(7deg);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Oswald',sans-serif; font-weight:700; color:#fff7ec; font-size:.6rem; text-align:center; line-height:1.2; letter-spacing:.06em;
+}
+.fanmail-reply-to { font-family:'Special Elite',monospace; font-size:.8rem; color:#6e5f48; margin-bottom:.6rem; }
+.fanmail-reply-text {
+  font-family:'Caveat',cursive; font-size:1.55rem; line-height:32px; color:#1a2740;
+  white-space:pre-wrap; word-wrap:break-word; min-height:32px;
+}
+.fanmail-reply-sign { font-family:'Caveat',cursive; font-size:1.85rem; color:#c8281a; text-align:right; margin-top:.7rem; transform:rotate(-2.5deg); }
+.fanmail-reply.pending .fanmail-reply-text { color:#6e5f48; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
+
+/* the reply rising out of the opened envelope */
+.fanmail-reply.arriving { opacity:0; transform:translateY(40px) scale(.95); transition:opacity .55s ease, transform .55s ease; margin-top:-30px; z-index:1; }
 .fanmail-reply.arriving.show { opacity:1; transform:translateY(0) scale(1); }
 .fm-caret::after { content:'|'; color:#1a2740; animation:fmCaret .7s steps(1) infinite; }
 @keyframes fmCaret { 50%{opacity:0;} }
@@ -818,6 +1012,7 @@
 @keyframes fmStampIn { 0%{transform:rotate(-4deg) scale(1.6); opacity:0;} 100%{transform:rotate(-4deg) scale(1); opacity:1;} }
 
 @media (prefers-reduced-motion: reduce) {
+  .letter-sheet, .letter-curl, .letter-curl::before, .ss-stamp, .fanmail-reply { animation:none; }
   .fm-flyaway, .fm-envelope.drop { animation:none; }
   .fm-envelope { opacity:1; transform:none; }
   .fanmail-reply.arriving { transition:none; opacity:1; transform:none; margin-top:0; }
@@ -1303,7 +1498,7 @@
 
   function addLetterReply(text, toName, persist){
     const wrap = document.createElement("div");
-    wrap.className = "fanmail-card fanmail-reply";
+    wrap.className = "fanmail-reply";
     wrap.innerHTML =
       '<div class="fanmail-stamp">SS<br>2026</div>' +
       '<div class="fanmail-reply-to">To ' + esc(toName || "Anonymous") + ' —</div>' +
@@ -1324,23 +1519,36 @@
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
 
-  // fold the written letter and fly it off into the mail
+  // fold the written letter, press the wax, and send it sailing off
   function playSend(){
     return new Promise(resolve => {
-      const card = document.querySelector(".fanmail-write");
+      const card = document.getElementById("fmSheet") || document.querySelector(".fanmail-write");
       const board = document.getElementById("scorchFanmail");
-      if (reduceMotion || !card || !board) return resolve();
+      if (reduceMotion || !card || !board) {
+        if (card) { card.style.transition = "opacity .25s"; card.style.opacity = ".4"; setTimeout(()=>{ card.style.opacity=""; },300); }
+        return resolve();
+      }
       const cr = card.getBoundingClientRect();
       const br = board.getBoundingClientRect();
+
+      // fold the real sheet down
+      card.classList.add("folding");
+
+      // a sealed letter takes its place and flies off
       const fly = document.createElement("div");
       fly.className = "fm-flyaway";
       fly.style.left = (cr.left - br.left) + "px";
       fly.style.top = (cr.top - br.top) + "px";
       fly.style.width = cr.width + "px";
-      fly.style.height = cr.height + "px";
+      fly.style.height = Math.min(cr.height, 150) + "px";
       board.style.position = "relative";
       board.appendChild(fly);
-      setTimeout(() => { fly.remove(); resolve(); }, 1650);
+
+      setTimeout(() => {
+        fly.remove();
+        card.classList.remove("folding");
+        resolve();
+      }, 1500);
     });
   }
 
@@ -1360,7 +1568,8 @@
     });
   }
 
-  // his reply flies in as a sealed envelope, opens, the letter rises + gets written
+  // his reply sails in as a sealed envelope; the wax cracks, the flap opens,
+  // the page unfurls and his answer is scrawled out in his own hand
   async function playReceive(toName, text){
     try {
       if (reduceMotion) { return addLetterReply(text, toName, false); }
@@ -1376,14 +1585,16 @@
       const env = arrival.querySelector(".fm-envelope");
 
       await wait(40);
-      env.classList.add("drop");          // flies in + bounces
-      await wait(850);
-      env.classList.add("open");          // flap flips, inner letter peeks up
-      await wait(650);
+      env.classList.add("drop");          // sails in + settles
+      await wait(900);
+      env.classList.add("cracking");      // the wax seal shudders + cracks
+      await wait(420);
+      env.classList.add("open");          // flap flips back, letter peeks up
+      await wait(680);
 
       // the real reply paper rises out of the envelope
       const wrap = document.createElement("div");
-      wrap.className = "fanmail-card fanmail-reply arriving";
+      wrap.className = "fanmail-reply arriving";
       wrap.innerHTML =
         '<div class="fanmail-stamp">SS<br>2026</div>' +
         '<div class="fanmail-reply-to">To ' + esc(toName || "Anonymous") + ' —</div>' +
@@ -1395,8 +1606,8 @@
       // fade the envelope away as the letter takes its place
       env.style.transition = "opacity .5s ease, transform .5s ease";
       env.style.opacity = "0";
-      env.style.transform = "translateY(-18px) scale(.92)";
-      await wait(380);
+      env.style.transform = "translateY(-22px) scale(.9)";
+      await wait(420);
       env.remove();
 
       // handwriting
