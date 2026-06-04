@@ -200,7 +200,7 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
     ];
   } else if (mode === "reply") {
     // a fan replied to a comment/reply inside a thread. Scorch MIGHT jump in.
-    system += `\n\nYou're scrolling the replies under a comment on your profile.\n${threadContext ? "Here's the conversation so far (oldest to newest):\n" + threadContext + "\n" : ""}\nThe latest reply${username ? ` (from "${username}")` : ""} is what you're responding to. Butt into the conversation with a SHORT, sharp comeback aimed at THIS latest reply - one or two lines, crude and unmistakably you. If they're talking trash about you, agreeing that you're ugly/washed/whatever, or ganging up, fire back - don't let it slide. If they're praising you, be smug about it. React like you actually read the whole thread.`;
+    system += `\n\nYou're reading a reply thread under a comment on your profile.\n\n${threadContext || ""}\n\nThe new reply itself is the user message below. IMPORTANT: read the whole conversation above first — a short reply like "I agree" or "so true" refers to the comment it's replying to, so figure out what they actually mean from the thread (e.g. if they're agreeing with someone who insulted you, they're insulting you too). Then butt in with a SHORT, sharp comeback aimed at this new reply and what it's really saying — one or two lines, crude and unmistakably you. Fire back at trash-talk or pile-ons; be smug about praise. React like you read the entire thread, not just the last line.`;
     messages = [
       { role: "system", content: system },
       { role: "user", content: comment },
