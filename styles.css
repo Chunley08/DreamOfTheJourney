@@ -233,9 +233,9 @@
         rgba(232, 94, 232, 0.50),
         rgba(94, 127, 255, 0.40),
         rgba(157, 92, 255, 0.55));
-    filter: blur(34px) saturate(1.3);
-    opacity: 0.75;
-    animation: meetAurora 11s linear infinite;
+    filter: blur(40px) saturate(1.15);
+    opacity: 0.3;
+    animation: meetAurora 16s linear infinite;
   }
   @keyframes meetAurora {
     0%   { transform: rotate(0deg)   scale(1.05); }
@@ -245,13 +245,10 @@
   /* Soft pulsing glow to draw the eye */
   @keyframes meetPulse {
     0%, 100% {
-      box-shadow: 0 0 0 0 rgba(232, 94, 232, 0.0),
-                  0 0 34px rgba(157, 92, 255, 0.40);
+      box-shadow: 0 0 16px rgba(157, 92, 255, 0.20);
     }
     50% {
-      box-shadow: 0 0 0 10px rgba(232, 94, 232, 0.0),
-                  0 0 60px rgba(232, 94, 232, 0.55),
-                  0 0 100px rgba(94, 220, 255, 0.32);
+      box-shadow: 0 0 28px rgba(232, 94, 232, 0.30);
     }
   }
   /* Animated sheen sweep across the button */
@@ -420,17 +417,18 @@
     animation: rainbowFlow 18s linear infinite;
   }
 
-  /* ----- the "Meet the Characters" title: animated rainbow OUTLINE + shine ----- */
+  /* ----- the "Meet the Characters" title: clean animated rainbow, no bloom ----- */
   .meet-title {
     position: relative;
     display: inline-block;
-    /* a clean, breathing glow so the words shine without washing out */
-    filter: drop-shadow(0 0 8px rgba(255, 180, 255, 0.45))
-            drop-shadow(0 0 18px rgba(120, 200, 255, 0.3));
-    animation: rainbowFlow 18s linear infinite, meetShine 3s ease-in-out infinite;
+    /* no glow/bloom — just a tight dark shadow to ground the letters */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+    /* slow, smooth rainbow drift through all the colors */
+    animation: rainbowFlow 22s linear infinite;
   }
-  /* a duplicate of the words behind the fill, drawn as a flowing DARK rainbow stroke
-     so the bright fill stays legible against a deep, saturated outline */
+  /* a duplicate of the words behind the fill, drawn as a STATIC dark rainbow
+     stroke — a steady outline that keeps the bright fill crisp and legible
+     without any glow or shimmer competing with it */
   .meet-title::before {
     content: attr(data-text);
     position: absolute;
@@ -438,21 +436,19 @@
     z-index: -1;
     pointer-events: none;
     background: var(--rainbow-dark);
-    background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    /* transparent stroke + clipped dark-rainbow fill = a DARK rainbow OUTLINE */
-    -webkit-text-stroke: 4px transparent;
-    animation: rainbowFlowRev 9s linear infinite;
-    /* a tight dark shadow to deepen the edge, no bright bloom */
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.6));
+    /* transparent stroke + clipped dark-rainbow fill = a crisp dark OUTLINE */
+    -webkit-text-stroke: 2.5px transparent;
+    /* a tight dark shadow to deepen the edge — no bright bloom */
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.65));
   }
   /* fallback for browsers without text-stroke support */
   @supports not (-webkit-text-stroke: 1px red) {
     .meet-title::before { display: none; }
-    .meet-title { text-shadow: 0 0 2px #fff, 0 0 8px var(--accent-magenta), 0 0 16px var(--accent-cyan); }
+    .meet-title { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 1px rgba(0, 0, 0, 0.5); }
   }
   @keyframes rainbowFlowRev {
     from { background-position: 200% 50%; }
