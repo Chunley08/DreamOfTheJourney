@@ -1199,7 +1199,17 @@
   }
 
   // nest a flat list by parentId and render recursively
+  let pendingItems = null;   // stash a redraw we deferred because the user was typing
+  function userIsTyping(){
+    // an open reply composer, OR focus inside the thread/composer = don't yank the DOM
+    if (thread.querySelector(".sc-reply-box.open")) return true;
+    const a = document.activeElement;
+    if (a && (a.matches(".sc-rb-name, .sc-rb-text, .sc-name-input, .sc-comment-input") || thread.contains(a))) return true;
+    return false;
+  }
   function renderWall(rawItems){
+    // never blow away the thread while someone's mid-reply — defer it
+    if (userIsTyping()) { pendingItems = rawItems; return; }
     const items = backfillLegacy(rawItems);
     const sig = items.map(i => i.id + ":" + (i.likes||0) + ":" + (i.dislikes||0)).join(",")
                 + (ADMIN_KEY ? "|a" : "") + "|" + JSON.stringify(myVotes);
@@ -1305,6 +1315,7 @@
     const cancel = e.target.closest(".sc-reply-cancel");
     if (cancel) {
       const box = cancel.closest(".sc-reply-box"); if (box) box.classList.remove("open");
+      flushPending();
       return;
     }
     // ---- post a threaded reply ----
@@ -1320,11 +1331,19 @@
       const name = (nameI.value.trim() || "Anonymous");
       if (!text) { mini.textContent = "type something first."; return; }
 
-      // build the thread context (parent + nearby) so Scorch can answer in-context
-      const parentBlock = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-      const parentText = parentBlock ? (parentBlock.querySelector('.sc-comment-text')?.textContent || "") : "";
-      const parentAuthor = parentBlock ? (parentBlock.querySelector('.sc-comment-author')?.textContent || "someone") : "someone";
-      const ctx = parentAuthor + ' said: "' + parentText + '"';
+      // build the FULL thread context by walking up the ancestor chain,
+      // so Scorch can react to the whole conversation (incl. the original comment).
+      const esc2 = s => (s||"");
+      const chain = [];
+      let cur = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+      while (cur && cur.classList && cur.classList.contains("sc-comment")) {
+        const a = cur.querySelector(".sc-comment-author")?.textContent?.replace(/\s*✓ Scorch$/,"").trim() || "someone";
+        const t = cur.querySelector(".sc-comment-text")?.textContent || "";
+        chain.unshift(a + ': "' + esc2(t) + '"');
+        // climb to the parent comment (skip the .sc-children wrapper)
+        cur = cur.parentElement ? cur.parentElement.closest(".sc-comment") : null;
+      }
+      const ctx = chain.join("\n");
 
       post.disabled = true; mini.textContent = "posting...";
       try {
@@ -1335,12 +1354,17 @@
         textI.value = ""; box.classList.remove("open"); mini.textContent = "";
         if (data.justBlocked) { setTimeout(setBlocked, 600); }
         // refresh to show the new threaded reply (and Scorch's answer if he gave one)
-        if (data.saved) { lastSig = ""; await loadWall(); }
+        if (data.saved) { lastSig = ""; setTimeout(loadWall, 400); }
       } catch (err) { mini.textContent = "couldn't post — try again."; }
       finally { post.disabled = false; }
       return;
     }
   });
+
+  // re-run a redraw we deferred while the user was typing
+  function flushPending(){
+    if (pendingItems && !userIsTyping()) { const it = pendingItems; pendingItems = null; lastSig = ""; renderWall(it); }
+  }
 
   // surface Scorch's reaction to a vote as a transient line under the comment
   function showVoteReaction(block, text){
