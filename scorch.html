@@ -1165,6 +1165,13 @@
   function saveVotes(v){ try { sessionStorage.setItem(VOTE_KEY, JSON.stringify(v)); } catch(e){} }
   let myVotes = loadVotes();   // { commentId: "like" | "dislike" }
 
+  // per-session display name: lives in sessionStorage, so the chosen name
+  // sticks around for this tab (surviving redraws after a reply) but is
+  // wiped automatically the moment the tab is closed.
+  const NAME_KEY = "scorchName";
+  function loadName(){ try { return sessionStorage.getItem(NAME_KEY) || ""; } catch(e){ return ""; } }
+  function saveName(n){ try { sessionStorage.setItem(NAME_KEY, (n||"").trim()); } catch(e){} }
+
   // avatar color from a name (stable hash -> hue)
   function avatarColor(name){
     let h = 0; const s = (name || "?");
@@ -1372,7 +1379,14 @@
       const boxes = thread.querySelectorAll(".sc-reply-box.open");
       boxes.forEach(b => { if (b.dataset.replybox !== id) b.classList.remove("open"); });
       const box = thread.querySelector('.sc-reply-box[data-replybox="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-      if (box) { box.classList.toggle("open"); const t = box.querySelector(".sc-rb-text"); if (box.classList.contains("open") && t) t.focus(); }
+      if (box) {
+        box.classList.toggle("open");
+        if (box.classList.contains("open")) {
+          const ni = box.querySelector(".sc-rb-name");
+          if (ni && !ni.value) ni.value = loadName();
+          const t = box.querySelector(".sc-rb-text"); if (t) t.focus();
+        }
+      }
       return;
     }
     // ---- cancel ----
@@ -1394,6 +1408,7 @@
       const text = textI.value.trim();
       const name = (nameI.value.trim() || "Anonymous");
       if (!text) { mini.textContent = "type something first."; return; }
+      if (nameI.value.trim()) saveName(nameI.value);
 
       // build the FULL thread context by climbing the parentId chain in the
       // DATA model (the DOM is flat now, so there are no ancestor nodes to walk).
@@ -1519,6 +1534,14 @@
     loadBlocked();
   }
 
+  // restore the name the user chose earlier this session, and keep it saved
+  // as they type so it survives the redraw that happens after sending.
+  if (nameEl) {
+    const saved = loadName();
+    if (saved && !nameEl.value) nameEl.value = saved;
+    nameEl.addEventListener("input", () => saveName(nameEl.value));
+  }
+
   // load now + refresh every 15s so other people's comments appear live
   loadWall();
   setInterval(loadWall, 15000);
@@ -1529,6 +1552,7 @@
     const comment = textEl.value.trim();
     const name = (nameEl.value.trim() || "Anonymous");
     if (!comment) { statusEl.textContent = "type something first."; return; }
+    if (nameEl.value.trim()) saveName(nameEl.value);
 
     const user = getUser(name);
     const pastComments = user.comments.slice();  // what he's seen from them before
