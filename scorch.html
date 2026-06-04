@@ -669,6 +669,15 @@
   <span class="sc-dm-fab-notif" id="scDmNotif">1</span>
 </button>
 
+<!-- full-screen splash when Scorch DMs you -->
+<div class="sc-dm-splash" id="scDmSplash" aria-hidden="true">
+  <div class="sc-dm-splash-inner">
+    <div class="sc-dm-splash-icon">✉</div>
+    <div class="sc-dm-splash-text">Scorch slid into your DMs</div>
+    <div class="sc-dm-splash-sub">check the corner ↘</div>
+  </div>
+</div>
+
 <div class="sc-chat" id="scChat" aria-hidden="true">
   <div class="sc-chat-head">
     <div class="sc-chat-avatar">
@@ -765,6 +774,37 @@
 .sc-dm-fab.has-notif .sc-dm-fab-notif { display:flex; }
 .sc-dm-fab.has-notif { animation:scFabShake .6s ease-in-out 2; }
 @keyframes scFabShake { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-12deg) scale(1.1);} 75%{transform:rotate(12deg) scale(1.1);} }
+
+/* full-screen DM splash */
+.sc-dm-splash {
+  position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center;
+  background:rgba(8,2,4,.78); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none;
+}
+.sc-dm-splash.show { animation:scSplashFade 2.8s ease forwards; }
+@keyframes scSplashFade {
+  0%   { opacity:0; }
+  12%  { opacity:1; }
+  78%  { opacity:1; }
+  100% { opacity:0; }
+}
+.sc-dm-splash-inner { text-align:center; transform:scale(.8); }
+.sc-dm-splash.show .sc-dm-splash-inner { animation:scSplashPop 2.8s cubic-bezier(.2,.9,.3,1.4) forwards; }
+@keyframes scSplashPop {
+  0%   { transform:scale(.6); opacity:0; }
+  14%  { transform:scale(1.08); opacity:1; }
+  22%  { transform:scale(1); }
+  78%  { transform:scale(1); opacity:1; }
+  100% { transform:scale(.95); opacity:0; }
+}
+.sc-dm-splash-icon {
+  font-size:5rem; color:#ff5a1f; line-height:1; margin-bottom:1rem;
+  text-shadow:0 0 30px rgba(255,90,31,.8), 0 0 60px rgba(200,40,26,.5);
+  animation:scSplashThrob 1.2s ease-in-out infinite;
+}
+@keyframes scSplashThrob { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+.sc-dm-splash-text { font-family:'Metal Mania',cursive; font-size:2rem; color:#fff; letter-spacing:.02em; text-shadow:0 2px 12px rgba(0,0,0,.6); }
+.sc-dm-splash-sub { font-family:'Special Elite',monospace; font-size:1rem; color:#ff5a1f; margin-top:.6rem; letter-spacing:.1em; }
 @keyframes scFabPulse { 0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 14px rgba(255,90,31,.4);} 50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 26px rgba(255,90,31,.75);} }
 .sc-chat { position:fixed; bottom:22px; right:22px; z-index:9999; width:min(370px,calc(100vw - 32px)); height:min(540px,calc(100vh - 60px)); display:flex; flex-direction:column; background:linear-gradient(165deg,#1a0a14,#120509); border-radius:20px; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,90,31,.22); opacity:0; transform:translateY(24px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s, transform .28s cubic-bezier(.2,.9,.3,1.25); }
 .sc-chat.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
@@ -797,11 +837,13 @@
   const CHAR = "scorch";
   const esc = s => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
-  // ---- per-device memory (localStorage) ----
-  // remembers each username's past comments + their DM thread, on THIS device.
+  // ---- per-session memory (sessionStorage) ----
+  // remembers each username's comments + DM thread + letters during THIS visit.
+  // sessionStorage wipes automatically when the tab is closed, so a fresh visit
+  // starts Scorch over with no memory. Refreshes within the same tab are kept.
   const MEM_KEY = "scorchMemory_v1";
-  function loadMem(){ try { return JSON.parse(localStorage.getItem(MEM_KEY)) || {}; } catch(e){ return {}; } }
-  function saveMem(m){ try { localStorage.setItem(MEM_KEY, JSON.stringify(m)); } catch(e){} }
+  function loadMem(){ try { return JSON.parse(sessionStorage.getItem(MEM_KEY)) || {}; } catch(e){ return {}; } }
+  function saveMem(m){ try { sessionStorage.setItem(MEM_KEY, JSON.stringify(m)); } catch(e){} }
   let memory = loadMem();
   function userKey(name){ return (name || "Anonymous").toLowerCase().trim(); }
   function getUser(name){
@@ -873,6 +915,16 @@
   const chatInput = document.getElementById("scChatInput");
   const chatSend = document.getElementById("scChatSend");
   const notif = document.getElementById("scDmNotif");
+  const splash = document.getElementById("scDmSplash");
+
+  function playSplash(){
+    if (!splash) return;
+    splash.classList.remove("show");
+    void splash.offsetWidth;   // restart the animation if it's mid-play
+    splash.classList.add("show");
+    splash.setAttribute("aria-hidden","false");
+    setTimeout(() => { splash.classList.remove("show"); splash.setAttribute("aria-hidden","true"); }, 2900);
+  }
 
   // who the current DM thread belongs to (defaults to whatever name is typed, else Anonymous)
   let currentDmUser = "Anonymous";
@@ -931,7 +983,7 @@
   function receiveDM(text){
     primeDMFor(currentDmUser);
     addMsg(text, "scorch");           // saved to that user's thread
-    if (!chat.classList.contains("open")) showNotif();  // ping the bubble if closed
+    if (!chat.classList.contains("open")) { showNotif(); playSplash(); }  // ping + splash if closed
   }
 
   async function sendDM(){
