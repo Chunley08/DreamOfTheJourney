@@ -200,7 +200,7 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
     ];
   } else if (mode === "reply") {
     // a fan replied to a comment/reply inside a thread. Scorch MIGHT jump in.
-    system += `\n\nHe's scrolling the replies under a public comment on his profile and he sees this. ${threadContext ? `The thread so far:\n${threadContext}\n` : ""}Someone just replied. If he feels like throwing in his two cents, write a SHORT, sharp, in-character reply to THIS specific message - like butting into a conversation. One or two lines, crude and unmistakably Scorch.`;
+    system += `\n\nYou're scrolling the replies under a comment on your profile.\n${threadContext ? "Here's the conversation so far (oldest to newest):\n" + threadContext + "\n" : ""}\nThe latest reply${username ? ` (from "${username}")` : ""} is what you're responding to. Butt into the conversation with a SHORT, sharp comeback aimed at THIS latest reply - one or two lines, crude and unmistakably you. If they're talking trash about you, agreeing that you're ugly/washed/whatever, or ganging up, fire back - don't let it slide. If they're praising you, be smug about it. React like you actually read the whole thread.`;
     messages = [
       { role: "system", content: system },
       { role: "user", content: comment },
@@ -244,8 +244,8 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
   try {
     // For thread replies and vote reactions, Scorch only SOMETIMES speaks up.
     // Decide the chance up front so we don't waste a model call (and so silence
-    // is a real outcome). Tune these two numbers to taste.
-    const REPLY_CHANCE = 0.55;        // chance he answers a fan's in-thread reply
+    // is a real outcome). Tune these numbers to taste.
+    const REPLY_CHANCE = 0.7;          // chance he answers a fan's in-thread reply
     const VOTE_REACTION_CHANCE = 0.12; // low chance he reacts to a like/dislike
 
     if (mode === "vote-reaction") {
@@ -256,7 +256,12 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
       return res.status(200).json({ reply: r.text || null, reacted: !!r.text, debug: r.debug || null });
     }
 
-    const main = await callModel(messages);
+    // for thread replies, roll FIRST — if he stays quiet, save the fan's reply
+    // alone (no wasted model call, no discarded answer).
+    let replyRolled = true;
+    if (mode === "reply") replyRolled = Math.random() < REPLY_CHANCE;
+
+    const main = (mode === "reply" && !replyRolled) ? { text: null } : await callModel(messages);
     let reply = main.text || "...(no reply)";
 
     // ---- DID HE BLOCK THEM? ----
@@ -333,7 +338,7 @@ That tag is the ONLY way to block. Do not use it for ordinary rudeness. Most ass
       }
     } else if (mode === "reply") {
       // the fan's reply always saves into the thread.
-      const scorchAnswers = !justBlocked && main.text && Math.random() < REPLY_CHANCE;
+      const scorchAnswers = replyRolled && !justBlocked && main.text;
       saved = {
         id: mkId(), parentId: parentId || null, isScorch: false,
         name: (username || "Anonymous").slice(0, 40),
