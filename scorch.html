@@ -1243,29 +1243,47 @@
       const prev = myVotes[id] || "none";
       const dir = (prev === want) ? "none" : want;   // tapping the same one removes it
 
-      // optimistic UI: update counts + state right away
+      // the two vote pills for THIS comment (siblings of the clicked one)
+      const actions = vote.closest(".sc-actions");
+      const likeEl = actions ? actions.querySelector(".sc-like") : null;
+      const dislikeEl = actions ? actions.querySelector(".sc-dislike") : null;
+      const likeN = likeEl ? likeEl.querySelector(".sc-vote-n") : null;
+      const dislikeN = dislikeEl ? dislikeEl.querySelector(".sc-vote-n") : null;
+      const readN = (el) => { const n = parseInt(el && el.textContent, 10); return isNaN(n) ? 0 : n; };
+
+      // ===== OPTIMISTIC: update the numbers + highlight RIGHT NOW =====
+      let likes = readN(likeN), dislikes = readN(dislikeN);
+      if (prev === "like") likes = Math.max(0, likes - 1);
+      if (prev === "dislike") dislikes = Math.max(0, dislikes - 1);
+      if (dir === "like") likes += 1;
+      if (dir === "dislike") dislikes += 1;
+      if (likeN) likeN.textContent = likes;
+      if (dislikeN) dislikeN.textContent = dislikes;
+      if (likeEl) likeEl.classList.toggle("on", dir === "like");
+      if (dislikeEl) dislikeEl.classList.toggle("on", dir === "dislike");
+
+      // remember my vote (per session) so it survives redraws
       const next = { ...myVotes };
       if (dir === "none") delete next[id]; else next[id] = dir;
       myVotes = next; saveVotes(myVotes);
-      vote.classList.add("pop"); setTimeout(()=>vote.classList.remove("pop"), 300);
-      lastSig = "";  // force redraw on next load
+      vote.classList.add("pop"); setTimeout(()=>vote.classList.remove("pop"), 420);
+      lastSig = "";  // let the next poll redraw cleanly
 
+      // ===== tell the server; reconcile if it returns authoritative counts =====
       try {
         const res = await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
           body: JSON.stringify({ action:"vote", id, dir, prev }) });
         const data = await res.json();
-        // reflect server's authoritative counts
-        const block = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-        if (block && typeof data.likes === "number") {
-          const ln = block.querySelector('.sc-like .sc-vote-n'); if (ln) ln.textContent = data.likes;
-          const dn = block.querySelector('.sc-dislike .sc-vote-n'); if (dn) dn.textContent = data.dislikes;
+        if (data && typeof data.likes === "number") {
+          if (likeN) likeN.textContent = data.likes;
+          if (dislikeN) dislikeN.textContent = data.dislikes;
         }
-      } catch (err) { /* optimistic state stays; will reconcile on next poll */ }
+      } catch (err) { /* keep optimistic numbers; next poll reconciles */ }
 
       // ---- small chance Scorch notices your vote ----
       if (dir !== "none" && !IS_BLOCKED) {
-        const block = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-        const ctxText = block ? (block.querySelector('.sc-comment-text')?.textContent || "") : "";
+        const block = vote.closest(".sc-comment");
+        const ctxText = block ? (block.querySelector(".sc-comment-text")?.textContent || "") : "";
         fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({ character: CHAR, comment: ctxText, mode:"vote-reaction", voteDir: dir, threadContext: ctxText, username:"", clientId: CID }) })
           .then(r => r.json()).then(d => { if (d && d.reply) showVoteReaction(block, d.reply); }).catch(()=>{});
