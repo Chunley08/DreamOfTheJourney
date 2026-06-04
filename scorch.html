@@ -1037,6 +1037,35 @@
 .sc-chat-send { flex-shrink:0; width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; color:#fff; font-size:1rem; background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 4px 14px rgba(255,90,31,.4); transition:transform .15s; }
 .sc-chat-send:hover { transform:scale(1.1); }
 .sc-chat-send:disabled { opacity:.5; transform:none; cursor:default; }
+
+/* ============================================================
+   FIX · nested-reply width on mobile
+   Threads can nest up to 12 deep, and each .sc-children level added
+   ~2.2rem of left inset with no cap — so on a narrow phone a deep
+   reply chain squeezed the innermost card down to ~one word wide
+   (text wrapping one word per line). Cap the accumulated indent and
+   let text break if it ever does get tight.
+   ============================================================ */
+.sc-comment, .sc-comment-text, .sc-c-namewrap { min-width: 0; }
+.sc-comment-text { overflow-wrap: anywhere; }
+
+/* desktop: stop indentation accumulating past ~3 levels deep */
+.sc-children .sc-children .sc-children .sc-children {
+  margin-left: 0;
+  padding-left: .75rem;
+}
+
+@media (max-width: 560px) {
+  /* gentler indent per level on phones... */
+  .sc-children { margin-left: .45rem; padding-left: .6rem; }
+  /* ...and from the 3rd level down, add almost nothing, so even a
+     12-deep Scorch reply chain keeps a readable card width */
+  .sc-children .sc-children .sc-children {
+    margin-left: 0;
+    padding-left: .55rem;
+    border-left-color: rgba(255,255,255,.05);
+  }
+}
 </style>
 
 <script>
@@ -1282,7 +1311,7 @@
       // ===== tell the server; reconcile if it returns authoritative counts =====
       try {
         const res = await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"vote", id, dir, prev }) });
+          body: JSON.stringify({ action:"vote", id, dir, prev, clientId: CID }) });
         const data = await res.json();
         if (data && typeof data.likes === "number") {
           if (likeN) likeN.textContent = data.likes;
@@ -1331,19 +1360,27 @@
       const name = (nameI.value.trim() || "Anonymous");
       if (!text) { mini.textContent = "type something first."; return; }
 
-      // build the FULL thread context by walking up the ancestor chain,
-      // so Scorch can react to the whole conversation (incl. the original comment).
-      const esc2 = s => (s||"");
+      // build the FULL thread context by walking up the ancestor chain, so
+      // Scorch sees the whole conversation and knows exactly who's replying to whom.
       const chain = [];
       let cur = thread.querySelector('.sc-comment[data-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+      // the comment being directly replied to (the parent)
+      let parentAuthor = "someone", parentText = "";
+      if (cur) {
+        parentAuthor = cur.querySelector(".sc-comment-author")?.textContent?.replace(/\s*✓ Scorch$/,"").trim() || "someone";
+        parentText = cur.querySelector(".sc-comment-text")?.textContent || "";
+      }
       while (cur && cur.classList && cur.classList.contains("sc-comment")) {
         const a = cur.querySelector(".sc-comment-author")?.textContent?.replace(/\s*✓ Scorch$/,"").trim() || "someone";
         const t = cur.querySelector(".sc-comment-text")?.textContent || "";
-        chain.unshift(a + ': "' + esc2(t) + '"');
-        // climb to the parent comment (skip the .sc-children wrapper)
+        chain.unshift("  " + a + ': "' + (t||"") + '"');
         cur = cur.parentElement ? cur.parentElement.closest(".sc-comment") : null;
       }
-      const ctx = chain.join("\n");
+      // spell it out so even a weak model gets who's agreeing with whom
+      const ctx =
+        "The conversation so far (oldest to newest):\n" + chain.join("\n") +
+        "\n\n" + (name || "Someone") + ' is now replying to ' + parentAuthor +
+        "'s comment" + (parentText ? ' ("' + parentText + '")' : "") + ".";
 
       post.disabled = true; mini.textContent = "posting...";
       try {
