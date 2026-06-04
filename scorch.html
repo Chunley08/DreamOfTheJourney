@@ -523,6 +523,21 @@
       </div>
     </div>
 
+    <!-- ===== COMMENT WALL ===== -->
+    <div class="dating-card scorch-comments" id="scorchComments">
+      <h2 class="dating-card-head">Comments — leave him one if you dare</h2>
+      <p class="sc-comments-sub">he reads every one. he replies to most. <em>be brave.</em></p>
+
+      <div class="sc-comment-form">
+        <input type="text" class="sc-name-input" id="scName" maxlength="24" placeholder="your name (or stay anonymous)" autocomplete="off">
+        <textarea class="sc-comment-input" id="scComment" maxlength="280" placeholder="say something to Scorch..."></textarea>
+        <button type="button" class="sc-comment-send" id="scSend">Post Comment</button>
+        <div class="sc-comment-status" id="scStatus" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="sc-comment-thread" id="scThread"></div>
+    </div>
+
     <!-- ===== CTA ===== -->
     <a href="https://dreamjourneyai.com/creation/66637a43-9df3-4f7e-be7e-deb25a49bbc4"
        target="_blank" rel="noopener" class="dating-cta">
@@ -646,6 +661,171 @@
     </form>
   </div>
 </div>
+
+<!-- ============================================================ -->
+<!--  SCORCH FLOATING DM BUBBLE + CHAT WINDOW                      -->
+<!-- ============================================================ -->
+<button class="sc-dm-fab" id="scDmFab" type="button" aria-label="Message Scorch">
+  <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="" onerror="this.style.display='none'">
+  <span class="sc-dm-fab-dot"></span>
+</button>
+
+<div class="sc-chat" id="scChat" aria-hidden="true">
+  <div class="sc-chat-head">
+    <div class="sc-chat-avatar">
+      <img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="Scorch" onerror="this.style.display='none'">
+    </div>
+    <div class="sc-chat-who">
+      <div class="sc-chat-name">Scorch <span class="sc-chat-verified">✓</span></div>
+      <div class="sc-chat-presence">online · probably ignoring you</div>
+    </div>
+    <button class="sc-chat-close" id="scChatClose" type="button" aria-label="Close chat">✕</button>
+  </div>
+  <div class="sc-chat-body" id="scChatBody">
+    <div class="sc-chat-msg sc-from-scorch">the fuck do you want?</div>
+  </div>
+  <div class="sc-chat-input-row">
+    <input type="text" class="sc-chat-input" id="scChatInput" maxlength="280" placeholder="message Scorch..." autocomplete="off">
+    <button type="button" class="sc-chat-send" id="scChatSend" aria-label="Send">➤</button>
+  </div>
+</div>
+
+<style>
+.scorch-comments { --sc-accent: var(--dp-accent, #ff5a1f); --sc-accent-2: var(--dp-accent-2, #c8281a); }
+.sc-comments-sub { font-family:'Outfit',sans-serif; font-size:.92rem; color:var(--dp-ink-dim,rgba(255,255,255,.6)); margin:0 0 1.1rem; line-height:1.5; }
+.sc-comments-sub em { color:var(--sc-accent); font-style:italic; }
+.sc-comment-form { display:flex; flex-direction:column; gap:.7rem; }
+.sc-name-input, .sc-comment-input { width:100%; box-sizing:border-box; background:rgba(0,0,0,.28); border:1.5px solid rgba(255,255,255,.12); border-radius:12px; padding:.8rem 1rem; color:#fff; font-family:'Outfit',sans-serif; font-size:.98rem; transition:border-color .18s,box-shadow .18s; }
+.sc-comment-input { resize:vertical; min-height:90px; line-height:1.5; }
+.sc-name-input:focus, .sc-comment-input:focus { outline:none; border-color:var(--sc-accent); box-shadow:0 0 0 3px rgba(255,90,31,.18); }
+.sc-name-input::placeholder, .sc-comment-input::placeholder { color:rgba(255,255,255,.4); }
+.sc-comment-send { align-self:flex-start; cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:.92rem; color:#fff; padding:.7rem 1.5rem; border-radius:999px; background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)); box-shadow:0 6px 20px rgba(255,90,31,.35); transition:transform .15s,box-shadow .15s,opacity .15s; }
+.sc-comment-send:hover { transform:translateY(-2px); box-shadow:0 9px 26px rgba(255,90,31,.5); }
+.sc-comment-send:disabled { opacity:.5; cursor:default; transform:none; }
+.sc-comment-status { font-family:'Outfit',sans-serif; font-size:.85rem; color:var(--sc-accent); min-height:1.2em; }
+.sc-comment-thread { margin-top:1.4rem; display:flex; flex-direction:column; gap:1rem; }
+.sc-comment { background:rgba(255,255,255,.045); border-radius:14px; padding:.9rem 1.05rem; border:1px solid rgba(255,255,255,.07); }
+.sc-comment-author { font-family:'Oswald',sans-serif; font-weight:600; color:#fff; font-size:.95rem; margin-bottom:.2rem; }
+.sc-comment-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.88); font-size:.96rem; line-height:1.45; }
+.sc-reply { margin-top:.8rem; margin-left:.8rem; padding:.75rem 1rem; background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(200,40,26,.06)); border-left:3px solid var(--sc-accent); border-radius:0 12px 12px 0; }
+.sc-reply-author { font-family:'Oswald',sans-serif; font-weight:700; color:var(--sc-accent); font-size:.9rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem; }
+.sc-reply-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.92); font-size:.95rem; line-height:1.45; }
+.sc-typing { font-style:italic; color:rgba(255,255,255,.5); }
+.sc-dm-fab { position:fixed; bottom:22px; right:22px; z-index:9998; width:62px; height:62px; border-radius:50%; border:2px solid #ff5a1f; background:#1a0a0a; cursor:pointer; overflow:hidden; padding:0; box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 18px rgba(255,90,31,.45); transition:transform .2s, box-shadow .2s; animation:scFabPulse 2.6s ease-in-out infinite; }
+.sc-dm-fab:hover { transform:scale(1.08); box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 26px rgba(255,90,31,.7); }
+.sc-dm-fab img { width:100%; height:100%; object-fit:cover; }
+.sc-dm-fab-dot { position:absolute; top:6px; right:6px; width:13px; height:13px; border-radius:50%; background:#3ad14f; border:2px solid #1a0a0a; }
+@keyframes scFabPulse { 0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 14px rgba(255,90,31,.4);} 50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 26px rgba(255,90,31,.75);} }
+.sc-chat { position:fixed; bottom:22px; right:22px; z-index:9999; width:min(370px,calc(100vw - 32px)); height:min(540px,calc(100vh - 60px)); display:flex; flex-direction:column; background:linear-gradient(165deg,#1a0a14,#120509); border-radius:20px; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.65), inset 0 0 0 1px rgba(255,90,31,.22); opacity:0; transform:translateY(24px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s, transform .28s cubic-bezier(.2,.9,.3,1.25); }
+.sc-chat.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+.sc-chat-head { display:flex; align-items:center; gap:.7rem; padding:.85rem 1rem; background:rgba(255,90,31,.1); border-bottom:1px solid rgba(255,90,31,.2); }
+.sc-chat-avatar { width:42px; height:42px; border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid #ff5a1f; background:#000; }
+.sc-chat-avatar img { width:100%; height:100%; object-fit:cover; }
+.sc-chat-who { flex:1; min-width:0; }
+.sc-chat-name { font-family:'Oswald',sans-serif; font-weight:700; color:#fff; font-size:1rem; display:flex; align-items:center; gap:.35rem; }
+.sc-chat-verified { color:#ff5a1f; font-size:.78rem; }
+.sc-chat-presence { font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.5); }
+.sc-chat-close { background:none; border:none; color:rgba(255,255,255,.55); font-size:1.1rem; cursor:pointer; transition:color .15s; }
+.sc-chat-close:hover { color:#fff; }
+.sc-chat-body { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:.6rem; }
+.sc-chat-msg { max-width:80%; padding:.6rem .85rem; border-radius:16px; font-family:'Outfit',sans-serif; font-size:.95rem; line-height:1.4; word-wrap:break-word; }
+.sc-from-scorch { align-self:flex-start; background:rgba(255,255,255,.08); color:#fff; border-bottom-left-radius:5px; }
+.sc-from-user { align-self:flex-end; background:linear-gradient(135deg,#ff5a1f,#c8281a); color:#fff; border-bottom-right-radius:5px; }
+.sc-chat-msg.sc-typing { color:rgba(255,255,255,.55); font-style:italic; }
+.sc-chat-input-row { display:flex; gap:.5rem; padding:.75rem; border-top:1px solid rgba(255,90,31,.18); background:rgba(0,0,0,.25); }
+.sc-chat-input { flex:1; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.13); border-radius:999px; padding:.6rem 1rem; color:#fff; font-family:'Outfit',sans-serif; font-size:.95rem; }
+.sc-chat-input:focus { outline:none; border-color:#ff5a1f; }
+.sc-chat-input::placeholder { color:rgba(255,255,255,.4); }
+.sc-chat-send { flex-shrink:0; width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; color:#fff; font-size:1rem; background:linear-gradient(135deg,#ff5a1f,#c8281a); box-shadow:0 4px 14px rgba(255,90,31,.4); transition:transform .15s; }
+.sc-chat-send:hover { transform:scale(1.1); }
+.sc-chat-send:disabled { opacity:.5; transform:none; cursor:default; }
+</style>
+
+<script>
+(function () {
+  // 🔧 PASTE YOUR VERCEL URL HERE (no trailing slash):
+  const FUNCTION_URL = "https://YOUR-PROJECT.vercel.app/api/comment";
+  const CHAR = "scorch";
+  const esc = s => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+  const sendBtn = document.getElementById("scSend");
+  const nameEl  = document.getElementById("scName");
+  const textEl  = document.getElementById("scComment");
+  const statusEl= document.getElementById("scStatus");
+  const thread  = document.getElementById("scThread");
+
+  if (sendBtn) sendBtn.addEventListener("click", async () => {
+    const comment = textEl.value.trim();
+    const name = (nameEl.value.trim() || "Anonymous");
+    if (!comment) { statusEl.textContent = "type something first."; return; }
+    const block = document.createElement("div");
+    block.className = "sc-comment";
+    block.innerHTML =
+      '<div class="sc-comment-author">' + esc(name) + '</div>' +
+      '<div class="sc-comment-text">' + esc(comment) + '</div>' +
+      '<div class="sc-reply"><div class="sc-reply-author">Scorch <span>✓</span></div>' +
+      '<div class="sc-reply-text sc-typing">typing...</div></div>';
+    thread.prepend(block);
+    const replyEl = block.querySelector(".sc-reply-text");
+    textEl.value = ""; sendBtn.disabled = true; statusEl.textContent = "sending...";
+    try {
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment" }) });
+      const data = await res.json();
+      replyEl.classList.remove("sc-typing");
+      replyEl.textContent = data.reply || "...(he ignored you)";
+      statusEl.textContent = "";
+    } catch (e) {
+      replyEl.classList.remove("sc-typing");
+      replyEl.textContent = "(couldn't reach him - try again)";
+      statusEl.textContent = "connection failed.";
+    } finally { sendBtn.disabled = false; }
+  });
+
+  const fab = document.getElementById("scDmFab");
+  const chat = document.getElementById("scChat");
+  const chatClose = document.getElementById("scChatClose");
+  const chatBody = document.getElementById("scChatBody");
+  const chatInput = document.getElementById("scChatInput");
+  const chatSend = document.getElementById("scChatSend");
+  const dmHistory = [{ from:"scorch", text:"the fuck do you want?" }];
+
+  function openChat(){ chat.classList.add("open"); chat.setAttribute("aria-hidden","false"); fab.style.display="none"; chatInput.focus(); }
+  function closeChat(){ chat.classList.remove("open"); chat.setAttribute("aria-hidden","true"); fab.style.display=""; }
+  if (fab) fab.addEventListener("click", openChat);
+  if (chatClose) chatClose.addEventListener("click", closeChat);
+
+  function addMsg(text, from){
+    const m = document.createElement("div");
+    m.className = "sc-chat-msg " + (from === "user" ? "sc-from-user" : "sc-from-scorch");
+    m.textContent = text;
+    chatBody.appendChild(m);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return m;
+  }
+  async function sendDM(){
+    const text = chatInput.value.trim();
+    if (!text) return;
+    addMsg(text, "user");
+    dmHistory.push({ from:"user", text });
+    chatInput.value = ""; chatSend.disabled = true;
+    const typing = addMsg("typing...", "scorch");
+    typing.classList.add("sc-typing");
+    try {
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory }) });
+      const data = await res.json();
+      typing.remove();
+      const reply = data.reply || "...";
+      addMsg(reply, "scorch");
+      dmHistory.push({ from:"scorch", text: reply });
+    } catch (e) {
+      typing.remove();
+      addMsg("(he's not answering. typical.)", "scorch");
+    } finally { chatSend.disabled = false; chatInput.focus(); }
+  }
+  if (chatSend) chatSend.addEventListener("click", sendDM);
+  if (chatInput) chatInput.addEventListener("keydown", e => { if (e.key === "Enter") sendDM(); });
+})();
+</script>
 
 <script src="script.js"></script>
 </body>
