@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
+  const MODEL = "z-ai/glm-4.5-air:free";
 
   // ============================================================
   //  CHARACTER PERSONAS — the "drawer" of personalities.
@@ -123,12 +123,18 @@ Stay in character at all times.`,
       body: JSON.stringify({ model: MODEL, messages: msgs }),
     });
     const data = await r.json();
+    // log the COMPLETE raw response so the exact error shows in Vercel logs
+    console.log("OPENROUTER_RAW_RESPONSE", r.status, JSON.stringify(data));
     // surface whatever actually happened so we're not flying blind
     const text = data?.choices?.[0]?.message?.content?.trim();
     if (text) return { text };
-    // no text — figure out why
-    const apiErr = data?.error?.message || data?.error || null;
-    return { text: null, debug: apiErr ? String(apiErr) : `empty response (status ${r.status})` };
+    // no text — figure out why, with as much detail as possible
+    const apiErr =
+      data?.error?.message ||
+      (typeof data?.error === "string" ? data.error : null) ||
+      data?.error?.metadata?.raw ||
+      JSON.stringify(data?.error || data);
+    return { text: null, debug: `status ${r.status}: ${apiErr}` };
   }
 
   try {
