@@ -402,6 +402,56 @@
     background-clip: text;
     animation: rainbowFlow 18s linear infinite;
   }
+
+  /* ----- the "Meet the Characters" title: animated rainbow OUTLINE + shine ----- */
+  .meet-title {
+    position: relative;
+    display: inline-block;
+    /* a clean, breathing glow so the words shine without washing out */
+    filter: drop-shadow(0 0 8px rgba(255, 180, 255, 0.45))
+            drop-shadow(0 0 18px rgba(120, 200, 255, 0.3));
+    animation: rainbowFlow 18s linear infinite, meetShine 3s ease-in-out infinite;
+  }
+  /* a duplicate of the words behind the fill, drawn as a flowing rainbow stroke */
+  .meet-title::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--rainbow-gradient);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* transparent stroke + clipped rainbow fill = the OUTLINE renders rainbow */
+    -webkit-text-stroke: 3.5px transparent;
+    animation: rainbowFlowRev 9s linear infinite;
+    filter: drop-shadow(0 0 2px rgba(255, 120, 255, 0.95))
+            drop-shadow(0 0 5px rgba(120, 220, 255, 0.8))
+            drop-shadow(0 0 9px rgba(150, 255, 180, 0.55));
+  }
+  /* fallback for browsers without text-stroke support */
+  @supports not (-webkit-text-stroke: 1px red) {
+    .meet-title::before { display: none; }
+    .meet-title { text-shadow: 0 0 2px #fff, 0 0 8px var(--accent-magenta), 0 0 16px var(--accent-cyan); }
+  }
+  @keyframes rainbowFlowRev {
+    from { background-position: 200% 50%; }
+    to   { background-position: 0% 50%; }
+  }
+  @keyframes meetShine {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px rgba(255, 180, 255, 0.4))
+              drop-shadow(0 0 18px rgba(120, 200, 255, 0.28));
+    }
+    50% {
+      filter: drop-shadow(0 0 14px rgba(255, 210, 255, 0.8))
+              drop-shadow(0 0 30px rgba(150, 220, 255, 0.55))
+              drop-shadow(0 0 50px rgba(232, 94, 232, 0.35));
+    }
+  }
   .section-sub {
     text-align: center;
     color: #d8c8f5;
