@@ -900,7 +900,14 @@
 .sc-comment-status { font-family:'Outfit',sans-serif; font-size:.85rem; color:var(--sc-accent); min-height:1.2em; }
 
 /* ===== THREAD ===== */
-.sc-comment-thread { margin-top:1.6rem; display:flex; flex-direction:column; gap:1.1rem; }
+.sc-comment-thread { margin-top:1.6rem; display:flex; flex-direction:column; gap:1.1rem;
+  max-height:min(72vh,760px); overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch; padding-right:.4rem;
+  scrollbar-width:thin; scrollbar-color:rgba(255,90,31,.45) transparent; }
+.sc-comment-thread::-webkit-scrollbar { width:8px; }
+.sc-comment-thread::-webkit-scrollbar-track { background:transparent; }
+.sc-comment-thread::-webkit-scrollbar-thumb { background:rgba(255,90,31,.4); border-radius:999px; }
+.sc-comment-thread::-webkit-scrollbar-thumb:hover { background:rgba(255,90,31,.65); }
 
 /* a card */
 .sc-comment { position:relative; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1rem 1.15rem .85rem; transition:border-color .2s, background .2s; }
@@ -915,10 +922,21 @@
 .sc-comment-author { font-family:'Oswald',sans-serif; font-weight:600; color:#fff; font-size:.98rem; display:flex; align-items:center; gap:.4rem; }
 .sc-badge { display:inline-flex; align-items:center; gap:.2rem; font-family:'Oswald',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)); padding:.08rem .42rem; border-radius:999px; }
 .sc-c-time { font-family:'Outfit',sans-serif; font-size:.72rem; color:rgba(255,255,255,.4); }
-.sc-comment-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.9); font-size:.98rem; line-height:1.5; }
+.sc-comment-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.9); font-size:.98rem; line-height:1.5; min-width:0; overflow-wrap:break-word; word-break:break-word; }
 
-/* nested children: indent + rail */
-.sc-children { margin-top:.9rem; margin-left:1.2rem; padding-left:1rem; border-left:2px solid rgba(255,255,255,.08); display:flex; flex-direction:column; gap:.9rem; }
+/* nested replies: indent + connector rail.
+   Indentation is CAPPED so deep reply-chains can never squeeze a card
+   down to nothing: the first few levels indent (with a rail, so it
+   reads as a real thread), then everything deeper renders flat.
+   Desktop cap = 4 levels; mobile cap = 2 (see media query below). */
+.sc-children { margin-top:.9rem; margin-left:1rem; padding-left:1rem;
+  border-left:2px solid rgba(255,90,31,.18); display:flex; flex-direction:column; gap:.9rem; min-width:0; }
+
+/* DESKTOP: from the 5th level down, stop adding inset entirely —
+   deeper replies stack flat under the last indented ancestor */
+.sc-children .sc-children .sc-children .sc-children .sc-children {
+  margin-left:0; padding-left:0; border-left:none;
+}
 
 /* action bar */
 .sc-actions { display:flex; align-items:center; gap:.45rem; margin-top:.7rem; flex-wrap:wrap; }
@@ -1039,32 +1057,20 @@
 .sc-chat-send:disabled { opacity:.5; transform:none; cursor:default; }
 
 /* ============================================================
-   FIX · nested-reply width on mobile
-   Threads can nest up to 12 deep, and each .sc-children level added
-   ~2.2rem of left inset with no cap — so on a narrow phone a deep
-   reply chain squeezed the innermost card down to ~one word wide
-   (text wrapping one word per line). Cap the accumulated indent and
-   let text break if it ever does get tight.
+   Thread layout — mobile tuning
+   On phones the indent cap drops to 2 levels: deeper replies render
+   flat so a card never collapses (the old design let a deep chain
+   shrink text to one character per line). Cards also tighten up a bit.
    ============================================================ */
-.sc-comment, .sc-comment-text, .sc-c-namewrap { min-width: 0; }
-.sc-comment-text { overflow-wrap: anywhere; }
-
-/* desktop: stop indentation accumulating past ~3 levels deep */
-.sc-children .sc-children .sc-children .sc-children {
-  margin-left: 0;
-  padding-left: .75rem;
-}
-
 @media (max-width: 560px) {
-  /* gentler indent per level on phones... */
-  .sc-children { margin-left: .45rem; padding-left: .6rem; }
-  /* ...and from the 3rd level down, add almost nothing, so even a
-     12-deep Scorch reply chain keeps a readable card width */
+  .sc-comment { padding:.8rem .9rem .7rem; border-radius:14px; }
+  .sc-avatar { width:32px; height:32px; font-size:.85rem; }
+  .sc-children { margin-left:.55rem; padding-left:.7rem; }
+  /* from the 3rd level down: no extra inset — stack flat */
   .sc-children .sc-children .sc-children {
-    margin-left: 0;
-    padding-left: .55rem;
-    border-left-color: rgba(255,255,255,.05);
+    margin-left:0; padding-left:0; border-left:none;
   }
+  .sc-comment-thread { max-height:none; } /* let the page scroll on small screens */
 }
 </style>
 
