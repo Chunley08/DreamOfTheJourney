@@ -880,12 +880,10 @@
       const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments }) });
       const data = await res.json();
       replyEl.classList.remove("sc-typing");
-      if (data.reply) {
+      if (data.reply && data.reply !== "...(no reply)") {
         replyEl.textContent = data.reply;
-      } else if (data.error) {
-        replyEl.textContent = "(he's swamped — the free AI is busy. try again in a sec.)";
       } else {
-        replyEl.textContent = "...(he ignored you)";
+        replyEl.textContent = data.debug ? ("⚠ " + data.debug) : "(he's swamped — the free AI is busy. try again in a sec.)";
       }
       statusEl.textContent = "";
 
