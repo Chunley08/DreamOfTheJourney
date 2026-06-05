@@ -1308,7 +1308,7 @@
   }
   async function loadWall(){
     try {
-      const res = await fetch(WALL_URL, { method:"GET" });
+      const res = await fetch(WALL_URL + "?character=" + encodeURIComponent(CHAR), { method:"GET" });
       const data = await res.json();
       if (Array.isArray(data.comments)) renderWall(data.comments);
     } catch (e) { /* keep whatever's on screen */ }
@@ -1353,7 +1353,7 @@
       // ===== tell the server; reconcile if it returns authoritative counts =====
       try {
         const res = await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"vote", id, dir, prev, clientId: CID }) });
+          body: JSON.stringify({ character: CHAR, action:"vote", id, dir, prev, clientId: CID }) });
         const data = await res.json();
         if (data && typeof data.likes === "number") {
           if (likeN) likeN.textContent = data.likes;
@@ -1472,7 +1472,7 @@
       try {
         await fetch(WALL_URL, {
           method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"delete", id: btn.dataset.id, key: ADMIN_KEY }),
+          body: JSON.stringify({ character: CHAR, action:"delete", id: btn.dataset.id, key: ADMIN_KEY }),
         });
         lastSig = ""; await loadWall();
       } catch (err) { btn.disabled = false; btn.textContent = "\uD83D\uDDD1 delete"; }
@@ -1494,7 +1494,7 @@
       adminBody.textContent = "loading...";
       try {
         const res = await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"listblocked", key: ADMIN_KEY }) });
+          body: JSON.stringify({ character: CHAR, action:"listblocked", key: ADMIN_KEY }) });
         const data = await res.json();
         const list = data.blocked || [];
         if (!list.length) { adminBody.innerHTML = '<div class="sc-admin-empty">nobody\u2019s blocked. he\u2019s being\u2026 tolerant.</div>'; return; }
@@ -1513,7 +1513,7 @@
             ub.disabled = true; ub.textContent = "...";
             try {
               await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-                body: JSON.stringify({ action:"unblock", field: b.field, key: ADMIN_KEY }) });
+                body: JSON.stringify({ character: CHAR, action:"unblock", field: b.field, key: ADMIN_KEY }) });
               loadBlocked();
             } catch (e) { ub.disabled = false; ub.textContent = "unblock"; }
           });
@@ -1527,7 +1527,7 @@
       if (!confirm("Wipe the ENTIRE public comment wall? This can't be undone.")) return;
       try {
         await fetch(WALL_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ action:"clear", key: ADMIN_KEY }) });
+          body: JSON.stringify({ character: CHAR, action:"clear", key: ADMIN_KEY }) });
         lastSig = ""; loadWall();
       } catch (e) {}
     });
