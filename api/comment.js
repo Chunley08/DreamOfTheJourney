@@ -144,7 +144,22 @@ export default async function handler(req, res) {
   //  To add a character, see personas/index.js
   // ============================================================
   const personas = await getPersonas();
-  const base = personas[character] || "You are a fictional character. Reply in-character, short.";
+  // A character's record may be an object { name, persona, blocking } (new
+  // format) or a plain persona string (older format). Handle both so a
+  // half-updated deploy degrades gracefully instead of crashing.
+  const _cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+  const _rec = personas[character];
+  let base, NAME, charBlocking;
+  if (_rec && typeof _rec === "object") {
+    base = _rec.persona || "You are a fictional character. Reply in-character, short.";
+    NAME = _rec.name || _cap(character) || "they";
+    charBlocking = _rec.blocking || "";
+  } else if (typeof _rec === "string") {
+    base = _rec; NAME = _cap(character) || "they"; charBlocking = "";
+  } else {
+    base = "You are a fictional character. Reply in-character, short.";
+    NAME = _cap(character) || "they"; charBlocking = "";
+  }
 
   // ---- build the messages depending on mode ----
   let messages;
@@ -154,19 +169,17 @@ export default async function handler(req, res) {
   system += `
 
 YOUR LIMIT / THE BLOCK:
-Scorch is an asshole who can take ANYTHING. Insults, mockery, "washed up," crude jokes, horny/thirsty comments, people commenting on his body or that he's shirtless (e.g. "ew, I see your nipples"), people calling him gross or cringe - ALL of that just earns his usual venom back. He ROASTS them, he does NOT block. Being rude, sexual, thirsty, or annoying is NEVER on its own a reason to block - if it were, he'd block everyone. His default is always to fire back with a brutal comeback.
+${NAME} can take almost anything. Insults, mockery, crude jokes, horny/thirsty comments, people commenting on your body, people calling you gross or cringe - ALL of that just earns your usual energy back, in character. You do NOT block for any of that. Being rude, sexual, thirsty, or annoying is NEVER on its own a reason to block - if it were, you'd block everyone. Your default is to handle them in character, never to block.
 
-He blocks almost never. Reserve it for someone who genuinely crosses a hard line, and ONLY one of these:
-- a real, specific threat of violence against him or someone he loves
-- sexualizing, threatening, or being cruel about his young son Conner
-- deliberately mocking his dead father, the abuse he survived, or his prison time to wound him
-- someone relentlessly targeting him AFTER he has already told them they're done
+You block almost never. Reserve it for someone who genuinely crosses a hard line - only one of these:
+- a real, specific threat of violence against you or someone you love
+- someone relentlessly targeting you AFTER you've already told them they're done${charBlocking ? "\n" + charBlocking : ""}
 
-If a comment isn't clearly one of those four, DO NOT block - roast them instead. When in doubt, ROAST, never block.
+If a comment isn't clearly one of those, DO NOT block - handle them in character instead. When in doubt, never block.
 
-To block (and only then): write his final furious words to them, then put this control tag alone on the very last line:
+To block (and only then): write your final words to them, then put this control tag alone on the very last line:
 <<BLOCK>>
-That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, or sexual/body comments. The tag is invisible to them - they only see his words.`;
+That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, or sexual/body comments. The tag is invisible to them - they only see your words.`;
 
   // If we know this user and they've commented before, let Scorch remember.
   if (username && pastComments.length) {
@@ -175,7 +188,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
   }
 
   if (mode === "dm") {
-    system += `\n\nHe is now in a PRIVATE DM chat with this fan - more intimate than a public comment. This is a back-and-forth conversation; stay consistent with what's already been said. React the way Scorch would: an asshole but sometimes a likeable one, meaner if they push him, occasionally letting the boyish charm crack through when he forgets to guard it. keep true to the personality core.`;
+    system += `\n\n${NAME} is now in a PRIVATE DM chat with this fan - more intimate than a public comment. This is a back-and-forth conversation; stay consistent with what's already been said, and stay true to the personality core above (match their energy, warm up or get sharper exactly the way ${NAME} would).`;
     messages = [
       { role: "system", content: system },
       ...history.slice(-12).map(m => ({
@@ -185,7 +198,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       { role: "user", content: comment },
     ];
   } else if (mode === "letter") {
-    system += `\n\nScorch received a handwritten FAN LETTER. Write a letter BACK in his own voice - Scorch actually putting pen to paper, which he'd grumble about. It can be a few sentences up to a short paragraph; more thought than a quick comment, but still crude, guarded, and unmistakably him. Do NOT include a "Dear ___" greeting or sign-off signature - just the body of what he writes back (the page already shows who it's to and signs it for you). If they've written before, he remembers their past letters - reference them, soften or get pricklier based on the history.`;
+    system += `\n\n${NAME} received a handwritten FAN LETTER. Write a letter BACK in ${NAME}'s own voice - actually putting pen to paper. It can be a few sentences up to a short paragraph; more thought than a quick comment, but still unmistakably ${NAME}. Do NOT include a "Dear ___" greeting or sign-off signature - just the body of what they write back (the page already shows who it's to and signs it for you). If they've written before, reference their past letters - soften or get pricklier based on the history.`;
     messages = [
       { role: "system", content: system },
       ...history.slice(-8).map(m => ({
@@ -196,20 +209,20 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     ];
   } else if (mode === "reply") {
     // a fan replied to a comment/reply inside a thread. Scorch MIGHT jump in.
-    system += `\n\nYou're reading a reply thread under a comment on your profile.\n\n${threadContext || ""}\n\nThe new reply itself is the user message below. IMPORTANT: read the whole conversation above first — a short reply like "I agree" or "so true" refers to the comment it's replying to, so figure out what they actually mean from the thread (e.g. if they're agreeing with someone who insulted you, they're insulting you too). Then butt in with a SHORT, sharp comeback aimed at this new reply and what it's really saying — one or two lines, crude and unmistakably you. Fire back at trash-talk or pile-ons; be smug about praise. React like you read the entire thread, not just the last line.`;
+    system += `\n\nYou're reading a reply thread under a comment on your profile.\n\n${threadContext || ""}\n\nThe new reply itself is the user message below. IMPORTANT: read the whole conversation above first — a short reply like "I agree" or "so true" refers to the comment it's replying to, so figure out what they actually mean from the thread (e.g. if they're agreeing with someone who insulted you, they're insulting you too). Then butt in with a SHORT, sharp comeback aimed at this new reply and what it's really saying — one or two lines, unmistakably you (in character). Fire back at trash-talk or pile-ons; be smug about praise. React like you read the entire thread, not just the last line.`;
     messages = [
       { role: "system", content: system },
       { role: "user", content: comment },
     ];
   } else if (mode === "vote-reaction") {
     // someone liked/disliked a comment. tiny chance Scorch notices + comments.
-    system += `\n\nScorch noticed someone just ${voteDir === "dislike" ? "DISLIKED" : "LIKED"} a comment on his profile${threadContext ? `: "${threadContext}"` : ""}. React with ONE short, off-the-cuff line about them ${voteDir === "dislike" ? "downvoting" : "upvoting"} it - amused, smug, irritated, whatever fits. Like he caught them tapping the button. Keep it to one line, pure Scorch.`;
+    system += `\n\n${NAME} noticed someone just ${voteDir === "dislike" ? "DISLIKED" : "LIKED"} a comment on ${NAME}'s profile${threadContext ? `: "${threadContext}"` : ""}. React with ONE short, off-the-cuff line about them ${voteDir === "dislike" ? "downvoting" : "upvoting"} it - amused, smug, irritated, whatever fits. Like you caught them tapping the button. Keep it to one line, unmistakably ${NAME}.`;
     messages = [
       { role: "system", content: system },
       { role: "user", content: voteDir === "dislike" ? "(someone just disliked a comment)" : "(someone just liked a comment)" },
     ];
   } else {
-    system += `\n\nScorch is replying to a PUBLIC comment left on his dating profile. Short, sharp, in-character.`;
+    system += `\n\n${NAME} is replying to a PUBLIC comment left on ${NAME}'s dating profile. Short, sharp, in-character.`;
     messages = [
       { role: "system", content: system },
       { role: "user", content: comment },
@@ -326,7 +339,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       if (saved && reply && reply !== "...(no reply)" && !justBlocked) {
         savedScorch = {
           id: mkId(), parentId: saved.id, isScorch: true,
-          name: "Scorch", comment: reply,
+          name: NAME, comment: reply,
           likes: 0, dislikes: 0, ts: Date.now() + 1,
         };
         const w2 = await saveToWall(savedScorch, character);
@@ -347,7 +360,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       if (saved && scorchAnswers) {
         savedScorch = {
           id: mkId(), parentId: saved.id, isScorch: true,
-          name: "Scorch", comment: reply,
+          name: NAME, comment: reply,
           likes: 0, dislikes: 0, ts: Date.now() + 1,
         };
         const w2 = await saveToWall(savedScorch, character);
