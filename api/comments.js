@@ -16,8 +16,18 @@
 //  Replies + Scorch's in-thread answers are written by /api/comment.
 // ============================================================
 
-const WALL_KEY = "scorch:wall";
-const BLOCK_KEY = "scorch:blocked";
+// Each character has their OWN wall + block list ("drawer"). Scorch keeps
+// the original keys so his existing comments are preserved; everyone else
+// gets "wall:<character>" / "blocked:<character>". The character is passed
+// in via ?character= on GET, or in the JSON body on POST actions.
+function wallKeyFor(character) {
+  const c = String(character || "scorch").toLowerCase().trim();
+  return c === "scorch" ? "scorch:wall" : "wall:" + c;
+}
+function blockKeyFor(character) {
+  const c = String(character || "scorch").toLowerCase().trim();
+  return c === "scorch" ? "scorch:blocked" : "blocked:" + c;
+}
 const MAX = 200; // keep newest 200 (threads use up more slots)
 
 // normalize an old/new stored record so threading + votes always exist
@@ -63,7 +73,9 @@ export default async function handler(req, res) {
 
   // -------- READ THE WALL (public) --------
   if (req.method === "GET") {
-    const out = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
+    const character = (req.query && req.query.character) || "scorch";
+    const wallKey = wallKeyFor(character);
+    const out = await redis(["LRANGE", wallKey, "0", String(MAX - 1)]);
     if (!out.ok) {
       return res.status(200).json({ comments: [], debug: out.error || "redis read failed" });
     }
@@ -77,6 +89,10 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     const body = req.body || {};
     const { action } = body;
+    // which character's wall/blocklist this action targets
+    const character = body.character || "scorch";
+    const wallKey = wallKeyFor(character);
+    const blockKey = blockKeyFor(character);
 
     // ===== PUBLIC: toggle a like/dislike on a comment =====
     // dir = the vote the user now wants ("like"|"dislike"|"none")
@@ -105,7 +121,7 @@ export default async function handler(req, res) {
       (all.result || []).forEach(v => { if (v === "like") likes++; else if (v === "dislike") dislikes++; });
 
       // mirror the totals onto the comment record so GET stays correct
-      const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
+      const list = await redis(["LRANGE", wallKey, "0", String(MAX - 1)]);
       if (list.ok) {
         const arr = list.result || [];
         for (let i = 0; i < arr.length; i++) {
@@ -113,7 +129,7 @@ export default async function handler(req, res) {
             const o = JSON.parse(arr[i]);
             if (o.id === id) {
               o.likes = likes; o.dislikes = dislikes;
-              await redis(["LSET", WALL_KEY, String(i), JSON.stringify(o)]);
+              await redis(["LSET", wallKey, String(i), JSON.stringify(o)]);
               break;
             }
           } catch (e) {}
@@ -131,13 +147,13 @@ export default async function handler(req, res) {
     if (key !== ADMIN) return res.status(403).json({ error: "wrong admin key" });
 
     if (action === "clear") {
-      const out = await redis(["DEL", WALL_KEY]);
+      const out = await redis(["DEL", wallKey]);
       return res.status(200).json({ ok: out.ok, cleared: true, debug: out.error || null });
     }
 
     // ---- list everyone Scorch has blocked ----
     if (action === "listblocked") {
-      const out = await redis(["HGETALL", BLOCK_KEY]);
+      const out = await redis(["HGETALL", blockKey]);
       if (!out.ok) return res.status(200).json({ blocked: [], debug: out.error });
       // HGETALL returns a flat [field, value, field, value, ...]
       const flat = out.result || [];
@@ -159,20 +175,20 @@ export default async function handler(req, res) {
     if (action === "unblock") {
       const field = (req.body || {}).field;
       if (!field) return res.status(400).json({ error: "no field" });
-      const got = await redis(["HGET", BLOCK_KEY, field]);
+      const got = await redis(["HGET", blockKey, field]);
       let rec = null; try { rec = JSON.parse(got.result); } catch (e) {}
       const dels = [field];
       if (rec) {
         if (rec.name && rec.name.toLowerCase() !== "anonymous") dels.push("n:" + rec.name.toLowerCase().trim());
         if (rec.clientId) dels.push("c:" + rec.clientId);
       }
-      for (const f of [...new Set(dels)]) await redis(["HDEL", BLOCK_KEY, f]);
+      for (const f of [...new Set(dels)]) await redis(["HDEL", blockKey, f]);
       return res.status(200).json({ ok: true, unblocked: rec ? rec.name : field });
     }
 
     if (action === "delete") {
       if (!id) return res.status(400).json({ error: "no id" });
-      const list = await redis(["LRANGE", WALL_KEY, "0", String(MAX - 1)]);
+      const list = await redis(["LRANGE", wallKey, "0", String(MAX - 1)]);
       if (!list.ok) return res.status(200).json({ ok: false, debug: list.error });
       const arr = list.result || [];
 
@@ -194,7 +210,7 @@ export default async function handler(req, res) {
       let removed = 0;
       for (const p of parsed) {
         if (toKill.has(p.obj.id)) {
-          const out = await redis(["LREM", WALL_KEY, "1", p.raw]);
+          const out = await redis(["LREM", wallKey, "1", p.raw]);
           if (out.ok) removed += (out.result || 0);
           await redis(["DEL", "scorch:votes:" + p.obj.id]);   // clear its vote tally too
         }
