@@ -59,7 +59,7 @@
     width: 54px; height: 54px;
     margin: -27px 0 0 -27px;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 2147483647; /* must sit ABOVE every overlay (DM chat 9999, splash 10000) — it has pointer-events:none so it can never block clicks */
     will-change: transform;
   }
   .dragon-cursor-inner {
