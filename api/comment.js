@@ -15,7 +15,7 @@ let _personaLoadErr = null;
 async function getPersonas() {
   if (_personasCache) return _personasCache;
   try {
-    const mod = await import("./personas/index.js");
+    const mod = await import("./index.js");
     _personasCache = (mod && mod.personas) ? mod.personas : {};
     if (!Object.keys(_personasCache).length) {
       _personaLoadErr = "personas/index.js loaded but exported no personas";
