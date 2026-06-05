@@ -4,7 +4,28 @@
 //  older ones auto-delete. Reads creds from whichever names the
 //  Vercel/Upstash integration created.
 // ============================================================
-import { personas } from "./personas/index.js";
+// Personas are loaded LAZILY via dynamic import inside the handler. A static
+// top-level import crashes this entire function at load time if anything in the
+// personas/ graph fails to resolve (wrong path, case mismatch, module-type
+// mismatch) — which silently takes EVERY character offline at once. Dynamic
+// import lets us catch that, fall back to a generic persona, and report the
+// real reason in `debug` instead of returning blanket 500s.
+let _personasCache = null;
+let _personaLoadErr = null;
+async function getPersonas() {
+  if (_personasCache) return _personasCache;
+  try {
+    const mod = await import("./personas/index.js");
+    _personasCache = (mod && mod.personas) ? mod.personas : {};
+    if (!Object.keys(_personasCache).length) {
+      _personaLoadErr = "personas/index.js loaded but exported no personas";
+    }
+  } catch (e) {
+    _personaLoadErr = "persona load failed: " + String((e && e.message) || e);
+    _personasCache = {};
+  }
+  return _personasCache;
+}
 
 // Each character gets their OWN comment wall (their own "drawer").
 // Scorch stays on the original "scorch:wall" key so his existing comments
@@ -122,6 +143,7 @@ export default async function handler(req, res) {
   //  To edit a character, open personas/<name>.js
   //  To add a character, see personas/index.js
   // ============================================================
+  const personas = await getPersonas();
   const base = personas[character] || "You are a fictional character. Reply in-character, short.";
 
   // ---- build the messages depending on mode ----
@@ -339,7 +361,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       reply, dm, saved, savedScorch,
       justBlocked,
       notice: justBlocked ? "you've been blocked." : null,
-      debug: main.debug || wallDebug || null,
+      debug: main.debug || wallDebug || _personaLoadErr || null,
     });
   } catch (e) {
     return res.status(500).json({ error: "AI request failed", debug: String(e && e.message || e) });
