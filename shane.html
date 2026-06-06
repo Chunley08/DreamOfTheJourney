@@ -9,6 +9,160 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css?v=cozy1" />
+
+<style id="shane-journal-game-css">
+.sjg {
+    --paper:#efe6d2; --rule:#c9b48f; --ink:#2a2118; --ink-blue:#2c3a52; --ink-faded:#6b5d49;
+    --gold:#caa45a; --danger:#ff5a44; --warn:#ffc24a; --safe:#7fcf9a;
+  }
+.sjg * { box-sizing:border-box; margin:0; padding:0; }
+.sjg body { font-family:'Outfit',sans-serif; color:#e8dcc4; background:#0c0908; }
+.sjg .jg-shell {
+    position:relative; width:100%; max-width:700px; margin:1.5rem auto; padding:18px; border-radius:18px;
+    background:repeating-linear-gradient(115deg, rgba(0,0,0,.06) 0 2px, transparent 2px 5px), radial-gradient(130% 120% at 30% 10%, #6e4429, #3a2316 55%, #241308);
+    box-shadow:0 24px 60px rgba(0,0,0,.7), inset 0 0 70px rgba(0,0,0,.5); border:1px solid #160d06;
+  }
+.sjg .jg-corner { position:absolute; width:46px; height:46px; border:3px solid var(--gold); opacity:.65; z-index:30; pointer-events:none; }
+.sjg .jg-corner.tl { top:9px; left:9px; border-right:0; border-bottom:0; border-radius:14px 0 0 0; }
+.sjg .jg-corner.tr { top:9px; right:9px; border-left:0; border-bottom:0; border-radius:0 14px 0 0; }
+.sjg .jg-corner.bl { bottom:9px; left:9px; border-right:0; border-top:0; border-radius:0 0 0 14px; }
+.sjg .jg-corner.br { bottom:9px; right:9px; border-left:0; border-top:0; border-radius:0 0 14px 0; }
+.sjg .jg-corner::after { content:''; position:absolute; width:9px; height:9px; border-radius:50%; background:var(--gold); box-shadow:0 0 8px var(--gold); }
+.sjg .jg-corner.tl::after { top:-6px; left:-6px; }
+.sjg .jg-corner.tr::after { top:-6px; right:-6px; }
+.sjg .jg-corner.bl::after { bottom:-6px; left:-6px; }
+.sjg .jg-corner.br::after { bottom:-6px; right:-6px; }
+.sjg /* THE ROOM */
+  .room { position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(202,164,90,.18);
+    box-shadow:inset 0 0 50px rgba(0,0,0,.6); padding:1.3rem 1.2rem 1.5rem; transition:filter .5s ease;
+    background:linear-gradient(180deg, #15100b 0%, #1c130c 42%, #2a1a0f 42%, #3a2414 100%); }
+.sjg .room::before { content:''; position:absolute; left:0; right:0; bottom:0; height:58%; z-index:0; pointer-events:none; opacity:.5;
+    background:repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 1px, transparent 1px 70px), repeating-linear-gradient(180deg, rgba(255,180,110,.04) 0 3px, transparent 3px 9px); }
+.sjg .lamp { position:absolute; left:8%; top:-6%; width:80%; height:80%; z-index:0; pointer-events:none;
+    background:radial-gradient(circle at 28% 22%, rgba(255,196,110,.20), rgba(255,180,90,.06) 38%, transparent 62%); }
+.sjg .vignette { position:absolute; inset:0; z-index:8; pointer-events:none; box-shadow:inset 0 0 90px 20px rgba(0,0,0,.55); transition:box-shadow .5s ease; }
+.sjg .room.stir .vignette { box-shadow:inset 0 0 110px 26px rgba(60,30,8,.7); }
+.sjg .room.looking .vignette { box-shadow:inset 0 0 130px 36px rgba(80,12,8,.82); animation:dangerPulse 1s ease-in-out infinite; }
+
+  @keyframes dangerPulse{ 0%,100%{ box-shadow:inset 0 0 120px 30px rgba(80,12,8,.7);} 50%{ box-shadow:inset 0 0 150px 44px rgba(120,16,10,.9);} }
+.sjg .room.stir { filter:saturate(.92) brightness(.96); }
+.sjg .room.looking { filter:saturate(.8) brightness(.9); }
+.sjg .loom { position:absolute; right:-12%; top:-18%; width:62%; height:130%; z-index:1; pointer-events:none;
+    background:radial-gradient(ellipse 50% 55% at 70% 40%, rgba(0,0,0,.6), transparent 70%); opacity:0; transform:scale(.7); transform-origin:75% 40%; transition:opacity .6s ease, transform .6s ease; }
+.sjg .room.stir .loom { opacity:.5; transform:scale(.92); }
+.sjg .room.looking .loom { opacity:.9; transform:scale(1.15); }
+.sjg .ember { position:absolute; width:3px; height:3px; border-radius:50%; background:rgba(230,170,80,.5); pointer-events:none; z-index:2; }
+.sjg .hud { display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-bottom:.9rem; position:relative; z-index:5; flex-wrap:wrap; }
+.sjg .hud-title { font-family:'Playfair Display',serif; font-weight:900; font-size:1.1rem; color:var(--gold); text-shadow:0 2px 4px rgba(0,0,0,.7); }
+.sjg .hud-title small { display:block; font-family:'Special Elite',monospace; font-weight:400; font-size:.58rem; letter-spacing:.18em; color:#9a8763; text-transform:uppercase; margin-top:2px; }
+.sjg .hud-stats { display:flex; gap:1rem; font-family:'Oswald',sans-serif; }
+.sjg .hud-stat { text-align:center; }
+.sjg .hud-stat .k { font-size:.52rem; letter-spacing:.16em; text-transform:uppercase; color:#9a8763; }
+.sjg .hud-stat .v { font-size:1.2rem; font-weight:700; color:#f0dcae; line-height:1; }
+.sjg .hud-stat .v.gold { color:var(--gold); }
+.sjg .pips { display:flex; gap:5px; justify-content:center; margin-bottom:1rem; position:relative; z-index:5; flex-wrap:wrap; }
+.sjg .pip { width:15px; height:6px; border-radius:3px; background:rgba(255,255,255,.1); transition:all .35s; }
+.sjg .pip.on { background:linear-gradient(90deg,var(--gold),#e7c879); box-shadow:0 0 8px rgba(202,164,90,.6); }
+.sjg .scene { position:relative; z-index:4; display:grid; grid-template-columns:130px 1fr; gap:16px; align-items:start; }
+@media (max-width:540px){.sjg .scene { grid-template-columns:100px 1fr; gap:11px; }}
+.sjg .portrait { position:relative; border-radius:13px; padding:8px 8px 24px; overflow:hidden; transition:box-shadow .3s;
+    background:radial-gradient(120% 100% at 30% 12%, #6e4429, #3a2316 60%, #1f1109); border:1px solid #160d06; box-shadow:0 8px 22px rgba(0,0,0,.55), inset 0 0 24px rgba(0,0,0,.5); }
+.sjg .portrait-frame { position:absolute; inset:5px 5px 20px; border:2px solid rgba(216,184,120,.35); border-radius:9px; pointer-events:none; z-index:3; transition:border-color .3s; }
+.sjg .portrait-pic { position:relative; width:100%; aspect-ratio:1/1; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; border-radius:8px; background:radial-gradient(circle at 50% 25%, rgba(255,200,120,.10), transparent 72%); }
+.sjg .portrait-pic img { max-width:114%; max-height:124%; object-fit:contain; filter:drop-shadow(0 4px 8px rgba(0,0,0,.6)); transition:opacity .3s, transform .3s; }
+.sjg .portrait.calm .portrait-pic img { animation:pbob 2.4s ease-in-out infinite; }
+
+  @keyframes pbob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-4px);} }
+.sjg .portrait.stir { box-shadow:0 8px 22px rgba(0,0,0,.55), 0 0 0 2px rgba(255,194,74,.7), 0 0 22px rgba(255,194,74,.4); }
+.sjg .portrait.stir .portrait-frame { border-color:rgba(255,194,74,.85); }
+.sjg .portrait.looking { box-shadow:0 8px 22px rgba(0,0,0,.55), 0 0 0 2px rgba(255,90,68,.85), 0 0 26px rgba(255,90,68,.55); animation:pjolt .25s infinite; }
+.sjg .portrait.looking .portrait-frame { border-color:rgba(255,90,68,.95); }
+
+  @keyframes pjolt{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-2px);} 75%{transform:translateX(2px);} }
+.sjg .portrait-name { position:absolute; left:0; right:0; bottom:5px; text-align:center; font-family:'Oswald',sans-serif; font-size:.5rem; letter-spacing:.14em; text-transform:uppercase; color:#d8b878; z-index:4; }
+.sjg .portrait.stir .portrait-name { color:var(--warn); }
+.sjg .portrait.looking .portrait-name { color:var(--danger); }
+.sjg .portrait-emote { position:absolute; top:4px; right:7px; z-index:5; font-family:'Playfair Display',serif; font-weight:900; font-size:1.4rem; opacity:0; transform:scale(.5); transition:all .2s; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+.sjg .portrait.stir .portrait-emote { opacity:1; transform:scale(1); color:var(--warn); }
+.sjg .portrait.looking .portrait-emote { opacity:1; transform:scale(1.1); color:var(--danger); }
+.sjg .bubble { position:absolute; left:0; top:-4px; max-width:155px; z-index:9; background:#f3ead4; color:#2a2118; padding:.45rem .7rem; border-radius:12px;
+    font-family:'Special Elite',monospace; font-size:.78rem; line-height:1.25; box-shadow:0 6px 16px rgba(0,0,0,.5); opacity:0; transform:translateY(6px) scale(.95); transition:all .22s; pointer-events:none; }
+.sjg .bubble::after { content:''; position:absolute; left:22px; bottom:-7px; border:8px solid transparent; border-top-color:#f3ead4; border-bottom:0; }
+.sjg .bubble.show { opacity:1; transform:translateY(0) scale(1); }
+.sjg .bubble.danger { background:#ffe0d8; color:#7a1d12; }
+.sjg .book { position:relative; perspective:2400px; z-index:3; }
+.sjg .spread { position:relative; border-radius:10px; padding:14px; transform-style:preserve-3d;
+    background:repeating-linear-gradient(115deg, rgba(0,0,0,.05) 0 2px, transparent 2px 5px), radial-gradient(120% 100% at 32% 22%, #6e4429, #4a2c19 55%, #2f1b0f);
+    box-shadow:0 26px 48px rgba(0,0,0,.65), inset 0 0 50px rgba(0,0,0,.45); border:1px solid #160d06; }
+.sjg .spread-stitch { position:absolute; inset:7px; border:2px dashed rgba(216,184,120,.26); border-radius:7px; pointer-events:none; z-index:5; }
+.sjg .pages { position:relative; display:grid; grid-template-columns:1fr 1fr; border-radius:3px; overflow:hidden; min-height:290px; box-shadow:0 4px 14px rgba(0,0,0,.5); transform-style:preserve-3d; }
+.sjg .leaf { position:relative; padding:1.4rem 1.2rem; background:
+      radial-gradient(circle at 22% 18%, rgba(150,110,60,.10), transparent 40%),
+      radial-gradient(circle at 80% 75%, rgba(130,95,50,.12), transparent 45%),
+      radial-gradient(120% 95% at 50% 0%, #ece0c6, #e4d6b6 60%, #d8c69e); }
+.sjg .leaf.left { box-shadow:inset -20px 0 30px -16px rgba(70,45,20,.5); }
+.sjg .leaf.right { box-shadow:inset 20px 0 30px -16px rgba(70,45,20,.5); }
+.sjg .leaf.left::before { content:''; display:none; }
+.sjg .pages::before { content:''; position:absolute; inset:0; pointer-events:none; z-index:3; box-shadow:inset 0 0 24px rgba(120,80,40,.28); }
+.sjg .gutter { position:absolute; left:50%; top:0; bottom:0; width:2px; transform:translateX(-50%); z-index:4; background:linear-gradient(180deg, rgba(60,40,20,.5), rgba(60,40,20,.15)); }
+.sjg .entry-tag { display:inline-block; font-family:'Oswald',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.15em; text-transform:uppercase; color:#7a6a4a; border:1px solid rgba(122,106,74,.4); border-radius:3px; padding:2px 7px; margin-bottom:.8rem; position:relative; z-index:2; }
+.sjg .entry { font-family:'Caveat',cursive; font-size:1.4rem; line-height:1.5; color:var(--ink-blue); position:relative; z-index:2; white-space:pre-wrap; word-break:break-word; }
+.sjg .entry.tab { font-family:'Special Elite',monospace; font-size:.92rem; line-height:1.7; color:var(--ink); }
+.sjg .sign { margin-top:.85rem; font-family:'Kalam',cursive; font-style:italic; font-size:.86rem; color:var(--ink-faded); text-align:right; position:relative; z-index:2; }
+.sjg .egg .leaf { background:
+      radial-gradient(circle at 25% 20%, rgba(170,130,50,.12), transparent 42%),
+      radial-gradient(120% 95% at 50% 0%, #f3e7c4, #ecdcb0 60%, #e0cc94);
+      box-shadow:inset 0 0 0 2px rgba(190,150,70,.45), inset 0 0 50px rgba(160,120,40,.25); }
+
+
+  @keyframes flip{ 0%{transform:rotateY(0);opacity:1;} 45%{transform:rotateY(-86deg);opacity:.35;} 55%{transform:rotateY(86deg);opacity:.35;} 100%{transform:rotateY(0);opacity:1;} }
+.sjg .flipping .leaf.right { animation:flip .5s ease-in-out; transform-origin:left center; }
+
+
+  @keyframes slamShut{
+    0%{ transform:rotateX(0) translateY(0) scale(1);} 30%{ transform:rotateX(-12deg) translateY(-14px) scale(1.04);}
+    62%{ transform:rotateX(-86deg) translateY(0) scale(.97);} 74%{ transform:rotateX(-72deg) translateY(0) scale(.99);}
+    86%{ transform:rotateX(-84deg) translateY(0) scale(.97);} 100%{ transform:rotateX(-84deg) translateY(2px) scale(.96); opacity:.92;}
+  }
+.sjg .slammed .spread { animation:slamShut .55s cubic-bezier(.4,0,.3,1) forwards; transform-origin:top center; }
+.sjg .dust { position:absolute; left:50%; bottom:10px; width:10px; height:10px; border-radius:50%; background:rgba(200,170,120,.5); opacity:0; z-index:6; pointer-events:none; }
+.sjg .slammed .dust { animation:puff .6s ease-out .28s; }
+
+  @keyframes puff{ 0%{opacity:.6; transform:translate(-50%,0) scale(.4);} 100%{opacity:0; transform:translate(-50%,-30px) scale(2.4);} }
+
+  @keyframes bigShake{ 0%,100%{transform:translate(0,0);} 15%{transform:translate(-12px,4px);} 30%{transform:translate(11px,-3px);} 45%{transform:translate(-9px,2px);} 60%{transform:translate(7px,-2px);} 80%{transform:translate(-4px,1px);} }
+.sjg .quake { animation:bigShake .5s; }
+.sjg .flashbang { position:absolute; inset:0; z-index:15; background:#fff; opacity:0; pointer-events:none; }
+.sjg .flashbang.go { animation:flashFade .4s ease-out; }
+
+  @keyframes flashFade{ 0%{opacity:0;} 12%{opacity:.6;} 100%{opacity:0;} }
+.sjg .controls { display:flex; gap:.7rem; justify-content:center; margin-top:1.3rem; flex-wrap:wrap; position:relative; z-index:5; }
+.sjg .jbtn { font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.05em; text-transform:uppercase; font-size:.82rem; cursor:pointer; padding:.72rem 1.5rem; border-radius:9px; border:none; transition:all .15s; }
+.sjg .jbtn.turn { background:linear-gradient(135deg,#e7c879,#a07c2e); color:#241606; box-shadow:0 6px 16px rgba(160,124,46,.45); }
+.sjg .jbtn.turn:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(160,124,46,.6); }
+.sjg .jbtn.turn:active { transform:translateY(1px); }
+.sjg .jbtn.shut { background:rgba(70,18,12,.7); color:#ff9a7a; border:1px solid rgba(255,106,82,.5); }
+.sjg .jbtn.shut:hover { background:rgba(95,24,16,.9); transform:translateY(-2px); }
+.sjg .jbtn:disabled { opacity:.35; cursor:not-allowed; transform:none !important; }
+.sjg .overlay { position:absolute; inset:0; z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; opacity:0; pointer-events:none; transition:opacity .3s; }
+.sjg .overlay.show { opacity:1; pointer-events:auto; }
+.sjg .overlay.caught { background:radial-gradient(circle at 50% 40%, rgba(80,12,8,.93), rgba(10,4,3,.97)); }
+.sjg .overlay.clear { background:radial-gradient(circle at 50% 40%, rgba(60,40,12,.92), rgba(10,8,3,.96)); }
+.sjg .overlay.start { background:radial-gradient(circle at 50% 40%, rgba(30,20,12,.96), rgba(8,5,3,.98)); }
+.sjg .ov-chibi { width:210px; height:210px; object-fit:contain; filter:drop-shadow(0 8px 16px rgba(0,0,0,.7)); margin-bottom:.4rem; }
+.sjg .ov-chibi.crash { animation:crash .45s cubic-bezier(.3,1.4,.5,1); }
+
+  @keyframes crash{ 0%{transform:scale(2.2) translateY(-40px); opacity:0;} 60%{transform:scale(.92) translateY(0); opacity:1;} 100%{transform:scale(1);} }
+.sjg .ov-chibi.pop { animation:pop .4s cubic-bezier(.2,.9,.3,1.5); }
+
+  @keyframes pop{ 0%{transform:scale(.4);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+.sjg .ov-h { font-family:'Playfair Display',serif; font-weight:900; font-size:1.9rem; margin-bottom:.4rem; }
+.sjg .ov-h.bad { color:#ff6a52; text-shadow:0 0 24px rgba(255,80,60,.6); }
+.sjg .ov-h.good { color:var(--gold); text-shadow:0 0 22px rgba(202,164,90,.5); }
+.sjg .ov-line { font-family:'Special Elite',monospace; font-style:italic; font-size:1.05rem; color:#e8d2b0; margin-bottom:1.2rem; max-width:340px; min-height:1.4em; }
+.sjg .ov-stat { font-family:'Oswald',sans-serif; color:#e0c79a; margin-bottom:1.4rem; }
+.sjg .ov-stat b { font-size:1.5rem; color:var(--gold); }
+</style>
 </head>
 <body data-standalone="shane">
 
@@ -258,53 +412,6 @@
     </details>
   </section>
 
-  <!-- ====== READING HIS JOURNAL (cozy pixel game) ====== -->
-  <section class="char-section poster-section" id="shaneGameSection">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Read His Journal</h2>
-    <span class="poster-eyebrow reveal-up">He's right there. Turn the pages while he's not looking.</span>
-
-    <div class="sj reveal-up" id="sjGame">
-
-      <!-- HUD -->
-      <div class="sj-hud">
-        <div class="sj-gaze away" id="sjGaze"><span class="dot"></span><span id="sjGazeText">He's not looking.</span></div>
-        <span class="sj-count">Read <b id="sjReadCount">0</b></span>
-        <span class="sj-count sj-rare">Rare <b id="sjRareCount">0</b></span>
-      </div>
-
-      <!-- the room -->
-      <div class="sj-stage">
-        <canvas id="sjCanvas" width="320" height="200" aria-label="Shane's room — read his journal"></canvas>
-
-        <!-- intro / game-over overlay -->
-        <div class="sj-overlay" id="sjOverlay">
-          <div class="sj-overlay-inner">
-            <p class="sj-callout" id="sjCallout">His Journal Is Open.</p>
-            <p class="sj-sub" id="sjSub">He left it open on the desk and he's right there tuning his bass. <b>Turn Page</b> to read an entry. Every so often he'll <b>stir, then glance over</b> &mdash; tap <b>Shut it!</b> before he sees, or he catches you. The more you read, the better your odds of stumbling on the rare stuff: band secrets, things he buried a long time ago&hellip; and one page he never meant for anyone.</p>
-            <button type="button" class="sj-btn" id="sjStart">Sneak a Look</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- the page being read -->
-      <div class="sj-page" id="sjPage">
-        <div class="sj-page-head">
-          <span class="sj-tag" id="sjTag">&mdash;</span>
-          <span class="sj-sticker" id="sjSticker" hidden></span>
-        </div>
-        <div class="sj-entry" id="sjEntry">(his journal, open on the desk)</div>
-        <div class="sj-date" id="sjDate">&mdash; private. obviously.</div>
-      </div>
-
-      <!-- controls -->
-      <div class="sj-controls">
-        <button type="button" class="sj-cbtn turn" id="sjTurn">Turn Page ▸</button>
-        <button type="button" class="sj-cbtn shut" id="sjShut">✕ Shut it!</button>
-      </div>
-
-      <p class="sj-line" id="sjLine">It's open. You shouldn't. You're going to.</p>
-    </div>
-  </section>
 
   <!-- ====== THE JOURNAL (kept — Shane's unique feature) ====== -->
   <section class="char-section poster-section">
@@ -351,37 +458,84 @@ yeah. that's closer.</p>
     </div>
   </section>
 
-  <!-- ====== MERCH (= gallery — Shane IS the merch) ====== -->
-  <section class="char-section poster-section">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Merch</h2>
-    <span class="poster-eyebrow reveal-up">Shane IS the merch &middot; Stock: 1 &middot; He didn't sign off on any of these</span>
+  <!-- ====== READING HIS JOURNAL (the game — replaced merch) ====== -->
+  <section class="char-section poster-section" id="shaneJournalGameSection">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">His Journal</h2>
+    <span class="poster-eyebrow reveal-up">he keeps one. he'd kill you for reading it. so don't get caught.</span>
+<div class="sjg">
+<div class="jg-shell">
+  <span class="jg-corner tl"></span><span class="jg-corner tr"></span>
+  <span class="jg-corner bl"></span><span class="jg-corner br"></span>
 
-    <div class="pit-board merch-board">
-      <div class="price-tag tag-1of1 reveal-stamp">1 of 1</div>
-      <div class="price-tag tag-priceless reveal-stamp">$&infin;</div>
-      <div class="price-tag tag-noresale reveal-stamp">Not For Resale</div>
+  <div class="room calm" id="room">
+    <div class="lamp"></div><div class="loom"></div><div class="vignette"></div>
+    <div class="flashbang" id="flash"></div>
 
-      <button class="pit-cta gallery-entry" id="shaneGalleryEntry" type="button" aria-label="Open gallery">
-        <div class="polaroid">
-          <div class="polaroid-photo">
-            <img class="gallery-entry-cover" src="assets/Shane Pics/shane-gallery-cover.jpg" alt="Shane gallery cover" />
-          </div>
-          <div class="polaroid-caption">Shane<small>Limited Edition &middot; 10 Photos &middot; View All</small></div>
-        </div>
-      </button>
-      <script id="shaneGalleryData" type="application/json">[
-        {"src": "assets/Shane Pics/shane-gallery-01.jpg", "alt": "Shane on the knucklehead"},
-        {"src": "assets/Shane Pics/shane-gallery-02.jpg", "alt": "Bass in the studio"},
-        {"src": "assets/Shane Pics/shane-gallery-03.jpg", "alt": "Backstage, deadpan as ever"},
-        {"src": "assets/Shane Pics/shane-gallery-04.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-05.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-06.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-07.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-08.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-09.jpg", "alt": ""},
-        {"src": "assets/Shane Pics/shane-gallery-10.jpg", "alt": ""}
-      ]</script>
+    <div class="hud">
+      <div class="hud-title">Shane's Private Shit<small>you really shouldn't</small></div>
+      <div class="hud-stats">
+        <div class="hud-stat"><div class="k">Level</div><div class="v gold" id="lvl">1</div></div>
+        <div class="hud-stat"><div class="k">Read</div><div class="v" id="readTot">0</div></div>
+        <div class="hud-stat"><div class="k">Best</div><div class="v" id="best">0</div></div>
+      </div>
     </div>
+
+    <div class="pips" id="pips"></div>
+
+    <div class="scene" id="scene">
+      <div class="portrait calm" id="portrait">
+        <div class="bubble" id="bubble"></div>
+        <div class="portrait-pic"><img id="portraitImg" src="" alt="Shane"></div>
+        <div class="portrait-frame"></div>
+        <div class="portrait-emote" id="portraitEmote"></div>
+        <div class="portrait-name" id="portraitName">distracted</div>
+      </div>
+
+      <div class="book">
+        <div class="spread" id="spread">
+          <div class="spread-stitch"></div><div class="dust"></div>
+          <div class="pages" id="pageWrap">
+            <div class="gutter"></div>
+            <div class="leaf left">
+              <span class="entry-tag" id="tag">— private. obviously.</span>
+              <div class="entry" id="entryL">his journal. open on the desk.
+
+he's distracted. now's your chance.</div>
+            </div>
+            <div class="leaf right"><div class="entry" id="entryR"></div><div class="sign" id="sign"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="jbtn turn" id="turnBtn" type="button">Turn Page ▸</button>
+      <button class="jbtn shut" id="shutBtn" type="button">✕ Shut it!</button>
+    </div>
+
+    <div class="overlay start show" id="ovStart">
+      <div class="ov-h good">Shane's Private Shit</div>
+      <div class="ov-line">His journal's right there. Read it — <b>10 pages</b> clears a level — but <b>watch him.</b> When he gets suspicious, shut it before he looks up. No meter — read his face. Harder every level. Endless.</div>
+      <button class="jbtn turn" id="startBtn" type="button">Start Sneaking ▸</button>
+    </div>
+
+    <div class="overlay caught" id="ovCaught">
+      <img class="ov-chibi" id="caughtImg" src="" alt="">
+      <div class="ov-h bad">CAUGHT</div>
+      <div class="ov-line" id="caughtLine"></div>
+      <div class="ov-stat">made it to <b id="caughtLvl">1</b> · read <b id="caughtRead">0</b></div>
+      <button class="jbtn turn" id="retryBtn" type="button">Try Again ▸</button>
+    </div>
+
+    <div class="overlay clear" id="ovClear">
+      <img class="ov-chibi" id="clearImg" src="" alt="">
+      <div class="ov-h good" id="clearH">Level Clear</div>
+      <div class="ov-line" id="clearLine"></div>
+      <button class="jbtn turn" id="nextBtn" type="button">Next Level ▸</button>
+    </div>
+  </div>
+</div>
+</div>
   </section>
 
   <!-- ====== BACKSTAGE PASS ====== -->
@@ -957,5 +1111,155 @@ yeah. that's closer.</p>
 <script src="character-page.js"></script>
 
 <script src="script.js?v=cozy1"></script>
+
+<script id="shane-journal-game-js">
+
+(function(){
+  var ART = "assets/Shane Pics/";
+  var IMG = { bike:ART+"shane-bike.png", bass:ART+"shane-bass.png", sleep:ART+"shane-sleep.png",
+    sus:ART+"shane-suspicious.png", point:ART+"shane-caught-point.png", fist:ART+"shane-caught-fist.png",
+    knife:ART+"shane-caught-knife.png", kiss:ART+"shane-kiss.png" };
+
+  var POOL = [
+    { tag:"late. can't sleep.", l:"didn't say much today. nothing worth saying.", r:"new line's almost right. almost.\nk." },
+    { tag:"bass idea", tab:true, l:"drop D —\nA|--5--5--3--0--\nD|--5--5--3--0--", r:"too clean.\nrough it up." },
+    { tag:"—", l:"scorch broke another mic stand.", r:"told him to chill.\nhe didn't. good show tho." },
+    { tag:"3am", l:"some nights the old life feels close.", r:"don't miss it.\njust remember it." },
+    { tag:"whatever", l:"cody asked if I was ok.", r:"said yeah.\nmostly meant it." },
+    { tag:"the bike", l:"knucklehead's running clean again.", r:"took all night.\nworth it." },
+    { tag:"—", l:"someone left a comment that landed.", r:"weird.\ndidn't hate it." },
+    { tag:"rain", l:"rode in the rain. dumb. cold.", r:"felt good though.\nquiet out there." },
+  ];
+
+  // >>> CHUNLEY: your secret hand-written easter egg <<<
+  var EGG_CHANCE = 0.03;
+  var EGG = { tag:"", l:"(this is where Chunley's secret entry goes.)", r:"— the only page he wrote by hand.", sign:"— S." };
+
+  var $=function(id){return document.getElementById(id);};
+  var room=$('room'), portrait=$('portrait'), portraitImg=$('portraitImg'), portraitName=$('portraitName'),
+      portraitEmote=$('portraitEmote'), bubble=$('bubble'), spread=$('spread'), pageWrap=$('pageWrap'),
+      tag=$('tag'), entryL=$('entryL'), entryR=$('entryR'), sign=$('sign'), scene=$('scene'),
+      turnBtn=$('turnBtn'), shutBtn=$('shutBtn'), flash=$('flash'),
+      lvlEl=$('lvl'), readTotEl=$('readTot'), bestEl=$('best'), pips=$('pips');
+
+  var level=1, pageInLevel=0, totalRead=0, best=0, state='', caught=false, busy=false, running=false;
+  var heat=6, deepness=0, rafId=null, lastTick=0, GOAL=10;
+
+  var calmBubbles=["...", "hm.", "(scribbles)", ""];
+  var stirBubbles=["...the hell?", "you hear that?", "...someone there?", "hm?"];
+  var lookBubbles=["—?!", "the fuck—", "HEY."];
+  var caughtShallow=["...the hell are you doing.","u good, bro?","that's mine. put it down.","lol. busted, weirdo."];
+  var caughtDeep=["the fuck do you think you're doing.","put. it. down.","you went too far, man.","yeah. we're done here."];
+  var clearLines=["...you're still here? whatever.","didn't catch you. this time.","hm. sneaky.","got away with it. barely."];
+
+  function heatRate(){ return 2.0 + level*0.5; }
+  function heatPerPage(){ return 4 + level*0.7; }
+  function stirAt(){ return Math.max(40,60-level*2); }
+  function lookAt(){ return Math.max(64,80-level*2); }
+  function sleepChance(){ return Math.max(0.06,0.34-level*0.03); }
+
+  function buildPips(){ pips.innerHTML=''; for(var i=0;i<GOAL;i++){ var p=document.createElement('div'); p.className='pip'+(i<pageInLevel?' on':''); pips.appendChild(p);} }
+  function setPortrait(kind,name){ portraitImg.src=IMG[kind]||kind; if(name) portraitName.textContent=name; }
+  function say(arr,danger){ var t=arr[Math.floor(Math.random()*arr.length)]; if(!t){ bubble.classList.remove('show'); return;} bubble.textContent=t; bubble.className='bubble show'+(danger?' danger':''); }
+
+  function pickDistracted(){
+    if(Math.random()<sleepChance()){ setPortrait('sleep','asleep'); }
+    else if(Math.random()<0.5){ setPortrait('bike','fixing bike'); }
+    else { setPortrait('bass','tuning bass'); }
+  }
+
+  function setState(s){
+    if(state===s) return; state=s;
+    portrait.className='portrait '+s; room.className='room '+s;
+    if(s==='calm'){ pickDistracted(); portraitEmote.textContent=''; if(Math.random()<0.4) say(calmBubbles,false); else bubble.classList.remove('show'); }
+    if(s==='stir'){ setPortrait('sus','suspicious'); portraitEmote.textContent='?'; say(stirBubbles,false); }
+    if(s==='looking'){ setPortrait('sus','LOOKING UP'); portraitEmote.textContent='!'; say(lookBubbles,true); }
+  }
+
+  function tick(ts){
+    if(caught) return;
+    if(!lastTick) lastTick=ts;
+    var dt=(ts-lastTick)/1000; lastTick=ts;
+    if(running && !busy){
+      heat += heatRate()*dt;
+      if(heat>=100){ doCaught(); return; }
+      if(heat>=lookAt()) setState('looking');
+      else if(heat>=stirAt()) setState('stir');
+      else setState('calm');
+    }
+    rafId=requestAnimationFrame(tick);
+  }
+
+  function turnPage(){
+    if(caught||busy||!running) return;
+    busy=true;
+    pageWrap.classList.remove('flipping'); void pageWrap.offsetWidth; pageWrap.classList.add('flipping');
+    setTimeout(function(){
+      var egg=Math.random()<EGG_CHANCE;
+      var e=egg?EGG:POOL[Math.floor(Math.random()*POOL.length)];
+      tag.textContent=e.tag||"—";
+      entryL.className='entry'+(e.tab?' tab':''); entryR.className='entry'+(e.tab?' tab':'');
+      entryL.textContent=e.l; entryR.textContent=e.r||""; sign.textContent=e.sign||"";
+      spread.classList.toggle('egg',!!egg);
+      pageInLevel++; totalRead++; readTotEl.textContent=totalRead; deepness=pageInLevel; buildPips();
+      heat=Math.min(99,heat+heatPerPage());
+      busy=false;
+      if(pageInLevel>=GOAL){ levelClear(); return; }
+    },250);
+  }
+
+  function shutIt(){
+    if(caught||!running) return;
+    if(heat>=stirAt()){ heat=Math.max(6,heat-32); say(["(eased it shut)"],false); setTimeout(function(){ if(state==='calm') bubble.classList.remove('show'); },1200); }
+  }
+
+  function doCaught(){
+    caught=true; running=false;
+    var deep=deepness>=6;
+    var pool=deep?caughtDeep:caughtShallow;
+    var img=deep?IMG.knife:(Math.random()<0.5?IMG.point:IMG.fist);
+    var line=pool[Math.floor(Math.random()*pool.length)];
+    flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+    spread.classList.add('slammed'); scene.classList.add('quake'); room.className='room looking';
+    setTimeout(function(){ scene.classList.remove('quake'); },520);
+    if(totalRead>best){ best=totalRead; bestEl.textContent=best; }
+    var ci=$('caughtImg'); ci.src=img; ci.className='ov-chibi crash';
+    $('caughtLine').textContent='“'+line+'”'; $('caughtLvl').textContent=level; $('caughtRead').textContent=totalRead;
+    setTimeout(function(){ $('ovCaught').classList.add('show'); },520);
+  }
+
+  function levelClear(){
+    running=false; busy=true;
+    var ci=$('clearImg'); ci.src=IMG.kiss; ci.className='ov-chibi pop';
+    $('clearH').textContent='Level '+level+' Clear';
+    $('clearLine').textContent='“'+clearLines[Math.floor(Math.random()*clearLines.length)]+'”';
+    if(totalRead>best){ best=totalRead; bestEl.textContent=best; }
+    setTimeout(function(){ $('ovClear').classList.add('show'); },300);
+  }
+
+  function startLevel(){
+    pageInLevel=0; heat=6; caught=false; busy=false; deepness=0; lastTick=0;
+    lvlEl.textContent=level; buildPips();
+    spread.classList.remove('slammed','egg'); room.className='room calm';
+    tag.textContent='— private. obviously.'; entryL.className='entry'; entryR.className='entry';
+    entryL.textContent="he's distracted. now's your chance."; entryR.textContent=''; sign.textContent='';
+    state=''; setState('calm'); turnBtn.disabled=false; shutBtn.disabled=false; running=true;
+    if(!rafId) rafId=requestAnimationFrame(tick);
+  }
+  function fullReset(){ level=1; totalRead=0; readTotEl.textContent=0; startLevel(); }
+
+  for(var i=0;i<10;i++){ (function(){ var e=document.createElement('div'); e.className='ember'; room.appendChild(e);
+    function fly(){ e.style.left=(Math.random()*100)+'%'; e.style.top='100%';
+      var dur=4000+Math.random()*4500; e.animate([{transform:'translateY(0)',opacity:.5},{transform:'translateY(-360px)',opacity:0}],{duration:dur,easing:'ease-out'});
+      setTimeout(fly,dur);} setTimeout(fly,Math.random()*4500); })(); }
+
+  $('startBtn').addEventListener('click',function(){ $('ovStart').classList.remove('show'); startLevel(); });
+  $('retryBtn').addEventListener('click',function(){ $('ovCaught').classList.remove('show'); fullReset(); });
+  $('nextBtn').addEventListener('click',function(){ $('ovClear').classList.remove('show'); level++; startLevel(); });
+  turnBtn.addEventListener('click',turnPage);
+  shutBtn.addEventListener('click',shutIt);
+})();
+
+</script>
 </body>
 </html>
