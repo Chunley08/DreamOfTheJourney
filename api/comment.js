@@ -277,7 +277,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       const targetId = body.targetId;
       if (!targetId || !comment) return res.status(200).json({ voted: null });
       const v = await callModel([
-        { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it — a sweet/funny/real one he'd grudgingly LIKE; a rude, boring, or insulting one (or anything praising the Street Rats/Skye) he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE.` },
+        { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it. Decide based purely on how ${NAME} — with the exact personality described above — would actually feel about this specific comment: something he'd genuinely vibe with, find funny, or that flatters him he'd LIKE; something rude, boring, insulting, or that hits one of his sore spots he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE.` },
         { role: "user", content: `The comment: "${comment}"` },
       ]);
       const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
@@ -377,7 +377,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       if (!justBlocked && Math.random() < 0.35) {
         try {
           const v = await callModel([
-            { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it — based purely on how he feels about it (a sweet/funny/real one he'd grudgingly LIKE; a rude, boring, or insulting one, or anything praising the Street Rats/Skye, he'd DISLIKE). Reply with EXACTLY one word: LIKE or DISLIKE. Nothing else.` },
+            { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it. Decide based purely on how ${NAME} — with the exact personality described above — would actually feel about this specific comment: something he'd genuinely vibe with, find funny, or that flatters him he'd LIKE; something rude, boring, insulting, or that hits one of his sore spots he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE. Nothing else.` },
             { role: "user", content: `The comment: "${comment}"` },
           ]);
           const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
