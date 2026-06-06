@@ -9,6 +9,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+
+<style id="preview-status-css">
+/* live status line on dating preview cards (matches the dating-page banner) */
+.preview-status{ display:flex; align-items:center; gap:.5rem; margin:.1rem 0 .7rem; padding:.45rem .7rem;
+  background:linear-gradient(135deg, rgba(255,90,31,.14), rgba(255,90,31,.05));
+  border:1px solid rgba(255,90,31,.32); border-radius:10px; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  text-align:left; }
+.preview-status-dot{ width:8px; height:8px; flex:none; border-radius:50%; background:#3ddc6e; box-shadow:0 0 7px #3ddc6e; animation:pvPulse 2s infinite; }
+@keyframes pvPulse{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+.preview-status-text{ font-family:'Special Elite',monospace; font-size:.82rem; line-height:1.25; color:#f4e2d6;
+  overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; flex:1; }
+.preview-status-mood{ font-family:'Oswald',sans-serif; font-size:.52rem; letter-spacing:.08em; text-transform:uppercase;
+  color:#ffb88a; background:rgba(255,90,31,.18); border:1px solid rgba(255,90,31,.38); border-radius:999px; padding:2px 7px; white-space:nowrap; flex:none; }
+.preview-status-mood:empty{ display:none; }
+.preview-status.loading .preview-status-text{ opacity:.5; }
+</style>
 </head>
 <body>
 
@@ -54,6 +70,12 @@
         <div class="dating-preview-body">
           <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
           <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <!-- live status (pulled from /api/status) -->
+          <div class="preview-status" data-status-char="scorch">
+            <span class="preview-status-dot"></span>
+            <span class="preview-status-text">…</span>
+            <span class="preview-status-mood"></span>
+          </div>
           <div class="dating-preview-types">
             <span class="romance-tag rt-toxic">🔥 Toxic</span>
             <span class="romance-tag rt-baggage">💔 Baggage</span>
@@ -284,5 +306,29 @@
 
 
 <script src="script.js"></script>
+
+<script id="preview-status-js">
+(function(){
+  var STATUS_URL = "https://dream-of-the-journey.vercel.app/api/status";
+  // fill EVERY preview card that has a data-status-char (reusable for all characters)
+  var nodes = document.querySelectorAll(".preview-status[data-status-char]");
+  nodes.forEach(function(node){
+    var ch = node.getAttribute("data-status-char");
+    var txt = node.querySelector(".preview-status-text");
+    var mood = node.querySelector(".preview-status-mood");
+    node.classList.add("loading");
+    fetch(STATUS_URL + "?character=" + encodeURIComponent(ch))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        node.classList.remove("loading");
+        if(d && d.status){
+          txt.textContent = (d.moodEmoji ? d.moodEmoji + " " : "") + d.status;
+          if(mood) mood.textContent = d.mood || "";
+        } else { txt.textContent = "around. whatever."; }
+      })
+      .catch(function(){ node.classList.remove("loading"); txt.textContent = "around. whatever."; });
+  });
+})();
+</script>
 </body>
 </html>
