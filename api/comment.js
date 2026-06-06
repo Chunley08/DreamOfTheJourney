@@ -254,8 +254,8 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     // For thread replies and vote reactions, Scorch only SOMETIMES speaks up.
     // Decide the chance up front so we don't waste a model call (and so silence
     // is a real outcome). Tune these numbers to taste.
-    const REPLY_CHANCE = 0.7;          // chance he answers a fan's in-thread reply
-    const VOTE_REACTION_CHANCE = 0.12; // low chance he reacts to a like/dislike
+    const REPLY_CHANCE = 0.75;         // chance he answers a fan's in-thread reply
+    const VOTE_REACTION_CHANCE = 0.30; // chance he reacts to a like/dislike (was .12 — never seen, raised)
 
     if (mode === "vote-reaction") {
       if (Math.random() > VOTE_REACTION_CHANCE) {
