@@ -166,6 +166,14 @@
       replyingTo +
       '<div class="sc-comment-text">' + esc(it.comment || "") + '</div>';
     html += voteRow(it);
+    // Scorch's own like/dislike badge (if he voted on this comment)
+    if (it.scorchVote === "like" || it.scorchVote === "dislike") {
+      var liked = it.scorchVote === "like";
+      html += '<div class="sc-scorch-verdict ' + (liked ? 'liked' : 'disliked') + '">' +
+                '<span class="sc-sv-icon">' + (liked ? '\u2665' : '\uD83D\uDC94') + '</span>' +
+                '<span class="sc-sv-text">' + esc(AUTHOR) + (liked ? ' Liked This' : ' Disliked This') + '</span>' +
+              '</div>';
+    }
     if (ADMIN_KEY && it.id) {
       html += '<button type="button" class="sc-del" data-id="' + esc(it.id) + '">\uD83D\uDDD1 delete</button>';
     }
@@ -240,6 +248,57 @@
       if (Array.isArray(data.comments)) renderWall(data.comments);
     } catch (e) { /* keep whatever's on screen */ }
   }
+
+  // ===== SCORCH "BROWSING" — occasionally he votes on an existing comment =====
+  // Every so often while you're on the page, pick a real (non-Scorch) comment
+  // he hasn't voted on yet and have him cast a like/dislike. Low-key, ambient.
+  function scorchBrowseTick(){
+    try {
+      var nodes = Array.prototype.slice.call(thread.querySelectorAll(".sc-comment"));
+      // candidates: not his own, no verdict badge yet, has an id + text
+      var cands = nodes.filter(function(n){
+        return !n.classList.contains("is-scorch") &&
+               !n.querySelector(".sc-scorch-verdict") &&
+               n.dataset.id &&
+               (n.querySelector(".sc-comment-text")||{}).textContent;
+      });
+      if (!cands.length) return;
+      var pick = cands[Math.floor(Math.random()*cands.length)];
+      var id = pick.dataset.id;
+      var text = pick.querySelector(".sc-comment-text").textContent;
+      fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ character: CHAR, mode:"scorch-browse", targetId: id, comment: text, clientId: CID }) })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if (d && (d.voted === "like" || d.voted === "dislike") && !d.already){
+            animateVerdict(pick, d.voted, d.likes, d.dislikes);
+          }
+        }).catch(function(){});
+    } catch(e){}
+  }
+  // drop the badge onto a comment with a little animation (live, while browsing)
+  function animateVerdict(block, vote, likes, dislikes){
+    if (!block || block.querySelector(".sc-scorch-verdict")) return;
+    var liked = vote === "like";
+    var v = document.createElement("div");
+    v.className = "sc-scorch-verdict " + (liked?"liked":"disliked") + " pop";
+    v.innerHTML = '<span class="sc-sv-icon">' + (liked?'\u2665':'\uD83D\uDC94') + '</span>' +
+                  '<span class="sc-sv-text">' + esc(AUTHOR) + (liked?' Liked This':' Disliked This') + '</span>';
+    var actions = block.querySelector(".sc-actions");
+    if (actions) actions.parentNode.insertBefore(v, actions.nextSibling); else block.appendChild(v);
+    // bump the visible count too
+    try {
+      var sel = liked ? ".sc-like .sc-vote-n" : ".sc-dislike .sc-vote-n";
+      var nEl = block.querySelector(sel);
+      if (nEl && typeof likes==="number") nEl.textContent = liked ? likes : dislikes;
+    } catch(e){}
+  }
+  // run the browse tick on a gentle random cadence (every ~25–55s)
+  function scheduleBrowse(){
+    var wait = 25000 + Math.random()*30000;
+    setTimeout(function(){ if(Math.random() < 0.6) scorchBrowseTick(); scheduleBrowse(); }, wait);
+  }
+  scheduleBrowse();
 
   // ===== VOTES + THREADED REPLIES (delegated on the thread) =====
   thread.addEventListener("click", async (e) => {
