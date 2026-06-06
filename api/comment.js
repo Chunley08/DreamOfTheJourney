@@ -265,6 +265,38 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       return res.status(200).json({ reply: r.text || null, reacted: !!r.text, debug: r.debug || null });
     }
 
+    // ===== SCORCH BROWSE-VOTE: he likes/dislikes an EXISTING comment =====
+    // frontend sends { mode:"scorch-browse", targetId, comment:<that comment's text> }
+    if (mode === "scorch-browse") {
+      const targetId = body.targetId;
+      if (!targetId || !comment) return res.status(200).json({ voted: null });
+      const v = await callModel([
+        { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it — a sweet/funny/real one he'd grudgingly LIKE; a rude, boring, or insulting one (or anything praising the Street Rats/Skye) he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE.` },
+        { role: "user", content: `The comment: "${comment}"` },
+      ]);
+      const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
+      if (!vote) return res.status(200).json({ voted: null, debug: v.debug || null });
+      // find + update that record on the wall (LSET in place)
+      const key = wallKeyFor(character);
+      const list = await _redis(["LRANGE", key, "0", String(WALL_MAX - 1)]);
+      if (list.ok) {
+        const arr = list.result || [];
+        for (let i = 0; i < arr.length; i++) {
+          try {
+            const o = JSON.parse(arr[i]);
+            if (o.id === targetId) {
+              if (o.scorchVote) return res.status(200).json({ voted: o.scorchVote, already: true }); // don't double-vote
+              o.scorchVote = vote;
+              if (vote === "like") o.likes = (o.likes || 0) + 1; else o.dislikes = (o.dislikes || 0) + 1;
+              await _redis(["LSET", key, String(i), JSON.stringify(o)]);
+              return res.status(200).json({ voted: vote, id: targetId, likes: o.likes, dislikes: o.dislikes });
+            }
+          } catch (e) {}
+        }
+      }
+      return res.status(200).json({ voted: null });
+    }
+
     // for thread replies, roll FIRST — if he stays quiet, save the fan's reply
     // alone (no wasted model call, no discarded answer).
     let replyRolled = true;
@@ -333,6 +365,23 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         comment: String(comment).slice(0, 400),
         likes: 0, dislikes: 0, ts: Date.now(),
       };
+
+      // ---- SCORCH CASTS A VOTE (35% chance, AI decides like vs dislike) ----
+      // decided BEFORE saving so it's baked into the stored record + counts.
+      if (!justBlocked && Math.random() < 0.35) {
+        try {
+          const v = await callModel([
+            { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it — based purely on how he feels about it (a sweet/funny/real one he'd grudgingly LIKE; a rude, boring, or insulting one, or anything praising the Street Rats/Skye, he'd DISLIKE). Reply with EXACTLY one word: LIKE or DISLIKE. Nothing else.` },
+            { role: "user", content: `The comment: "${comment}"` },
+          ]);
+          const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
+          if (vote) {
+            saved.scorchVote = vote;
+            if (vote === "like") saved.likes += 1; else saved.dislikes += 1;
+          }
+        } catch (e) { /* vote call failed — skip it, no harm */ }
+      }
+
       let w = await saveToWall(saved, character);
       if (!w.ok) { wallDebug = w.error; saved = null; }
       // his auto-reply becomes a child node under their comment
