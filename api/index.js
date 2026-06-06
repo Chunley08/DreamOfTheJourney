@@ -28,6 +28,7 @@ function register(...modules) {
       name: m.name || (key.charAt(0).toUpperCase() + key.slice(1)),
       persona: m.persona,
       blocking: m.blocking || "",
+      statusThemes: m.statusThemes || "",
     };
   }
   return map;
