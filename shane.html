@@ -1120,20 +1120,65 @@ he's distracted. now's your chance.</div>
     sus:ART+"shane-suspicious.png", point:ART+"shane-caught-point.png", fist:ART+"shane-caught-fist.png",
     knife:ART+"shane-caught-knife.png", kiss:ART+"shane-kiss.png" };
 
+  // ============================================================
+  //  AI BACKEND — the journal endpoint that writes Shane's entries.
+  //  Same domain as your comment endpoint, just /api/journal.
+  // ============================================================
+  var JOURNAL_URL = "https://dream-of-the-journey.vercel.app/api/journal";
+  var CHAR = "shane";
+
+  // We keep a small BUFFER of AI-written entries so turning a page is
+  // instant. We refill it in the background. If it's ever empty (slow
+  // network / API hiccup), we fall back to a POOL placeholder so the
+  // game never freezes waiting on the server.
+  var aiBuffer = [];
+  var fetching = false;
+  function refillBuffer(){
+    if(fetching || aiBuffer.length >= 3) return;
+    fetching = true;
+    fetch(JOURNAL_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"write", character:CHAR }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.text){ aiBuffer.push({ date:d.date||"", text:d.text }); }
+        fetching = false;
+        if(aiBuffer.length < 3) refillBuffer();   // keep topping up
+      })
+      .catch(function(){ fetching = false; });
+  }
+  // pull one entry: prefer AI buffer, else a placeholder; always refill after
+  function nextAIEntry(){
+    var e = aiBuffer.shift();
+    refillBuffer();
+    return e;  // may be undefined if buffer was empty
+  }
+
+  // fetch his CAUGHT line (with instant local fallback if the call is slow)
+  function fetchCaughtLine(deep, onDone){
+    var settled = false;
+    var fallback = (deep?caughtDeep:caughtShallow)[Math.floor(Math.random()*(deep?caughtDeep:caughtShallow).length)];
+    var timer = setTimeout(function(){ if(!settled){ settled=true; onDone(fallback); } }, 1400); // don't wait long
+    fetch(JOURNAL_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"caught", character:CHAR, deep:!!deep }) })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(!settled){ settled=true; clearTimeout(timer); onDone((d&&d.line)||fallback); } })
+      .catch(function(){ if(!settled){ settled=true; clearTimeout(timer); onDone(fallback); } });
+  }
+
+  // POOL = fallback placeholder entries (used only if the AI buffer is empty)
   var POOL = [
-    { tag:"late. can't sleep.", l:"didn't say much today. nothing worth saying.", r:"new line's almost right. almost.\nk." },
-    { tag:"bass idea", tab:true, l:"drop D —\nA|--5--5--3--0--\nD|--5--5--3--0--", r:"too clean.\nrough it up." },
-    { tag:"—", l:"scorch broke another mic stand.", r:"told him to chill.\nhe didn't. good show tho." },
-    { tag:"3am", l:"some nights the old life feels close.", r:"don't miss it.\njust remember it." },
-    { tag:"whatever", l:"cody asked if I was ok.", r:"said yeah.\nmostly meant it." },
-    { tag:"the bike", l:"knucklehead's running clean again.", r:"took all night.\nworth it." },
-    { tag:"—", l:"someone left a comment that landed.", r:"weird.\ndidn't hate it." },
-    { tag:"rain", l:"rode in the rain. dumb. cold.", r:"felt good though.\nquiet out there." },
+    { tag:"", l:"didn't say much today. nothing worth saying.", r:"" },
+    { tag:"", l:"new line's almost right. almost.\nk.", r:"" },
+    { tag:"", l:"scorch broke another mic stand. told him to chill. he didn't.", r:"" },
+    { tag:"", l:"some nights the old life feels close. don't miss it. just remember it.", r:"" },
+    { tag:"", l:"cody asked if I was ok. said yeah. mostly meant it.", r:"" },
+    { tag:"", l:"knucklehead's running clean again. took all night. worth it.", r:"" },
   ];
 
   // >>> CHUNLEY: your secret hand-written easter egg <<<
   var EGG_CHANCE = 0.03;
   var EGG = { tag:"", l:"(this is where Chunley's secret entry goes.)", r:"— the only page he wrote by hand.", sign:"— S." };
+
 
   var $=function(id){return document.getElementById(id);};
   var room=$('room'), portrait=$('portrait'), portraitImg=$('portraitImg'), portraitName=$('portraitName'),
@@ -1196,11 +1241,26 @@ he's distracted. now's your chance.</div>
     pageWrap.classList.remove('flipping'); void pageWrap.offsetWidth; pageWrap.classList.add('flipping');
     setTimeout(function(){
       var egg=Math.random()<EGG_CHANCE;
-      var e=egg?EGG:POOL[Math.floor(Math.random()*POOL.length)];
-      tag.textContent=e.tag||"—";
-      entryL.className='entry'+(e.tab?' tab':''); entryR.className='entry'+(e.tab?' tab':'');
-      entryL.textContent=e.l; entryR.textContent=e.r||""; sign.textContent=e.sign||"";
-      spread.classList.toggle('egg',!!egg);
+      if(egg){
+        tag.textContent=EGG.tag||"—";
+        entryL.className='entry'; entryR.className='entry';
+        entryL.textContent=EGG.l; entryR.textContent=EGG.r||""; sign.textContent=EGG.sign||"";
+        spread.classList.add('egg');
+      } else {
+        spread.classList.remove('egg');
+        var ai=nextAIEntry();               // AI-written entry if ready
+        if(ai){
+          tag.textContent=ai.date||"—";      // the date sits where the tag was
+          entryL.className='entry'; entryR.className='entry';
+          // put the whole entry on the left leaf; right stays clear (entries are short)
+          entryL.textContent=ai.text; entryR.textContent=""; sign.textContent="";
+        } else {
+          var e=POOL[Math.floor(Math.random()*POOL.length)];   // fallback if buffer empty
+          tag.textContent="—";
+          entryL.className='entry'; entryR.className='entry';
+          entryL.textContent=e.l; entryR.textContent=e.r||""; sign.textContent="";
+        }
+      }
       pageInLevel++; totalRead++; readTotEl.textContent=totalRead; deepness=pageInLevel; buildPips();
       heat=Math.min(99,heat+heatPerPage());
       busy=false;
@@ -1216,15 +1276,16 @@ he's distracted. now's your chance.</div>
   function doCaught(){
     caught=true; running=false;
     var deep=deepness>=6;
-    var pool=deep?caughtDeep:caughtShallow;
     var img=deep?IMG.knife:(Math.random()<0.5?IMG.point:IMG.fist);
-    var line=pool[Math.floor(Math.random()*pool.length)];
     flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
     spread.classList.add('slammed'); scene.classList.add('quake'); room.className='room looking';
     setTimeout(function(){ scene.classList.remove('quake'); },520);
     if(totalRead>best){ best=totalRead; bestEl.textContent=best; }
     var ci=$('caughtImg'); ci.src=img; ci.className='ov-chibi crash';
-    $('caughtLine').textContent='“'+line+'”'; $('caughtLvl').textContent=level; $('caughtRead').textContent=totalRead;
+    $('caughtLvl').textContent=level; $('caughtRead').textContent=totalRead;
+    $('caughtLine').textContent='…';
+    // get his line from the AI (falls back to a local line instantly if slow)
+    fetchCaughtLine(deep, function(line){ $('caughtLine').textContent='“'+line+'”'; });
     setTimeout(function(){ $('ovCaught').classList.add('show'); },520);
   }
 
@@ -1244,6 +1305,7 @@ he's distracted. now's your chance.</div>
     tag.textContent='— private. obviously.'; entryL.className='entry'; entryR.className='entry';
     entryL.textContent="he's distracted. now's your chance."; entryR.textContent=''; sign.textContent='';
     state=''; setState('calm'); turnBtn.disabled=false; shutBtn.disabled=false; running=true;
+    refillBuffer();   // start pulling AI entries so the first page-turn has one ready
     if(!rafId) rafId=requestAnimationFrame(tick);
   }
   function fullReset(){ level=1; totalRead=0; readTotEl.textContent=0; startLevel(); }
