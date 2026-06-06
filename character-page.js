@@ -415,11 +415,16 @@
         "'s comment" + (parentText ? ' ("' + parentText + '")' : "") + ".";
 
       post.disabled = true; mini.textContent = "posting...";
+      // remember this person's reply in the same per-session memory as their comments
+      const ru = getUser(name);
+      const replyPast = ru.comments.slice();
       try {
         const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, clientId: CID }) });
+          body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, pastComments: replyPast, clientId: CID }) });
         const data = await res.json();
         if (data.blocked) { mini.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "you've been blocked.") + '</span>'; setBlocked(); return; }
+        // save their reply into memory so he recalls it later this session
+        ru.comments.push(text); ru.comments = ru.comments.slice(-12); saveMem(memory);
         textI.value = ""; box.classList.remove("open"); mini.textContent = "";
         if (data.justBlocked) { setTimeout(setBlocked, 600); }
         // refresh to show the new threaded reply AND Scorch's answer if he gave one.
@@ -691,6 +696,9 @@
     const text = chatInput.value.trim();
     if (!text) return;
     addMsg(text, "user");
+    // also fold this into the shared per-session memory so his comment/reply
+    // replies can recall what they said in DMs (one connected memory of them).
+    try { const du = getUser(currentDmUser); du.comments.push(text); du.comments = du.comments.slice(-12); saveMem(memory); } catch(e){}
     chatInput.value = ""; chatSend.disabled = true;
     const typing = addMsg("typing...", SIDE, false);
     typing.classList.add("sc-typing");
