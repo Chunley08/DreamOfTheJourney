@@ -9,6 +9,50 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
+
+<style id="sc-status-css">
+.sc-status-wrap{ max-width:680px; margin:1.4rem auto 0; padding:0 1rem; }
+.sc-status-card{ display:flex; align-items:center; gap:1rem; padding:1rem 1.2rem; border-radius:16px;
+  background:linear-gradient(135deg, rgba(30,12,8,.92), rgba(18,8,6,.95));
+  border:1px solid rgba(255,90,31,.28); box-shadow:0 10px 34px rgba(0,0,0,.5), inset 0 0 30px rgba(255,90,31,.06);
+  position:relative; overflow:hidden; }
+.sc-status-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+  background:linear-gradient(180deg, var(--sc-accent,#ff5a1f), var(--sc-accent-2,#ff9a3f)); }
+.sc-status-avatar{ position:relative; width:60px; height:60px; flex:none; border-radius:50%; overflow:hidden;
+  border:2px solid rgba(255,90,31,.5); box-shadow:0 0 14px rgba(255,90,31,.35); }
+.sc-status-avatar img{ width:100%; height:100%; object-fit:cover; }
+.sc-status-dot{ position:absolute; right:2px; bottom:2px; width:13px; height:13px; border-radius:50%;
+  background:#3ddc6e; border:2px solid #160806; box-shadow:0 0 8px #3ddc6e; animation:scStatusPulse 2s ease-in-out infinite; }
+@keyframes scStatusPulse{ 0%,100%{ box-shadow:0 0 6px #3ddc6e; } 50%{ box-shadow:0 0 14px #3ddc6e; } }
+.sc-status-body{ flex:1; min-width:0; }
+.sc-status-top{ display:flex; align-items:center; gap:.6rem; margin-bottom:.25rem; flex-wrap:wrap; }
+.sc-status-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:1.02rem; letter-spacing:.03em; color:#fff; }
+.sc-status-mood{ font-family:'Oswald',sans-serif; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase;
+  color:#ffb88a; background:rgba(255,90,31,.16); border:1px solid rgba(255,90,31,.35); border-radius:999px; padding:2px 9px; }
+.sc-status-mood:empty{ display:none; }
+.sc-status-line{ font-family:'Special Elite',monospace; font-size:1.02rem; line-height:1.35; color:#f0ddd2; }
+.sc-status-meta{ display:flex; align-items:center; gap:.6rem; margin-top:.4rem;
+  font-family:'Oswald',sans-serif; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:#9a7a6a; }
+.sc-status-live{ color:#ff5a1f; font-weight:700; letter-spacing:.14em; }
+.sc-status-card.loading .sc-status-line{ opacity:.5; }
+.sc-status-card.updating{ animation:scStatusFlash .6s ease; }
+@keyframes scStatusFlash{ 0%{ box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 0 rgba(255,90,31,.5);} 100%{ box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 14px rgba(255,90,31,0);} }
+@media (max-width:520px){ .sc-status-avatar{ width:48px; height:48px; } .sc-status-line{ font-size:.92rem; } }
+
+/* ===== Scorch's like/dislike verdict badge on comments ===== */
+.sc-scorch-verdict{ display:inline-flex; align-items:center; gap:.45rem; margin-top:.5rem; padding:.32rem .7rem;
+  border-radius:999px; font-family:'Oswald',sans-serif; font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.sc-scorch-verdict.liked{ color:#ff7a9c; background:rgba(255,70,110,.12); border:1px solid rgba(255,70,110,.4); }
+.sc-scorch-verdict.disliked{ color:#9aa6c4; background:rgba(120,140,180,.1); border:1px solid rgba(120,140,180,.35); }
+.sc-scorch-verdict .sc-sv-icon{ font-size:1rem; line-height:1; }
+.sc-scorch-verdict.liked .sc-sv-icon{ animation:svHeart 1.4s ease-in-out infinite; }
+@keyframes svHeart{ 0%,100%{ transform:scale(1);} 30%{ transform:scale(1.25);} 45%{ transform:scale(1.05);} }
+.sc-scorch-verdict.pop{ animation:svPop .5s cubic-bezier(.2,1.5,.4,1); }
+@keyframes svPop{ 0%{ transform:scale(0) translateY(8px); opacity:0;} 70%{ transform:scale(1.12);} 100%{ transform:scale(1); opacity:1;} }
+.sc-scorch-verdict.disliked .sc-sv-icon{ display:inline-block; animation:svCrack .6s ease both; }
+@keyframes svCrack{ 0%{ transform:rotate(0);} 25%{ transform:rotate(-8deg);} 50%{ transform:rotate(7deg);} 75%{ transform:rotate(-4deg);} 100%{ transform:rotate(0);} }
+
+</style>
 </head>
 <body data-standalone="scorch">
 
@@ -55,6 +99,25 @@
 
     <div class="poster-scroll">▼ Scroll ▼</div>
   </section>
+
+  <!-- ====== SCORCH STATUS CARD (what he's doing right now) ====== -->
+  <section class="sc-status-wrap reveal-up" aria-label="Scorch's current status">
+    <div class="sc-status-card" id="scStatusCard">
+      <div class="sc-status-avatar">
+        <img src="assets/Scorch Pics/scorch-hero.jpg" alt="" onerror="this.style.display='none'">
+        <span class="sc-status-dot"></span>
+      </div>
+      <div class="sc-status-body">
+        <div class="sc-status-top">
+          <span class="sc-status-name">Scorch</span>
+          <span class="sc-status-mood" id="scStatusMood"></span>
+        </div>
+        <div class="sc-status-line" id="scStatusLine">checking what he's up to…</div>
+        <div class="sc-status-meta"><span class="sc-status-live">● LIVE</span> <span id="scStatusAge"></span></div>
+      </div>
+    </div>
+  </section>
+
 
   <!-- ====== TOUR DATES ====== -->
   <section class="char-section poster-section">
@@ -1114,5 +1177,32 @@
 <script src="character-page.js"></script>
 
 <script src="script.js"></script>
+
+<script id="sc-status-js">
+(function(){
+  var STATUS_URL = "https://dream-of-the-journey.vercel.app/api/status";
+  var CHAR = "scorch";
+  var card = document.getElementById('scStatusCard');
+  if(!card) return;
+  var lineEl = document.getElementById('scStatusLine');
+  var moodEl = document.getElementById('scStatusMood');
+  var ageEl  = document.getElementById('scStatusAge');
+  card.classList.add('loading');
+  fetch(STATUS_URL + "?character=" + CHAR)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      card.classList.remove('loading');
+      if(d && d.status){
+        lineEl.textContent = (d.moodEmoji ? d.moodEmoji + "  " : "") + d.status;
+        moodEl.textContent = d.mood || "";
+        ageEl.textContent = d.ageText || "";
+        if(d.cached === false){ card.classList.add('updating'); setTimeout(function(){ card.classList.remove('updating'); }, 700); }
+      } else {
+        lineEl.textContent = "around. whatever.";
+      }
+    })
+    .catch(function(){ card.classList.remove('loading'); lineEl.textContent = "around. whatever."; });
+})();
+</script>
 </body>
 </html>
