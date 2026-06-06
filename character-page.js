@@ -363,8 +363,13 @@
         if (data.blocked) { mini.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "you've been blocked.") + '</span>'; setBlocked(); return; }
         textI.value = ""; box.classList.remove("open"); mini.textContent = "";
         if (data.justBlocked) { setTimeout(setBlocked, 600); }
-        // refresh to show the new threaded reply (and Scorch's answer if he gave one)
-        if (data.saved) { lastSig = ""; setTimeout(loadWall, 400); }
+        // refresh to show the new threaded reply AND Scorch's answer if he gave one.
+        // Always refresh (not just on data.saved) — and do it twice, because his
+        // answer node can save a moment after the fan's reply, so a single early
+        // refresh sometimes misses it. This was the "he barely replies" bug.
+        lastSig = "";
+        setTimeout(loadWall, 400);   // show the fan's reply fast
+        setTimeout(function(){ lastSig = ""; loadWall(); }, 1600);  // catch Scorch's answer
       } catch (err) { mini.textContent = "couldn't post — try again."; }
       finally { post.disabled = false; }
       return;
