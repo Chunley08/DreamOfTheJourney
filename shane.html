@@ -128,6 +128,13 @@
 .sjg .dust { position:absolute; left:50%; bottom:10px; width:10px; height:10px; border-radius:50%; background:rgba(200,170,120,.5); opacity:0; z-index:6; pointer-events:none; }
 .sjg .slammed .dust { animation:puff .6s ease-out .28s; }
 
+  /* gentle close (when YOU shut it safely) then it eases back open */
+  @keyframes closeEase{
+    0%{ transform:rotateX(0); } 45%{ transform:rotateX(-80deg) scale(.98); }
+    55%{ transform:rotateX(-80deg) scale(.98); } 100%{ transform:rotateX(0); }
+  }
+  .sjg .closing .spread { animation:closeEase .7s ease-in-out; transform-origin:top center; }
+
   @keyframes puff{ 0%{opacity:.6; transform:translate(-50%,0) scale(.4);} 100%{opacity:0; transform:translate(-50%,-30px) scale(2.4);} }
 
   @keyframes bigShake{ 0%,100%{transform:translate(0,0);} 15%{transform:translate(-12px,4px);} 30%{transform:translate(11px,-3px);} 45%{transform:translate(-9px,2px);} 60%{transform:translate(7px,-2px);} 80%{transform:translate(-4px,1px);} }
@@ -512,6 +519,7 @@ he's distracted. now's your chance.</div>
       <button class="jbtn turn" id="turnBtn" type="button">Turn Page ▸</button>
       <button class="jbtn shut" id="shutBtn" type="button">✕ Shut it!</button>
     </div>
+    <div id="sjgDebug" style="display:none; margin-top:.6rem; font-family:monospace; font-size:.62rem; color:#c9a45a; background:rgba(0,0,0,.4); border:1px solid rgba(202,164,90,.3); border-radius:6px; padding:.4rem .6rem; text-align:center; position:relative; z-index:6;">debug</div>
 
     <div class="overlay start show" id="ovStart">
       <div class="ov-h good">Shane's Private Shit</div>
@@ -1133,18 +1141,23 @@ he's distracted. now's your chance.</div>
   // game never freezes waiting on the server.
   var aiBuffer = [];
   var fetching = false;
+  var DEBUG = true;  // <-- set to false once it's working. Shows what the AI returns.
+  function dbg(msg){ if(!DEBUG) return; var d=document.getElementById('sjgDebug'); if(d){ d.textContent=msg; d.style.display='block'; } }
   function refillBuffer(){
     if(fetching || aiBuffer.length >= 3) return;
     fetching = true;
+    dbg("calling AI…");
     fetch(JOURNAL_URL, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ action:"write", character:CHAR }) })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d && d.text){ aiBuffer.push({ date:d.date||"", text:d.text }); }
+      .then(function(r){ return r.json().then(function(d){ return {status:r.status, d:d}; }); })
+      .then(function(res){
+        var d=res.d;
+        if(d && d.text){ aiBuffer.push({ date:d.date||"", text:d.text }); dbg("AI ok ✓ ("+aiBuffer.length+" ready) "+(d.debug?("| note: "+d.debug):"")); }
+        else { dbg("AI returned no text. status "+res.status+" | "+(d&&(d.debug||d.error)||JSON.stringify(d)).slice(0,160)); }
         fetching = false;
-        if(aiBuffer.length < 3) refillBuffer();   // keep topping up
+        if(aiBuffer.length < 3) refillBuffer();
       })
-      .catch(function(){ fetching = false; });
+      .catch(function(err){ fetching = false; dbg("FETCH FAILED: "+String(err).slice(0,160)); });
   }
   // pull one entry: prefer AI buffer, else a placeholder; always refill after
   function nextAIEntry(){
@@ -1270,7 +1283,14 @@ he's distracted. now's your chance.</div>
 
   function shutIt(){
     if(caught||!running) return;
-    if(heat>=stirAt()){ heat=Math.max(6,heat-32); say(["(eased it shut)"],false); setTimeout(function(){ if(state==='calm') bubble.classList.remove('show'); },1200); }
+    if(heat>=stirAt()){
+      heat=Math.max(6,heat-32);
+      say(["(eased it shut)"],false);
+      setTimeout(function(){ if(state==='calm') bubble.classList.remove('show'); },1200);
+      // visibly close the journal and ease it back open
+      scene.classList.remove('closing'); void scene.offsetWidth; scene.classList.add('closing');
+      setTimeout(function(){ scene.classList.remove('closing'); },720);
+    }
   }
 
   function doCaught(){
