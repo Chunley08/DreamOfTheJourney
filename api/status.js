@@ -66,35 +66,29 @@ function ageText(ts) {
 }
 
 // ---- the status-writing instruction (wraps the persona) ----
-// We nudge toward a rotating set of themes so it stays varied + in character.
-const THEME_HINTS = [
-  "what you're doing right now as the frontman/singer (writing lyrics, in the studio, working on a new song for YOUR band The Snake Skins)",
-  "life in YOUR band The Snake Skins (rehearsal, a show coming up, going on tour, sound check) — you front it, you're proud of it",
-  "something mundane and human (eating tacos, can't sleep, out of coffee, fixing something)",
-  "messing with or about one of YOUR bandmates in The Snake Skins (Cody, Shane, Max, Kayla, Ricky)",
-  "trash-talking the RIVAL band The Street Rats — especially their singer Sin — they're the enemy, not your band",
-  "a mood you're in (pissed off, bored, restless, weirdly fine, hungover-tired)",
-  "Lilith the snake, or just being annoyed at people in general",
-];
+// Each character supplies their OWN status themes via their persona file
+// (export const statusThemes = `...`). If a character hasn't set any yet,
+// we fall back to a generic nudge so the engine still works for everyone.
+const GENERIC_THEMES = `Pick something true to who you are right now and write it in your own voice — what you're doing, how you're feeling, something on your mind, someone you're thinking about, or just a mood. Keep it short and in character.`;
 
-function statusSystem(base, NAME) {
-  const hint = THEME_HINTS[Math.floor(Math.random() * THEME_HINTS.length)];
-  const hint2 = THEME_HINTS[Math.floor(Math.random() * THEME_HINTS.length)];
+function statusSystem(base, NAME, themes) {
+  const themeBlock = (themes && themes.trim()) ? themes.trim() : GENERIC_THEMES;
   return `${base}
 
 ============================================================
 STATUS MODE — you are setting the "what I'm doing right now" status at the top of your dating profile. Like a status update people post. This is PUBLIC and casual.
 ============================================================
-WHO YOU ARE (do not get this wrong): you are ${NAME}, the FRONTMAN and lead SINGER of your own band, THE SNAKE SKINS. The Snake Skins is YOUR band — you're proud of it and protective of it. You would NEVER talk about The Snake Skins as a rival or as competition; they're yours. The RIVAL band you can't stand is THE STREET RATS (their singer is Sin). Never mix these up: Snake Skins = yours, Street Rats = the enemy.
+You are ${NAME}. Write YOUR current status, fully in character, based on the themes below. Make it fresh and specific, never canned.
 
-Write ${NAME}'s current status. Lean toward this vibe (but make it your own, fresh, never canned): ${hint}${hint2 && hint2 !== hint ? " — or maybe: " + hint2 : ""}.
+YOUR STATUS THEMES:
+${themeBlock}
 
 OUTPUT FORMAT — respond with ONLY this, nothing else:
 STATUS: <one short in-character line, like a real status update. max ~12 words. unmistakably ${NAME}.>
 MOOD: <one or two words for the mood, lowercase, e.g. "pissed off", "restless", "fine i guess">
 EMOJI: <a single emoji that fits the mood>
 
-Rules: no quotes around the lines, no extra commentary, no explanation. Keep STATUS short and punchy and in his voice (crude/blunt is fine). Just the three lines.`;
+Rules: no quotes around the lines, no extra commentary, no explanation. Keep STATUS short and punchy and in ${NAME}'s voice. Just the three lines.`;
 }
 
 function parseStatus(text) {
@@ -111,14 +105,14 @@ function parseStatus(text) {
   return out;
 }
 
-async function generateStatus(base, NAME, apiKey) {
+async function generateStatus(base, NAME, themes, apiKey) {
   const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: MODEL,
       messages: [
-        { role: "system", content: statusSystem(base, NAME) },
+        { role: "system", content: statusSystem(base, NAME, themes) },
         { role: "user", content: "(set your status right now)" },
       ],
       temperature: 1.0,
@@ -165,9 +159,10 @@ export default async function handler(req, res) {
   const rec = personas[character];
   const base = (rec && rec.persona) || "You are a fictional character setting a status.";
   const NAME = (rec && rec.name) || _cap(character) || "He";
+  const themes = (rec && rec.statusThemes) || "";
 
   try {
-    const s = await generateStatus(base, NAME, apiKey);
+    const s = await generateStatus(base, NAME, themes, apiKey);
     if (s.status) {
       const rec2 = { status: s.status, mood: s.mood || "", moodEmoji: s.moodEmoji || "", ts: Date.now() };
       await redis(["SET", key, JSON.stringify(rec2)]);
