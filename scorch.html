@@ -11,33 +11,28 @@
 <link rel="stylesheet" href="styles.css" />
 
 <style id="sc-status-css">
-.sc-status-wrap{ max-width:680px; margin:1.4rem auto 0; padding:0 1rem; }
-.sc-status-card{ display:flex; align-items:center; gap:1rem; padding:1rem 1.2rem; border-radius:16px;
-  background:linear-gradient(135deg, rgba(30,12,8,.92), rgba(18,8,6,.95));
-  border:1px solid rgba(255,90,31,.28); box-shadow:0 10px 34px rgba(0,0,0,.5), inset 0 0 30px rgba(255,90,31,.06);
-  position:relative; overflow:hidden; }
-.sc-status-card::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
-  background:linear-gradient(180deg, var(--sc-accent,#ff5a1f), var(--sc-accent-2,#ff9a3f)); }
-.sc-status-avatar{ position:relative; width:60px; height:60px; flex:none; border-radius:50%; overflow:hidden;
-  border:2px solid rgba(255,90,31,.5); box-shadow:0 0 14px rgba(255,90,31,.35); }
-.sc-status-avatar img{ width:100%; height:100%; object-fit:cover; }
-.sc-status-dot{ position:absolute; right:2px; bottom:2px; width:13px; height:13px; border-radius:50%;
-  background:#3ddc6e; border:2px solid #160806; box-shadow:0 0 8px #3ddc6e; animation:scStatusPulse 2s ease-in-out infinite; }
-@keyframes scStatusPulse{ 0%,100%{ box-shadow:0 0 6px #3ddc6e; } 50%{ box-shadow:0 0 14px #3ddc6e; } }
-.sc-status-body{ flex:1; min-width:0; }
-.sc-status-top{ display:flex; align-items:center; gap:.6rem; margin-bottom:.25rem; flex-wrap:wrap; }
-.sc-status-name{ font-family:'Oswald',sans-serif; font-weight:700; font-size:1.02rem; letter-spacing:.03em; color:#fff; }
-.sc-status-mood{ font-family:'Oswald',sans-serif; font-size:.62rem; letter-spacing:.12em; text-transform:uppercase;
-  color:#ffb88a; background:rgba(255,90,31,.16); border:1px solid rgba(255,90,31,.35); border-radius:999px; padding:2px 9px; }
-.sc-status-mood:empty{ display:none; }
-.sc-status-line{ font-family:'Special Elite',monospace; font-size:1.02rem; line-height:1.35; color:#f0ddd2; }
-.sc-status-meta{ display:flex; align-items:center; gap:.6rem; margin-top:.4rem;
-  font-family:'Oswald',sans-serif; font-size:.6rem; letter-spacing:.1em; text-transform:uppercase; color:#9a7a6a; }
-.sc-status-live{ color:#ff5a1f; font-weight:700; letter-spacing:.14em; }
-.sc-status-card.loading .sc-status-line{ opacity:.5; }
-.sc-status-card.updating{ animation:scStatusFlash .6s ease; }
-@keyframes scStatusFlash{ 0%{ box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 0 rgba(255,90,31,.5);} 100%{ box-shadow:0 10px 34px rgba(0,0,0,.5), 0 0 0 14px rgba(255,90,31,0);} }
-@media (max-width:520px){ .sc-status-avatar{ width:48px; height:48px; } .sc-status-line{ font-size:.92rem; } }
+/* live status banner that sits inside his dating-hero photo */
+.dating-status{ position:relative; margin-top:1rem; border-radius:14px; padding:.85rem 1rem .85rem 1.15rem; overflow:hidden;
+  background:linear-gradient(135deg, rgba(20,9,6,.82), rgba(12,6,4,.88)); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(255,90,31,.4); box-shadow:0 10px 28px rgba(0,0,0,.45);
+  display:flex; gap:.85rem; align-items:center; max-width:440px; }
+.dating-status::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:linear-gradient(180deg, var(--sc-accent,#ff5a1f), var(--sc-accent-2,#ff9a3f)); }
+.dating-status-emoji{ font-size:2rem; flex:none; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); animation:dsBob 3s ease-in-out infinite; }
+@keyframes dsBob{ 0%,100%{ transform:translateY(0) rotate(-3deg);} 50%{ transform:translateY(-4px) rotate(3deg);} }
+.dating-status-body{ flex:1; min-width:0; }
+.dating-status-eyebrow{ display:flex; align-items:center; gap:.45rem; font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:#ff8a55; margin-bottom:.3rem; }
+.dating-status-dot{ width:7px; height:7px; border-radius:50%; background:#3ddc6e; box-shadow:0 0 7px #3ddc6e; animation:dsPulse 2s infinite; }
+.dating-status-live{ color:var(--sc-accent,#ff5a1f); font-weight:700; }
+@keyframes dsPulse{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+.dating-status-line{ font-family:'Special Elite',monospace; font-size:1rem; line-height:1.35; color:#f4e2d6; }
+.dating-status-foot{ display:flex; align-items:center; gap:.7rem; margin-top:.45rem; flex-wrap:wrap; }
+.dating-status-mood{ font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:#ffb88a; background:rgba(255,90,31,.18); border:1px solid rgba(255,90,31,.4); border-radius:999px; padding:3px 10px; }
+.dating-status-mood:empty{ display:none; }
+.dating-status-age{ font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:#b89684; }
+.dating-status.loading .dating-status-line{ opacity:.5; }
+.dating-status.updating{ animation:dsFlash .7s ease; }
+@keyframes dsFlash{ 0%{ box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 0 rgba(255,90,31,.5);} 100%{ box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 14px rgba(255,90,31,0);} }
+@media (max-width:520px){ .dating-status{ max-width:none; } .dating-status-line{ font-size:.92rem; } .dating-status-emoji{ font-size:1.7rem; } }
 
 /* ===== Scorch's like/dislike verdict badge on comments ===== */
 .sc-scorch-verdict{ display:inline-flex; align-items:center; gap:.45rem; margin-top:.5rem; padding:.32rem .7rem;
@@ -99,25 +94,6 @@
 
     <div class="poster-scroll">▼ Scroll ▼</div>
   </section>
-
-  <!-- ====== SCORCH STATUS CARD (what he's doing right now) ====== -->
-  <section class="sc-status-wrap reveal-up" aria-label="Scorch's current status">
-    <div class="sc-status-card" id="scStatusCard">
-      <div class="sc-status-avatar">
-        <img src="assets/Scorch Pics/scorch-hero.jpg" alt="" onerror="this.style.display='none'">
-        <span class="sc-status-dot"></span>
-      </div>
-      <div class="sc-status-body">
-        <div class="sc-status-top">
-          <span class="sc-status-name">Scorch</span>
-          <span class="sc-status-mood" id="scStatusMood"></span>
-        </div>
-        <div class="sc-status-line" id="scStatusLine">checking what he's up to…</div>
-        <div class="sc-status-meta"><span class="sc-status-live">● LIVE</span> <span id="scStatusAge"></span></div>
-      </div>
-    </div>
-  </section>
-
 
   <!-- ====== TOUR DATES ====== -->
   <section class="char-section poster-section">
@@ -498,6 +474,18 @@
           <span>🎸 Frontman, The Snake Skins</span>
           <span>📍 Austin, TX</span>
           <span>♨ Single (mostly bitter about it)</span>
+        </div>
+        <!-- live AI status banner (updates every ~3h on visit) -->
+        <div class="dating-status" id="scStatusCard">
+          <div class="dating-status-emoji" id="scStatusEmoji">🚬</div>
+          <div class="dating-status-body">
+            <div class="dating-status-eyebrow"><span class="dating-status-dot"></span> Currently <span class="dating-status-live">· LIVE</span></div>
+            <div class="dating-status-line" id="scStatusLine">checking what he's up to…</div>
+            <div class="dating-status-foot">
+              <span class="dating-status-mood" id="scStatusMood"></span>
+              <span class="dating-status-age" id="scStatusAge"></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1187,13 +1175,15 @@
   var lineEl = document.getElementById('scStatusLine');
   var moodEl = document.getElementById('scStatusMood');
   var ageEl  = document.getElementById('scStatusAge');
+  var emojiEl = document.getElementById('scStatusEmoji');
   card.classList.add('loading');
   fetch(STATUS_URL + "?character=" + CHAR)
     .then(function(r){ return r.json(); })
     .then(function(d){
       card.classList.remove('loading');
       if(d && d.status){
-        lineEl.textContent = (d.moodEmoji ? d.moodEmoji + "  " : "") + d.status;
+        lineEl.textContent = d.status;
+        if(emojiEl && d.moodEmoji) emojiEl.textContent = d.moodEmoji;
         moodEl.textContent = d.mood || "";
         ageEl.textContent = d.ageText || "";
         if(d.cached === false){ card.classList.add('updating'); setTimeout(function(){ card.classList.remove('updating'); }, 700); }
