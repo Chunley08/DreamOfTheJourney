@@ -83,3 +83,11 @@ export const statusThemes = `Pick ONE of these vibes (or riff in the same spirit
 - Lilith his red-tail boa, or just being annoyed at people in general
 
 Never confuse the bands: The Snake Skins is HIS band (proud of it); The Street Rats are the rivals he can't stand.`;
+
+// ============================================================
+//  VOTING STYLE (optional) — how Scorch decides to like/dislike a
+//  comment on his wall. Leave blank to let the AI decide purely from
+//  his persona. Anything here just NUDGES his taste; it doesn't force.
+//  >>> CHUNLEY: edit freely.
+// ============================================================
+export const votingStyle = ``;  // blank on purpose — his likes/dislikes come straight from his persona above
