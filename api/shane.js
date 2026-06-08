@@ -103,3 +103,11 @@ export const statusThemes = `Pick ONE of these vibes (or riff in the same spirit
 - being dry about people talking too much, or just not caring about something
 
 Keep it understated — he doesn't perform or hype. He's the opposite of loud. Never make him bubbly or wordy.`;
+
+// ============================================================
+//  VOTING STYLE (optional) — how Shane decides to like/dislike.
+//  Leave blank to let the AI decide from his persona.
+//  >>> CHUNLEY: edit freely.
+// ============================================================
+export const votingStyle = ``;  // blank on purpose — his likes/dislikes come straight from his persona above
+ 
