@@ -243,7 +243,7 @@ export default async function handler(req, res) {
   // ramble or answer in-character when handed a huge persona + "one word",
   // which made votes silently fail. A short brief gets a clean LIKE/DISLIKE.
   function votePrompt(strict) {
-    let p = `You are deciding how the character ${NAME} would react to a single comment on their profile. Here is who they are, briefly:\n${base.slice(0, 700)}\n\nWould ${NAME} LIKE this comment or DISLIKE it? React the way this exact character honestly would.`;
+    let p = `You are deciding how the character ${NAME} would vote on a single comment on their profile. Here is who they are:\n${base.slice(0, 4760)}\n\nDecide whether ${NAME} hits LIKE or DISLIKE on this comment. Judge by how ${NAME} TRULY feels about it underneath — not by how they'd act on the surface. A LIKE means the comment genuinely landed, amused them, earned their respect, or got to them in a good way — even if ${NAME} would never admit it and would act gruff, unbothered, or deflect about it. A DISLIKE means it actually bored, annoyed, or disrespected them. Do NOT vote DISLIKE just because ${NAME} is prickly, sarcastic, or bad at taking compliments — a real compliment or a comment they secretly like still gets a LIKE.`;
     if (charVoting) p += `\n\n${NAME}'s own take on what they like/dislike:\n${charVoting}`;
     p += `\n\nAnswer with ONLY the single word LIKE or DISLIKE — no other text, no punctuation, no explanation.`;
     return p;
