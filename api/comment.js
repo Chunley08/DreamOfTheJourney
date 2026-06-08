@@ -149,16 +149,28 @@ export default async function handler(req, res) {
   // half-updated deploy degrades gracefully instead of crashing.
   const _cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
   const _rec = personas[character];
-  let base, NAME, charBlocking;
+  let base, NAME, charBlocking, charVoting;
   if (_rec && typeof _rec === "object") {
     base = _rec.persona || "You are a fictional character. Reply in-character, short.";
     NAME = _rec.name || _cap(character) || "they";
     charBlocking = _rec.blocking || "";
+    charVoting = _rec.votingStyle || "";
   } else if (typeof _rec === "string") {
-    base = _rec; NAME = _cap(character) || "they"; charBlocking = "";
+    base = _rec; NAME = _cap(character) || "they"; charBlocking = ""; charVoting = "";
   } else {
     base = "You are a fictional character. Reply in-character, short.";
-    NAME = _cap(character) || "they"; charBlocking = "";
+    NAME = _cap(character) || "they"; charBlocking = ""; charVoting = "";
+  }
+
+  // ---- generic like/dislike decision prompt (open by default) ----
+  // The engine says NOTHING about what this character likes — it lets the AI
+  // decide purely from their persona. A character can OPTIONALLY steer this by
+  // adding `export const votingStyle = "..."` in their own .js file.
+  function votePrompt(strict) {
+    let p = base + `\n\n${NAME} is scrolling their own profile and looking at this ONE comment. Based ENTIRELY on who ${NAME} is and how ${NAME} genuinely feels — nothing else — decide whether ${NAME} would LIKE it or DISLIKE it. Don't overthink it; react the way this exact character honestly would.`;
+    if (charVoting) p += `\n\n${NAME}'s own take on what they like/dislike:\n${charVoting}`;
+    p += `\n\nReply with EXACTLY one word: LIKE or DISLIKE.` + (strict ? " Nothing else." : "");
+    return p;
   }
 
   // ---- build the messages depending on mode ----
@@ -277,7 +289,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       const targetId = body.targetId;
       if (!targetId || !comment) return res.status(200).json({ voted: null });
       const v = await callModel([
-        { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it. Decide based purely on how ${NAME} — with the exact personality described above — would actually feel about this specific comment: something he'd genuinely vibe with, find funny, or that flatters him he'd LIKE; something rude, boring, insulting, or that hits one of his sore spots he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE.` },
+        { role: "system", content: votePrompt(false) },
         { role: "user", content: `The comment: "${comment}"` },
       ]);
       const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
@@ -377,7 +389,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
       if (!justBlocked && Math.random() < 0.35) {
         try {
           const v = await callModel([
-            { role: "system", content: base + `\n\n${NAME} is scrolling his own profile and reacts to this ONE comment by either LIKING or DISLIKING it. Decide based purely on how ${NAME} — with the exact personality described above — would actually feel about this specific comment: something he'd genuinely vibe with, find funny, or that flatters him he'd LIKE; something rude, boring, insulting, or that hits one of his sore spots he'd DISLIKE. Reply with EXACTLY one word: LIKE or DISLIKE. Nothing else.` },
+            { role: "system", content: votePrompt(true) },
             { role: "user", content: `The comment: "${comment}"` },
           ]);
           const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
