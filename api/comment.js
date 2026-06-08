@@ -482,7 +482,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
 
       // ---- SCORCH CASTS A VOTE (35% chance, AI decides like vs dislike) ----
       // decided BEFORE saving so it's baked into the stored record + counts.
-      if (!justBlocked && Math.random() < 0.5) {
+      if (!justBlocked) {
         try {
           const v = await callModel([
             { role: "system", content: votePrompt(true) },
