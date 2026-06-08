@@ -369,7 +369,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     // Decide the chance up front so we don't waste a model call (and so silence
     // is a real outcome). Tune these numbers to taste.
     const REPLY_CHANCE = 0.75;         // chance he answers a fan's in-thread reply
-    const VOTE_REACTION_CHANCE = 0.30; // chance he reacts to a like/dislike (was .12 — never seen, raised)
+    const VOTE_REACTION_CHANCE = 0.85; // chance he reacts to a like/dislike (was .12 — never seen, raised)
 
     if (mode === "vote-reaction") {
       if (Math.random() > VOTE_REACTION_CHANCE) {
