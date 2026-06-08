@@ -42,6 +42,17 @@
     } catch (e) { return ""; }
   }
   const CID = getCID();
+  // PERSISTENT device id — used ONLY for permanent memory (survives tab close,
+  // so an anonymous returning visitor is still recognized). Blocking keeps using
+  // the tab-only CID above, so getting blocked still resets on refresh.
+  function getMemId(){
+    try {
+      let m = localStorage.getItem(CHAR + "MemId");
+      if (!m) { m = "m_" + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(CHAR + "MemId", m); }
+      return m;
+    } catch (e) { return CID; } // if localStorage is blocked, fall back to session id
+  }
+  const MEMID = getMemId();
   let IS_BLOCKED = false;
 
   // flip the whole page into "you've been blocked" mode
@@ -420,7 +431,7 @@
       const replyPast = ru.comments.slice();
       try {
         const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, pastComments: replyPast, clientId: CID }) });
+          body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, pastComments: replyPast, clientId: CID, memId: MEMID }) });
         const data = await res.json();
         if (data.blocked) { mini.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "you've been blocked.") + '</span>'; setBlocked(); return; }
         // save their reply into memory so he recalls it later this session
@@ -565,7 +576,7 @@
 
     textEl.value = ""; sendBtn.disabled = true; statusEl.textContent = "sending...";
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments, clientId: CID }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments, clientId: CID, memId: MEMID }) });
       const data = await res.json();
 
       if (data.blocked) {
@@ -703,7 +714,7 @@
     const typing = addMsg("typing...", SIDE, false);
     typing.classList.add("sc-typing");
     try {
-      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments, clientId: CID }) });
+      const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments, clientId: CID, memId: MEMID }) });
       const data = await res.json();
       typing.remove();
       if (data.blocked) {
@@ -858,7 +869,7 @@
 
     // fire the request and the send animation at the same time
     const netP = fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ character: CHAR, comment: body, mode:"letter", history: user.letters, username: name, pastComments: user.comments, clientId: CID }) })
+      body: JSON.stringify({ character: CHAR, comment: body, mode:"letter", history: user.letters, username: name, pastComments: user.comments, clientId: CID, memId: MEMID }) })
       .then(r => r.json()).catch(() => ({ error: "net" }));
 
     await playSend();
