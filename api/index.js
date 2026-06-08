@@ -30,6 +30,7 @@ function register(...modules) {
       persona: m.persona,
       blocking: m.blocking || "",
       statusThemes: m.statusThemes || "",
+      votingStyle: m.votingStyle || "",
     };
   }
   return map;
