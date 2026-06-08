@@ -100,6 +100,76 @@ async function blockUser(name, clientId, reason, character) {
   return true;
 }
 
+// ============================================================
+//  PERMANENT MEMORY  ("remembers you forever", per character)
+//
+//  We DON'T hoard every message. We keep a small, bounded record:
+//    { summary, recent[], count, lastSeen, name }
+//  - recent[]  = last RECENT_KEEP messages, word-for-word (in-the-moment)
+//  - summary   = one short paragraph: who this person is to the character.
+//                Rewritten by the AI every SUMMARIZE_EVERY messages so it
+//                NEVER grows — keeps the AI from being overwhelmed.
+//  - lastSeen  = bumped every visit; the key auto-expires after MEMORY_TTL
+//                of total silence (one-time ghosts get cleaned up, but
+//                anyone who keeps visiting is remembered ~forever).
+//
+//  Recognized by NAME first (follows them across devices), else by the
+//  per-device clientId (so anonymous returners are still known).
+//  Per character: scorch's memory of you is separate from shane's.
+// ============================================================
+const RECENT_KEEP = 10;        // raw messages kept word-for-word
+const SUMMARIZE_EVERY = 12;    // re-summarize after this many interactions
+const MEMORY_TTL = 60 * 60 * 24 * 183; // ~6 months, in seconds
+
+function memKeyFor(character, name, clientId) {
+  const c = String(character || "scorch").toLowerCase().trim();
+  const nm = String(name || "").toLowerCase().trim();
+  const who = (nm && !/^anon(ymous)?$/.test(nm)) ? "n:" + nm : "d:" + String(clientId || "nobody");
+  return "mem:" + c + ":" + who;
+}
+
+async function readMemory(character, name, clientId) {
+  if (!name && !clientId) return null;
+  const got = await _redis(["GET", memKeyFor(character, name, clientId)]);
+  if (got.ok && got.result) {
+    try { return JSON.parse(got.result); } catch (e) { return null; }
+  }
+  return null;
+}
+
+// Save/refresh memory after an interaction. Appends to recent[], bumps the
+// count, refreshes the 6-month clock. Every SUMMARIZE_EVERY interactions it
+// folds everything into a fresh short summary. Summary failures are non-fatal.
+async function writeMemory(character, name, clientId, userMsg, charReply, base, NAME, summarize) {
+  if (!name && !clientId) return;
+  const key = memKeyFor(character, name, clientId);
+  let mem = await readMemory(character, name, clientId);
+  if (!mem) mem = { summary: "", recent: [], count: 0, name: name || "Anonymous", lastSeen: 0 };
+
+  if (userMsg) mem.recent.push("them: " + String(userMsg).slice(0, 240));
+  if (charReply) mem.recent.push(NAME + ": " + String(charReply).slice(0, 240));
+  mem.count = (mem.count || 0) + 1;
+  mem.name = name || mem.name || "Anonymous";
+  mem.lastSeen = Date.now();
+
+  // fold recent history into the rolling summary on schedule
+  if (summarize && mem.count % SUMMARIZE_EVERY === 0 && mem.recent.length) {
+    try {
+      const convo = mem.recent.join("\n");
+      const sumRes = await summarize(
+        `${base}\n\nYou are quietly updating your private mental note about a specific person you talk to, so you remember them next time. Your CURRENT note (may be blank):\n"${mem.summary || "(nothing yet)"}"\n\nRecent conversation with them:\n${convo}\n\nWrite an UPDATED short note (2-4 sentences MAX) capturing who this person is TO YOU, ${NAME}: their name if known, their vibe, how you feel about them, anything notable, whether you've clashed or clicked. Tight, in your own head-voice. Output ONLY the note.`
+      );
+      if (sumRes && sumRes.trim()) {
+        mem.summary = sumRes.trim().slice(0, 800);
+        mem.recent = mem.recent.slice(-4); // keep a short tail; summary holds the rest
+      }
+    } catch (e) { /* summary failed (rate limit etc) — skip, retry next time */ }
+  }
+
+  if (mem.recent.length > RECENT_KEEP) mem.recent = mem.recent.slice(-RECENT_KEEP);
+  await _redis(["SET", key, JSON.stringify(mem), "EX", String(MEMORY_TTL)]);
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -113,7 +183,10 @@ export default async function handler(req, res) {
   // pastComments: this username's earlier comments (for "remembering" them)
   // username: who is commenting
   const { character, comment, mode = "comment", history = [], pastComments = [], username = "", clientId = "",
-          parentId = null, threadContext = "", voteDir = "" } = req.body || {};
+          memId = "", parentId = null, threadContext = "", voteDir = "" } = req.body || {};
+  // memory uses the PERSISTENT device id (survives tab close); fall back to the
+  // session clientId if the page didn't send one. Blocking still uses clientId.
+  const memDevice = memId || clientId;
   if (!comment && mode !== "vote-reaction") return res.status(400).json({ error: "No comment" });
 
   // ---- BLOCK GATE: if Scorch has blocked this person, refuse before doing anything ----
@@ -193,10 +266,23 @@ To block (and only then): write your final words to them, then put this control 
 <<BLOCK>>
 That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, or sexual/body comments. The tag is invisible to them - they only see your words.`;
 
-  // If we know this user and they've commented before, let Scorch remember.
-  if (username && pastComments.length) {
+  // ---- PERMANENT MEMORY: recall who this person is to this character ----
+  // (read once here; we also write to it after the reply is generated)
+  const memory = await readMemory(character, username, memDevice);
+  if (memory && (memory.summary || (memory.recent && memory.recent.length))) {
+    let recall = `\n\nYOU REMEMBER THIS PERSON. This isn't a stranger — you've talked before${memory.name && !/^anon/i.test(memory.name) ? ` (they go by "${memory.name}")` : ""}.`;
+    if (memory.summary) {
+      recall += `\n\nYour private read on them (what you remember):\n"${memory.summary}"`;
+    }
+    if (memory.recent && memory.recent.length) {
+      recall += `\n\nThe last few things between you (most recent last):\n${memory.recent.slice(-RECENT_KEEP).join("\n")}`;
+    }
+    recall += `\n\nTalk like someone who genuinely remembers them — pick up where you left off, call back to things, stay warm or wary based on your history. If you two clashed or someone got blocked before, you remember that too. Don't recite the notes robotically; just BE someone with a history with them.`;
+    system += recall;
+  } else if (username && pastComments.length) {
+    // fallback: first time we've seen them but the page sent this session's comments
     const recap = pastComments.slice(-6).map(c => `- "${c}"`).join("\n");
-    system += `\n\nYou've talked to this person before in THIS session. The name they're using is "${username}". Here's what they've said to you already (comments, replies, and/or DMs):\n${recap}\nReference this history naturally when it fits — recognize them, call back to what they said, hold a grudge or warm up slightly. Don't list it robotically; just talk like someone who remembers them. (This memory only lasts the session, so don't claim to remember them "from before" beyond today.)`;
+    system += `\n\nThis person has been talking to you today. Name they're using: "${username}". What they've said so far:\n${recap}\nRecognize them and reference it naturally if it fits.`;
   }
 
   // Anonymous handling — Scorch gives them shit for hiding who they are.
@@ -434,6 +520,21 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         if (!w2.ok) savedScorch = null;
       }
       reply = scorchAnswers ? reply : null;
+    }
+
+    // ---- UPDATE PERMANENT MEMORY (comment / reply / dm) ----
+    // Records this exchange so the character remembers them next time, and
+    // re-summarizes on schedule. Summary uses the model via this helper;
+    // if it fails (rate limit), writeMemory just skips it and retries later.
+    if (mode === "comment" || mode === "reply" || mode === "dm") {
+      const summarize = async (prompt) => {
+        const r = await callModel([{ role: "system", content: prompt }]);
+        return r.text || "";
+      };
+      const said = main.text ? reply : null; // only count it as "he replied" if he actually did
+      try {
+        await writeMemory(character, username, memDevice, comment, said, base, NAME, summarize);
+      } catch (e) { /* memory write is best-effort; never break the reply */ }
     }
 
     // debug surfaces the real reason when there's no text (model busy, error, etc.)
