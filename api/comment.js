@@ -239,11 +239,21 @@ export default async function handler(req, res) {
   // The engine says NOTHING about what this character likes — it lets the AI
   // decide purely from their persona. A character can OPTIONALLY steer this by
   // adding `export const votingStyle = "..."` in their own .js file.
+  // NOTE: we keep this prompt LEAN (not the whole persona) — free models often
+  // ramble or answer in-character when handed a huge persona + "one word",
+  // which made votes silently fail. A short brief gets a clean LIKE/DISLIKE.
   function votePrompt(strict) {
-    let p = base + `\n\n${NAME} is scrolling their own profile and looking at this ONE comment. Based ENTIRELY on who ${NAME} is and how ${NAME} genuinely feels — nothing else — decide whether ${NAME} would LIKE it or DISLIKE it. Don't overthink it; react the way this exact character honestly would.`;
+    let p = `You are deciding how the character ${NAME} would react to a single comment on their profile. Here is who they are, briefly:\n${base.slice(0, 700)}\n\nWould ${NAME} LIKE this comment or DISLIKE it? React the way this exact character honestly would.`;
     if (charVoting) p += `\n\n${NAME}'s own take on what they like/dislike:\n${charVoting}`;
-    p += `\n\nReply with EXACTLY one word: LIKE or DISLIKE.` + (strict ? " Nothing else." : "");
+    p += `\n\nAnswer with ONLY the single word LIKE or DISLIKE — no other text, no punctuation, no explanation.`;
     return p;
+  }
+  // robust parse: tolerate chatter, pick whichever verdict word appears (dislike wins ties)
+  function parseVote(text) {
+    const t = String(text || "").toLowerCase();
+    if (/\bdislike|dislikes|disliked\b/.test(t) || /\bdis\b/.test(t)) return "dislike";
+    if (/\blike|likes|liked\b/.test(t)) return "like";
+    return null;
   }
 
   // ---- build the messages depending on mode ----
@@ -378,7 +388,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         { role: "system", content: votePrompt(false) },
         { role: "user", content: `The comment: "${comment}"` },
       ]);
-      const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
+      const vote = parseVote(v.text);
       if (!vote) return res.status(200).json({ voted: null, debug: v.debug || null });
       // find + update that record on the wall (LSET in place)
       const key = wallKeyFor(character);
@@ -472,13 +482,13 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
 
       // ---- SCORCH CASTS A VOTE (35% chance, AI decides like vs dislike) ----
       // decided BEFORE saving so it's baked into the stored record + counts.
-      if (!justBlocked && Math.random() < 0.35) {
+      if (!justBlocked && Math.random() < 0.5) {
         try {
           const v = await callModel([
             { role: "system", content: votePrompt(true) },
             { role: "user", content: `The comment: "${comment}"` },
           ]);
-          const vote = /dislike/i.test(v.text || "") ? "dislike" : (/like/i.test(v.text || "") ? "like" : null);
+          const vote = parseVote(v.text);
           if (vote) {
             saved.scorchVote = vote;
             if (vote === "like") saved.likes += 1; else saved.dislikes += 1;
