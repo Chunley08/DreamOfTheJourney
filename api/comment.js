@@ -480,7 +480,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         likes: 0, dislikes: 0, ts: Date.now(),
       };
 
-      // ---- SCORCH CASTS A VOTE (35% chance, AI decides like vs dislike) ----
+      // ---- SCORCH CASTS A VOTE (always, AI decides like vs dislike) ----
       // decided BEFORE saving so it's baked into the stored record + counts.
       if (!justBlocked) {
         try {
@@ -517,6 +517,22 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         comment: String(comment).slice(0, 400),
         likes: 0, dislikes: 0, ts: Date.now(),
       };
+
+      // ---- SCORCH CASTS A VOTE on the reply too ----
+      if (!justBlocked) {
+        try {
+          const v = await callModel([
+            { role: "system", content: votePrompt(true) },
+            { role: "user", content: `The comment: "${comment}"` },
+          ]);
+          const vote = parseVote(v.text);
+          if (vote) {
+            saved.scorchVote = vote;
+            if (vote === "like") saved.likes += 1; else saved.dislikes += 1;
+          }
+        } catch (e) { /* vote call failed — skip it, no harm */ }
+      }
+
       let w = await saveToWall(saved, character);
       if (!w.ok) { wallDebug = w.error; saved = null; }
       // Scorch sometimes answers — as a child node under the fan's reply
