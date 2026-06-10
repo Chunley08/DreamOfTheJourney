@@ -1,6 +1,6 @@
 // ============================================================
 //  PUBLIC WALL STORAGE (Redis) — saves each public comment +
-//  Scorch's reply so EVERYONE sees them. Newest 100 are kept;
+//  Scorch's reply so EVERYONE sees them. Newest 200 are kept;
 //  older ones auto-delete. Reads creds from whichever names the
 //  Vercel/Upstash integration created.
 // ============================================================
@@ -34,7 +34,7 @@ function wallKeyFor(character) {
   const c = String(character || "scorch").toLowerCase().trim();
   return c === "scorch" ? "scorch:wall" : "wall:" + c;
 }
-const WALL_MAX = 100;
+const WALL_MAX = 200; // FIX: was 100 — comments.js reads up to 200, so the trim was silently clipping the wall to half that
 function _redisCreds() {
   return {
     url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL,
@@ -382,7 +382,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     // ===== SCORCH BROWSE-VOTE: he likes/dislikes an EXISTING comment =====
     // frontend sends { mode:"scorch-browse", targetId, comment:<that comment's text> }
     if (mode === "scorch-browse") {
-      const targetId = body.targetId;
+      const targetId = (req.body || {}).targetId; // FIX: `body` was never defined here — this threw a ReferenceError on every browse-vote
       if (!targetId || !comment) return res.status(200).json({ voted: null });
       const v = await callModel([
         { role: "system", content: votePrompt(false) },
@@ -554,7 +554,12 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     // if it fails (rate limit), writeMemory just skips it and retries later.
     if (mode === "comment" || mode === "reply" || mode === "dm") {
       const summarize = async (prompt) => {
-        const r = await callModel([{ role: "system", content: prompt }]);
+        // FIX: some providers reject a conversation with ONLY a system message.
+        // Keep the instructions as system, add a tiny user turn to kick it off.
+        const r = await callModel([
+          { role: "system", content: prompt },
+          { role: "user", content: "Write the updated note now." },
+        ]);
         return r.text || "";
       };
       const said = main.text ? reply : null; // only count it as "he replied" if he actually did
