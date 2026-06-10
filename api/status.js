@@ -29,8 +29,8 @@ async function getPersonas() {
 }
 
 const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
-// FALLBACK CHAIN — same as comment.js: free Qwen -> any live free model -> cheap paid backstop.
-const MODELS = [MODEL, "openrouter/free", "z-ai/glm-4.5-air"];
+// FALLBACK CHAIN — strictly FREE: main model -> any live free model. Never spends credits.
+const MODELS = [MODEL, "openrouter/free"];
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
