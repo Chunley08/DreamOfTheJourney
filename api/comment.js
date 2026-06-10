@@ -209,7 +209,7 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "z-ai/glm-4.5-air:free";
+  const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
