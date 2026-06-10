@@ -122,6 +122,10 @@ export default async function handler(req, res) {
       (all.result || []).forEach(v => { if (v === "like") likes++; else if (v === "dislike") dislikes++; });
 
       // mirror the totals onto the comment record so GET stays correct
+      // FIX: the character's own vote (scorchVote) lives ONLY on the record,
+      // not in the voter hash — so the recount must ADD it back, or a user
+      // vote overwrites/erases the character's vote (1 + 1 stayed 1).
+      let finalLikes = likes, finalDislikes = dislikes;
       const list = await redis(["LRANGE", wallKey, "0", String(MAX - 1)]);
       if (list.ok) {
         const arr = list.result || [];
@@ -129,7 +133,9 @@ export default async function handler(req, res) {
           try {
             const o = JSON.parse(arr[i]);
             if (o.id === id) {
-              o.likes = likes; o.dislikes = dislikes;
+              finalLikes = likes + (o.scorchVote === "like" ? 1 : 0);
+              finalDislikes = dislikes + (o.scorchVote === "dislike" ? 1 : 0);
+              o.likes = finalLikes; o.dislikes = finalDislikes;
               await redis(["LSET", wallKey, String(i), JSON.stringify(o)]);
               break;
             }
@@ -137,7 +143,7 @@ export default async function handler(req, res) {
         }
       }
 
-      return res.status(200).json({ ok: true, likes, dislikes, you: dir });
+      return res.status(200).json({ ok: true, likes: finalLikes, dislikes: finalDislikes, you: dir });
     }
 
     // ===== ADMIN ACTIONS (need the key) =====
