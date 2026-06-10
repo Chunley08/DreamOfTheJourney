@@ -210,12 +210,11 @@ export default async function handler(req, res) {
   //  including :free on the end if it's a free model.
   // ============================================================
   const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
-  // FALLBACK CHAIN — OpenRouter tries these in order if the one before fails:
-  //   1. the free Qwen above
-  //   2. "openrouter/free"  -> OpenRouter auto-picks ANY live free model
-  //   3. paid GLM-4.5-Air   -> costs a fraction of a cent, only used when ALL free options are down
-  // Remove the paid one if you ever want strictly-free-only behavior.
-  const MODELS = [MODEL, "openrouter/free", "z-ai/glm-4.5-air"];
+  // FALLBACK CHAIN — strictly FREE. If the main model is down/busy,
+  // "openrouter/free" lets OpenRouter auto-pick ANY live free model.
+  // This can never spend credits. (To add a paid last-resort backstop
+  // later, append e.g. "z-ai/glm-4.5-air" to this list.)
+  const MODELS = [MODEL, "openrouter/free"];
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
