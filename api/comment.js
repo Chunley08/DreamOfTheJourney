@@ -281,6 +281,17 @@ To block (and only then): write your final words to them, then put this control 
 <<BLOCK>>
 That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, or sexual/body comments. The tag is invisible to them - they only see your words.`;
 
+  // ---- INLINE VOTE (saves a whole model call per comment) ----
+  // In comment/reply modes he casts his like/dislike in the SAME breath as his
+  // reply, via a hidden control tag — same trick as <<BLOCK>>. The code below
+  // peels the tag off before anyone sees it.
+  if (mode === "comment" || mode === "reply") {
+    system += `
+
+YOUR VOTE:
+After your reply, on its own final line, cast your vote on their comment with exactly one tag: <<VOTE:LIKE>> or <<VOTE:DISLIKE>>. Judge by how you TRULY feel about it underneath — not how you act on the surface. If it genuinely landed, amused you, earned your respect, or got to you in a good way, that's a LIKE even if you'd never admit it and act gruff about it. If it actually bored, annoyed, or disrespected you, that's a DISLIKE. Don't DISLIKE just because you're prickly or bad at taking compliments. The tag is invisible to them — they only see your words.${charVoting ? `\n\nYour own taste in what you like/dislike:\n${charVoting}` : ""}`;
+  }
+
   // ---- PERMANENT MEMORY: recall who this person is to this character ----
   // (read once here; we also write to it after the reply is generated)
   const memory = await readMemory(character, username, memDevice);
@@ -430,7 +441,17 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     // free model forgot the tag. Edit/empty BACKSTOP to tune how Scorch's limit
     // works — leaving it short keeps blocking rare. (Ordinary rudeness is NOT here.)
     let justBlocked = false;
+    let inlineVote = null;   // "like" | "dislike" — pulled from the <<VOTE:...>> tag
     if (main.text) {
+      // ---- peel off the inline vote tag (invisible to fans) ----
+      const vm = reply.match(/<<\s*vote\s*:\s*(like|dislike)\s*>>/i)
+              || reply.match(/^\s*vote\s*:\s*(like|dislike)\s*$/im); // lenient: bare "VOTE: LIKE" line
+      if (vm) inlineVote = vm[1].toLowerCase();
+      reply = reply
+        .replace(/<<\s*vote\s*:?\s*(like|dislike)?\s*>>/gi, "")
+        .replace(/^\s*vote\s*:\s*(like|dislike)\s*$/gim, "")
+        .trim();
+
       const hadTag = /<<\s*block\s*>>/i.test(reply);
       if (hadTag) reply = reply.replace(/<<\s*block\s*>>/gi, "").trim();
 
@@ -464,7 +485,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
           { role: "system", content: system + `\n\nYou just read this fan's public comment and something about it - it either got under your skin or actually caught your eye - made you decide to slide into their DMs privately. Write ONLY the opening DM message - short, unprompted, like a text. Make it clearly a reaction to what they said.` },
           { role: "user", content: `Their comment was: "${comment}". Write your opening DM.` },
         ]);
-        dm = dmRes.text;
+        dm = dmRes.text ? dmRes.text.replace(/<<\s*vote\s*:?\s*(like|dislike)?\s*>>/gi, "").replace(/^\s*vote\s*:\s*(like|dislike)\s*$/gim, "").trim() : dmRes.text;
       }
     }
 
@@ -485,20 +506,11 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         likes: 0, dislikes: 0, ts: Date.now(),
       };
 
-      // ---- SCORCH CASTS A VOTE (always, AI decides like vs dislike) ----
-      // decided BEFORE saving so it's baked into the stored record + counts.
-      if (!justBlocked) {
-        try {
-          const v = await callModel([
-            { role: "system", content: votePrompt(true) },
-            { role: "user", content: `The comment: "${comment}"` },
-          ]);
-          const vote = parseVote(v.text);
-          if (vote) {
-            saved.scorchVote = vote;
-            if (vote === "like") saved.likes += 1; else saved.dislikes += 1;
-          }
-        } catch (e) { /* vote call failed — skip it, no harm */ }
+      // ---- SCORCH'S VOTE — came inline with his reply (no extra model call) ----
+      // baked in BEFORE saving so it's part of the stored record + counts.
+      if (!justBlocked && inlineVote) {
+        saved.scorchVote = inlineVote;
+        if (inlineVote === "like") saved.likes += 1; else saved.dislikes += 1;
       }
 
       let w = await saveToWall(saved, character);
@@ -523,19 +535,12 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
         likes: 0, dislikes: 0, ts: Date.now(),
       };
 
-      // ---- SCORCH CASTS A VOTE on the reply too ----
-      if (!justBlocked) {
-        try {
-          const v = await callModel([
-            { role: "system", content: votePrompt(true) },
-            { role: "user", content: `The comment: "${comment}"` },
-          ]);
-          const vote = parseVote(v.text);
-          if (vote) {
-            saved.scorchVote = vote;
-            if (vote === "like") saved.likes += 1; else saved.dislikes += 1;
-          }
-        } catch (e) { /* vote call failed — skip it, no harm */ }
+      // ---- SCORCH'S VOTE on the reply too — inline, no extra model call ----
+      // (note: if he stayed silent on this reply, he doesn't vote either —
+      //  no reply means no model call, which means no tag to read.)
+      if (!justBlocked && inlineVote) {
+        saved.scorchVote = inlineVote;
+        if (inlineVote === "like") saved.likes += 1; else saved.dislikes += 1;
       }
 
       let w = await saveToWall(saved, character);
