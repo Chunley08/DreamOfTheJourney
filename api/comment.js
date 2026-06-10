@@ -210,6 +210,12 @@ export default async function handler(req, res) {
   //  including :free on the end if it's a free model.
   // ============================================================
   const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
+  // FALLBACK CHAIN — OpenRouter tries these in order if the one before fails:
+  //   1. the free Qwen above
+  //   2. "openrouter/free"  -> OpenRouter auto-picks ANY live free model
+  //   3. paid GLM-4.5-Air   -> costs a fraction of a cent, only used when ALL free options are down
+  // Remove the paid one if you ever want strictly-free-only behavior.
+  const MODELS = [MODEL, "openrouter/free", "z-ai/glm-4.5-air"];
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
@@ -347,7 +353,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: MODEL, messages: msgs }),
+      body: JSON.stringify({ model: MODEL, models: MODELS, messages: msgs }),
     });
     const data = await r.json();
     // log the COMPLETE raw response so the exact error shows in Vercel logs
