@@ -28,7 +28,7 @@ async function getPersonas() {
   return _personasCache;
 }
 
-const MODEL = "z-ai/glm-4.5-air:free";
+const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
