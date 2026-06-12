@@ -73,6 +73,39 @@
     if (di) { di.disabled = true; di.placeholder = AUTHOR + " blocked you."; }
   }
 
+  // ---- "comments temporarily closed" mode (backend kill switch is on) ----
+  let IS_CLOSED = false;
+  function setClosed(){
+    if (IS_CLOSED || IS_BLOCKED) return;
+    IS_CLOSED = true;
+    const msg = "📴 comments are temporarily closed — check back soon.";
+    const cs = document.getElementById("scSend");
+    if (cs) { cs.disabled = true; cs.textContent = "Closed"; }
+    const st = document.getElementById("scStatus");
+    if (st) st.innerHTML = '<span class="sc-blocked-note">' + msg + '</span>';
+    const fs = document.getElementById("fmSend");
+    if (fs) { fs.disabled = true; fs.textContent = "Closed"; }
+    const fst = document.getElementById("fmStatus");
+    if (fst) fst.textContent = msg;
+    const ds = document.getElementById("scChatSend");
+    if (ds) ds.disabled = true;
+    const di2 = document.getElementById("scChatInput");
+    if (di2) { di2.disabled = true; di2.placeholder = "comments are temporarily closed."; }
+  }
+
+  // on load, quietly ask the API whether commenting is open. If the backend
+  // kill switch is on, gray everything out up front instead of letting
+  // people type a message into the void. (A no-op vote-reaction ping —
+  // costs nothing, never reaches the AI.)
+  (async function probeClosed(){
+    try {
+      const r = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ character: CHAR, mode: "vote-reaction", clientId: CID }) });
+      const d = await r.json();
+      if (d && d.disabled) setClosed();
+    } catch (e) {}
+  })();
+
   // ---- per-session memory (sessionStorage) ----
   // remembers each username's comments + DM thread + letters during THIS visit.
   // sessionStorage wipes automatically when the tab is closed, so a fresh visit
@@ -433,6 +466,7 @@
         const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
           body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, pastComments: replyPast, clientId: CID, memId: MEMID }) });
         const data = await res.json();
+        if (data.disabled) { mini.innerHTML = '<span class="sc-blocked-note">📴 ' + esc(data.notice || "comments are temporarily closed.") + '</span>'; setClosed(); return; }
         if (data.blocked) { mini.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "you've been blocked.") + '</span>'; setBlocked(); return; }
         // save their reply into memory so he recalls it later this session
         ru.comments.push(text); ru.comments = ru.comments.slice(-12); saveMem(memory);
@@ -579,6 +613,13 @@
       const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment, mode:"comment", username: name, pastComments, clientId: CID, memId: MEMID }) });
       const data = await res.json();
 
+      if (data.disabled) {
+        block.remove();
+        statusEl.innerHTML = '<span class="sc-blocked-note">📴 ' + esc(data.notice || "comments are temporarily closed — check back soon.") + '</span>';
+        setClosed();
+        return;
+      }
+
       if (data.blocked) {
         block.remove();
         statusEl.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "message could not be sent — you've been blocked.") + '</span>';
@@ -717,6 +758,11 @@
       const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ character: CHAR, comment: text, mode:"dm", history: dmHistory, username: currentDmUser, pastComments: getUser(currentDmUser).comments, clientId: CID, memId: MEMID }) });
       const data = await res.json();
       typing.remove();
+      if (data.disabled) {
+        addMsg("📴 " + (data.notice || "comments are temporarily closed — check back soon."), SIDE, false);
+        setClosed();
+        return;
+      }
       if (data.blocked) {
         addMsg("🚫 " + (data.notice || "message could not be sent — you've been blocked."), SIDE, false);
         setBlocked();
@@ -879,6 +925,12 @@
     const data = await netP;
 
     // blocked before he ever read it
+    if (data.disabled) {
+      fmStatus.innerHTML = '<span class="sc-blocked-note">📴 ' + esc(data.notice || "the mailbox is closed for now — check back soon.") + '</span>';
+      setClosed();
+      return;
+    }
+
     if (data.blocked) {
       fmStatus.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "returned to sender — you've been blocked.") + '</span>';
       setBlocked();
