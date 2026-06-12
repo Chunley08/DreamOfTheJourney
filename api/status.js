@@ -31,6 +31,10 @@ async function getPersonas() {
 const MODEL = "deepseek/deepseek-v4-flash";
 // SINGLE MODEL — paid, cheap, multi-provider, essentially always up.
 // No fallback chain. (Keep in sync with comment.js.)
+
+// KILL SWITCH — while true, NEVER calls the AI; serves the cached status
+// or a quiet default. Set false + redeploy to resume fresh statuses.
+const STATUS_DISABLED = true;
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
@@ -143,6 +147,12 @@ export default async function handler(req, res) {
   if (got.ok && got.result) { try { cached = JSON.parse(got.result); } catch (e) {} }
 
   const fresh = cached && cached.ts && (Date.now() - cached.ts < REFRESH_MS);
+
+  // KILL SWITCH: serve cache or a quiet default; never hit the AI.
+  if (STATUS_DISABLED) {
+    const fallback = cached || { status: "away for a bit.", mood: "offline", moodEmoji: "🚬", ts: Date.now() };
+    return res.status(200).json({ ...fallback, ageText: ageText(fallback.ts), cached: true, disabled: true });
+  }
 
   // 2) if fresh, serve it. no AI call.
   if (fresh) {
