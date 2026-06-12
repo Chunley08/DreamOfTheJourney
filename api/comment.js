@@ -235,6 +235,13 @@ async function writeMemory(character, name, clientId, userMsg, charReply, base, 
   await _redis(["SET", key, JSON.stringify(mem), "EX", String(MEMORY_TTL)]);
 }
 
+// ============================================================
+//  KILL SWITCH — set to false to turn the AI / commenting back on,
+//  then redeploy. While true, every comment/DM/vote-reaction gets a
+//  polite "closed" notice and NO AI call is ever made (costs nothing).
+// ============================================================
+const COMMENTS_DISABLED = true;
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -242,6 +249,16 @@ export default async function handler(req, res) {
 
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+
+  if (COMMENTS_DISABLED) {
+    return res.status(200).json({
+      disabled: true,
+      reply: null,
+      reacted: false,
+      voted: null,
+      notice: "comments are temporarily closed — check back soon.",
+    });
+  }
 
   // mode: "comment" (public wall) or "dm" (private chat)
   // history: prior messages (for dm chat continuity)
