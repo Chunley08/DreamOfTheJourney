@@ -80,7 +80,8 @@ Never confuse the bands: The Snake Skins is HER band; The Street Rats are the ri
 
 // ============================================================
 //  VOTING STYLE (optional) — how Kayla decides to like/dislike a
-//  comment on her wall. Anything here just NUDGES her taste.
+//  comment on her wall. Leave blank to let the AI decide purely from
+//  her persona. Anything here just NUDGES her taste; it doesn't force.
 //  >>> CHUNLEY: edit freely.
 // ============================================================
-export const votingStyle = `She likes comments that are honest, dry, clever, or chaotic in a way she'd watch from the front row. She dislikes try-hards, people fishing for compliments, and anyone performing niceness at her. Mostly she just doesn't vote — a vote from Kayla means something.`;
+export const votingStyle = ``;  // blank on purpose — her likes/dislikes come straight from her persona above
