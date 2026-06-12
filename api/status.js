@@ -28,13 +28,15 @@ async function getPersonas() {
   return _personasCache;
 }
 
-const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
-// FALLBACK CHAIN — strictly FREE, in order: Hermes -> Dolphin Venice ->
-// Pony Alpha (free as-is, no :free suffix). No wildcard fallback anymore.
+const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition:free";
+// FALLBACK CHAIN — strictly FREE, in order: best voice first, most
+// reliable last. (Same chain as comment.js — keep the two in sync.)
 const MODELS = [
   MODEL,
-  "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-  "openrouter/pony-alpha",
+  "qwen/qwen3-next-80b-a3b-instruct:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "qwen/qwen3-coder:free",
+  "meta-llama/llama-3.2-3b-instruct:free",
 ];
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
