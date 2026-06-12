@@ -29,13 +29,11 @@ async function getPersonas() {
 }
 
 const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition:free";
-// FALLBACK CHAIN — strictly FREE, in order: best voice first, most
-// reliable last. (Same chain as comment.js — keep the two in sync.)
+// FALLBACK CHAIN — strictly FREE. OpenRouter caps this array at 3 models;
+// a 4th makes every request 400. (Keep in sync with comment.js.)
 const MODELS = [
   MODEL,
   "qwen/qwen3-next-80b-a3b-instruct:free",
-  "nvidia/nemotron-3-super-120b-a12b:free",
-  "qwen/qwen3-coder:free",
   "meta-llama/llama-3.2-3b-instruct:free",
 ];
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
