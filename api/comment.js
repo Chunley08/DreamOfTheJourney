@@ -274,12 +274,16 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
-  // FALLBACK CHAIN — strictly FREE. If the main model is down/busy,
-  // "openrouter/free" lets OpenRouter auto-pick ANY live free model.
-  // This can never spend credits. (To add a paid last-resort backstop
-  // later, append e.g. "z-ai/glm-4.5-air" to this list.)
-  const MODELS = [MODEL, "openrouter/free"];
+  const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
+  // FALLBACK CHAIN — strictly FREE, in order. If Hermes is down/busy,
+  // try Dolphin Venice, then Pony Alpha (free, no :free suffix —
+  // it's OpenRouter's own stealth model and is $0 as-is).
+  // No "openrouter/free" wildcard anymore — only these three, ever.
+  const MODELS = [
+    MODEL,
+    "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    "openrouter/pony-alpha",
+  ];
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
