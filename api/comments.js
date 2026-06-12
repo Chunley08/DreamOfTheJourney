@@ -154,8 +154,18 @@ export default async function handler(req, res) {
     if (key !== ADMIN) return res.status(403).json({ error: "wrong admin key" });
 
     if (action === "clear") {
+      // first sweep up every comment's vote hash, THEN delete the wall —
+      // otherwise scorch:votes:<id> keys get orphaned in Redis forever.
+      let votesCleared = 0;
+      const list = await redis(["LRANGE", wallKey, "0", String(MAX - 1)]);
+      for (const s of (list.result || [])) {
+        try {
+          const o = JSON.parse(s);
+          if (o.id) { await redis(["DEL", "scorch:votes:" + o.id]); votesCleared++; }
+        } catch (e) {}
+      }
       const out = await redis(["DEL", wallKey]);
-      return res.status(200).json({ ok: out.ok, cleared: true, debug: out.error || null });
+      return res.status(200).json({ ok: out.ok, cleared: true, votesCleared, debug: out.error || null });
     }
 
     // ---- list everyone Scorch has blocked ----
