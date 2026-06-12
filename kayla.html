@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kayla — DreamjourneyAI</title>
+<link rel="icon" type="image/webp" href="assets/favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Metal+Mania&family=Oswald:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&family=Special+Elite&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+
+<style id="sc-status-css">
+/* ============================================================
+   KAYLA POSTER PALETTE — the shared poster system in styles.css
+   themes itself off these --pp-* variables. Gothic queen: violet,
+   black lace, silver — with a vein of Omni lava in accent-3.
+   ============================================================ */
+.kayla-page {
+  --pp-bg-deep: #08060c;
+  --pp-bg-mid:  #130a1c;
+  --pp-glow-1:  rgba(176, 77, 255, 0.16);
+  --pp-glow-2:  rgba(58, 18, 92, 0.45);
+  --pp-grit-1:  rgba(176, 77, 255, 0.07);
+  --pp-grit-2:  rgba(120, 60, 200, 0.06);
+  --pp-paper:   #e9e2ee;
+  --pp-paper-2: #c6bad0;
+  --pp-paper-shadow: #2a0a3a;
+  --pp-paper-mark: rgba(42, 10, 58, 0.06);
+  --pp-ink:      #140618;
+  --pp-ink-soft: #4a2a5a;
+  --pp-accent:   #b04dff;
+  --pp-accent-2: #6a1fb8;
+  --pp-accent-3: #ff7a3c;            /* Omni's lava — used sparingly */
+  --pp-accent-soft: #b3a0c6;
+  --pp-stamp:      #c84dff;
+  --pp-stamp-glow: rgba(176, 77, 255, 0.55);
+  --pp-title-1: #f6eaff;
+  --pp-title-2: #d8a0ff;
+  --pp-title-3: #b04dff;
+  --pp-title-4: #6a1fb8;
+  --pp-title-5: #1a0530;
+  --pp-tape-1: #cfc0e8;
+  --pp-tape-2: #9a86b8;
+  --pp-splat-filter: hue-rotate(75deg) saturate(0.7) brightness(0.8); /* blood -> violet */
+}
+/* accent vars the shared comment wall / DM widgets lean on */
+body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
+
+/* live status banner that sits inside her dating-hero photo */
+.dating-status{ position:relative; margin-top:1rem; border-radius:14px; padding:.85rem 1rem .85rem 1.15rem; overflow:hidden;
+  background:linear-gradient(135deg, rgba(16,8,24,.82), rgba(10,5,16,.88)); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(176,77,255,.4); box-shadow:0 10px 28px rgba(0,0,0,.45);
+  display:flex; gap:.85rem; align-items:center; max-width:440px; }
+.dating-status::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:linear-gradient(180deg, var(--sc-accent,#b04dff), var(--sc-accent-2,#c89aff)); }
+.dating-status-emoji{ font-size:2rem; flex:none; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); animation:dsBob 3s ease-in-out infinite; }
+@keyframes dsBob{ 0%,100%{ transform:translateY(0) rotate(-3deg);} 50%{ transform:translateY(-4px) rotate(3deg);} }
+.dating-status-body{ flex:1; min-width:0; }
+.dating-status-eyebrow{ display:flex; align-items:center; gap:.45rem; font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:#c89aff; margin-bottom:.3rem; }
+.dating-status-dot{ width:7px; height:7px; border-radius:50%; background:#3ddc6e; box-shadow:0 0 7px #3ddc6e; animation:dsPulse 2s infinite; }
+.dating-status-live{ color:var(--sc-accent,#b04dff); font-weight:700; }
+@keyframes dsPulse{ 0%,100%{ opacity:1;} 50%{ opacity:.35;} }
+.dating-status-line{ font-family:'Special Elite',monospace; font-size:1rem; line-height:1.35; color:#ece2f4; }
+.dating-status-foot{ display:flex; align-items:center; gap:.7rem; margin-top:.45rem; flex-wrap:wrap; }
+.dating-status-mood{ font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:#d8b8ff; background:rgba(176,77,255,.18); border:1px solid rgba(176,77,255,.4); border-radius:999px; padding:3px 10px; }
+.dating-status-mood:empty{ display:none; }
+.dating-status-age{ font-family:'Oswald',sans-serif; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:#9a86b8; }
+.dating-status.loading .dating-status-line{ opacity:.5; }
+.dating-status.updating{ animation:dsFlash .7s ease; }
+@keyframes dsFlash{ 0%{ box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 0 rgba(176,77,255,.5);} 100%{ box-shadow:0 10px 28px rgba(0,0,0,.45), 0 0 0 14px rgba(176,77,255,0);} }
+@media (max-width:520px){ .dating-status{ max-width:none; } .dating-status-line{ font-size:.92rem; } .dating-status-emoji{ font-size:1.7rem; } }
+
+/* ===== Kayla's like/dislike verdict badge on comments ===== */
+.sc-scorch-verdict{ display:inline-flex; align-items:center; gap:.45rem; margin-top:.5rem; padding:.32rem .7rem;
+  border-radius:999px; font-family:'Oswald',sans-serif; font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; }
+.sc-scorch-verdict.liked{ color:#ff7a9c; background:rgba(255,70,110,.12); border:1px solid rgba(255,70,110,.4); }
+.sc-scorch-verdict.disliked{ color:#9aa6c4; background:rgba(120,140,180,.1); border:1px solid rgba(120,140,180,.35); }
+.sc-scorch-verdict .sc-sv-icon{ font-size:1rem; line-height:1; }
+.sc-scorch-verdict.liked .sc-sv-icon{ animation:svHeart 1.4s ease-in-out infinite; }
+@keyframes svHeart{ 0%,100%{ transform:scale(1);} 30%{ transform:scale(1.25);} 45%{ transform:scale(1.05);} }
+.sc-scorch-verdict.pop{ animation:svPop .5s cubic-bezier(.2,1.5,.4,1); }
+@keyframes svPop{ 0%{ transform:scale(0) translateY(8px); opacity:0;} 70%{ transform:scale(1.12);} 100%{ transform:scale(1); opacity:1;} }
+.sc-scorch-verdict.disliked .sc-sv-icon{ display:inline-block; animation:svCrack .6s ease both; }
+@keyframes svCrack{ 0%{ transform:rotate(0);} 25%{ transform:rotate(-8deg);} 50%{ transform:rotate(7deg);} 75%{ transform:rotate(-4deg);} 100%{ transform:rotate(0);} }
+
+</style>
+</head>
+<body data-standalone="kayla">
+
+<canvas id="stars-canvas"></canvas>
+<canvas id="ripples-canvas"></canvas>
+
+<div class="dragon-cursor" id="dragonCursor">
+  <div class="dragon-cursor-inner">
+    <img src="assets/ChunDragon.webp" alt="" draggable="false" />
+  </div>
+</div>
+
+<!-- ====================== SCORCH CHARACTER PAGE ====================== -->
+<div class="character-page kayla-page" id="kaylaPage" aria-hidden="true">
+  <button class="char-close" id="kaylaClose" aria-label="Close" type="button">✕</button>
+  <button class="scene-tab" data-character="Kayla" type="button" aria-label="Open scene request">Scene Request?</button>
+  <button class="dating-tab" data-dating="kayla" type="button" aria-label="View dating profile">Dating Profile ♡</button>
+
+  <!-- ====== POSTER HERO ====== -->
+  <section class="poster-hero">
+    <div class="poster-hero-bg" style="background-image: url('assets/Kayla Pics/kayla-hero.jpg');"></div>
+
+    <!-- decorative blood/fire splats -->
+    <div class="splat splat--tl" aria-hidden="true"></div>
+    <div class="splat splat--br" aria-hidden="true"></div>
+
+    <!-- corner stamps -->
+    <div class="stamp stamp--tonight reveal-stamp">★ Tonight ★<br><small style="font-family:'Special Elite',monospace;font-size:0.55em;letter-spacing:0.3em;">One Night Only</small></div>
+    <div class="stamp stamp--age reveal-stamp">21 + Over</div>
+
+    <!-- decorative tape -->
+    <div class="tape" style="top: 18px; left: 22%; transform: rotate(-8deg);"></div>
+    <div class="tape" style="top: 14px; right: 24%; transform: rotate(7deg); width: 70px;"></div>
+
+    <div class="poster-tag">The Snake Skins Presents</div>
+    <h1 class="poster-title">KAYLA</h1>
+    <div class="poster-subtitle">Bite Back Tour</div>
+    <div class="poster-role">Cello <span>•</span> Keys <span>•</span> Resident Queen Bitch</div>
+
+    <a href="https://dreamjourneyai.com/creation/KAYLA-LINK-GOES-HERE"
+       target="_blank" rel="noopener" class="ticket-cta">
+      Chat with Kayla &rarr;
+    </a>
+
+    <div class="poster-scroll">▼ Scroll ▼</div>
+  </section>
+
+  <!-- ====== TOUR DATES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">On Tour Now</h2>
+    <span class="poster-eyebrow reveal-up">Bite Back Tour — 2026</span>
+
+    <div class="tour-dates reveal-up">
+      <div class="tour-dates-head">★ Live ★ Loud ★ Unhinged ★</div>
+      <div class="tour-dates-sub">North America &middot; Spring 2026</div>
+
+      <div class="tour-row">
+        <div class="tour-date">MAR 14</div>
+        <div class="tour-where"><strong>Austin, TX</strong> &mdash; The Mohawk</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 18</div>
+        <div class="tour-where"><strong>Houston, TX</strong> &mdash; White Oak Music Hall</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 22</div>
+        <div class="tour-where"><strong>New Orleans, LA</strong> &mdash; House of Blues</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">MAR 27</div>
+        <div class="tour-where"><strong>Nashville, TN</strong> &mdash; Exit/In</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 02</div>
+        <div class="tour-where"><strong>Atlanta, GA</strong> &mdash; The Masquerade</div>
+        <div class="tour-status tour-status--avail">Get Tickets</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 08</div>
+        <div class="tour-where"><strong>Chicago, IL</strong> &mdash; Metro</div>
+        <div class="tour-status tour-status--few">Few Left</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 14</div>
+        <div class="tour-where"><strong>Brooklyn, NY</strong> &mdash; Warsaw</div>
+        <div class="tour-status tour-status--sold">Sold Out</div>
+      </div>
+      <div class="tour-row">
+        <div class="tour-date">APR 20</div>
+        <div class="tour-where"><strong>Los Angeles, CA</strong> &mdash; The Wiltern</div>
+        <div class="tour-status tour-status--tba">TBA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE CELLIST (BIO) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Cellist</h2>
+    <span class="poster-eyebrow reveal-up">Who the Hell Is She</span>
+
+    <div class="bio-panel reveal-up">
+      <p>Kayla is the classically-trained spine of The Snake Skins &mdash; a cello prodigy who traded famous orchestras for distortion and never looked back. Laid back. Watching. Probably already knows your business. Most people meet her and decide she's a total bitch. She's not. <em>Not trying to be, anyway.</em></p>
+      <p>The flat stare and the blunt mouth come standard. She'll tell you what's what, and your feelings don't really factor in when it comes to the truth &mdash; that's just how she rolls. The people who know her find it funny. The people who don't get offended. <strong>Either way, she's not losing sleep over it.</strong></p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">not actually a bitch (mostly)</span>
+      <span class="sticker-patch">zero filter installed</span>
+      <span class="sticker-patch">cello prodigy</span>
+      <span class="sticker-patch">front row to your drama</span>
+      <span class="sticker-patch">knows things</span>
+      <span class="sticker-patch">blunt force honesty</span>
+      <span class="sticker-patch">gothic royalty</span>
+    </div>
+  </section>
+
+  <!-- ====== QUOTES ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-2deg;">Off The Record</h2>
+    <span class="poster-eyebrow reveal-up">She Said What</span>
+
+    <div class="stub-grid">
+      <div class="stub reveal-tilt" style="--rot:-2deg;">"Eh. I think you could do better. That just doesn't suit you very well."</div>
+      <div class="stub reveal-tilt" style="--rot:1.5deg;">"You did read the whole thing before you signed it, right? ...No? Okay. Mm."</div>
+      <div class="stub reveal-tilt" style="--rot:-0.8deg;">"I mean, you asked what I thought. This is what I thought. Don't do that next time."</div>
+    </div>
+  </section>
+
+  <!-- ====== THE LINEUP ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">The Lineup</h2>
+    <span class="poster-eyebrow reveal-up">The Snake Skins</span>
+
+    <div class="lineup-row">
+      <div class="polaroid reveal-tilt" style="--rot:-3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Scorch Pics/SexyScorchLookingDown.webp" alt="Scorch" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Scorch<small>Frontman</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Shane<small>Bass</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-2deg;">
+        <div class="polaroid-photo">♪<img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Cody<small>Drums</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:3deg;">
+        <div class="polaroid-photo">♪<img src="assets/Max Pics/max-portrait.jpg" alt="Max" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Max<small>Lead Guitar</small></div>
+      </div>
+      <div class="polaroid reveal-tilt" style="--rot:-1deg;">
+        <div class="polaroid-photo">♪<img src="assets/Ricky Pics/ricky-portrait.jpg" alt="Ricky" onerror="this.remove()"></div>
+        <div class="polaroid-caption">Ricky<small>Manager</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== MUSIC PLAYER (existing wiring, wrapped in stage frame) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Bite Back — Live</h2>
+    <span class="poster-eyebrow reveal-up">Bootleg Recording &mdash; Stage Left</span>
+
+    <div class="stage-frame reveal-up">
+      <div class="stage-frame-head">
+        <span><span class="live-dot"></span> Live Bootleg</span>
+        <small>The Snake Skins // Bite Back Tour</small>
+      </div>
+      <div class="setlist-stage" id="snakeSkinsPlayer">
+        <div class="np-console" id="npConsole">
+          <div class="np-display">
+            <div class="np-eyebrow"><span class="live-dot"></span> Now Spinning</div>
+            <div class="np-title" id="npTitle">— select a track —</div>
+            <div class="np-sub" id="npSub">The Snake Skins  •  Bite Back Tour</div>
+            <div class="np-viz" id="npViz" aria-hidden="true"></div>
+            <div class="np-progress" id="npProgress" role="slider" aria-label="Seek" tabindex="0">
+              <div class="np-progress-fill" id="npFill"></div>
+              <div class="np-progress-head" id="npHead"></div>
+            </div>
+            <div class="np-times">
+              <span id="npTimeCurrent">0:00</span>
+              <span id="npTimeTotal">0:00</span>
+            </div>
+          </div>
+          <div class="np-transport">
+            <button class="np-btn np-prev" id="npPrev" type="button" aria-label="Previous track">
+              <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5-6v12z"/></svg>
+            </button>
+            <button class="np-btn np-play" id="npPlay" type="button" aria-label="Play / pause">
+              <svg id="npPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="np-btn np-next" id="npNext" type="button" aria-label="Next track">
+              <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="np-setlist">
+          <div class="np-setlist-head">// The Setlist</div>
+          <div class="np-setlist-sub">Bite Back Tour — Track List</div>
+          <div id="npTrackList"></div>
+          <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
+        </div>
+      </div>
+    </div>
+    <audio id="npAudio" preload="metadata" crossorigin="anonymous"></audio>
+    <script id="snakeSkinsTracksData" type="application/json">[
+      {"title": "Cult Of Scorch",        "src": "assets/Scorch Pics/Cult Of Scorch.mp3"},
+      {"title": "Placeholder",    "src": "assets/Scorch Pics/snakeskins-track-02.mp3"},
+      {"title": "Placeholder", "src": "assets/Scorch Pics/snakeskins-track-03.mp3"}
+    ]</script>
+  </section>
+
+  <!-- ====== STIR THE POT (mini-game) ====== -->
+  <section class="char-section poster-section" id="kaylaGameSection">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Front Row Seat</h2>
+    <span class="poster-eyebrow reveal-up">Stir The Pot &mdash; Rage Bait Like Kayla</span>
+
+    <div class="bio-panel reveal-up" style="margin-bottom:1.4rem;">
+      <p>Kayla loves drama the way other people love true crime &mdash; <em>front-row seat, never a part in the story.</em> She won't pick the fight. But every so often she'll nudge something, just to watch it go off. Nobody can ever prove it was her. <strong>That's the fun.</strong></p>
+    </div>
+
+    <div class="kb-game reveal-up" id="kbGame">
+      <div class="kb-hud">
+        <div class="kb-stat"><span class="kb-stat-label">Meltdowns</span><b id="kbScore">0</b></div>
+        <div class="kb-sus">
+          <span class="kb-stat-label">Suspicion</span>
+          <div class="kb-sus-pips" id="kbSus"><i></i><i></i><i></i></div>
+        </div>
+        <div class="kb-round" id="kbRound">post 0/8</div>
+      </div>
+
+      <div class="kb-feed">
+        <div class="kb-overlay" id="kbOverlay">
+          <p class="kb-callout">The Comment Section Awaits.</p>
+          <p class="kb-rules">Pick the reply that makes strangers melt down &mdash; <b class="kb-good">bland and deniable</b> scores big. Too obvious and you get <b class="kb-bad">reported</b>. Three reports and the account's gone.</p>
+          <button type="button" class="kb-btn" id="kbStart">Open the App</button>
+        </div>
+
+        <div class="kb-play" id="kbPlay" hidden>
+          <div class="kb-post">
+            <div class="kb-post-head">
+              <span class="kb-post-avatar" id="kbAvatar">@</span>
+              <span class="kb-post-author" id="kbAuthor">@someone</span>
+            </div>
+            <p class="kb-post-text" id="kbPost">...</p>
+          </div>
+          <div class="kb-replies" id="kbReplies"></div>
+          <p class="kb-toast" id="kbToast" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <p class="kb-line">She closes the app and goes back to crocheting. You can too.</p>
+    </div>
+
+    <style>
+    /* ===== Stir The Pot — self-contained ===== */
+    .kb-game{ max-width:620px; margin:0 auto; background:linear-gradient(165deg,#150a20,#0b0512);
+      border:1px solid rgba(176,77,255,.28); border-radius:18px; padding:1rem 1rem 1.1rem;
+      box-shadow:0 20px 50px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.03); }
+    .kb-hud{ display:flex; align-items:center; gap:1rem; justify-content:space-between; flex-wrap:wrap; margin-bottom:.8rem; }
+    .kb-stat-label{ font-family:'Oswald',sans-serif; font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:#c89aff; display:block; }
+    .kb-stat b{ font-family:'Metal Mania',cursive; font-size:1.5rem; color:#fff; line-height:1; }
+    .kb-sus-pips{ display:flex; gap:.35rem; margin-top:.25rem; }
+    .kb-sus-pips i{ width:14px; height:14px; border-radius:50%; border:1.5px solid rgba(255,90,90,.5); background:transparent; transition:background .2s, box-shadow .2s; }
+    .kb-sus-pips i.on{ background:#ff3b3b; box-shadow:0 0 10px rgba(255,60,60,.8); }
+    .kb-round{ font-family:'Special Elite',monospace; font-size:.78rem; color:rgba(255,255,255,.45); }
+    .kb-feed{ position:relative; min-height:300px; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.07); border-radius:14px; overflow:hidden; }
+    .kb-overlay{ position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.7rem; text-align:center; padding:1.4rem; background:rgba(10,5,16,.88); backdrop-filter:blur(3px); }
+    .kb-overlay[hidden]{ display:none; }
+    .kb-callout{ font-family:'Metal Mania',cursive; font-size:1.7rem; color:#d8a0ff; margin:0; text-shadow:0 0 18px rgba(176,77,255,.5); }
+    .kb-rules{ font-family:'Outfit',sans-serif; font-size:.95rem; color:rgba(255,255,255,.75); margin:0; max-width:42ch; line-height:1.5; }
+    .kb-rules .kb-good{ color:#b04dff; } .kb-rules .kb-bad{ color:#ff5a5a; }
+    .kb-btn{ cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.07em; text-transform:uppercase; font-size:.92rem; color:#fff; padding:.7rem 1.6rem; border-radius:999px; background:linear-gradient(135deg,#b04dff,#6a1fb8); box-shadow:0 6px 20px rgba(176,77,255,.35); transition:transform .15s; }
+    .kb-btn:hover{ transform:translateY(-2px); }
+    .kb-play{ padding:1rem; display:flex; flex-direction:column; gap:.8rem; }
+    .kb-post{ background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09); border-radius:14px; padding:.85rem 1rem; }
+    .kb-post-head{ display:flex; align-items:center; gap:.55rem; margin-bottom:.45rem; }
+    .kb-post-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-weight:700; color:#fff; background:linear-gradient(135deg,#6a1fb8,#3a0f68); font-size:.85rem; }
+    .kb-post-author{ font-family:'Oswald',sans-serif; font-weight:600; color:#fff; font-size:.92rem; }
+    .kb-post-text{ font-family:'Outfit',sans-serif; color:rgba(255,255,255,.92); font-size:1rem; line-height:1.5; margin:0; }
+    .kb-replies{ display:flex; flex-direction:column; gap:.55rem; }
+    .kb-reply{ cursor:pointer; text-align:left; font-family:'Outfit',sans-serif; font-size:.95rem; line-height:1.45; color:rgba(255,255,255,.9);
+      background:rgba(176,77,255,.07); border:1.5px solid rgba(176,77,255,.25); border-radius:12px; padding:.65rem .9rem; transition:background .15s, border-color .15s, transform .1s; }
+    .kb-reply:hover{ background:rgba(176,77,255,.16); border-color:rgba(176,77,255,.55); transform:translateY(-1px); }
+    .kb-reply:disabled{ opacity:.45; cursor:default; transform:none; }
+    .kb-toast{ font-family:'Special Elite',monospace; font-size:.85rem; color:#d8b8ff; min-height:1.3em; margin:0; }
+    .kb-toast.bad{ color:#ff6a6a; }
+    .kb-line{ font-family:'Special Elite',monospace; font-size:.74rem; color:rgba(255,255,255,.4); text-align:center; margin:.9rem 0 0; }
+    .kb-shake{ animation:kbShake .4s ease; }
+    @keyframes kbShake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+    </style>
+  </section>
+
+  <!-- ====== HIGH SOCIETY (FAMILY) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">High Society</h2>
+    <span class="poster-eyebrow reveal-up">Old Money &middot; The Mercers</span>
+
+    <div class="wanted-grid">
+      <div class="wanted reveal-tilt" style="--rot:-2deg;">
+        <div class="wanted-head">The CEO</div>
+        <div class="wanted-name">Grant Mercer</div>
+        <div class="wanted-role">Her father</div>
+        <div class="wanted-desc">Cold. Practical. Shows love through money and high standards, and not much else. Didn't approve of his prodigy daughter running off to play cello in a metal band. Didn't stop her, either. They're still deciding what that means.</div>
+      </div>
+      <div class="wanted reveal-tilt" style="--rot:2deg;">
+        <div class="wanted-head">The Soft One</div>
+        <div class="wanted-name">Kassandra Mercer</div>
+        <div class="wanted-role">Her mother</div>
+        <div class="wanted-desc">The warmth in a house that looked perfect from the outside. Where Grant handed over expectations, Kassandra handed over actual affection. Kayla learned to read a room from one of them and to hide what she feels from the other.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== THE INK (OMNI) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ The Ink ★</h2>
+    <span class="poster-eyebrow reveal-up">Left Arm &middot; Full Sleeve &middot; Don't Touch</span>
+
+    <div class="bio-panel reveal-up">
+      <p><strong>Omni.</strong> A mythological dragon god she likes &mdash; coiled the full length of her left arm, dark scales cracked through with veins of fire and lava. Ask her what it means and you'll get a flat <em>"I like him."</em> That's the whole interview.</p>
+      <p>It's the loudest thing about a woman who keeps everything else folded down small. Black lace, leather, fishnet, silver, dark lips, black nails &mdash; and a dragon god burning quietly under all of it.</p>
+    </div>
+
+    <div class="sticker-tags reveal-up">
+      <span class="sticker-patch">crochets. doesn't explain it.</span>
+      <span class="sticker-patch">rage-baits strangers for sport</span>
+      <span class="sticker-patch">closes the app, returns to yarn</span>
+      <span class="sticker-patch">cello at 3am = leave her alone</span>
+    </div>
+  </section>
+
+  <!-- ====== CASE FILE (BACKSTORY SPOILER) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The File</h2>
+    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+
+    <details class="case-file reveal-up">
+      <summary>
+        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
+      </summary>
+      <div class="case-file-body">
+        <p>Kayla grew up rich. Her dad, <strong>Grant Mercer</strong>, is a cold, practical CEO who showed love through money and high standards; her mom, <strong>Kassandra</strong>, was the softer one. The family looked perfect from the outside &mdash; and that's exactly what it taught her: read every room, hide what you really feel. She was a cello prodigy. Formally trained, seated in famous orchestras, a real reputation before most kids pick a major.</p>
+        <p>At fifteen she got pregnant by a twenty-year-old named <strong>Chase</strong>, who ghosted the second she told him. She made it to eight months before the baby died, and she delivered a daughter who never cried. <em>It broke something that never set right.</em></p>
+        <p>Two vows since, both kept: <strong>no kids, no serious relationships.</strong> They're not really rules. They're scar tissue. Anything she lets herself want can be taken with no warning and no reason &mdash; so she stopped wanting out loud. Low-stakes and no-expectations is the only kind of close that feels safe.</p>
+        <p>Then Scorch heard her play, and pushed &mdash; and kept pushing &mdash; until she joined The Snake Skins on cello and keys. Her dad disapproved. He didn't stop her. She loves the band. It's the closest she lets the world get.</p>
+        <p>When something's pressing on her, she disappears into the cello &mdash; the same passages, over and over, for hours. Sometimes until her fingers bleed and she doesn't notice. If she lets you in anyway? That's not her going soft. That's her deciding you're worth the risk she swore off. It means exactly as much as it sounds like it does.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ====== SPRAY-PAINT QUOTE ====== -->
+  <section class="char-section poster-section">
+    <div class="spray-quote reveal-up">
+      <q>I'm not a bitch. I'm honest. There's a difference.</q>
+      <cite>— Kayla</cite>
+    </div>
+  </section>
+
+  <!-- ====== FANMAIL ====== -->
+  <section class="char-section poster-section fanmail-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:1deg;">Fanmail</h2>
+    <span class="poster-eyebrow reveal-up">Scrawl her something &middot; she reads everything. replying is another story</span>
+
+    <div class="fanmail-board reveal-up" id="kaylaFanmail">
+      <!-- backstage wall textures -->
+      <div class="fm-wall-vignette" aria-hidden="true"></div>
+      <div class="fm-debris fm-debris--strip" aria-hidden="true"></div>
+      <div class="fm-debris fm-debris--ticket" aria-hidden="true">ADMIT ONE<br>SNAKE SKINS</div>
+      <div class="fm-debris fm-debris--pick" aria-hidden="true"></div>
+
+      <div class="fm-board-inner">
+        <!-- tape holding the setlist to the wall -->
+        <div class="fm-tape fm-tape--tl" id="fmTape1" aria-hidden="true"></div>
+        <div class="fm-tape fm-tape--br" id="fmTape2" aria-hidden="true"></div>
+
+        <!-- the setlist you scrawl on (back side) -->
+        <div class="fm-setlist fanmail-write" id="fmSheet">
+          <span class="fm-grain" aria-hidden="true"></span>
+          <span class="fm-crumple" aria-hidden="true"></span>
+          <span class="fm-burn" aria-hidden="true"></span>
+          <div class="fm-bleed" aria-hidden="true">BITE BACK · MAR 14<br>1. CELLO INTRO — slow<br>2. MONSTER<br>3. FORGIVE ME, BROTHER<br>4. KEYS SOLO ??<br>5. don't rush me — K</div>
+          <div class="fm-pin fm-pin--1" aria-hidden="true"></div>
+
+          <div class="fm-sl-head">
+            <span class="fm-sl-ttl">THE SNAKE SKINS</span>
+            <span class="fm-sl-meta">BITE BACK TOUR '26<br>c/o KAYLA</span>
+          </div>
+          <p class="fm-sl-note">// flip side — scrawl her something //</p>
+
+          <textarea class="fm-marker fanmail-body" id="fmBody" maxlength="900" placeholder="...say whatever you want her to read. she will have an opinion."></textarea>
+
+          <div class="fm-sign-row">
+            <span class="fm-sign-x">✗</span>
+            <input type="text" class="fm-marker fanmail-name" id="fmName" maxlength="24" placeholder="tag it" autocomplete="off">
+          </div>
+
+          <div class="fm-send-row">
+            <button type="button" class="fanmail-send" id="fmSend">MAIL IT →</button>
+            <span class="fanmail-status" id="fmStatus" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- where his replies slap onto the wall -->
+      <div class="fanmail-replies" id="fmReplies"></div>
+    </div>
+  </section>
+
+  <!-- ====== BACKSTAGE PASS (CTA) ====== -->
+  <section class="char-section poster-section">
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1.5deg;">All Access</h2>
+    <span class="poster-eyebrow reveal-up">Backstage Pass &middot; Talk to Kayla</span>
+
+    <div class="backstage-pass reveal-up">
+      <div class="pass-head">★ VIP All Access ★</div>
+      <div class="pass-body">
+        <div class="pass-name">KAYLA</div>
+        <div class="pass-role">Cello / Keys &middot; The Snake Skins</div>
+        <a href="https://dreamjourneyai.com/creation/KAYLA-LINK-GOES-HERE"
+           target="_blank" rel="noopener" class="pass-cta">
+          Talk to Kayla &rarr;
+        </a>
+        <div class="pass-barcode" aria-hidden="true"></div>
+        <span class="pass-barcode-num">SS-2026-005</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER / BACK ====== -->
+  <section class="char-final-cta">
+    <a href="#" class="char-back-link" id="kaylaBack">← Back to DreamjourneyAI</a>
+  </section>
+</div>
+<!-- ================== END SCORCH CHARACTER PAGE ===================== -->
+
+<!-- ====================== KAYLA DATING PROFILE ====================== -->
+<div class="dating-page" id="kaylaDatingPage" aria-hidden="true" style="--dp-accent: #b04dff; --dp-accent-2: #6a1fb8;">
+  <button class="dating-close" id="kaylaDatingClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-wrap">
+    <!-- ===== HERO ===== -->
+    <div class="dating-hero">
+      <span class="dating-verified">Verified Ice Queen</span>
+      <img src="assets/Kayla Pics/kayla-hero.jpg" alt="Kayla hero" onerror="this.style.display='none'">
+      <div class="dating-hero-overlay">
+        <h1 class="dating-hero-name">Kayla<span>, 28</span></h1>
+        <div class="dating-hero-meta">
+          <span>🎻 Cello / Keys, The Snake Skins</span>
+          <span>📍 Austin, TX</span>
+          <span>🖤 Single (on purpose. it's a policy.)</span>
+        </div>
+        <!-- live AI status banner (updates every ~3h on visit) -->
+        <div class="dating-status" id="scStatusCard">
+          <div class="dating-status-emoji" id="scStatusEmoji">🧶</div>
+          <div class="dating-status-body">
+            <div class="dating-status-eyebrow"><span class="dating-status-dot"></span> Currently <span class="dating-status-live">· LIVE</span></div>
+            <div class="dating-status-line" id="scStatusLine">checking what she's up to…</div>
+            <div class="dating-status-foot">
+              <span class="dating-status-mood" id="scStatusMood"></span>
+              <span class="dating-status-age" id="scStatusAge"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAGLINE ===== -->
+    <div class="dating-tagline">"Nothing serious. That's not a challenge — it's a rule."</div>
+
+    <!-- ===== ROMANCE TYPE ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">Romance Type — what you're signing up for</h2>
+      <div class="romance-tags">
+        <span class="romance-tag rt-angst">🖤 Emotionally Unavailable</span>
+        <span class="romance-tag rt-complicated">⚠ Complicated</span>
+        <span class="romance-tag rt-baggage">💔 Locked Baggage</span>
+        <span class="romance-tag rt-worth">🌹 Worth The Work (if she lets you)</span>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT ME ===== -->
+    <div class="dating-card dating-bio">
+      <h2 class="dating-card-head">About me</h2>
+      <p>Ricky made the whole band fill these out, so let's get this over with. I play cello and keys in The Snake Skins. I'm told I come off like a bitch. I'm honestly not trying to — that's just my face, and my voice, and apparently my entire personality. <strong>People who know me think it's funny.</strong> You'll figure out which kind of person you are pretty fast.</p>
+      <p>Here's what you get: the truth, every time, even when you don't want it. Here's what you don't get: serious. I keep things low-stakes and no-expectations, and I'm not explaining why. <em>The band gets the explanation. You get the policy.</em></p>
+      <p>If that's a problem, there's the door. I'll even hold it open. See? Nice.</p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">no, I'm not mad. this is just my face.</div>
+    </div>
+
+    <!-- ===== PROMPTS ===== -->
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My most controversial opinion is...</p>
+      <p class="dating-prompt-a">most people don't actually want honesty. they want applause. <em>I don't do applause.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">I'll fall for you if...</p>
+      <p class="dating-prompt-a">that's not on the menu. but if you're chill, easy on the eyes, and don't expect anything? <em>we can talk.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My red flag is...</p>
+      <p class="dating-prompt-a">I will watch your life fall apart like it's a series finale. I might have popcorn. I will not be involved. <em>(you can't prove I was involved.)</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Kayla Pics/kayla-cello.jpg" alt="Kayla on cello" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">the cello gets more of me than you ever will. don't take it personally.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">On a typical Tuesday night, you'll find me...</p>
+      <p class="dating-prompt-a">cello til 2am, crocheting, or watching three strangers destroy each other in a comment section I definitely did not start.</p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">You should NOT date me if...</p>
+      <p class="dating-prompt-a">you want a future. plans. meeting the parents. mine would eat you alive anyway — <em>well, dad would. mom would feed you first.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">The most spontaneous thing I've ever done...</p>
+      <p class="dating-prompt-a">quit famous orchestras for a metal band because their unhinged frontman wouldn't stop harassing me until I said yes. <em>dad still brings it up at dinner.</em></p>
+    </div>
+
+    <!-- ===== PHOTO ===== -->
+    <div class="dating-photo">
+      <img src="assets/Kayla Pics/kayla-gallery-03.jpg" alt="Snake Skins live" onerror="this.parentElement.style.display='none'">
+      <div class="dating-photo-caption">the band. they're family. that's all you're getting.</div>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">My love language is...</p>
+      <p class="dating-prompt-a">telling you the truth nobody else will. <em>you're welcome.</em></p>
+    </div>
+
+    <div class="dating-prompt">
+      <p class="dating-prompt-q">Two truths and a lie...</p>
+      <p class="dating-prompt-a">1. I was a cello prodigy in famous orchestras.<br>2. I dye my hair black.<br>3. I don't care what you think of me.<br><em>figure it out.</em></p>
+    </div>
+
+    <!-- ===== QUICK STATS ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">The Vitals</h2>
+      <div class="dating-stats">
+        <div class="dating-stat"><div class="dating-stat-key">Looking for</div><div class="dating-stat-val">nothing serious. read it again.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Kids</div><div class="dating-stat-val">no. next question.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Drinks</div><div class="dating-stat-val">red wine. the kind you can't pronounce.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Smokes</div><div class="dating-stat-val">no. it's bad for the hands, and my hands are the talent.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Religion</div><div class="dating-stat-val">I have a dragon god tattooed down my whole left arm. his name is Omni. we're happy.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Pets</div><div class="dating-stat-val">no. I crochet animals. they don't shed and they can't disappoint me.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Languages</div><div class="dating-stat-val">English, sarcasm, cello.</div></div>
+        <div class="dating-stat"><div class="dating-stat-key">Income</div><div class="dating-stat-val">rich twice. born into it, then earned my own. dad's still mad about the second one.</div></div>
+      </div>
+    </div>
+
+    <!-- ===== PHOTO GRID ===== -->
+    <div class="dating-card">
+      <h2 class="dating-card-head">More of me</h2>
+      <div class="dating-grid">
+        <div class="dating-grid-item"><img src="assets/Kayla Pics/kayla-gallery-01.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Kayla Pics/kayla-gallery-02.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Kayla Pics/kayla-gallery-03.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="dating-grid-item"><img src="assets/Kayla Pics/kayla-gallery-04.jpg" alt="" onerror="this.style.display='none'"></div>
+      </div>
+    </div>
+
+    <!-- ===== COMMENT WALL ===== -->
+    <div class="dating-card scorch-comments" id="kaylaComments">
+      <h2 class="dating-card-head">Comments — leave her one if you must</h2>
+      <p class="sc-comments-sub">she reads every single one. she replies when she feels like it. <em>she always has an opinion.</em></p>
+
+      <div class="sc-comment-form">
+        <input type="text" class="sc-name-input" id="scName" maxlength="24" placeholder="your name (or stay anonymous)" autocomplete="off">
+        <textarea class="sc-comment-input" id="scComment" maxlength="280" placeholder="say something to Kayla..."></textarea>
+        <button type="button" class="sc-comment-send" id="scSend">Post Comment</button>
+        <div class="sc-comment-status" id="scStatus" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="sc-comment-thread" id="scThread"></div>
+    </div>
+
+    <!-- ===== CTA ===== -->
+    <a href="https://dreamjourneyai.com/creation/KAYLA-LINK-GOES-HERE"
+       target="_blank" rel="noopener" class="dating-cta">
+      Swipe Right ➜ Chat with Kayla
+    </a>
+
+    <div class="dating-foot">profile last updated by Kayla, under protest, while Ricky watched</div>
+  </div>
+</div>
+<!-- ================== END KAYLA DATING PROFILE ===================== -->
+
+<div class="dating-page dating-browse-page" id="datingBrowsePage" aria-hidden="true" style="--dp-accent: #e85ee8; --dp-accent-2: #5e7fff;">
+  <button class="dating-close" id="datingBrowseClose" type="button" aria-label="Close">✕</button>
+
+  <div class="dating-browse-wrap">
+    <h1 class="dating-browse-title">♡ Dating Profiles ♡</h1>
+    <p class="dating-browse-sub">find your type · find your toxic match · find someone worth the work</p>
+
+    <div class="dating-search" role="search">
+      <svg class="dating-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.3-4.3"/>
+      </svg>
+      <input
+        type="search"
+        id="datingSearchInput"
+        placeholder="search by name or vibe — try 'toxic', 'angst', 'good boy'..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <button class="dating-search-clear" id="datingSearchClear" type="button" aria-label="Clear search">✕</button>
+    </div>
+
+    <div class="dating-browse-grid" id="datingBrowseGrid">
+      <!-- Kayla (unlocked — this page) -->
+      <button class="dating-preview-card"
+              data-dating="kayla"
+              data-name="kayla"
+              data-tags="gothic queen ice cold honest blunt complicated emotionally unavailable cello keys crochet drama worth the work"
+              type="button" aria-label="View Kayla's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Kayla<span>, 28</span></h3>
+          <p class="dating-preview-tag">"Nothing serious. That's not a challenge — it's a rule."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-angst">🖤 Unavailable</span>
+            <span class="romance-tag rt-complicated">⚠ Complicated</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Scorch (links to his page) -->
+      <button class="dating-preview-card"
+              data-dating="scorch"
+              data-dating-href="scorch.html#dating"
+              data-name="scorch"
+              data-tags="toxic baggage complicated worth-the-work heavy frontman vocals fire hellfire bite back asshole"
+              type="button" aria-label="View Scorch's dating profile">
+        <div class="dating-preview-photo">
+          <img src="assets/Scorch Pics/scorch-g03.jpg" alt="Scorch" onerror="this.style.display='none'">
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Scorch<span>, 36</span></h3>
+          <p class="dating-preview-tag">"Walking dumpster fire. Proceed at own risk."</p>
+          <div class="dating-preview-types">
+            <span class="romance-tag rt-toxic">🔥 Toxic</span>
+            <span class="romance-tag rt-baggage">💔 Baggage</span>
+            <span class="romance-tag rt-worth">🌹 Worth It</span>
+          </div>
+          <span class="dating-preview-cta">View Profile ➜</span>
+        </div>
+      </button>
+
+      <!-- Shane (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="shane"
+              data-tags="deadpan ex-outlaw biker angst quiet emotionally unavailable bass"
+              type="button" disabled aria-label="Shane's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Shane Pics/shane_bassMainPic.webp" alt="Shane" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Shane<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he didn't want to fill it out</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-angst">⚠ TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+
+      <!-- Cody (locked placeholder) -->
+      <button class="dating-preview-card locked"
+              data-name="cody"
+              data-tags="good boy soft sweet bayou cajun drums depression heart of the band"
+              type="button" disabled aria-label="Cody's profile coming soon">
+        <div class="dating-preview-photo">
+          <img src="assets/Cody Pics/cody-portrait.jpg" alt="Cody" onerror="this.style.display='none'">
+          <div class="dating-preview-locked-stamp">Coming Soon</div>
+        </div>
+        <div class="dating-preview-body">
+          <h3 class="dating-preview-name">Cody<span>, ?</span></h3>
+          <p class="dating-preview-tag">profile pending — he's still being too polite about it</p>
+          <div class="dating-preview-types"><span class="romance-tag rt-soft">🌿 TBD</span></div>
+          <span class="dating-preview-cta">Coming Soon</span>
+        </div>
+      </button>
+    </div>
+
+    <p class="dating-no-results" id="datingNoResults">no profiles match — try a different vibe</p>
+  </div>
+</div>
+<!-- ================== END DATING BROWSE OVERLAY ===================== -->
+
+<div class="scene-modal" id="sceneModal" aria-hidden="true" role="dialog" aria-labelledby="sceneModalTitle">
+  <div class="scene-modal-panel">
+    <button class="scene-modal-close" id="sceneModalClose" type="button" aria-label="Close">✕</button>
+    <h2 class="scene-modal-h" id="sceneModalTitle">Scene Request</h2>
+    <p class="scene-modal-sub">For <strong id="sceneModalChar">—</strong></p>
+
+    <form id="sceneRequestForm" autocomplete="off">
+      <div class="scene-row">
+        <label for="sceneIdea">The Scene Idea</label>
+        <textarea id="sceneIdea" name="sceneIdea" required placeholder="describe the moment, the mood, the magic..."></textarea>
+      </div>
+      <div class="scene-row">
+        <label for="sceneSetting">Setting / World <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneSetting" name="sceneSetting" placeholder="where does it take place?">
+      </div>
+      <div class="scene-row">
+        <label for="sceneExtra">Extra Details <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneExtra" name="sceneExtra" placeholder="tone, length, anything specific">
+      </div>
+      <div class="scene-row">
+        <label for="sceneRequester">Your Name / Discord <span style="opacity:.55">— optional</span></label>
+        <input type="text" id="sceneRequester" name="sceneRequester" placeholder="so Chunley can credit you">
+      </div>
+      <button type="submit" class="scene-submit" id="sceneSubmit">Send to Chunley</button>
+      <div class="scene-status" id="sceneStatus" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  SCORCH FLOATING DM BUBBLE + CHAT WINDOW                      -->
+<!-- ============================================================ -->
+<button class="sc-dm-fab" id="scDmFab" type="button" aria-label="Message Kayla">
+  <img src="assets/Kayla Pics/kayla-portrait.jpg" alt="" onerror="this.style.display='none'">
+  <span class="sc-dm-fab-dot"></span>
+  <span class="sc-dm-fab-notif" id="scDmNotif">1</span>
+</button>
+
+<!-- full-screen splash when Kayla DMs you -->
+<div class="sc-dm-splash" id="scDmSplash" aria-hidden="true">
+  <div class="sc-dm-splash-inner">
+    <div class="sc-dm-splash-icon">✉</div>
+    <div class="sc-dm-splash-text">Kayla messaged you first</div>
+    <div class="sc-dm-splash-sub">don't make it weird ↘</div>
+  </div>
+</div>
+
+<div class="sc-chat" id="scChat" aria-hidden="true">
+  <div class="sc-chat-head">
+    <div class="sc-chat-avatar">
+      <img src="assets/Kayla Pics/kayla-portrait.jpg" alt="Kayla" onerror="this.style.display='none'">
+    </div>
+    <div class="sc-chat-who">
+      <div class="sc-chat-name">Kayla <span class="sc-chat-verified">✓</span></div>
+      <div class="sc-chat-presence">online · reading. not necessarily replying</div>
+    </div>
+    <button class="sc-chat-close" id="scChatClose" type="button" aria-label="Close chat">✕</button>
+  </div>
+  <div class="sc-chat-body" id="scChatBody"></div>
+  <div class="sc-chat-input-row">
+    <input type="text" class="sc-chat-input" id="scChatInput" maxlength="280" placeholder="message Kayla..." autocomplete="off">
+    <button type="button" class="sc-chat-send" id="scChatSend" aria-label="Send">➤</button>
+  </div>
+</div>
+
+<style>
+/* ============================================================
+   FANMAIL · backstage wall — write on the back of a setlist,
+   scrawled in marker, taped up crooked. Rip it off the wall to
+   send; his reply slaps back onto the wall as a torn flyer.
+   ============================================================ */
+.fanmail-section{ --fm-marker:#161616; --fm-red:#7a1fd0; --fm-tape:rgba(214,200,150,.72); }
+
+/* the wall itself */
+.fanmail-board{
+  position:relative; max-width:600px; margin:0 auto; padding:42px 18px 30px; overflow:hidden;
+  border-radius:10px;
+  background:
+    radial-gradient(140% 90% at 50% -10%, rgba(60,55,48,.5), transparent 55%),
+    radial-gradient(80% 60% at 12% 110%, rgba(0,0,0,.6), transparent 60%),
+    radial-gradient(40% 30% at 78% 30%, rgba(40,38,34,.6), transparent 70%),
+    radial-gradient(30% 24% at 22% 60%, rgba(30,28,25,.55), transparent 70%),
+    linear-gradient(160deg,#2a2622,#191613 70%);
+  box-shadow:inset 0 0 0 1px rgba(255,170,110,.05), 0 20px 44px rgba(0,0,0,.5);
+}
+.fanmail-board::before{ /* concrete grain */
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:overlay; border-radius:10px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='cc'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.016' numOctaves='5' seed='11'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23cc)'/%3E%3C/svg%3E");
+  background-size:380px 380px;
+}
+.fanmail-board::after{ /* streaks */
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.4; mix-blend-mode:multiply; border-radius:10px;
+  background-image:linear-gradient(180deg, transparent, rgba(20,14,8,.5) 80%), repeating-linear-gradient(91deg, transparent 0 60px, rgba(0,0,0,.06) 60px 61px);
+}
+.fm-wall-vignette{ position:absolute; inset:0; pointer-events:none; border-radius:10px; box-shadow:inset 0 0 180px 30px rgba(0,0,0,.8); z-index:1; }
+
+/* debris */
+.fm-debris{ position:absolute; z-index:2; pointer-events:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)); }
+.fm-debris--ticket{ width:108px; height:48px; top:6%; right:5%; transform:rotate(13deg);
+  background:linear-gradient(100deg,#b8442a,#7c2a18); color:#f7e3c8;
+  font-family:'Oswald',sans-serif; font-weight:700; font-size:.55rem; display:flex; align-items:center; justify-content:center; text-align:center; letter-spacing:.1em;
+  -webkit-mask:radial-gradient(circle 6px at 0 50%,transparent 98%,#000) left/12px 100% repeat-y, radial-gradient(circle 6px at 100% 50%,transparent 98%,#000) right/12px 100% repeat-y, linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out; mask-composite:exclude; }
+.fm-debris--pick{ width:30px; height:38px; bottom:8%; left:5%; transform:rotate(-22deg);
+  background:linear-gradient(#3fd0c8,#1f7c79); border-radius:46% 46% 50% 50%/60% 60% 40% 40%; }
+.fm-debris--strip{ width:190px; height:13px; top:18%; left:-28px; transform:rotate(-32deg); opacity:.45;
+  background:repeating-linear-gradient(90deg,#222 0 16px,#7a1fd0 16px 20px); }
+
+.fm-board-inner{ position:relative; z-index:3; }
+
+/* tape */
+.fm-tape{ position:absolute; width:92px; height:28px; z-index:6; pointer-events:none; opacity:.92;
+  background:linear-gradient(110deg, rgba(255,255,255,.12), rgba(255,255,255,0) 40%), var(--fm-tape);
+  box-shadow:0 2px 5px rgba(0,0,0,.45); }
+.fm-tape::after{ content:''; position:absolute; inset:0; mix-blend-mode:multiply; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='30'%3E%3Cfilter id='tt'%3E%3CfeTurbulence baseFrequency='0.2 0.7' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23tt)' opacity='0.5'/%3E%3C/svg%3E"); }
+.fm-tape--tl{ top:-12px; left:26px; transform:rotate(-26deg); }
+.fm-tape--br{ bottom:-12px; right:24px; transform:rotate(-18deg); width:116px; }
+.fm-tape.fly{ animation:fmTapeFly .5s ease forwards; }
+@keyframes fmTapeFly{ to{ transform:rotate(80deg) translate(30px,-40px); opacity:0; } }
+
+/* the setlist */
+.fm-setlist{
+  position:relative; padding:30px 30px 26px; z-index:3; transform:rotate(-2.2deg); transform-origin:50% 0;
+  color:var(--fm-marker);
+  background:
+    radial-gradient(closest-side, transparent 60%, rgba(70,40,15,.32) 62%, rgba(70,40,15,.05) 68%, transparent 70%) 78% 70%/120px 120px no-repeat,
+    radial-gradient(120% 120% at 50% 0%, #d8cca6, #c2b48b 70%, #a89a72 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 22px 40px -10px rgba(0,0,0,.7), 0 6px 14px -6px rgba(0,0,0,.6);
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02 0.06' numOctaves='3' seed='4'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='14'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r)'/%3E%3C/svg%3E") top/100% 22px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02 0.06' numOctaves='3' seed='9'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='14'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r2)'/%3E%3C/svg%3E") bottom/100% 22px no-repeat,
+    linear-gradient(#000,#000) center/100% calc(100% - 40px) no-repeat;
+  animation:fmFlap 6s ease-in-out infinite;
+}
+@keyframes fmFlap{ 0%,100%{transform:rotate(-2.2deg);} 50%{transform:rotate(-1.6deg) translateY(-2px);} }
+.fm-grain{ position:absolute; inset:0; pointer-events:none; mix-blend-mode:multiply; opacity:.6; z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03 0.05' numOctaves='5' seed='3'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.32 0 0 0 0 0.26 0 0 0 0 0.15 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"); background-size:260px 260px; }
+.fm-crumple{ position:absolute; inset:0; pointer-events:none; z-index:1; opacity:.5; mix-blend-mode:soft-light;
+  background:linear-gradient(118deg, transparent 30%, rgba(255,255,255,.5) 31%, transparent 33%),
+            linear-gradient(72deg, transparent 55%, rgba(0,0,0,.4) 56%, transparent 58%),
+            linear-gradient(200deg, transparent 68%, rgba(255,255,255,.4) 69%, transparent 71%); }
+.fm-burn{ position:absolute; width:26px; height:26px; border-radius:50%; top:16px; right:84px; z-index:2; pointer-events:none; transform:rotate(8deg);
+  background:radial-gradient(circle at 50% 50%, #1a1208 0 30%, #3b2410 45%, rgba(90,55,20,.5) 70%, transparent 78%); box-shadow:0 0 8px 2px rgba(0,0,0,.4) inset; }
+.fm-bleed{ position:absolute; inset:26px 30px; z-index:1; pointer-events:none; opacity:.13;
+  font-family:'Permanent Marker',cursive; color:#3a2a18; line-height:1.5; transform:scaleX(-1) rotate(.5deg); font-size:1rem; }
+.fm-pin{ position:absolute; width:18px; height:18px; border-radius:50%; z-index:7; top:-7px; left:50%;
+  background:radial-gradient(circle at 35% 30%, #ff6b5b, #b01608 70%);
+  box-shadow:0 3px 5px rgba(0,0,0,.6), inset -1px -1px 2px rgba(0,0,0,.4), inset 1px 1px 2px rgba(255,255,255,.5); }
+.fm-pin::after{ content:''; position:absolute; left:50%; top:50%; width:5px; height:5px; border-radius:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,.6); }
+
+.fm-sl-head{ position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid rgba(20,20,20,.6); padding-bottom:6px; margin-bottom:6px; }
+.fm-sl-ttl{ font-family:'Permanent Marker',cursive; font-size:1.5rem; color:#161616; transform:rotate(-1.5deg); }
+.fm-sl-meta{ font-family:'Special Elite',monospace; font-size:.62rem; color:#3a3024; letter-spacing:.08em; text-align:right; line-height:1.3; }
+.fm-sl-note{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.66rem; color:#4a3f2e; margin:0 0 2px; letter-spacing:.04em; opacity:.85; }
+
+.fm-marker{ position:relative; z-index:2; width:100%; box-sizing:border-box; background:transparent; border:none; resize:none;
+  font-family:'Permanent Marker',cursive; color:var(--fm-marker); line-height:1.55; text-shadow:0 0 1px rgba(0,0,0,.35); }
+.fm-marker:focus{ outline:none; }
+#fmBody{ font-size:1.35rem; min-height:150px; transform:rotate(-.5deg); }
+#fmBody::placeholder{ color:rgba(30,25,18,.4); }
+.fm-sign-row{ position:relative; z-index:2; display:flex; align-items:baseline; gap:10px; margin-top:8px; }
+.fm-sign-x{ font-family:'Permanent Marker',cursive; font-size:1.5rem; color:var(--fm-red); transform:rotate(-4deg); }
+#fmName{ flex:1; width:auto; font-size:1.45rem; border-bottom:2px solid rgba(20,20,20,.4); padding-bottom:1px; color:#161616; }
+#fmName::placeholder{ color:rgba(30,25,18,.35); font-family:'Special Elite',monospace; font-size:.85rem; }
+
+.fm-send-row{ position:relative; z-index:2; display:flex; align-items:center; gap:14px; margin-top:16px; }
+.fanmail-send{ cursor:pointer; border:3px solid #161616; background:var(--fm-red); color:#fff;
+  font-family:'Permanent Marker',cursive; font-size:1.15rem; padding:.2rem 1.1rem; transform:rotate(-2deg);
+  box-shadow:3px 3px 0 rgba(0,0,0,.5); transition:transform .1s, box-shadow .1s; letter-spacing:.02em; }
+.fanmail-send:hover{ transform:rotate(-2deg) translate(-1px,-1px); box-shadow:4px 4px 0 rgba(0,0,0,.5); }
+.fanmail-send:active{ transform:rotate(-2deg) translate(2px,2px); box-shadow:1px 1px 0 rgba(0,0,0,.5); }
+.fanmail-send:disabled{ opacity:.5; cursor:default; }
+.fanmail-status{ font-family:'Special Elite',monospace; font-size:.78rem; color:#d0b0ff; text-shadow:0 1px 4px #000; min-height:1em; }
+
+/* SEND — rip it off the wall */
+.fm-setlist.yank{ animation:fmYank .9s cubic-bezier(.5,-0.3,.7,1) forwards; }
+@keyframes fmYank{
+  0%{ transform:rotate(-2.2deg); }
+  12%{ transform:rotate(-5deg) translateY(6px) scale(1.02); }
+  100%{ transform:rotate(34deg) translate(64vw,-72vh) scale(.3); opacity:0; }
+}
+
+/* HIS REPLY — torn flyer slapped on the wall */
+.fanmail-replies{ position:relative; z-index:3; }
+.fanmail-reply{
+  position:relative; padding:26px 26px 30px; margin-top:34px; color:#0d0d0d; transform:rotate(2deg);
+  background:
+    radial-gradient(60% 50% at 80% 20%, rgba(214,50,31,.16), transparent 70%),
+    linear-gradient(150deg,#d9d2c0,#b9b09a 80%);
+  box-shadow:0 22px 40px -12px rgba(0,0,0,.75), 0 6px 12px -6px rgba(0,0,0,.6);
+  -webkit-mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r3'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025 0.07' numOctaves='3' seed='14'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='18'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r3)'/%3E%3C/svg%3E") top/100% 24px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r4'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025 0.07' numOctaves='3' seed='21'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='18'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r4)'/%3E%3C/svg%3E") bottom/100% 24px no-repeat,
+    linear-gradient(#000,#000) center/100% calc(100% - 44px) no-repeat;
+}
+.fanmail-reply:nth-child(even){ transform:rotate(-1.6deg); }
+.fanmail-reply .fm-grain{ opacity:.55; }
+.fanmail-reply-to{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.72rem; color:#4a3f2e; letter-spacing:.08em; margin-bottom:10px; transform:rotate(-1deg); }
+.fanmail-reply-text{ position:relative; z-index:2; font-family:'Permanent Marker',cursive; font-size:1.35rem; line-height:1.5; color:#101010; white-space:pre-wrap; word-wrap:break-word; min-height:1.4em; text-shadow:0 0 1px rgba(0,0,0,.5); }
+.fanmail-reply-sign{ position:relative; z-index:2; font-family:'Permanent Marker',cursive; font-size:2rem; color:var(--fm-red); text-align:right; margin-top:10px; transform:rotate(-3deg); }
+.fanmail-reply.pending .fanmail-reply-text{ color:#4a3f2e; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
+
+.fanmail-reply .fm-reply-tape{ position:absolute; width:90px; height:26px; z-index:6; pointer-events:none; opacity:.92;
+  background:linear-gradient(110deg, rgba(255,255,255,.12), rgba(255,255,255,0) 40%), var(--fm-tape); box-shadow:0 2px 5px rgba(0,0,0,.45); }
+
+.fanmail-reply.slap{ animation:fmSlap .5s cubic-bezier(.2,1.5,.4,1) forwards; transform-origin:60% 0; }
+@keyframes fmSlap{
+  0%{ opacity:0; transform:rotate(8deg) translateY(-80px) scale(1.3); }
+  60%{ opacity:1; transform:rotate(1deg) translateY(6px) scale(.98); }
+  100%{ opacity:1; transform:rotate(2deg) translateY(0) scale(1); }
+}
+
+/* marker caret */
+.fm-caret::after{ content:'▍'; color:#101010; animation:fmCaret .6s steps(1) infinite; }
+@keyframes fmCaret{ 50%{opacity:0;} }
+
+/* blocked notices */
+.sc-blocked-note{ color:#ff5a3c; font-family:'Special Elite',monospace; font-weight:700; letter-spacing:.02em; }
+.sc-blocked-stamp{ margin-top:.7rem; display:inline-block; padding:.25rem .7rem; border:2px solid #ff3b3b; border-radius:6px;
+  color:#ff5a3c; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.08em; text-transform:uppercase; font-size:.78rem;
+  transform:rotate(-4deg); background:rgba(255,40,40,.08); animation:fmStampIn .3s ease; }
+@keyframes fmStampIn{ 0%{transform:rotate(-4deg) scale(1.6); opacity:0;} 100%{transform:rotate(-4deg) scale(1); opacity:1;} }
+
+@media (prefers-reduced-motion: reduce){
+  .fm-setlist{ animation:none; } .fm-setlist.yank,.fanmail-reply.slap{ animation:none; } .fanmail-reply{ opacity:1; }
+}
+
+
+.sc-comments-sub { font-family:'Outfit',sans-serif; font-size:.92rem; color:var(--dp-ink-dim,rgba(255,255,255,.6)); margin:0 0 1.3rem; line-height:1.5; }
+.sc-comments-sub em { color:var(--sc-accent); font-style:italic; }
+
+/* ===== COMPOSER ===== */
+.sc-comment-form { display:flex; flex-direction:column; gap:.7rem; }
+.sc-name-input, .sc-comment-input { width:100%; box-sizing:border-box; background:rgba(0,0,0,.28); border:1.5px solid rgba(255,255,255,.12); border-radius:14px; padding:.85rem 1.05rem; color:#fff; font-family:'Outfit',sans-serif; font-size:.98rem; transition:border-color .18s,box-shadow .18s; }
+.sc-comment-input { resize:vertical; min-height:92px; line-height:1.5; }
+.sc-name-input:focus, .sc-comment-input:focus { outline:none; border-color:var(--sc-accent); box-shadow:0 0 0 3px rgba(176,77,255,.16); }
+.sc-name-input::placeholder, .sc-comment-input::placeholder { color:rgba(255,255,255,.4); }
+.sc-comment-send { align-self:flex-start; cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:.92rem; color:#fff; padding:.7rem 1.6rem; border-radius:999px; background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)); box-shadow:0 6px 20px rgba(176,77,255,.35); transition:transform .15s,box-shadow .15s,opacity .15s; }
+.sc-comment-send:hover { transform:translateY(-2px); box-shadow:0 9px 26px rgba(176,77,255,.5); }
+.sc-comment-send:disabled { opacity:.5; cursor:default; transform:none; }
+.sc-comment-status { font-family:'Outfit',sans-serif; font-size:.85rem; color:var(--sc-accent); min-height:1.2em; }
+
+/* ===== THREAD ===== */
+.sc-comment-thread { margin-top:1.6rem; display:flex; flex-direction:column; gap:1.1rem; }
+
+/* The thread scrolls WITH THE PAGE by default. The self-contained
+   scroll box (max-height + overflow) is only handed to devices with a
+   real mouse cursor — on touch it created a nested-scroll trap where
+   reaching the bottom would get "stuck" unless you swiped off to the
+   side. (hover/pointer) is reliable where a width breakpoint isn't:
+   phones never report a fine pointer, regardless of viewport width,
+   in-app browsers, or orientation. */
+@media (hover:hover) and (pointer:fine) {
+  .sc-comment-thread { max-height:min(72vh,760px); overflow-y:auto; overflow-x:hidden;
+    padding-right:.4rem; scrollbar-width:thin; scrollbar-color:rgba(176,77,255,.45) transparent; }
+  .sc-comment-thread::-webkit-scrollbar { width:8px; }
+  .sc-comment-thread::-webkit-scrollbar-track { background:transparent; }
+  .sc-comment-thread::-webkit-scrollbar-thumb { background:rgba(176,77,255,.4); border-radius:999px; }
+  .sc-comment-thread::-webkit-scrollbar-thumb:hover { background:rgba(176,77,255,.65); }
+}
+
+/* a card */
+.sc-comment { position:relative; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:1rem 1.15rem .85rem; transition:border-color .2s, background .2s; }
+.sc-comment:hover { border-color:rgba(255,255,255,.14); }
+.sc-comment.is-scorch { background:linear-gradient(135deg,rgba(176,77,255,.10),rgba(106,31,184,.045)); border-color:rgba(176,77,255,.3); }
+
+/* header: avatar + name */
+.sc-c-head { display:flex; align-items:center; gap:.6rem; margin-bottom:.5rem; }
+.sc-avatar { flex:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Oswald',sans-serif; font-weight:700; font-size:.95rem; color:#fff; text-transform:uppercase; box-shadow:inset 0 0 0 1px rgba(255,255,255,.15); }
+.sc-comment.is-scorch .sc-avatar { background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)) !important; }
+.sc-c-namewrap { display:flex; flex-direction:column; line-height:1.15; min-width:0; }
+.sc-comment-author { font-family:'Oswald',sans-serif; font-weight:600; color:#fff; font-size:.98rem; display:flex; align-items:center; gap:.4rem; }
+.sc-badge { display:inline-flex; align-items:center; gap:.2rem; font-family:'Oswald',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.04em; text-transform:uppercase; color:#fff; background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)); padding:.08rem .42rem; border-radius:999px; }
+.sc-c-time { font-family:'Outfit',sans-serif; font-size:.72rem; color:rgba(255,255,255,.4); }
+.sc-comment-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.9); font-size:.98rem; line-height:1.5; min-width:0; overflow-wrap:break-word; word-break:break-word; }
+
+/* ============================================================
+   FLAT THREAD MODEL
+   Every comment is a SIBLING in the thread — no boxes nested inside
+   boxes — so a reply-chain of any length can never compound the
+   indentation and collapse a card. Reply depth is expressed as a
+   SINGLE clamped indent (the --d variable, capped by --cap), plus a
+   connector rail and a "replying to" line so it still reads as a
+   genuine threaded conversation at any depth.
+   ============================================================ */
+.sc-comment { --d:0; --step:1.5rem; --cap:6; }
+.sc-comment[data-depth]:not([data-depth="0"]) {
+  position:relative;
+  margin-left:calc(min(var(--d), var(--cap)) * var(--step));
+}
+/* connector rail down the left of every reply */
+.sc-comment[data-depth]:not([data-depth="0"])::before {
+  content:""; position:absolute; top:-.55rem; bottom:auto; left:calc(var(--step) * -0.5);
+  width:2px; height:calc(100% + 1.1rem);
+  background:linear-gradient(180deg, rgba(176,77,255,.32), rgba(176,77,255,.1));
+  border-radius:2px; pointer-events:none;
+}
+/* "↳ replying to NAME" context line */
+.sc-reply-to { font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.45);
+  margin:-.1rem 0 .5rem; display:flex; align-items:center; gap:.25rem; min-width:0; }
+.sc-reply-to b { color:var(--sc-accent); font-weight:600; max-width:14ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* action bar */
+.sc-actions { display:flex; align-items:center; gap:.45rem; margin-top:.7rem; flex-wrap:wrap; }
+.sc-vote { cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:.35rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:rgba(255,255,255,.65); font-family:'Oswald',sans-serif; font-size:.8rem; padding:.28rem .65rem; border-radius:999px; transition:all .15s; line-height:1; }
+.sc-vote:hover { background:rgba(255,255,255,.1); color:#fff; transform:translateY(-1px); }
+.sc-vote svg { width:16px !important; height:16px !important; flex:none; display:block; transition:transform .15s; }
+.sc-vote .sc-vote-n { font-variant-numeric:tabular-nums; min-width:.7em; text-align:center; }
+.sc-like .sc-heart-fill { fill:none; stroke:currentColor; stroke-width:1.8; }
+.sc-like.on { color:#ff4d6d; }
+.sc-like.on .sc-heart-fill { fill:#ff4d6d; stroke:#ff4d6d; }
+.sc-dislike .sc-heart-fill { fill:none; stroke:currentColor; stroke-width:1.8; }
+.sc-dislike.on { color:#8aa0c8; }
+.sc-dislike.on .sc-heart-fill { fill:#8aa0c8; stroke:#8aa0c8; }
+.sc-vote.pop svg { animation:scHeartPop .42s cubic-bezier(.3,1.6,.5,1); }
+@keyframes scHeartPop { 0%{transform:scale(1);} 35%{transform:scale(1.45) rotate(-6deg);} 70%{transform:scale(.9);} 100%{transform:scale(1);} }
+
+.sc-reply-btn { cursor:pointer; background:none; border:none; color:rgba(255,255,255,.55); font-family:'Oswald',sans-serif; font-size:.8rem; letter-spacing:.04em; text-transform:uppercase; padding:.28rem .5rem; transition:color .15s; }
+.sc-reply-btn:hover { color:var(--sc-accent); }
+
+/* inline reply composer */
+.sc-reply-box { margin-top:.7rem; display:none; flex-direction:column; gap:.5rem; }
+.sc-reply-box.open { display:flex; animation:scBoxIn .2s ease; }
+@keyframes scBoxIn { from{opacity:0;transform:translateY(-4px);} to{opacity:1;transform:none;} }
+.sc-reply-box input, .sc-reply-box textarea { width:100%; box-sizing:border-box; background:rgba(0,0,0,.32); border:1.5px solid rgba(255,255,255,.14); border-radius:12px; padding:.6rem .85rem; color:#fff; font-family:'Outfit',sans-serif; font-size:.92rem; }
+.sc-reply-box textarea { resize:vertical; min-height:62px; line-height:1.45; }
+.sc-reply-box input:focus, .sc-reply-box textarea:focus { outline:none; border-color:var(--sc-accent); }
+.sc-reply-box-row { display:flex; gap:.5rem; align-items:center; }
+.sc-reply-post { cursor:pointer; border:none; font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase; font-size:.8rem; letter-spacing:.05em; color:#fff; padding:.5rem 1.1rem; border-radius:999px; background:linear-gradient(135deg,var(--sc-accent),var(--sc-accent-2)); transition:transform .15s,opacity .15s; }
+.sc-reply-post:hover { transform:translateY(-1px); }
+.sc-reply-post:disabled { opacity:.5; cursor:default; }
+.sc-reply-cancel { cursor:pointer; background:none; border:none; color:rgba(255,255,255,.45); font-family:'Oswald',sans-serif; font-size:.8rem; text-transform:uppercase; }
+.sc-mini-status { font-family:'Outfit',sans-serif; font-size:.8rem; color:var(--sc-accent); min-height:1em; }
+
+/* legacy embedded reply (old stored comments) + transient vote reaction */
+.sc-reply { margin-top:.7rem; padding:.7rem .9rem; background:linear-gradient(135deg,rgba(176,77,255,.12),rgba(106,31,184,.06)); border-left:3px solid var(--sc-accent); border-radius:0 12px 12px 0; }
+.sc-reply-author { font-family:'Oswald',sans-serif; font-weight:700; color:var(--sc-accent); font-size:.9rem; display:flex; align-items:center; gap:.4rem; margin-bottom:.25rem; }
+.sc-reply-text { font-family:'Outfit',sans-serif; color:rgba(255,255,255,.92); font-size:.95rem; line-height:1.45; }
+.sc-vote-reaction { animation:scBoxIn .25s ease; }
+.sc-del { margin-top:.7rem; cursor:pointer; font-family:'Outfit',sans-serif; font-size:.78rem; color:rgba(255,255,255,.75); background:rgba(255,60,60,.14); border:1px solid rgba(255,90,90,.35); border-radius:8px; padding:.3rem .7rem; transition:background .15s,opacity .15s; }
+.sc-del:hover { background:rgba(255,60,60,.28); color:#fff; }
+.sc-del:disabled { opacity:.5; cursor:default; }
+/* admin panel */
+.sc-admin-panel { background:rgba(255,40,40,.06); border:1px solid rgba(255,90,90,.3); border-radius:12px; padding:.8rem 1rem; margin-bottom:1.1rem; }
+.sc-admin-head { font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.04em; color:#ff7a5c; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; font-size:.92rem; }
+.sc-admin-btn { cursor:pointer; font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.85); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:7px; padding:.25rem .6rem; transition:background .15s; }
+.sc-admin-btn:hover { background:rgba(255,255,255,.16); }
+.sc-admin-btn:disabled { opacity:.5; cursor:default; }
+.sc-admin-danger { color:#ff6a6a; border-color:rgba(255,80,80,.5); background:rgba(255,40,40,.12); }
+.sc-admin-body { margin-top:.7rem; display:flex; flex-direction:column; gap:.5rem; }
+.sc-admin-empty { font-family:'Outfit',sans-serif; font-size:.85rem; color:rgba(255,255,255,.5); font-style:italic; }
+.sc-admin-row { display:flex; align-items:center; gap:.8rem; background:rgba(0,0,0,.25); border-radius:8px; padding:.5rem .7rem; }
+.sc-admin-info { display:flex; flex-direction:column; gap:.1rem; flex:1; min-width:0; }
+.sc-admin-info b { font-family:'Oswald',sans-serif; color:#fff; font-size:.92rem; }
+.sc-admin-reason { font-family:'Outfit',sans-serif; font-size:.78rem; color:rgba(255,255,255,.6); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sc-admin-when { font-family:'Outfit',sans-serif; font-size:.68rem; color:rgba(255,255,255,.38); }
+.sc-dm-fab { position:fixed; bottom:22px; right:22px; z-index:9998; width:62px; height:62px; border-radius:50%; border:2px solid #b04dff; background:#140a1e; cursor:pointer; overflow:hidden; padding:0; box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 18px rgba(176,77,255,.45); transition:transform .2s, box-shadow .2s; animation:scFabPulse 2.6s ease-in-out infinite; }
+.sc-dm-fab:hover { transform:scale(1.08); box-shadow:0 10px 30px rgba(0,0,0,.6), 0 0 26px rgba(176,77,255,.7); }
+.sc-dm-fab img { width:100%; height:100%; object-fit:cover; }
+.sc-dm-fab-dot { position:absolute; top:6px; right:6px; width:13px; height:13px; border-radius:50%; background:#3ad14f; border:2px solid #1a0a0a; }
+.sc-dm-fab-notif { position:absolute; top:-4px; right:-4px; min-width:20px; height:20px; padding:0 5px; border-radius:999px; background:#ff2d2d; border:2px solid #1a0a0a; color:#fff; font-family:'Oswald',sans-serif; font-weight:700; font-size:.7rem; display:none; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(255,45,45,.8); }
+.sc-dm-fab.has-notif .sc-dm-fab-notif { display:flex; }
+.sc-dm-fab.has-notif { animation:scFabShake .6s ease-in-out 2; }
+@keyframes scFabShake { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-12deg) scale(1.1);} 75%{transform:rotate(12deg) scale(1.1);} }
+
+/* full-screen DM splash */
+.sc-dm-splash {
+  position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center;
+  background:rgba(6,2,10,.78); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  opacity:0; pointer-events:none;
+}
+.sc-dm-splash.show { animation:scSplashFade 2.8s ease forwards; }
+@keyframes scSplashFade {
+  0%   { opacity:0; }
+  12%  { opacity:1; }
+  78%  { opacity:1; }
+  100% { opacity:0; }
+}
+.sc-dm-splash-inner { text-align:center; transform:scale(.8); }
+.sc-dm-splash.show .sc-dm-splash-inner { animation:scSplashPop 2.8s cubic-bezier(.2,.9,.3,1.4) forwards; }
+@keyframes scSplashPop {
+  0%   { transform:scale(.6); opacity:0; }
+  14%  { transform:scale(1.08); opacity:1; }
+  22%  { transform:scale(1); }
+  78%  { transform:scale(1); opacity:1; }
+  100% { transform:scale(.95); opacity:0; }
+}
+.sc-dm-splash-icon {
+  font-size:5rem; color:#b04dff; line-height:1; margin-bottom:1rem;
+  text-shadow:0 0 30px rgba(176,77,255,.8), 0 0 60px rgba(106,31,184,.5);
+  animation:scSplashThrob 1.2s ease-in-out infinite;
+}
+@keyframes scSplashThrob { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+.sc-dm-splash-text { font-family:'Metal Mania',cursive; font-size:2rem; color:#fff; letter-spacing:.02em; text-shadow:0 2px 12px rgba(0,0,0,.6); }
+.sc-dm-splash-sub { font-family:'Special Elite',monospace; font-size:1rem; color:#b04dff; margin-top:.6rem; letter-spacing:.1em; }
+@keyframes scFabPulse { 0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 14px rgba(176,77,255,.4);} 50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 26px rgba(176,77,255,.75);} }
+.sc-chat { position:fixed; bottom:22px; right:22px; z-index:9999; width:min(370px,calc(100vw - 32px)); height:min(540px,calc(100vh - 60px)); display:flex; flex-direction:column; background:linear-gradient(165deg,#150a20,#0c0512); border-radius:20px; overflow:hidden; box-shadow:0 24px 70px rgba(0,0,0,.65), inset 0 0 0 1px rgba(176,77,255,.22); opacity:0; transform:translateY(24px) scale(.96); transform-origin:bottom right; pointer-events:none; transition:opacity .28s, transform .28s cubic-bezier(.2,.9,.3,1.25); }
+.sc-chat.open { opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+.sc-chat-head { display:flex; align-items:center; gap:.7rem; padding:.85rem 1rem; background:rgba(176,77,255,.1); border-bottom:1px solid rgba(176,77,255,.2); }
+.sc-chat-avatar { width:42px; height:42px; border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid #b04dff; background:#000; }
+.sc-chat-avatar img { width:100%; height:100%; object-fit:cover; }
+.sc-chat-who { flex:1; min-width:0; }
+.sc-chat-name { font-family:'Oswald',sans-serif; font-weight:700; color:#fff; font-size:1rem; display:flex; align-items:center; gap:.35rem; }
+.sc-chat-verified { color:#b04dff; font-size:.78rem; }
+.sc-chat-presence { font-family:'Outfit',sans-serif; font-size:.74rem; color:rgba(255,255,255,.5); }
+.sc-chat-close { background:none; border:none; color:rgba(255,255,255,.55); font-size:1.1rem; cursor:pointer; transition:color .15s; }
+.sc-chat-close:hover { color:#fff; }
+.sc-chat-body { flex:1; overflow-y:auto; padding:1rem; display:flex; flex-direction:column; gap:.6rem; }
+.sc-chat-msg { max-width:80%; padding:.6rem .85rem; border-radius:16px; font-family:'Outfit',sans-serif; font-size:.95rem; line-height:1.4; word-wrap:break-word; }
+.sc-from-scorch { align-self:flex-start; background:rgba(255,255,255,.08); color:#fff; border-bottom-left-radius:5px; }
+.sc-from-user { align-self:flex-end; background:linear-gradient(135deg,#b04dff,#6a1fb8); color:#fff; border-bottom-right-radius:5px; }
+.sc-chat-msg.sc-typing { color:rgba(255,255,255,.55); font-style:italic; }
+.sc-chat-input-row { display:flex; gap:.5rem; padding:.75rem; border-top:1px solid rgba(176,77,255,.18); background:rgba(0,0,0,.25); }
+.sc-chat-input { flex:1; background:rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.13); border-radius:999px; padding:.6rem 1rem; color:#fff; font-family:'Outfit',sans-serif; font-size:.95rem; }
+.sc-chat-input:focus { outline:none; border-color:#b04dff; }
+.sc-chat-input::placeholder { color:rgba(255,255,255,.4); }
+.sc-chat-send { flex-shrink:0; width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; color:#fff; font-size:1rem; background:linear-gradient(135deg,#b04dff,#6a1fb8); box-shadow:0 4px 14px rgba(176,77,255,.4); transition:transform .15s; }
+.sc-chat-send:hover { transform:scale(1.1); }
+.sc-chat-send:disabled { opacity:.5; transform:none; cursor:default; }
+
+/* ============================================================
+   Thread layout — mobile tuning
+   Smaller indent step + lower depth cap so even a very deep chain
+   stays comfortably readable on a narrow screen. Because indent is a
+   single clamped value (not nested boxes), this is just two numbers.
+   ============================================================ */
+@media (max-width: 560px) {
+  .sc-comment { padding:.8rem .9rem .7rem; border-radius:14px; --step:.85rem; --cap:4; }
+  .sc-avatar { width:32px; height:32px; font-size:.85rem; }
+  .sc-comment[data-depth]:not([data-depth="0"])::before { left:calc(var(--step) * -0.45); }
+}
+</style>
+
+<!-- ============================================================ -->
+<!--  CHARACTER CONFIG  —  the ONLY per-character JS on this page.  -->
+<!--  Everything else (DM, comments, voting, blocking mechanics)   -->
+<!--  lives in the shared character-page.js. To make a new         -->
+<!--  character, copy TEMPLATE.html and change this block.         -->
+<!-- ============================================================ -->
+<script>
+  window.CHARACTER_CONFIG = {
+    CHAR: "kayla",           // MUST match personas/kayla.js  export const key
+    AUTHOR: "Kayla",         // display name shown on comments / DMs / letters
+    PRONOUN: "she",          // he | she | they  — used in status/blocked text
+    FUNCTION_URL: "https://dream-of-the-journey.vercel.app/api/comment",
+    COMMENTS_CARD_ID: "kaylaComments",
+    // --- optional voice overrides (delete any to use the neutral default) ---
+    DM_BUSY: "(busy. the free AI's overloaded — wait a sec. she's not going anywhere.)",
+    DM_OFFLINE: "(left on read. she saw it. she just didn't care.)",
+    LETTER_NO_REPLY: "...(she read it. twice. still didn't write back.)",
+    ADMIN_EMPTY_BLOCKED: "nobody's blocked. she's conserving the energy.",
+    UNREACHABLE: "(couldn't reach her - try again)",
+  };
+</script>
+<script src="character-page.js"></script>
+
+<script src="script.js"></script>
+
+<script id="sc-status-js">
+(function(){
+  var STATUS_URL = "https://dream-of-the-journey.vercel.app/api/status";
+  var CHAR = "kayla";
+  var card = document.getElementById('scStatusCard');
+  if(!card) return;
+  var lineEl = document.getElementById('scStatusLine');
+  var moodEl = document.getElementById('scStatusMood');
+  var ageEl  = document.getElementById('scStatusAge');
+  var emojiEl = document.getElementById('scStatusEmoji');
+  card.classList.add('loading');
+  fetch(STATUS_URL + "?character=" + CHAR)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      card.classList.remove('loading');
+      if(d && d.status){
+        lineEl.textContent = d.status;
+        if(emojiEl && d.moodEmoji) emojiEl.textContent = d.moodEmoji;
+        moodEl.textContent = d.mood || "";
+        ageEl.textContent = d.ageText || "";
+        if(d.cached === false){ card.classList.add('updating'); setTimeout(function(){ card.classList.remove('updating'); }, 700); }
+      } else {
+        lineEl.textContent = "around. watching. probably knows something you don't.";
+      }
+    })
+    .catch(function(){ card.classList.remove('loading'); lineEl.textContent = "around. watching. probably knows something you don't."; });
+})();
+</script>
+<script id="kb-game-js">
+/* ============================================================
+   STIR THE POT — Kayla's rage-bait mini-game.
+   Pick the bland, deniable reply -> strangers melt down -> score.
+   Pick the obvious flame -> reported. Three reports = banned.
+   Self-contained: no dependency on script.js or character-page.js.
+   ============================================================ */
+(function(){
+  var game = document.getElementById('kbGame');
+  if (!game) return;
+  var overlay = document.getElementById('kbOverlay');
+  var play    = document.getElementById('kbPlay');
+  var startBt = document.getElementById('kbStart');
+  var scoreEl = document.getElementById('kbScore');
+  var susEl   = document.getElementById('kbSus');
+  var roundEl = document.getElementById('kbRound');
+  var authorEl= document.getElementById('kbAuthor');
+  var avatarEl= document.getElementById('kbAvatar');
+  var postEl  = document.getElementById('kbPost');
+  var repliesEl=document.getElementById('kbReplies');
+  var toastEl = document.getElementById('kbToast');
+
+  var ROUNDS = 8;
+  // kind: perfect (+3, deniable), mild (+1), risky (reported, +0)
+  var POSTS = [
+    { a:"@gym_dean", p:"hit a new PR today!! 225 bench. hard work pays off 💪",
+      r:[ {t:"Eh. For your height that's about average, right? Good effort though.", k:"perfect"},
+          {t:"nice! what's your routine?", k:"mild"},
+          {t:"225?? my grandma warms up with that LOL weakling", k:"risky"} ] },
+    { a:"@bridezilla_jess", p:"our wedding is CHILD FREE and some family members are MAD about it. am I wrong??",
+      r:[ {t:"You're not wrong. Anyway, interesting that your sister already posted about it.", k:"perfect"},
+          {t:"your wedding, your rules", k:"mild"},
+          {t:"yes you're wrong and your dress is ugly", k:"risky"} ] },
+    { a:"@chefboy_marco", p:"made carbonara from scratch tonight 🍝 nailed it",
+      r:[ {t:"Looks good! Cream sauce carbonara is a fun twist on the real thing.", k:"perfect"},
+          {t:"recipe please?", k:"mild"},
+          {t:"that's an insult to Italy and your ancestors", k:"risky"} ] },
+    { a:"@plantmom_kira", p:"my monstera grew THREE new leaves this month. proud plant mom 🌱",
+      r:[ {t:"Cute. Mine does that in a week, but every plant moves at its own pace I guess.", k:"perfect"},
+          {t:"she's thriving!!", k:"mild"},
+          {t:"it's a houseplant. touch grass. literally.", k:"risky"} ] },
+    { a:"@vinyl_trev", p:"unpopular opinion: music peaked in the 90s and nothing since comes close",
+      r:[ {t:"Mm. People who say this usually just stopped looking. But you do you.", k:"perfect"},
+          {t:"some great stuff came out of the 90s for sure", k:"mild"},
+          {t:"boomer take. log off grandpa.", k:"risky"} ] },
+    { a:"@new_haircut_hailey", p:"fresh cut!! $90 well spent, I'm OBSESSED 💇‍♀️",
+      r:[ {t:"Eh. I think you could do better. That just doesn't suit you very well.", k:"perfect"},
+          {t:"it's cute! very you", k:"mild"},
+          {t:"$90?? you got SCAMMED it looks the same", k:"risky"} ] },
+    { a:"@hustle_kyle", p:"just signed the lease on my first business. who's laughing now??",
+      r:[ {t:"Congrats! You did read the whole thing before you signed it, right? ...Okay. Mm.", k:"perfect"},
+          {t:"big move, good luck man", k:"mild"},
+          {t:"can't wait to watch this fail in 6 months 🍿", k:"risky"} ] },
+    { a:"@dogdad_omar", p:"people who let their dogs sleep in the bed are weird. that's an animal.",
+      r:[ {t:"Interesting. Your dog posted like he pays rent though. Anyway.", k:"perfect"},
+          {t:"to each their own honestly", k:"mild"},
+          {t:"your dog deserves a better owner", k:"risky"} ] },
+    { a:"@latte_lena", p:"paid $9 for this latte and honestly? worth every penny ☕✨",
+      r:[ {t:"It's pretty! The foam's a little flat but the cup is doing a lot of work.", k:"perfect"},
+          {t:"looks delicious ngl", k:"mild"},
+          {t:"$9 for milk?? financial literacy is dead", k:"risky"} ] },
+    { a:"@gamer_gretch", p:"finally beat the final boss after 47 tries. don't talk to me about skill issues",
+      r:[ {t:"Congrats! Most people do it in like ten, but finishing is finishing.", k:"perfect"},
+          {t:"persistence wins, respect", k:"mild"},
+          {t:"47?? uninstall. embarrassing.", k:"risky"} ] }
+  ];
+
+  var deck=[], round=0, score=0, sus=0, busy=false;
+
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function setSus(){ var pips=susEl.querySelectorAll('i'); for(var i=0;i<pips.length;i++) pips[i].classList.toggle('on', i<sus); }
+
+  var MELT = [
+    "+3 — they're typing in all caps.",
+    "+3 — quote-posted with “the AUDACITY”.",
+    "+3 — three paragraph reply incoming.",
+    "+3 — they tagged their followers for backup."
+  ];
+  var MILD = [
+    "+1 — a slightly hurt “haha yeah”.",
+    "+1 — they left you on read. progress.",
+    "+1 — one passive-aggressive emoji back."
+  ];
+  var CAUGHT = [
+    "reported. too obvious — Kayla would never.",
+    "reported. you tipped your hand.",
+    "reported. subtlety, ever heard of it?"
+  ];
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function start(){
+    deck = shuffle(POSTS.slice()).slice(0, ROUNDS);
+    round=0; score=0; sus=0; busy=false;
+    scoreEl.textContent='0'; setSus();
+    overlay.hidden = true; play.hidden = false;
+    toastEl.textContent=''; toastEl.classList.remove('bad');
+    next();
+  }
+
+  function next(){
+    if (sus>=3) return end(false);
+    if (round>=deck.length) return end(true);
+    var it = deck[round];
+    round++;
+    roundEl.textContent = 'post ' + round + '/' + deck.length;
+    authorEl.textContent = it.a;
+    avatarEl.textContent = it.a.charAt(1).toUpperCase();
+    postEl.textContent = it.p;
+    repliesEl.innerHTML='';
+    shuffle(it.r.slice()).forEach(function(r){
+      var b=document.createElement('button');
+      b.type='button'; b.className='kb-reply'; b.textContent=r.t;
+      b.addEventListener('click', function(){ choose(r, b); });
+      repliesEl.appendChild(b);
+    });
+    busy=false;
+  }
+
+  function choose(r, btn){
+    if (busy) return; busy=true;
+    var btns=repliesEl.querySelectorAll('.kb-reply');
+    for(var i=0;i<btns.length;i++) btns[i].disabled=true;
+    btn.style.borderColor='rgba(176,77,255,.9)';
+    toastEl.classList.remove('bad');
+    if (r.k==='perfect'){ score+=3; toastEl.textContent=pick(MELT); }
+    else if (r.k==='mild'){ score+=1; toastEl.textContent=pick(MILD); }
+    else { sus++; setSus(); toastEl.textContent=pick(CAUGHT); toastEl.classList.add('bad'); game.classList.add('kb-shake'); setTimeout(function(){game.classList.remove('kb-shake');},450); }
+    scoreEl.textContent=String(score);
+    setTimeout(next, 1300);
+  }
+
+  function end(survived){
+    play.hidden = true; overlay.hidden = false;
+    var co = overlay.querySelector('.kb-callout');
+    var ru = overlay.querySelector('.kb-rules');
+    if (survived){
+      co.textContent = 'Pot: Stirred.';
+      ru.innerHTML = '<b class="kb-good">' + score + ' meltdowns</b> and nobody can prove it was you. Kayla closes the app and goes back to crocheting. <em>That’s the fun.</em>';
+      startBt.textContent='Stir It Again';
+    } else {
+      co.textContent = 'Account Reported.';
+      ru.innerHTML = 'You got caught at <b class="kb-bad">' + score + ' meltdowns</b>. Amateur. Kayla’s never been caught once. <em>She just makes a new account anyway.</em>';
+      startBt.textContent='New Account';
+    }
+  }
+
+  startBt.addEventListener('click', start);
+})();
+</script>
+</body>
+</html>
