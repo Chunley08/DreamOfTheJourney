@@ -849,6 +849,49 @@
     }
   }
 
+  /* Gothic-style name effect (Kayla). Violet/black-lace gradient with
+     a slow candle-pulse — gothic queen, silver jewelry, Omni underneath. */
+  .character-name.gothic {
+    font-family: 'Cinzel Decorative', serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: transparent;
+    background-image: linear-gradient(
+      180deg,
+      #f6eaff 0%,
+      #d8a0ff 25%,
+      #b04dff 55%,
+      #6a1fb8 85%,
+      #1a0530 100%
+    );
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+      0 0 8px rgba(176, 77, 255, 0.5),
+      0 0 18px rgba(216, 160, 255, 0.4),
+      0 0 32px rgba(106, 31, 184, 0.3);
+    animation: gothic-candle 4.2s ease-in-out infinite;
+  }
+  @keyframes gothic-candle {
+    0%, 100% {
+      text-shadow:
+        0 0 8px rgba(176, 77, 255, 0.5),
+        0 0 18px rgba(216, 160, 255, 0.4),
+        0 0 32px rgba(106, 31, 184, 0.3);
+      filter: brightness(1);
+    }
+    50% {
+      text-shadow:
+        0 0 13px rgba(216, 160, 255, 0.7),
+        0 0 26px rgba(176, 77, 255, 0.55),
+        0 0 46px rgba(106, 31, 184, 0.45);
+      filter: brightness(1.1);
+    }
+  }
+
   .character-card.placeholder {
     background: linear-gradient(160deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
     border-style: dashed;
