@@ -84,6 +84,152 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 @keyframes svCrack{ 0%{ transform:rotate(0);} 25%{ transform:rotate(-8deg);} 50%{ transform:rotate(7deg);} 75%{ transform:rotate(-4deg);} 100%{ transform:rotate(0);} }
 
 </style>
+
+<style id="kayla-gothic-css">
+/* ============================================================
+   KAYLA — GOTHIC OVERHAUL
+   Everything here is scoped to .kayla-page so the shared poster
+   system stays untouched for the other characters. Cathedral
+   candlelight, black lace, tarnished silver, violet wax.
+   ============================================================ */
+
+/* ---- faint damask + fog overlay across the whole page ---- */
+.kayla-damask{ position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    radial-gradient(ellipse at 50% 110%, rgba(106,31,184,.14), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23b04dff' stroke-width='1' opacity='0.5'%3E%3Cpath d='M60 12c8 12 20 14 20 26s-12 14-20 26c-8-12-20-14-20-26s12-14 20-26z'/%3E%3Ccircle cx='60' cy='38' r='4'/%3E%3Cpath d='M60 76v18M52 86h16'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:auto, 120px 120px; opacity:.05; mix-blend-mode:screen; }
+
+/* ---- gothic crosses flanking every section heading ---- */
+.kayla-page .poster-h2{ transform:rotate(0deg); letter-spacing:.1em; }
+.kayla-page .poster-h2::before{ content:'✠  '; color:var(--pp-accent-soft); text-shadow:0 0 12px rgba(176,77,255,.6); }
+.kayla-page .poster-h2::after { content:'  ✠'; color:var(--pp-accent-soft); text-shadow:0 0 12px rgba(176,77,255,.6); }
+.kayla-page .poster-eyebrow{ letter-spacing:.34em; color:#b8a0d0; }
+
+/* ---- quotes: black velvet cards, silver script, lace edge ---- */
+.kayla-page .stub{
+  background:
+    linear-gradient(160deg, #160c22 0%, #0c0614 100%);
+  color:#e8dcf4; border:1px solid rgba(184,160,216,.4);
+  box-shadow:0 0 0 4px #0c0614, 0 0 0 5px rgba(176,77,255,.35), 0 14px 30px rgba(0,0,0,.6);
+  font-style:italic;
+}
+.kayla-page .stub::before{ content:'❝'; display:block; font-size:1.6rem; line-height:1; color:var(--pp-accent); text-shadow:0 0 14px rgba(176,77,255,.7); margin-bottom:.35rem; font-style:normal; }
+
+/* ---- bio panels: lace-pinned vellum with a silver ring ---- */
+.kayla-page .bio-panel{
+  box-shadow:0 0 0 1px rgba(184,160,216,.45), 0 0 0 7px rgba(12,6,20,.85), 0 0 0 8px rgba(176,77,255,.3), 0 18px 40px rgba(0,0,0,.65);
+}
+.kayla-page .bio-panel p:first-of-type::first-letter{
+  font-family:'Cinzel Decorative',serif; font-weight:900; font-size:2.6em; line-height:.8;
+  float:left; padding:.06em .12em 0 0; color:#6a1fb8; text-shadow:0 0 10px rgba(176,77,255,.35);
+}
+
+/* ---- polaroids: cold violet duotone, mourning-photo vibe ---- */
+.kayla-page .polaroid-photo img{ filter:grayscale(.35) sepia(.2) hue-rotate(215deg) saturate(1.05) contrast(1.05); }
+
+/* ============================================================
+   THE PLAYER — "Requiem" skin. The shared np-* console is amber
+   parchment for the others; hers is a candlelit reliquary:
+   black velvet display, rosary-bead progress, organ-pipe candle
+   visualizer, journal-page setlist.
+   ============================================================ */
+
+/* stage frame: silver-bound, candle glow */
+.kayla-page .stage-frame{
+  border:3px solid #0c0614;
+  box-shadow:0 0 0 1px rgba(184,160,216,.55), 0 0 0 2px rgba(176,77,255,.25), 0 0 46px rgba(106,31,184,.4), 0 20px 40px rgba(0,0,0,.7);
+}
+.kayla-page .stage-frame-head{
+  background:linear-gradient(180deg,#2a0a3a 0%, #14061f 100%);
+  color:#e8dcf4; text-shadow:0 2px 0 #08030e; letter-spacing:.22em;
+  border-bottom:1px solid rgba(184,160,216,.35);
+}
+.kayla-page .stage-frame-head .live-dot{ background:#b04dff; box-shadow:0 0 14px #b04dff; }
+
+/* the velvet display */
+.kayla-page .np-display{
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(106,31,184,.28), transparent 55%),
+    linear-gradient(180deg, #150a22 0%, #07030d 100%);
+  border:1px solid rgba(184,160,216,.45);
+  box-shadow:inset 0 0 0 1px rgba(12,6,20,.9), inset 0 0 0 2px rgba(176,77,255,.18), inset 0 0 34px rgba(106,31,184,.22);
+}
+/* damask sheen instead of scanlines */
+.kayla-page .np-display::after{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23d8a0ff' stroke-width='1' opacity='0.6'%3E%3Cpath d='M45 9c6 9 15 10 15 19s-9 11-15 20c-6-9-15-11-15-20s9-10 15-19z'/%3E%3C/g%3E%3C/svg%3E") 0 0/90px 90px,
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(176,77,255,.04) 3px 4px);
+  opacity:.5;
+}
+.kayla-page .np-eyebrow{ color:#c89aff; text-shadow:0 0 8px rgba(176,77,255,.6); letter-spacing:.42em; }
+.kayla-page .np-eyebrow .live-dot{ background:#c84dff; box-shadow:0 0 8px #b04dff, 0 0 14px rgba(176,77,255,.6); }
+.kayla-page .np-title{
+  font-family:'Cinzel Decorative',serif; font-weight:900; letter-spacing:.04em;
+  font-size:clamp(1.4rem, 3vw, 2rem);
+  color:#ecdcff; text-shadow:0 0 18px rgba(176,77,255,.65), 0 2px 0 #1a0530;
+}
+.kayla-page .np-sub{ color:#b89ad8; }
+
+/* visualizer bars = candle flames in a row */
+.kayla-page .np-viz-bar{
+  background:linear-gradient(180deg, #f6eaff 0%, #d8a0ff 30%, #b04dff 65%, #2a0a3a 100%);
+  box-shadow:0 0 5px rgba(176,77,255,.55);
+}
+
+/* rosary progress: violet ribbon, silver bead */
+.kayla-page .np-progress{ background:rgba(176,77,255,.1); border:1px solid rgba(184,160,216,.4); }
+.kayla-page .np-progress-fill{ background:linear-gradient(90deg, #ecdcff, #b04dff); box-shadow:0 0 12px rgba(176,77,255,.7); }
+.kayla-page .np-progress-head{
+  background:radial-gradient(circle at 30% 30%, #ffffff, #d0c2e6 45%, #6a5a86);
+  box-shadow:0 0 10px #d8b8ff, 0 0 18px rgba(176,77,255,.65);
+}
+.kayla-page .np-times{ color:#b89ad8; }
+
+/* transport: tarnished-silver buttons */
+.kayla-page .np-btn{ background:rgba(7,3,13,.7); border-color:rgba(184,160,216,.55); color:#cdbce4; }
+.kayla-page .np-btn:hover{ border-color:#d8b8ff; color:#f0e6ff; box-shadow:0 0 18px rgba(176,77,255,.5); }
+.kayla-page .np-btn.np-play{ border-color:#b04dff; color:#ecdcff; box-shadow:0 0 14px rgba(176,77,255,.45), inset 0 0 12px rgba(106,31,184,.3); }
+.kayla-page .np-btn.np-play:hover{ background:rgba(176,77,255,.14); box-shadow:0 0 24px rgba(176,77,255,.65), inset 0 0 14px rgba(106,31,184,.35); }
+.kayla-page .np-console.is-playing .np-btn.np-play{ animation:none; box-shadow:0 0 28px rgba(176,77,255,.75), inset 0 0 14px rgba(106,31,184,.4); }
+
+/* setlist: a page torn from her journal — cool grey-violet, ruled in plum */
+.kayla-page .np-setlist{
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 32px, rgba(106,31,184,.1) 32px 33px),
+    linear-gradient(180deg, #ded6e6 0%, #c2b4d2 100%);
+  color:#1c0f2a;
+  box-shadow:inset 0 0 22px rgba(58,24,90,.28), 0 12px 28px rgba(0,0,0,.6);
+}
+.kayla-page .np-setlist::before,
+.kayla-page .np-setlist::after{ background:rgba(214,202,232,.6); }
+.kayla-page .np-setlist-head{
+  font-family:'Cinzel Decorative',serif; font-weight:900; font-size:1.25rem;
+  color:#4a1278; text-shadow:0 1px 0 rgba(236,222,250,.7);
+}
+.kayla-page .np-setlist-sub{ color:#4a3a60; }
+.kayla-page .np-track{ border-bottom:1px dashed rgba(58,24,90,.4); }
+.kayla-page .np-track:hover{ background:rgba(106,31,184,.1); }
+.kayla-page .np-track.is-active{ background:rgba(176,77,255,.2); }
+.kayla-page .np-scribble strong{ color:#6a1fb8; }
+
+/* ---- case file: sealed, not stapled ---- */
+.kayla-page .case-file{ box-shadow:0 0 0 1px rgba(184,160,216,.35), 0 16px 36px rgba(0,0,0,.6); }
+.kayla-page .case-file-label{ letter-spacing:.3em; }
+
+/* ---- backstage pass + fanmail board get the candle ring too ---- */
+.kayla-page .fanmail-board{
+  background:
+    radial-gradient(140% 90% at 50% -10%, rgba(60,40,80,.5), transparent 55%),
+    radial-gradient(80% 60% at 12% 110%, rgba(0,0,0,.6), transparent 60%),
+    radial-gradient(40% 30% at 78% 30%, rgba(42,28,58,.6), transparent 70%),
+    radial-gradient(30% 24% at 22% 60%, rgba(28,20,40,.55), transparent 70%),
+    linear-gradient(160deg,#241c30,#120c1c 70%);
+  box-shadow:inset 0 0 0 1px rgba(196,160,255,.06), 0 20px 44px rgba(0,0,0,.5);
+}
+
+@media (prefers-reduced-motion: reduce){ .kayla-damask{ display:none; } }
+</style>
 </head>
 <body data-standalone="kayla">
 
@@ -98,6 +244,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 
 <!-- ====================== SCORCH CHARACTER PAGE ====================== -->
 <div class="character-page kayla-page" id="kaylaPage" aria-hidden="true">
+  <div class="kayla-damask" aria-hidden="true"></div>
   <button class="char-close" id="kaylaClose" aria-label="Close" type="button">✕</button>
   <button class="scene-tab" data-character="Kayla" type="button" aria-label="Open scene request">Scene Request?</button>
   <button class="dating-tab" data-dating="kayla" type="button" aria-label="View dating profile">Dating Profile ♡</button>
@@ -247,13 +394,13 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 
   <!-- ====== MUSIC PLAYER (existing wiring, wrapped in stage frame) ====== -->
   <section class="char-section poster-section">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Bite Back — Live</h2>
-    <span class="poster-eyebrow reveal-up">Bootleg Recording &mdash; Stage Left</span>
+    <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">Requiem — Live</h2>
+    <span class="poster-eyebrow reveal-up">Candlelit Bootleg &mdash; Strings &amp; Keys, Stage Right</span>
 
     <div class="stage-frame reveal-up">
       <div class="stage-frame-head">
-        <span><span class="live-dot"></span> Live Bootleg</span>
-        <small>The Snake Skins // Bite Back Tour</small>
+        <span><span class="live-dot"></span> Candlelit Bootleg</span>
+        <small>The Snake Skins // Strings &amp; Keys</small>
       </div>
       <div class="setlist-stage" id="snakeSkinsPlayer">
         <div class="np-console" id="npConsole">
@@ -287,7 +434,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
           <div class="np-setlist-head">// The Setlist</div>
           <div class="np-setlist-sub">Bite Back Tour — Track List</div>
           <div id="npTrackList"></div>
-          <div class="np-scribble">scribbled on a napkin — <strong>Ricky</strong></div>
+          <div class="np-scribble">copied from <strong>Kayla’s</strong> journal — she knows you touched it</div>
         </div>
       </div>
     </div>
@@ -401,32 +548,14 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
     </div>
   </section>
 
-  <!-- ====== THE INK (OMNI) ====== -->
-  <section class="char-section poster-section">
-    <h2 class="poster-h2 reveal-stamp" style="--rot:1.5deg;">★ The Ink ★</h2>
-    <span class="poster-eyebrow reveal-up">Left Arm &middot; Full Sleeve &middot; Don't Touch</span>
-
-    <div class="bio-panel reveal-up">
-      <p><strong>Omni.</strong> A mythological dragon god she likes &mdash; coiled the full length of her left arm, dark scales cracked through with veins of fire and lava. Ask her what it means and you'll get a flat <em>"I like him."</em> That's the whole interview.</p>
-      <p>It's the loudest thing about a woman who keeps everything else folded down small. Black lace, leather, fishnet, silver, dark lips, black nails &mdash; and a dragon god burning quietly under all of it.</p>
-    </div>
-
-    <div class="sticker-tags reveal-up">
-      <span class="sticker-patch">crochets. doesn't explain it.</span>
-      <span class="sticker-patch">rage-baits strangers for sport</span>
-      <span class="sticker-patch">closes the app, returns to yarn</span>
-      <span class="sticker-patch">cello at 3am = leave her alone</span>
-    </div>
-  </section>
-
-  <!-- ====== CASE FILE (BACKSTORY SPOILER) ====== -->
+    <!-- ====== CASE FILE (BACKSTORY SPOILER) ====== -->
   <section class="char-section poster-section">
     <h2 class="poster-h2 reveal-stamp" style="--rot:-1deg;">The File</h2>
-    <span class="poster-eyebrow reveal-up">How He Got Here</span>
+    <span class="poster-eyebrow reveal-up">How She Got Here</span>
 
     <details class="case-file reveal-up">
       <summary>
-        <span class="case-file-label">⚠ Classified ⚠</span>
+        <span class="case-file-label">✠ Sealed ✠</span>
         <span class="case-file-sub">Character Backstory — Spoilers — Click to Open</span>
       </summary>
       <div class="case-file-body">
@@ -492,7 +621,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
         </div>
       </div>
 
-      <!-- where his replies slap onto the wall -->
+      <!-- where her replies slap onto the wall -->
       <div class="fanmail-replies" id="fmReplies"></div>
     </div>
   </section>
@@ -824,7 +953,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 </div>
 
 <!-- ============================================================ -->
-<!--  SCORCH FLOATING DM BUBBLE + CHAT WINDOW                      -->
+<!--  KAYLA FLOATING DM BUBBLE + CHAT WINDOW                      -->
 <!-- ============================================================ -->
 <button class="sc-dm-fab" id="scDmFab" type="button" aria-label="Message Kayla">
   <img src="assets/Kayla Pics/KaylaPfp.webp" alt="" onerror="this.style.display='none'">
@@ -863,7 +992,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 /* ============================================================
    FANMAIL · backstage wall — write on the back of a setlist,
    scrawled in marker, taped up crooked. Rip it off the wall to
-   send; his reply slaps back onto the wall as a torn flyer.
+   send; her reply slaps back onto the wall as a torn flyer.
    ============================================================ */
 .fanmail-section{ --fm-marker:#161616; --fm-red:#7a1fd0; --fm-tape:rgba(214,200,150,.72); }
 
@@ -921,7 +1050,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
   color:var(--fm-marker);
   background:
     radial-gradient(closest-side, transparent 60%, rgba(70,40,15,.32) 62%, rgba(70,40,15,.05) 68%, transparent 70%) 78% 70%/120px 120px no-repeat,
-    radial-gradient(120% 120% at 50% 0%, #d8cca6, #c2b48b 70%, #a89a72 100%);
+    radial-gradient(120% 120% at 50% 0%, #d8cede, #b9aec6 70%, #978aa8 100%);
   box-shadow:0 1px 0 rgba(255,255,255,.25) inset, 0 22px 40px -10px rgba(0,0,0,.7), 0 6px 14px -6px rgba(0,0,0,.6);
   -webkit-mask:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02 0.06' numOctaves='3' seed='4'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='14'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r)'/%3E%3C/svg%3E") top/100% 22px no-repeat,
@@ -939,7 +1068,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 .fm-burn{ position:absolute; width:26px; height:26px; border-radius:50%; top:16px; right:84px; z-index:2; pointer-events:none; transform:rotate(8deg);
   background:radial-gradient(circle at 50% 50%, #1a1208 0 30%, #3b2410 45%, rgba(90,55,20,.5) 70%, transparent 78%); box-shadow:0 0 8px 2px rgba(0,0,0,.4) inset; }
 .fm-bleed{ position:absolute; inset:26px 30px; z-index:1; pointer-events:none; opacity:.13;
-  font-family:'Permanent Marker',cursive; color:#3a2a18; line-height:1.5; transform:scaleX(-1) rotate(.5deg); font-size:1rem; }
+  font-family:'Permanent Marker',cursive; color:#2e2138; line-height:1.5; transform:scaleX(-1) rotate(.5deg); font-size:1rem; }
 .fm-pin{ position:absolute; width:18px; height:18px; border-radius:50%; z-index:7; top:-7px; left:50%;
   background:radial-gradient(circle at 35% 30%, #ff6b5b, #b01608 70%);
   box-shadow:0 3px 5px rgba(0,0,0,.6), inset -1px -1px 2px rgba(0,0,0,.4), inset 1px 1px 2px rgba(255,255,255,.5); }
@@ -947,18 +1076,18 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 
 .fm-sl-head{ position:relative; z-index:2; display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid rgba(20,20,20,.6); padding-bottom:6px; margin-bottom:6px; }
 .fm-sl-ttl{ font-family:'Permanent Marker',cursive; font-size:1.5rem; color:#161616; transform:rotate(-1.5deg); }
-.fm-sl-meta{ font-family:'Special Elite',monospace; font-size:.62rem; color:#3a3024; letter-spacing:.08em; text-align:right; line-height:1.3; }
-.fm-sl-note{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.66rem; color:#4a3f2e; margin:0 0 2px; letter-spacing:.04em; opacity:.85; }
+.fm-sl-meta{ font-family:'Special Elite',monospace; font-size:.62rem; color:#3a2e48; letter-spacing:.08em; text-align:right; line-height:1.3; }
+.fm-sl-note{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.66rem; color:#473a58; margin:0 0 2px; letter-spacing:.04em; opacity:.85; }
 
 .fm-marker{ position:relative; z-index:2; width:100%; box-sizing:border-box; background:transparent; border:none; resize:none;
   font-family:'Permanent Marker',cursive; color:var(--fm-marker); line-height:1.55; text-shadow:0 0 1px rgba(0,0,0,.35); }
 .fm-marker:focus{ outline:none; }
 #fmBody{ font-size:1.35rem; min-height:150px; transform:rotate(-.5deg); }
-#fmBody::placeholder{ color:rgba(30,25,18,.4); }
+#fmBody::placeholder{ color:rgba(35,26,48,.4); }
 .fm-sign-row{ position:relative; z-index:2; display:flex; align-items:baseline; gap:10px; margin-top:8px; }
 .fm-sign-x{ font-family:'Permanent Marker',cursive; font-size:1.5rem; color:var(--fm-red); transform:rotate(-4deg); }
 #fmName{ flex:1; width:auto; font-size:1.45rem; border-bottom:2px solid rgba(20,20,20,.4); padding-bottom:1px; color:#161616; }
-#fmName::placeholder{ color:rgba(30,25,18,.35); font-family:'Special Elite',monospace; font-size:.85rem; }
+#fmName::placeholder{ color:rgba(35,26,48,.35); font-family:'Special Elite',monospace; font-size:.85rem; }
 
 .fm-send-row{ position:relative; z-index:2; display:flex; align-items:center; gap:14px; margin-top:16px; }
 .fanmail-send{ cursor:pointer; border:3px solid #161616; background:var(--fm-red); color:#fff;
@@ -977,13 +1106,13 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
   100%{ transform:rotate(34deg) translate(64vw,-72vh) scale(.3); opacity:0; }
 }
 
-/* HIS REPLY — torn flyer slapped on the wall */
+/* HER REPLY — torn flyer slapped on the wall */
 .fanmail-replies{ position:relative; z-index:3; }
 .fanmail-reply{
   position:relative; padding:26px 26px 30px; margin-top:34px; color:#0d0d0d; transform:rotate(2deg);
   background:
-    radial-gradient(60% 50% at 80% 20%, rgba(214,50,31,.16), transparent 70%),
-    linear-gradient(150deg,#d9d2c0,#b9b09a 80%);
+    radial-gradient(60% 50% at 80% 20%, rgba(122,31,208,.14), transparent 70%),
+    linear-gradient(150deg,#d6cfdd,#b2a7c0 80%);
   box-shadow:0 22px 40px -12px rgba(0,0,0,.75), 0 6px 12px -6px rgba(0,0,0,.6);
   -webkit-mask:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='40'%3E%3Cfilter id='r3'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.025 0.07' numOctaves='3' seed='14'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='18'/%3E%3C/filter%3E%3Crect width='560' height='80' y='-20' fill='%23000' filter='url(%23r3)'/%3E%3C/svg%3E") top/100% 24px no-repeat,
@@ -992,7 +1121,7 @@ body { --sc-accent:#b04dff; --sc-accent-2:#6a1fb8; }
 }
 .fanmail-reply:nth-child(even){ transform:rotate(-1.6deg); }
 .fanmail-reply .fm-grain{ opacity:.55; }
-.fanmail-reply-to{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.72rem; color:#4a3f2e; letter-spacing:.08em; margin-bottom:10px; transform:rotate(-1deg); }
+.fanmail-reply-to{ position:relative; z-index:2; font-family:'Special Elite',monospace; font-size:.72rem; color:#473a58; letter-spacing:.08em; margin-bottom:10px; transform:rotate(-1deg); }
 .fanmail-reply-text{ position:relative; z-index:2; font-family:'Permanent Marker',cursive; font-size:1.35rem; line-height:1.5; color:#101010; white-space:pre-wrap; word-wrap:break-word; min-height:1.4em; text-shadow:0 0 1px rgba(0,0,0,.5); }
 .fanmail-reply-sign{ position:relative; z-index:2; font-family:'Permanent Marker',cursive; font-size:2rem; color:var(--fm-red); text-align:right; margin-top:10px; transform:rotate(-3deg); }
 .fanmail-reply.pending .fanmail-reply-text{ color:#4a3f2e; font-family:'Special Elite',monospace; font-size:.9rem; font-style:italic; }
