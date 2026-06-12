@@ -274,18 +274,12 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition:free";
-  // FALLBACK CHAIN — strictly FREE, in order: best Scorch-voice first,
-  // most-reliable last. NOTE: OpenRouter allows a MAXIMUM of 3 models
-  // in this array — adding a 4th makes EVERY request fail with a 400.
-  //  2. qwen3-next-80b — solid generalist (the old primary)
-  //  3. llama-3.2-3b   — tiny last resort; weak at persona but nearly
-  //                      always up. Better than no reply.
-  const MODELS = [
-    MODEL,
-    "qwen/qwen3-next-80b-a3b-instruct:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-  ];
+  const MODEL = "deepseek/deepseek-v4-flash";
+  // SINGLE MODEL — paid, cheap (~$0.10/M in, ~$0.20/M out), served by
+  // many providers so it's essentially always up. No fallback chain.
+  // NOTE: every request is now billed (tiny amounts, but not free).
+  // NOTE: if you ever re-add fallbacks, OpenRouter's `models` array
+  // maxes out at 3 entries — a 4th makes every request 400.
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
@@ -434,7 +428,9 @@ After your reply, on its own final line, cast your vote on their comment with ex
     const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: MODEL, models: MODELS, messages: msgs }),
+      // reasoning disabled: V4 Flash is a hybrid "thinking" model — without
+      // this it can burn time/tokens deliberating before a 2-sentence reply.
+      body: JSON.stringify({ model: MODEL, reasoning: { enabled: false }, messages: msgs }),
     });
     const data = await r.json();
     // log the COMPLETE raw response so the exact error shows in Vercel logs
