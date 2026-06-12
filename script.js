@@ -117,7 +117,14 @@ const CHARACTERS = [
   },
   // --- Two reserved slots: Max & Kayla (coming soon) ---
   { name: "Max",   desc: "coming soon", portrait: "✦", placeholder: true },
-  { name: "Kayla", desc: "coming soon", portrait: "✦", placeholder: true },
+  {
+    name: "Kayla",
+    desc: "cellist of The Snake Skins",
+    nameStyle: "gothic",
+    portrait: "assets/Kayla Pics/KaylaPfp.webp",
+    pageId: "kayla",
+    href: "kayla.html",
+  },
   // --- Rory: Irish, Peaky Blinders, 1920s Birmingham ---
   {
     name: "Rory",
