@@ -17,6 +17,7 @@
 import * as scorch from "./scorch.js";
 import * as shane from "./shane.js";
 import * as rory from "./rory.js";
+import * as kayla from "./kayla.js";
 // import * as cody from "./cody.js";        // <-- example: next character
 
 // Build { scorch: { name, persona, blocking }, shane: {...}, ... }
@@ -40,5 +41,6 @@ export const personas = register(
   scorch,
   shane,
   rory,
+  kayla,
   // cody,                                   // <-- and list it here
 );
