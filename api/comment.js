@@ -140,14 +140,75 @@ async function readMemory(character, name, clientId) {
 // Save/refresh memory after an interaction. Appends to recent[], bumps the
 // count, refreshes the 6-month clock. Every SUMMARIZE_EVERY interactions it
 // folds everything into a fresh short summary. Summary failures are non-fatal.
+// ============================================================
+//  GIBBERISH GUARD — free models occasionally return junk: leaked
+//  <think> reasoning blocks, wrong-language tokens, repetition
+//  loops, keyboard mash. Everything the model says passes through
+//  scrubModelText() (cleanup) and looksLikeGibberish() (reject).
+//  Rejected text is treated like "model busy": retried once, then
+//  dropped — it never reaches the wall, DMs, or memory/summaries.
+// ============================================================
+function scrubModelText(raw) {
+  if (!raw) return "";
+  let t = String(raw);
+  t = t.replace(/<think>[\s\S]*?<\/think>/gi, "");        // closed reasoning blocks
+  t = t.replace(/^[\s\S]*?<\/think>/i, (m) => (m.length < t.length ? "" : m)); // unclosed leading block
+  t = t.replace(/<think>[\s\S]*$/i, "");                   // unclosed trailing block
+  t = t.replace(/<\|[^|>]{0,40}\|>/g, "");                 // <|im_end|> style special tokens
+  t = t.replace(/\[\/?INST\]|<\/?s>/gi, "");             // llama-style markers
+  t = t.replace(/^```[a-z]*\s*|\s*```$/gi, "");            // wrapping code fences
+  t = t.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/g, ""); // control + replacement chars
+  t = t.trim();
+  // strip a leading speaker label like "Kayla:" / "Scorch:"
+  t = t.replace(/^[A-Z][a-zA-Z]{1,15}:\s+/, "");
+  return t.trim();
+}
+
+function looksLikeGibberish(text) {
+  const t = String(text || "").trim();
+  if (t.length < 2) return true;
+  if (t.length > 1200) return true;                          // replies are 1-3 sentences; this is a runaway
+  if (/[\uFFFD\u0000-\u0008]/.test(t)) return true;       // junk bytes survived
+  if (/(.)\1{9,}/.test(t)) return true;                     // same char 10+ in a row
+  if (/(.{6,}?)\1{4,}/s.test(t.slice(0, 1500))) return true; // a chunk repeated 5+ times (loop)
+  if (/\{\s*"role"\s*:|BEGININPUT|ENDCONTEXT|<\|im_start\|>/i.test(t)) return true; // leaked prompt/JSON
+  // script check: too many non-Latin letters = wrong-language leakage
+  const letters = t.match(/\p{L}/gu) || [];
+  if (letters.length >= 8) {
+    const latin = t.match(/\p{Script=Latin}/gu) || [];
+    if (latin.length / letters.length < 0.7) return true;
+  }
+  // keyboard-mash check: long letter runs with almost no vowels
+  if (letters.length >= 40) {
+    const vowels = t.match(/[aeiouyAEIOUY]/g) || [];
+    if (vowels.length / letters.length < 0.18) return true;
+  }
+  // token-soup check: absurd average word length (URLs don't count)
+  const words = t.split(/\s+/).filter((w) => w && !/^https?:/.test(w));
+  if (words.length >= 4) {
+    const avg = words.reduce((n, w) => n + w.length, 0) / words.length;
+    if (avg > 14) return true;
+  }
+  if (words.some((w) => w.length > 30)) return true;
+  return false;
+}
+
 async function writeMemory(character, name, clientId, userMsg, charReply, base, NAME, summarize) {
   if (!name && !clientId) return;
   const key = memKeyFor(character, name, clientId);
   let mem = await readMemory(character, name, clientId);
   if (!mem) mem = { summary: "", recent: [], count: 0, name: name || "Anonymous", lastSeen: 0 };
 
-  if (userMsg) mem.recent.push("them: " + String(userMsg).slice(0, 240));
-  if (charReply) mem.recent.push(NAME + ": " + String(charReply).slice(0, 240));
+  // GIBBERISH GUARD: nothing unreadable gets into the memory the
+  // summarizer later folds into the permanent note.
+  if (userMsg) {
+    const u = scrubModelText(userMsg);
+    mem.recent.push("them: " + (looksLikeGibberish(u) ? "(typed something unreadable)" : u.slice(0, 240)));
+  }
+  if (charReply) {
+    const c = scrubModelText(charReply);
+    if (!looksLikeGibberish(c)) mem.recent.push(NAME + ": " + c.slice(0, 240));
+  }
   mem.count = (mem.count || 0) + 1;
   mem.name = name || mem.name || "Anonymous";
   mem.lastSeen = Date.now();
@@ -159,8 +220,12 @@ async function writeMemory(character, name, clientId, userMsg, charReply, base, 
       const sumRes = await summarize(
         `${base}\n\nYou are quietly updating your private mental note about a specific person you talk to, so you remember them next time. Your CURRENT note (may be blank):\n"${mem.summary || "(nothing yet)"}"\n\nRecent conversation with them:\n${convo}\n\nWrite an UPDATED short note (2-4 sentences MAX) capturing who this person is TO YOU, ${NAME}: their name if known, their vibe, how you feel about them, anything notable, whether you've clashed or clicked. Tight, in your own head-voice. Output ONLY the note.`
       );
-      if (sumRes && sumRes.trim()) {
-        mem.summary = sumRes.trim().slice(0, 800);
+      // GIBBERISH GUARD: a junk summary would poison the note forever —
+      // reject it, keep the old summary AND the full recent[] so the next
+      // scheduled pass retries with nothing lost.
+      const cleanSum = scrubModelText(sumRes);
+      if (cleanSum && !looksLikeGibberish(cleanSum)) {
+        mem.summary = cleanSum.slice(0, 800);
         mem.recent = mem.recent.slice(-4); // keep a short tail; summary holds the rest
       }
     } catch (e) { /* summary failed (rate limit etc) — skip, retry next time */ }
@@ -369,7 +434,9 @@ After your reply, on its own final line, cast your vote on their comment with ex
     // log the COMPLETE raw response so the exact error shows in Vercel logs
     console.log("OPENROUTER_RAW_RESPONSE", r.status, JSON.stringify(data));
     // surface whatever actually happened so we're not flying blind
-    const text = data?.choices?.[0]?.message?.content?.trim();
+    // GIBBERISH GUARD: strip <think> blocks, special tokens, junk bytes
+    // before anyone sees or stores the text.
+    const text = scrubModelText(data?.choices?.[0]?.message?.content);
     if (text) return { text };
     // no text — figure out why, with as much detail as possible
     const apiErr =
@@ -378,6 +445,23 @@ After your reply, on its own final line, cast your vote on their comment with ex
       data?.error?.metadata?.raw ||
       JSON.stringify(data?.error || data);
     return { text: null, debug: `status ${r.status}: ${apiErr}` };
+  }
+
+  // GIBBERISH GUARD wrapper for CONVERSATIONAL output (replies, DMs,
+  // letters, summaries). If the cleaned text still reads as junk, retry
+  // once; if it's junk again, return null — the engine already treats
+  // null exactly like "model busy", so nothing breaks downstream and
+  // nothing unreadable is saved anywhere.
+  async function callModelClean(msgs) {
+    let last = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const r = await callModel(msgs);
+      if (!r.text) return r;                       // hard API failure — surface its debug
+      if (!looksLikeGibberish(r.text)) return r;   // clean — use it
+      console.log("GIBBERISH_FILTERED attempt", attempt + 1, JSON.stringify(r.text.slice(0, 200)));
+      last = r;
+    }
+    return { text: null, debug: "gibberish filtered (model returned unreadable text twice)" };
   }
 
   try {
@@ -391,7 +475,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
       if (Math.random() > VOTE_REACTION_CHANCE) {
         return res.status(200).json({ reply: null, reacted: false });
       }
-      const r = await callModel(messages);
+      const r = await callModelClean(messages);
       return res.status(200).json({ reply: r.text || null, reacted: !!r.text, debug: r.debug || null });
     }
 
@@ -432,7 +516,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
     let replyRolled = true;
     if (mode === "reply") replyRolled = Math.random() < REPLY_CHANCE;
 
-    const main = (mode === "reply" && !replyRolled) ? { text: null } : await callModel(messages);
+    const main = (mode === "reply" && !replyRolled) ? { text: null } : await callModelClean(messages);
     let reply = main.text || "...(no reply)";
 
     // ---- DID HE BLOCK THEM? ----
@@ -481,7 +565,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
       // comments NEVER pull a DM (baseline 0 = no out-of-nowhere messages).
       const chance = isSpicy ? 0.5 : 0;
       if (chance && Math.random() < chance) {
-        const dmRes = await callModel([
+        const dmRes = await callModelClean([
           { role: "system", content: system + `\n\nYou just read this fan's public comment and something about it - it either got under your skin or actually caught your eye - made you decide to slide into their DMs privately. Write ONLY the opening DM message - short, unprompted, like a text. Make it clearly a reaction to what they said.` },
           { role: "user", content: `Their comment was: "${comment}". Write your opening DM.` },
         ]);
@@ -566,7 +650,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
       const summarize = async (prompt) => {
         // FIX: some providers reject a conversation with ONLY a system message.
         // Keep the instructions as system, add a tiny user turn to kick it off.
-        const r = await callModel([
+        const r = await callModelClean([
           { role: "system", content: prompt },
           { role: "user", content: "Write the updated note now." },
         ]);
