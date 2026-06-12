@@ -274,15 +274,21 @@ export default async function handler(req, res) {
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
-  // FALLBACK CHAIN — strictly FREE, in order. If Hermes is down/busy,
-  // try Dolphin Venice, then Pony Alpha (free, no :free suffix —
-  // it's OpenRouter's own stealth model and is $0 as-is).
-  // No "openrouter/free" wildcard anymore — only these three, ever.
+  const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition:free";
+  // FALLBACK CHAIN — strictly FREE, in order: best Scorch-voice first,
+  // most-reliable last. Tried top to bottom when a model is down/busy.
+  //  2. qwen3-next-80b   — solid generalist (the old primary)
+  //  3. nemotron-3-super — big capacity; if replies start leaking
+  //                        "thinking" rambles, delete this line
+  //  4. qwen3-coder      — coding-tuned: coherent but flatter voice
+  //  5. llama-3.2-3b     — tiny last resort; weak at persona but
+  //                        nearly always up. Better than no reply.
   const MODELS = [
     MODEL,
-    "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
-    "openrouter/pony-alpha",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "qwen/qwen3-coder:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
   ];
 
   // ============================================================
