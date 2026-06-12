@@ -28,9 +28,14 @@ async function getPersonas() {
   return _personasCache;
 }
 
-const MODEL = "qwen/qwen3-next-80b-a3b-instruct:free";
-// FALLBACK CHAIN — strictly FREE: main model -> any live free model. Never spends credits.
-const MODELS = [MODEL, "openrouter/free"];
+const MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
+// FALLBACK CHAIN — strictly FREE, in order: Hermes -> Dolphin Venice ->
+// Pony Alpha (free as-is, no :free suffix). No wildcard fallback anymore.
+const MODELS = [
+  MODEL,
+  "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+  "openrouter/pony-alpha",
+];
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
