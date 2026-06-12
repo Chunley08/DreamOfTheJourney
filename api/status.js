@@ -28,13 +28,16 @@ async function getPersonas() {
   return _personasCache;
 }
 
-const MODEL = "deepseek/deepseek-v4-flash";
-// SINGLE MODEL — paid, cheap, multi-provider, essentially always up.
-// No fallback chain. (Keep in sync with comment.js.)
+// STATUSES RUN ON "openrouter/free" — OpenRouter's auto-router that
+// picks ANY live free model per request. Never spends credits. Fine for
+// statuses: they only refresh every 3h, and if generation fails the
+// stale cached status is served, so nobody ever sees an error.
+// (Comments use paid DeepSeek separately in comment.js.)
+const MODEL = "openrouter/free";
 
 // KILL SWITCH — while true, NEVER calls the AI; serves the cached status
-// or a quiet default. Set false + redeploy to resume fresh statuses.
-const STATUS_DISABLED = true;
+// or a quiet default. (Comments have their own switch in comment.js.)
+const STATUS_DISABLED = false;
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
@@ -117,7 +120,6 @@ async function generateStatus(base, NAME, themes, apiKey) {
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: MODEL,
-      reasoning: { enabled: false },
       messages: [
         { role: "system", content: statusSystem(base, NAME, themes) },
         { role: "user", content: "(set your status right now)" },
