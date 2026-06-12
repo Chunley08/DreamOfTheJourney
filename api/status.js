@@ -28,14 +28,9 @@ async function getPersonas() {
   return _personasCache;
 }
 
-const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition:free";
-// FALLBACK CHAIN — strictly FREE. OpenRouter caps this array at 3 models;
-// a 4th makes every request 400. (Keep in sync with comment.js.)
-const MODELS = [
-  MODEL,
-  "qwen/qwen3-next-80b-a3b-instruct:free",
-  "meta-llama/llama-3.2-3b-instruct:free",
-];
+const MODEL = "deepseek/deepseek-v4-flash";
+// SINGLE MODEL — paid, cheap, multi-provider, essentially always up.
+// No fallback chain. (Keep in sync with comment.js.)
 const REFRESH_MS = 3 * 60 * 60 * 1000;   // 3 hours
 
 // ---- Redis helpers (same shape as comments.js) ----
@@ -118,7 +113,7 @@ async function generateStatus(base, NAME, themes, apiKey) {
     headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: MODEL,
-      models: MODELS,
+      reasoning: { enabled: false },
       messages: [
         { role: "system", content: statusSystem(base, NAME, themes) },
         { role: "user", content: "(set your status right now)" },
