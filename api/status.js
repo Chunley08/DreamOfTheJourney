@@ -100,6 +100,58 @@ EMOJI: <a single emoji that fits the mood>
 Rules: no quotes around the lines, no extra commentary, no explanation. Keep STATUS short and punchy and in ${NAME}'s voice. Just the three lines.`;
 }
 
+// ============================================================
+//  GIBBERISH GUARD (same approach as comment.js) — the free auto-router
+//  sometimes leaks <think> blocks, role labels ("User: safety"), refusals,
+//  wrong-language tokens, or mash. Statuses pass through scrubModelText()
+//  (cleanup) + looksLikeStatusJunk() (reject); a junk status is rerolled
+//  up to MAX_TRIES, and if it never comes back clean the old cached status
+//  is served instead — so a broken status never reaches the page.
+// ============================================================
+function scrubModelText(raw) {
+  if (!raw) return "";
+  let t = String(raw);
+  t = t.replace(/<think>[\s\S]*?<\/think>/gi, "");
+  t = t.replace(/^[\s\S]*?<\/think>/i, (m) => (m.length < t.length ? "" : m));
+  t = t.replace(/<think>[\s\S]*$/i, "");
+  t = t.replace(/<\|[^|>]{0,40}\|>/g, "");
+  t = t.replace(/\[\/?INST\]|<\/?s>/gi, "");
+  t = t.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/g, "");
+  t = t.replace(/^\s*(user|assistant|system|human|ai)\s*:\s*(safety|policy|content|moderation)?\s*$/gim, "");
+  t = t.replace(/^\s*\[?\s*(safety|policy|content|moderation|disclaimer)\s*\]?\s*:?\s*$/gim, "");
+  return t.trim();
+}
+
+// Validate the PARSED status line (not the raw 3-line block) for junk.
+function looksLikeStatusJunk(statusLine) {
+  const t = String(statusLine || "").trim();
+  if (t.length < 2) return true;
+  if (t.length > 200) return true;                       // a status is one short line
+  if (/[\uFFFD\u0000-\u0008]/.test(t)) return true;
+  if (/(.)\1{9,}/.test(t)) return true;
+  if (/<\|?im_(start|end)\|?>|BEGININPUT|ENDCONTEXT|\{\s*"role"\s*:/i.test(t)) return true;
+  const low = t.toLowerCase();
+  const BAD = [
+    /\bas an? (ai|language model|assistant)\b/,
+    /\bi('?m| am) (an? )?(ai|language model|virtual assistant|chatbot)\b/,
+    /\bi (cannot|can'?t|am unable to|won'?t) (assist|help|comply|continue|generate|provide|create)\b/,
+    /\bagainst my (programming|guidelines|policy|policies)\b/,
+    /\b(content|usage) (policy|policies|guidelines)\b/,
+    /\bas a fictional character\b/,
+    /\b(system|assistant|user) prompt\b/,
+    /\bhow can i (help|assist) you\b/,
+  ];
+  if (BAD.some((re) => re.test(low))) return true;
+  if (/^\s*(user|assistant|system|human|ai)\s*:/i.test(t)) return true;
+  // wrong-language leakage (status lines are short, so check from 4 letters)
+  const letters = t.match(/\p{L}/gu) || [];
+  if (letters.length >= 4) {
+    const latin = t.match(/\p{Script=Latin}/gu) || [];
+    if (latin.length / letters.length < 0.7) return true;
+  }
+  return false;
+}
+
 function parseStatus(text) {
   const out = { status: "", mood: "", moodEmoji: "" };
   if (!text) return out;
@@ -114,23 +166,34 @@ function parseStatus(text) {
   return out;
 }
 
+const STATUS_MAX_TRIES = 3;
 async function generateStatus(base, NAME, themes, apiKey) {
-  const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: statusSystem(base, NAME, themes) },
-        { role: "user", content: "(set your status right now)" },
-      ],
-      temperature: 1.0,
-    }),
-  });
-  const data = await r.json();
-  console.log("STATUS_RAW_RESPONSE", r.status, JSON.stringify(data));
-  const text = data?.choices?.[0]?.message?.content?.trim();
-  return parseStatus(text);
+  for (let attempt = 0; attempt < STATUS_MAX_TRIES; attempt++) {
+    try {
+      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: MODEL,
+          messages: [
+            { role: "system", content: statusSystem(base, NAME, themes) },
+            { role: "user", content: "(set your status right now)" },
+          ],
+          temperature: 1.0,
+        }),
+      });
+      const data = await r.json();
+      console.log("STATUS_RAW_RESPONSE", r.status, "attempt", attempt + 1, JSON.stringify(data));
+      const raw = scrubModelText(data?.choices?.[0]?.message?.content);
+      const parsed = parseStatus(raw);
+      // reject junk and reroll; clean ones return immediately
+      if (parsed.status && !looksLikeStatusJunk(parsed.status)) return parsed;
+      console.log("STATUS_FILTERED attempt", attempt + 1, JSON.stringify(parsed.status || "").slice(0, 120));
+    } catch (e) {
+      console.log("STATUS_ERR attempt", attempt + 1, String(e && e.message || e));
+    }
+  }
+  return { status: "", mood: "", moodEmoji: "" };   // all tries junk -> caller serves stale cache
 }
 
 export default async function handler(req, res) {
