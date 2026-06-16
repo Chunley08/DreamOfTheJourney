@@ -994,6 +994,27 @@
    genuine threaded conversation at any depth.
    ============================================================ */
 .sc-comment { --d:0; --step:1.5rem; --cap:6; }
+
+/* ===== SLAP-IN ENTRANCE — comments land on the wall like flyers ===== */
+.sc-comment.sc-slap { animation: scSlapIn .52s cubic-bezier(.2,1.5,.4,1) backwards; animation-delay: var(--slap-delay, 0ms); transform-origin: 60% 0; }
+@keyframes scSlapIn {
+  0%   { opacity:0; transform: translateY(-46px) rotate(6deg) scale(1.16); }
+  60%  { opacity:1; transform: translateY(0) rotate(-1.5deg) scale(.99); }
+  80%  { transform: rotate(.8deg) scale(1.005); }
+  100% { opacity:1; transform: translateY(0) rotate(0) scale(1); }
+}
+.sc-comment.is-scorch.sc-slap { animation-name: scSlapInScorch; transform-origin: 40% 0; }
+@keyframes scSlapInScorch {
+  0%   { opacity:0; transform: translateY(-40px) rotate(-7deg) scale(1.14); }
+  60%  { opacity:1; transform: translateY(0) rotate(1.6deg) scale(.99); }
+  80%  { transform: rotate(-.7deg) scale(1.004); }
+  100% { opacity:1; transform: translateY(0) rotate(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-comment.sc-slap, .sc-comment.is-scorch.sc-slap { animation: scSlapFade .3s ease backwards; animation-delay: var(--slap-delay,0ms); }
+  @keyframes scSlapFade { from { opacity:0; } to { opacity:1; } }
+}
+
 .sc-comment[data-depth]:not([data-depth="0"]) {
   position:relative;
   margin-left:calc(min(var(--d), var(--cap)) * var(--step));
