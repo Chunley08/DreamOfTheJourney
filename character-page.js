@@ -27,6 +27,8 @@
   // /api/comment  -> generates + saves Scorch's reply
   // /api/comments -> reads the shared wall (and admin-deletes)
   const WALL_URL = FUNCTION_URL.replace(/\/comment$/, "/comments");
+  // /api/status -> the "what I'm doing right now" status card (admin can force-refresh)
+  const STATUS_URL = FUNCTION_URL.replace(/\/comment$/, "/status");
   // open the page as  ...scorch.html?admin=YOURKEY  to get delete buttons.
   const ADMIN_KEY = new URLSearchParams(location.search).get("admin") || "";
 
@@ -421,6 +423,7 @@
     panel.innerHTML =
       '<div class="sc-admin-head">\uD83D\uDEE1 Admin \u00b7 Blocked list ' +
         '<button type="button" class="sc-admin-btn" id="scAdminRefresh">refresh</button>' +
+        '<button type="button" class="sc-admin-btn" id="scAdminStatus">refresh status</button>' +
         '<button type="button" class="sc-admin-btn sc-admin-danger" id="scAdminClear">clear ALL comments</button>' +
       '</div><div class="sc-admin-body" id="scAdminBody">loading...</div>';
     const commentsCard = document.getElementById(CFG.COMMENTS_CARD_ID || "scorchComments");
@@ -460,6 +463,30 @@
       } catch (e) { adminBody.textContent = "couldn't load blocked list."; }
     }
     panel.querySelector("#scAdminRefresh").addEventListener("click", loadBlocked);
+    panel.querySelector("#scAdminStatus").addEventListener("click", async (e) => {
+      const btn = e.target; const orig = btn.textContent;
+      btn.disabled = true; btn.textContent = "refreshing\u2026";
+      try {
+        const res = await fetch(STATUS_URL, { method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ character: CHAR, action:"refresh", key: ADMIN_KEY }) });
+        const d = await res.json();
+        if (d && d.status) {
+          btn.textContent = "\u2713 updated";
+          // the status card uses a per-character id prefix (scStatus*/shStatus*/
+          // roStatus*), so look up each field by trying the known prefixes.
+          var pick = (suffix) => document.getElementById("sc"+suffix)
+                              || document.getElementById("sh"+suffix)
+                              || document.getElementById("ro"+suffix);
+          var line = pick("StatusLine"); if (line) line.textContent = d.status;
+          var mood = pick("StatusMood"); if (mood && d.mood) mood.textContent = d.mood;
+          var emo  = pick("StatusEmoji"); if (emo && d.moodEmoji) emo.textContent = d.moodEmoji;
+          var age  = pick("StatusAge"); if (age) age.textContent = d.ageText || "just now";
+        } else {
+          btn.textContent = (d && d.error) ? "\u2717 " + d.error : "\u2717 try again";
+        }
+      } catch (err) { btn.textContent = "\u2717 failed"; }
+      setTimeout(() => { btn.disabled = false; btn.textContent = orig; }, 2200);
+    });
     panel.querySelector("#scAdminClear").addEventListener("click", async () => {
       if (!confirm("Wipe the ENTIRE public comment wall? This can't be undone.")) return;
       try {
