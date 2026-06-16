@@ -237,10 +237,10 @@ async function writeMemory(character, name, clientId, userMsg, charReply, base, 
 
 // ============================================================
 //  KILL SWITCH — set to false to turn the AI / commenting back on,
-//  then redeploy. While true, every comment/DM/vote-reaction gets a
+//  then redeploy. While true, every comment/DM/vote gets a
 //  polite "closed" notice and NO AI call is ever made (costs nothing).
 // ============================================================
-const COMMENTS_DISABLED = true;
+const COMMENTS_DISABLED = false;
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -265,11 +265,11 @@ export default async function handler(req, res) {
   // pastComments: this username's earlier comments (for "remembering" them)
   // username: who is commenting
   const { character, comment, mode = "comment", history = [], pastComments = [], username = "", clientId = "",
-          memId = "", parentId = null, threadContext = "", voteDir = "" } = req.body || {};
+          memId = "" } = req.body || {};
   // memory uses the PERSISTENT device id (survives tab close); fall back to the
   // session clientId if the page didn't send one. Blocking still uses clientId.
   const memDevice = memId || clientId;
-  if (!comment && mode !== "vote-reaction") return res.status(400).json({ error: "No comment" });
+  if (!comment) return res.status(400).json({ error: "No comment" });
 
   // ---- BLOCK GATE: if Scorch has blocked this person, refuse before doing anything ----
   {
@@ -367,7 +367,7 @@ That tag is the ONLY way to block. Never use it for ordinary rudeness, insults, 
   // In comment/reply modes he casts his like/dislike in the SAME breath as his
   // reply, via a hidden control tag — same trick as <<BLOCK>>. The code below
   // peels the tag off before anyone sees it.
-  if (mode === "comment" || mode === "reply") {
+  if (mode === "comment") {
     system += `
 
 YOUR VOTE:
@@ -395,7 +395,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
 
   // Anonymous handling — Scorch gives them shit for hiding who they are.
   const isAnon = !username || /^anon(ymous)?$/i.test(String(username).trim());
-  if (isAnon && (mode === "comment" || mode === "reply" || mode === "dm")) {
+  if (isAnon && (mode === "comment" || mode === "dm")) {
     system += `\n\nThis person is posting WITHOUT a name — they're "Anonymous", hiding who they are. ${NAME} finds that a little gutless. At least once when it fits, give them shit for not putting a name on it — call them out for hiding, being a coward/pussy about it, talking big with no name attached, whatever's in character. Don't force it into every single line, but don't let cowardice slide unnoticed either. Stay natural.`;
   }
 
@@ -418,20 +418,6 @@ After your reply, on its own final line, cast your vote on their comment with ex
         content: m.text,
       })),
       { role: "user", content: comment },
-    ];
-  } else if (mode === "reply") {
-    // a fan replied to a comment/reply inside a thread. Scorch MIGHT jump in.
-    system += `\n\nYou're reading a reply thread under a comment on your profile.\n\n${threadContext || ""}\n\nThe new reply itself is the user message below. IMPORTANT: read the whole conversation above first — a short reply like "I agree" or "so true" refers to the comment it's replying to, so figure out what they actually mean from the thread (e.g. if they're agreeing with someone who insulted you, they're insulting you too). Then butt in with a SHORT, sharp comeback aimed at this new reply and what it's really saying — one or two lines, unmistakably you (in character). Fire back at trash-talk or pile-ons; be smug about praise. React like you read the entire thread, not just the last line.`;
-    messages = [
-      { role: "system", content: system },
-      { role: "user", content: comment },
-    ];
-  } else if (mode === "vote-reaction") {
-    // someone liked/disliked a comment. tiny chance Scorch notices + comments.
-    system += `\n\n${NAME} noticed someone just ${voteDir === "dislike" ? "DISLIKED" : "LIKED"} a comment on ${NAME}'s profile${threadContext ? `: "${threadContext}"` : ""}. React with ONE short, off-the-cuff line about them ${voteDir === "dislike" ? "downvoting" : "upvoting"} it - amused, smug, irritated, whatever fits. Like you caught them tapping the button. Keep it to one line, unmistakably ${NAME}.`;
-    messages = [
-      { role: "system", content: system },
-      { role: "user", content: voteDir === "dislike" ? "(someone just disliked a comment)" : "(someone just liked a comment)" },
     ];
   } else {
     system += `\n\n${NAME} is replying to a PUBLIC comment left on ${NAME}'s dating profile. Short, sharp, in-character.`;
@@ -484,20 +470,6 @@ After your reply, on its own final line, cast your vote on their comment with ex
   }
 
   try {
-    // For thread replies and vote reactions, Scorch only SOMETIMES speaks up.
-    // Decide the chance up front so we don't waste a model call (and so silence
-    // is a real outcome). Tune these numbers to taste.
-    const REPLY_CHANCE = 0.75;         // chance he answers a fan's in-thread reply
-    const VOTE_REACTION_CHANCE = 0.85; // chance he reacts to a like/dislike (was .12 — never seen, raised)
-
-    if (mode === "vote-reaction") {
-      if (Math.random() > VOTE_REACTION_CHANCE) {
-        return res.status(200).json({ reply: null, reacted: false });
-      }
-      const r = await callModelClean(messages);
-      return res.status(200).json({ reply: r.text || null, reacted: !!r.text, debug: r.debug || null });
-    }
-
     // ===== SCORCH BROWSE-VOTE: he likes/dislikes an EXISTING comment =====
     // frontend sends { mode:"scorch-browse", targetId, comment:<that comment's text> }
     if (mode === "scorch-browse") {
@@ -530,12 +502,7 @@ After your reply, on its own final line, cast your vote on their comment with ex
       return res.status(200).json({ voted: null });
     }
 
-    // for thread replies, roll FIRST — if he stays quiet, save the fan's reply
-    // alone (no wasted model call, no discarded answer).
-    let replyRolled = true;
-    if (mode === "reply") replyRolled = Math.random() < REPLY_CHANCE;
-
-    const main = (mode === "reply" && !replyRolled) ? { text: null } : await callModelClean(messages);
+    const main = await callModelClean(messages);
     let reply = main.text || "...(no reply)";
 
     // ---- DID HE BLOCK THEM? ----
@@ -628,44 +595,13 @@ After your reply, on its own final line, cast your vote on their comment with ex
         const w2 = await saveToWall(savedScorch, character);
         if (!w2.ok) savedScorch = null;
       }
-    } else if (mode === "reply") {
-      // the fan's reply always saves into the thread.
-      const scorchAnswers = replyRolled && !justBlocked && main.text;
-      saved = {
-        id: mkId(), parentId: parentId || null, isScorch: false,
-        name: (username || "Anonymous").slice(0, 40),
-        comment: String(comment).slice(0, 400),
-        likes: 0, dislikes: 0, ts: Date.now(),
-      };
-
-      // ---- SCORCH'S VOTE on the reply too — inline, no extra model call ----
-      // (note: if he stayed silent on this reply, he doesn't vote either —
-      //  no reply means no model call, which means no tag to read.)
-      if (!justBlocked && inlineVote) {
-        saved.scorchVote = inlineVote;
-        if (inlineVote === "like") saved.likes += 1; else saved.dislikes += 1;
-      }
-
-      let w = await saveToWall(saved, character);
-      if (!w.ok) { wallDebug = w.error; saved = null; }
-      // Scorch sometimes answers — as a child node under the fan's reply
-      if (saved && scorchAnswers) {
-        savedScorch = {
-          id: mkId(), parentId: saved.id, isScorch: true,
-          name: NAME, comment: reply,
-          likes: 0, dislikes: 0, ts: Date.now() + 1,
-        };
-        const w2 = await saveToWall(savedScorch, character);
-        if (!w2.ok) savedScorch = null;
-      }
-      reply = scorchAnswers ? reply : null;
     }
 
-    // ---- UPDATE PERMANENT MEMORY (comment / reply / dm) ----
+    // ---- UPDATE PERMANENT MEMORY (comment / dm) ----
     // Records this exchange so the character remembers them next time, and
     // re-summarizes on schedule. Summary uses the model via this helper;
     // if it fails (rate limit), writeMemory just skips it and retries later.
-    if (mode === "comment" || mode === "reply" || mode === "dm") {
+    if (mode === "comment" || mode === "dm") {
       const summarize = async (prompt) => {
         // FIX: some providers reject a conversation with ONLY a system message.
         // Keep the instructions as system, add a tiny user turn to kick it off.
