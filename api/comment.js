@@ -145,8 +145,8 @@ async function readMemory(character, name, clientId) {
 //  <think> reasoning blocks, wrong-language tokens, repetition
 //  loops, keyboard mash. Everything the model says passes through
 //  scrubModelText() (cleanup) and looksLikeGibberish() (reject).
-//  Rejected text is treated like "model busy": retried once, then
-//  dropped — it never reaches the wall, DMs, or memory/summaries.
+//  Rejected text is treated like "model busy": rerolled up to 3x, then
+//  dropped (and the user is asked to try again) — it never reaches the wall, DMs, or memory/summaries.
 // ============================================================
 function scrubModelText(raw) {
   if (!raw) return "";
@@ -158,6 +158,11 @@ function scrubModelText(raw) {
   t = t.replace(/\[\/?INST\]|<\/?s>/gi, "");             // llama-style markers
   t = t.replace(/^```[a-z]*\s*|\s*```$/gi, "");            // wrapping code fences
   t = t.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/g, ""); // control + replacement chars
+  // strip leaked conversation/turn scaffolding the free models sometimes emit:
+  //   "User:", "Assistant:", "System:", "User: safety", "[safety]", etc.
+  t = t.replace(/^\s*(user|assistant|system|human|ai)\s*:\s*(safety|policy|content|moderation)?\s*$/gim, "");
+  t = t.replace(/^\s*\[?\s*(safety|policy|content|moderation|disclaimer)\s*\]?\s*:?\s*$/gim, "");
+  t = t.replace(/^\s*(user|assistant|system|human|ai)\s*:\s+/gim, ""); // leading turn labels on any line
   t = t.trim();
   // strip a leading speaker label like "Kayla:" / "Scorch:"
   t = t.replace(/^[A-Z][a-zA-Z]{1,15}:\s+/, "");
@@ -190,6 +195,30 @@ function looksLikeGibberish(text) {
     if (avg > 14) return true;
   }
   if (words.some((w) => w.length > 30)) return true;
+
+  // ---- OUT-OF-CHARACTER / REFUSAL / AI-SPEAK detection ----
+  // Free models sometimes break character with assistant boilerplate, a
+  // canned refusal, or leftover turn scaffolding. These never belong in a
+  // character's mouth, so treat them as junk and reroll.
+  const low = t.toLowerCase();
+  const AI_SPEAK = [
+    /\bas an? (ai|language model|assistant)\b/,
+    /\bi('?m| am) (an? )?(ai|language model|virtual assistant|chatbot)\b/,
+    /\bi (cannot|can'?t|am unable to|won'?t) (assist|help|comply|continue|engage|roleplay|role-play|generate|provide|create|fulfill)\b/,
+    /\bi'?m (sorry|afraid)[, ].{0,40}\b(can'?t|cannot|unable|not able)\b/,
+    /\b(i must|i have to) (decline|refuse)\b/,
+    /\bagainst my (programming|guidelines|policy|policies)\b/,
+    /\b(content|usage) (policy|policies|guidelines)\b/,
+    /\bi don'?t feel comfortable\b/,
+    /\bas a fictional character\b/,            // model narrating the frame instead of being in it
+    /\b(system|assistant|user) prompt\b/,
+    /^\s*(sure|certainly|of course)[,!]?\s+(here'?s|i'?ll|let me)\b/, // assistant-style preamble
+    /\bhow can i (help|assist) you\b/,
+  ];
+  if (AI_SPEAK.some((re) => re.test(low))) return true;
+  // a leftover bare turn label that survived scrubbing (e.g. "user: safety")
+  if (/^\s*(user|assistant|system|human|ai)\s*:/i.test(t)) return true;
+
   return false;
 }
 
@@ -286,17 +315,22 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.OPENROUTER_KEY;
 
+  // shown when the free model returns junk MAX_TRIES in a row (see callModelClean)
+  const CFG_RETRY_NOTICE = "the free AI's being weird right now — give it a sec and try again.";
+
   // ============================================================
   //  MODEL — change this one line to switch models.
   //  Must be the exact slug from the model's OpenRouter page,
   //  including :free on the end if it's a free model.
   // ============================================================
-  const MODEL = "deepseek/deepseek-v4-flash";
-  // SINGLE MODEL — paid, cheap (~$0.10/M in, ~$0.20/M out), served by
-  // many providers so it's essentially always up. No fallback chain.
-  // NOTE: every request is now billed (tiny amounts, but not free).
-  // NOTE: if you ever re-add fallbacks, OpenRouter's `models` array
-  // maxes out at 3 entries — a 4th makes every request 400.
+  const MODEL = "openrouter/free";
+  // FREE AUTO-ROUTER — OpenRouter picks any live free model per request, so
+  // it never spends credits. Free models are less reliable (they sometimes
+  // leak <think> blocks, role labels like "User: safety", refusals, or
+  // wrong-language junk), so every reply runs through callModelClean() below,
+  // which rerolls up to MAX_TRIES times and discards anything that still
+  // reads as junk via looksLikeGibberish(). Nothing unreadable reaches the
+  // wall, DMs, memory, or summaries.
 
   // ============================================================
   //  CHARACTER PERSONAS — now loaded from the personas/ folder.
@@ -453,20 +487,27 @@ After your reply, on its own final line, cast your vote on their comment with ex
   }
 
   // GIBBERISH GUARD wrapper for CONVERSATIONAL output (replies, DMs,
-  // letters, summaries). If the cleaned text still reads as junk, retry
-  // once; if it's junk again, return null — the engine already treats
-  // null exactly like "model busy", so nothing breaks downstream and
-  // nothing unreadable is saved anywhere.
+  // letters, summaries). On the free auto-router, reroll up to MAX_TRIES
+  // times — discarding any response that reads as junk (think-blocks,
+  // refusals, role labels, wrong-language, mash) AND retrying transient
+  // API hiccups (a free model briefly down). If every try fails, return
+  // null with rerollFailed:true so the handler can show a "try again"
+  // notice. Nothing unreadable is ever saved.
+  const MAX_TRIES = 3;
   async function callModelClean(msgs) {
-    let last = null;
-    for (let attempt = 0; attempt < 2; attempt++) {
+    let lastDebug = null;
+    for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
       const r = await callModel(msgs);
-      if (!r.text) return r;                       // hard API failure — surface its debug
-      if (!looksLikeGibberish(r.text)) return r;   // clean — use it
-      console.log("GIBBERISH_FILTERED attempt", attempt + 1, JSON.stringify(r.text.slice(0, 200)));
-      last = r;
+      if (r.text && !looksLikeGibberish(r.text)) return r;   // clean — use it
+      if (r.text) {
+        console.log("GIBBERISH_FILTERED attempt", attempt + 1, JSON.stringify(r.text.slice(0, 200)));
+        lastDebug = "gibberish filtered";
+      } else {
+        console.log("MODEL_EMPTY attempt", attempt + 1, r.debug || "");
+        lastDebug = r.debug || "no text";
+      }
     }
-    return { text: null, debug: "gibberish filtered (model returned unreadable text twice)" };
+    return { text: null, rerollFailed: true, debug: `rerolled ${MAX_TRIES}x, still junk (${lastDebug})` };
   }
 
   try {
@@ -618,10 +659,15 @@ After your reply, on its own final line, cast your vote on their comment with ex
     }
 
     // debug surfaces the real reason when there's no text (model busy, error, etc.)
+    // rerollFailed -> the free model returned junk MAX_TRIES times; tell the
+    // user to try again rather than silently posting nothing.
+    const tryAgain = (main.rerollFailed && !main.text)
+      ? (CFG_RETRY_NOTICE) : null;
     return res.status(200).json({
       reply, dm, saved, savedScorch,
       justBlocked,
-      notice: justBlocked ? "you've been blocked." : null,
+      retry: !!tryAgain,
+      notice: justBlocked ? "you've been blocked." : tryAgain,
       debug: main.debug || wallDebug || _personaLoadErr || null,
     });
   } catch (e) {
