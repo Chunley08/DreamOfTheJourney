@@ -95,12 +95,12 @@
 
   // on load, quietly ask the API whether commenting is open. If the backend
   // kill switch is on, gray everything out up front instead of letting
-  // people type a message into the void. (A no-op vote-reaction ping —
-  // costs nothing, never reaches the AI.)
+  // people type a message into the void. (The kill-switch check runs before
+  // the comment guard, so this empty ping reads `disabled` without an AI call.)
   (async function probeClosed(){
     try {
       const r = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ character: CHAR, mode: "vote-reaction", clientId: CID }) });
+        body: JSON.stringify({ character: CHAR, mode: "probe", clientId: CID }) });
       const d = await r.json();
       if (d && d.disabled) setClosed();
     } catch (e) {}
@@ -175,16 +175,6 @@
           HEART + '<span class="sc-vote-n">' + (it.likes||0) + '</span></span>' +
         '<span class="sc-vote sc-dislike' + (mine==="dislike"?" on":"") + '" data-vote="dislike" data-id="' + esc(it.id) + '" title="dislike">' +
           HEART_BROKEN + '<span class="sc-vote-n">' + (it.dislikes||0) + '</span></span>' +
-        '<button type="button" class="sc-reply-btn" data-replybtn="' + esc(it.id) + '">Reply</button>' +
-      '</div>' +
-      '<div class="sc-reply-box" data-replybox="' + esc(it.id) + '">' +
-        '<input type="text" class="sc-rb-name" maxlength="24" placeholder="your name (or anonymous)">' +
-        '<textarea class="sc-rb-text" maxlength="280" placeholder="reply..."></textarea>' +
-        '<div class="sc-reply-box-row">' +
-          '<button type="button" class="sc-reply-post" data-postreply="' + esc(it.id) + '">Reply</button>' +
-          '<button type="button" class="sc-reply-cancel" data-cancelreply="' + esc(it.id) + '">cancel</button>' +
-          '<span class="sc-mini-status"></span>' +
-        '</div>' +
       '</div>'
     );
   }
@@ -242,11 +232,11 @@
   // render a flat list, threading expressed by clamped indent (not nested DOM)
   let pendingItems = null;   // stash a redraw we deferred because the user was typing
   let commentIndex = { byId: {} };  // id -> record, for building reply context from data (not DOM)
+  const _slapped = new Set();   // ids that already played their entrance — only NEW cards slap in on redraw
   function userIsTyping(){
-    // an open reply composer, OR focus inside the thread/composer = don't yank the DOM
-    if (thread.querySelector(".sc-reply-box.open")) return true;
+    // focus inside the thread or the main comment composer = don't yank the DOM
     const a = document.activeElement;
-    if (a && (a.matches(".sc-rb-name, .sc-rb-text, .sc-name-input, .sc-comment-input") || thread.contains(a))) return true;
+    if (a && (a.matches(".sc-name-input, .sc-comment-input") || thread.contains(a))) return true;
     return false;
   }
   function renderWall(rawItems){
@@ -272,6 +262,7 @@
     // Depth is just a number we hand to CSS as --d (clamped there), so it
     // can never compound into a collapsed card no matter how deep the chain.
     thread.innerHTML = "";
+    let _animI = 0;   // running index so cards slap onto the wall one after another
     const emit = (parentKey, depth) => {
       (byParent[parentKey] || []).forEach(it => {
         const parent = it.parentId ? byId[it.parentId] : null;
@@ -279,6 +270,15 @@
         const node = buildComment(it);
         node.dataset.depth = String(depth);
         node.style.setProperty("--d", String(depth));
+        // slap-in entrance: only for cards that haven't animated yet this
+        // session, so a vote/refresh doesn't make the whole wall re-jump.
+        // Stagger by render order; his reply lands a beat after its comment.
+        if (it.id && !_slapped.has(it.id)) {
+          node.classList.add("sc-slap");
+          node.style.setProperty("--slap-delay", (_animI * 70 + depth * 90) + "ms");
+          _animI++;
+          if (!/^_pending/.test(String(it.id))) _slapped.add(it.id);
+        }
         thread.appendChild(node);
         emit(it.id, depth + 1);   // no depth limit needed — flat DOM, clamped indent
       });
@@ -391,96 +391,6 @@
         }
       } catch (err) { /* keep optimistic numbers; next poll reconciles */ }
 
-      // ---- small chance Scorch notices your vote ----
-      if (dir !== "none" && !IS_BLOCKED) {
-        const block = vote.closest(".sc-comment");
-        const ctxText = block ? (block.querySelector(".sc-comment-text")?.textContent || "") : "";
-        fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ character: CHAR, comment: ctxText, mode:"vote-reaction", voteDir: dir, threadContext: ctxText, username:"", clientId: CID }) })
-          .then(r => r.json()).then(d => { if (d && d.reply) showVoteReaction(block, d.reply); }).catch(()=>{});
-      }
-      return;
-    }
-
-    // ---- open the reply box ----
-    const rbtn = e.target.closest(".sc-reply-btn");
-    if (rbtn) {
-      const id = rbtn.dataset.replybtn;
-      const boxes = thread.querySelectorAll(".sc-reply-box.open");
-      boxes.forEach(b => { if (b.dataset.replybox !== id) b.classList.remove("open"); });
-      const box = thread.querySelector('.sc-reply-box[data-replybox="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
-      if (box) {
-        box.classList.toggle("open");
-        if (box.classList.contains("open")) {
-          const ni = box.querySelector(".sc-rb-name");
-          if (ni && !ni.value) ni.value = loadName();
-          const t = box.querySelector(".sc-rb-text"); if (t) t.focus();
-        }
-      }
-      return;
-    }
-    // ---- cancel ----
-    const cancel = e.target.closest(".sc-reply-cancel");
-    if (cancel) {
-      const box = cancel.closest(".sc-reply-box"); if (box) box.classList.remove("open");
-      flushPending();
-      return;
-    }
-    // ---- post a threaded reply ----
-    const post = e.target.closest(".sc-reply-post");
-    if (post) {
-      if (IS_BLOCKED) return;
-      const id = post.dataset.postreply;
-      const box = post.closest(".sc-reply-box");
-      const nameI = box.querySelector(".sc-rb-name");
-      const textI = box.querySelector(".sc-rb-text");
-      const mini = box.querySelector(".sc-mini-status");
-      const text = textI.value.trim();
-      const name = (nameI.value.trim() || "Anonymous");
-      if (!text) { mini.textContent = "type something first."; return; }
-      if (nameI.value.trim()) saveName(nameI.value);
-
-      // build the FULL thread context by climbing the parentId chain in the
-      // DATA model (the DOM is flat now, so there are no ancestor nodes to walk).
-      const authorOf = (rec) => rec.isScorch ? AUTHOR : (rec.name || "someone");
-      const chain = [];
-      const start = commentIndex.byId[id] || null;
-      let parentAuthor = "someone", parentText = "";
-      if (start) { parentAuthor = authorOf(start); parentText = start.comment || ""; }
-      let cur = start, guard = 0;
-      while (cur && guard++ < 60) {
-        chain.unshift("  " + authorOf(cur) + ': "' + (cur.comment || "") + '"');
-        cur = cur.parentId ? commentIndex.byId[cur.parentId] : null;
-      }
-      // spell it out so even a weak model gets who's agreeing with whom
-      const ctx =
-        "The conversation so far (oldest to newest):\n" + chain.join("\n") +
-        "\n\n" + (name || "Someone") + ' is now replying to ' + parentAuthor +
-        "'s comment" + (parentText ? ' ("' + parentText + '")' : "") + ".";
-
-      post.disabled = true; mini.textContent = "posting...";
-      // remember this person's reply in the same per-session memory as their comments
-      const ru = getUser(name);
-      const replyPast = ru.comments.slice();
-      try {
-        const res = await fetch(FUNCTION_URL, { method:"POST", headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({ character: CHAR, comment: text, mode:"reply", parentId: id, threadContext: ctx, username: name, pastComments: replyPast, clientId: CID, memId: MEMID }) });
-        const data = await res.json();
-        if (data.disabled) { mini.innerHTML = '<span class="sc-blocked-note">📴 ' + esc(data.notice || "comments are temporarily closed.") + '</span>'; setClosed(); return; }
-        if (data.blocked) { mini.innerHTML = '<span class="sc-blocked-note">🚫 ' + esc(data.notice || "you've been blocked.") + '</span>'; setBlocked(); return; }
-        // save their reply into memory so he recalls it later this session
-        ru.comments.push(text); ru.comments = ru.comments.slice(-12); saveMem(memory);
-        textI.value = ""; box.classList.remove("open"); mini.textContent = "";
-        if (data.justBlocked) { setTimeout(setBlocked, 600); }
-        // refresh to show the new threaded reply AND Scorch's answer if he gave one.
-        // Always refresh (not just on data.saved) — and do it twice, because his
-        // answer node can save a moment after the fan's reply, so a single early
-        // refresh sometimes misses it. This was the "he barely replies" bug.
-        lastSig = "";
-        setTimeout(loadWall, 400);   // show the fan's reply fast
-        setTimeout(function(){ lastSig = ""; loadWall(); }, 1600);  // catch Scorch's answer
-      } catch (err) { mini.textContent = "couldn't post — try again."; }
-      finally { post.disabled = false; }
       return;
     }
   });
@@ -490,20 +400,6 @@
     if (pendingItems && !userIsTyping()) { const it = pendingItems; pendingItems = null; lastSig = ""; renderWall(it); }
   }
 
-  // surface Scorch's reaction to a vote as a transient line under the comment
-  function showVoteReaction(block, text){
-    if (!block) return;
-    let n = block.querySelector(".sc-vote-reaction");
-    if (!n) {
-      n = document.createElement("div");
-      n.className = "sc-reply sc-vote-reaction";
-      n.innerHTML = '<div class="sc-reply-author">' + AUTHOR + ' <span>\u2713</span></div><div class="sc-reply-text"></div>';
-      const actions = block.querySelector(".sc-actions");
-      if (actions) actions.parentNode.insertBefore(n, actions);
-      else block.appendChild(n);
-    }
-    n.querySelector(".sc-reply-text").textContent = text;
-  }
   if (ADMIN_KEY) {
     thread.addEventListener("click", async (e) => {
       const btn = e.target.closest(".sc-del");
