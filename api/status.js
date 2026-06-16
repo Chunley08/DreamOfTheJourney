@@ -206,10 +206,43 @@ export default async function handler(req, res) {
     .toString().toLowerCase().trim();
   const key = statusKey(character);
 
+  // ---- ADMIN: force a fresh status (clears the cache so the next read
+  //      regenerates). POST { action:"refresh", character, key }. Returns
+  //      the freshly generated status so a button can update immediately.
+  if (req.method === "POST" && req.body && req.body.action === "refresh") {
+    const ADMIN = process.env.ADMIN_KEY || "";
+    if (!ADMIN) return res.status(500).json({ error: "ADMIN_KEY not set on the server" });
+    if (req.body.key !== ADMIN) return res.status(403).json({ error: "wrong admin key" });
+    await redis(["DEL", key]);                 // wipe the (possibly junk) cached status
+    if (STATUS_DISABLED) return res.status(200).json({ ok: true, cleared: true, disabled: true });
+    const apiKey = process.env.OPENROUTER_KEY;
+    if (!apiKey) return res.status(200).json({ ok: true, cleared: true, debug: "no api key — will use default on next read" });
+    const personas = await getPersonas();
+    const _cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+    const rec = personas[character];
+    const base = (rec && rec.persona) || "You are a fictional character setting a status.";
+    const NAME = (rec && rec.name) || _cap(character) || "He";
+    const themes = (rec && rec.statusThemes) || "";
+    const s = await generateStatus(base, NAME, themes, apiKey);
+    if (s.status) {
+      const rec2 = { status: s.status, mood: s.mood || "", moodEmoji: s.moodEmoji || "", ts: Date.now() };
+      await redis(["SET", key, JSON.stringify(rec2)]);
+      return res.status(200).json({ ok: true, cleared: true, ...rec2, ageText: ageText(rec2.ts) });
+    }
+    return res.status(200).json({ ok: true, cleared: true, debug: "regen returned junk all tries; cache cleared, next read will retry" });
+  }
+
   // 1) read cached status
   let cached = null;
   const got = await redis(["GET", key]);
   if (got.ok && got.result) { try { cached = JSON.parse(got.result); } catch (e) {} }
+
+  // VALIDATE-ON-READ: if the cached status itself reads as junk (e.g. an old
+  // "User: safety" written before the guard existed), don't trust it — drop it
+  // so the logic below regenerates a clean one instead of serving the junk for
+  // up to REFRESH_MS. This is what makes a stuck bad status self-heal.
+  const cacheIsJunk = cached && looksLikeStatusJunk(cached.status);
+  if (cacheIsJunk) cached = null;
 
   const fresh = cached && cached.ts && (Date.now() - cached.ts < REFRESH_MS);
 
