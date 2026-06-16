@@ -523,6 +523,14 @@
         return;
       }
 
+      // free model returned junk MAX_TRIES in a row — nothing was saved.
+      // Pull the optimistic preview back off the wall and ask them to retry.
+      if (data.retry && !data.reply) {
+        block.remove(); sc.remove();
+        statusEl.innerHTML = '<span class="sc-blocked-note">↻ ' + esc(data.notice || "the AI's being weird — give it a sec and try again.") + '</span>';
+        return;
+      }
+
       replyEl.classList.remove("sc-typing");
       if (data.reply && data.reply !== "...(no reply)") {
         replyEl.textContent = data.reply;
@@ -666,6 +674,9 @@
       }
       if (data.reply) {
         addMsg(data.reply, SIDE);
+      } else if (data.retry) {
+        // free model returned junk MAX_TRIES in a row
+        addMsg("↻ " + (data.notice || CFG.DM_BUSY || "(the AI's being weird — give it a sec and try again.)"), SIDE, false);
       } else if (data.error) {
         addMsg((CFG.DM_BUSY || "(busy. the AI's overloaded — give it a sec and try again.)"), SIDE, false);
       } else {
