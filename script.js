@@ -81,7 +81,7 @@
       In Discord: Server Settings → Integrations → Webhooks → New Webhook
       Copy the URL and paste it between the quotes below:
 */
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1556771067387969616/80jT4t1fKw1SbfTYrOZlVy0xwCu2
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1556771067387969616/80jT4t1fKw1SbfTYrOZlVy0xwCu2-3tL3TRkLCEJKw5DzN712PvfJele1ejinvJFmt4O";
 
 /* 2) CHARACTERS — add a card for each of your characters.
       `url` is where the user goes when clicking the card.
